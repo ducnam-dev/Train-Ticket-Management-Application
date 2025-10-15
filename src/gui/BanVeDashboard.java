@@ -8,10 +8,9 @@ import java.awt.event.ActionListener;
 
 // Giả định các Panel nội dung đã tồn tại
 //class HomePanel extends JPanel { public HomePanel() { add(new JLabel("Trang chủ")); setBackground(Color.LIGHT_GRAY); } }
-class BanVePanel extends JPanel { public BanVePanel() { add(new JLabel("Màn hình Bán vé")); setBackground(new Color(240, 240, 255)); } }
-class DoiVePanel extends JPanel { public DoiVePanel() { add(new JLabel("Màn hình Đổi vé")); setBackground(new Color(255, 240, 240)); } }
+//class ManHinhDoiVe extends JPanel { public ManHinhDoiVe() { add(new JLabel("Màn hình Đổi vé")); setBackground(new Color(255, 240, 240)); } }
 class TraCuuPanel extends JPanel { public TraCuuPanel() { add(new JLabel("Màn hình Tra cứu")); setBackground(new Color(240, 255, 240)); } }
-
+//
 
 public class BanVeDashboard extends JFrame implements ActionListener {
     private CardLayout cardLayout;
@@ -34,8 +33,12 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         initEventHandlers();
         
         // Hiển thị trang ManHinhBanVe ngay khi khởi động (theo yêu cầu màn hình)
-        cardLayout.show(contentPanel, "banVe"); 
-        
+        cardLayout.show(contentPanel, "banVe");
+
+        //full screen
+//        setExtendedState(JFrame.MAXIMIZED_BOTH); // Maximize window
+//        setUndecorated(true);
+
         setVisible(true);
     }
 
@@ -102,7 +105,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         contentPanel.add(new ManHinhBanVe());
         // Đây là nơi bạn sẽ đặt lớp BanVeUI (đã vẽ ở câu hỏi trước)
         contentPanel.add(new ManHinhBanVe(), "banVe"); 
-        contentPanel.add(new DoiVePanel(), "doiVe");
+        contentPanel.add(new ManHinhDoiVe(), "doiVe");
         contentPanel.add(new TraCuuPanel(), "traCuu"); 
 
         add(contentPanel, BorderLayout.CENTER);
