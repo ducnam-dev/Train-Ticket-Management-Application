@@ -1,8 +1,8 @@
 package view;
 
 import javax.swing.SwingUtilities;
-import gui.BanVeDashboard;
-import gui.ManHinhDangNhap;
+
+import gui.MainFrame.ManHinhDangNhap;
 
 public class Main {
     public static void main(String[] args) {

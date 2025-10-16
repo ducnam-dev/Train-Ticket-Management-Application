@@ -1,4 +1,7 @@
-package gui;
+package gui.MainFrame;
+
+import gui.Panel.ManHinhBanVe;
+import gui.Panel.ManHinhDoiVe;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

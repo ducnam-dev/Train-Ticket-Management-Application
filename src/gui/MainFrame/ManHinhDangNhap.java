@@ -1,4 +1,4 @@
-package gui; // Đảm bảo package này khớp với cấu trúc thư mục của bạn
+package gui.MainFrame; // Đảm bảo package này khớp với cấu trúc thư mục của bạn
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
