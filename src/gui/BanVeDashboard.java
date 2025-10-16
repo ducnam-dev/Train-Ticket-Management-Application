@@ -6,12 +6,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-// Giả định các Panel nội dung đã tồn tại
-//class HomePanel extends JPanel { public HomePanel() { add(new JLabel("Trang chủ")); setBackground(Color.LIGHT_GRAY); } }
-//class ManHinhDoiVe extends JPanel { public ManHinhDoiVe() { add(new JLabel("Màn hình Đổi vé")); setBackground(new Color(255, 240, 240)); } }
 class TraCuuPanel extends JPanel { public TraCuuPanel() { add(new JLabel("Màn hình Tra cứu")); setBackground(new Color(240, 255, 240)); } }
 //
-
 public class BanVeDashboard extends JFrame implements ActionListener {
     private CardLayout cardLayout;
     private JPanel contentPanel;

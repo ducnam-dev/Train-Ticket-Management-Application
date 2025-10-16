@@ -11,16 +11,16 @@ import java.awt.*;
  * Lớp ManHinhBanVe: Chỉ chứa nội dung chính của màn hình Bán vé
  * - Đã loại bỏ GridBagLayout, thay bằng BorderLayout và BoxLayout.
  */
-public class ManHinhBanVe extends JPanel {
+public class BanVePanel extends JPanel {
 
-    public ManHinhBanVe() {
+    public BanVePanel() {
         // Cấu hình BorderLayout cho Panel (dùng cho tiêu đề và nội dung chính)
         setLayout(new BorderLayout(5, 5));
 
         // Thêm Padding bên ngoài
         setBorder(new EmptyBorder(10, 10, 10, 10));
         setBackground(new Color(240, 242, 245)); // Màu nền xám nhạt
-//        setBackground(Color.BLACK);
+        setBackground(Color.BLACK);
         // 1. Panel Header (Tiêu đề "Bán vé" và ID người dùng)
         JPanel headerPanel = createHeaderPanel();
         add(headerPanel, BorderLayout.NORTH);
