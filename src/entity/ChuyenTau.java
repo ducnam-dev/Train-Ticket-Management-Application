@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 
+import entity.lopEnum.TrangThaiChuyenTau;
+
 public class ChuyenTau {
     public String maChuyenTau;
     public String tenChuyenTau;
@@ -15,6 +17,7 @@ public class ChuyenTau {
     public LocalDate ngayDenDuKien;
     public LocalTime gioDenDuKien;
     public NhanVien nhanVien;
+    public TrangThaiChuyenTau thct;
 
     public ChuyenTau() {
 

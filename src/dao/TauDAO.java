@@ -6,8 +6,12 @@ import entity.Tau;
 
 
 public interface TauDAO {
-List<Tau> layTatCa();
-Tau timTheoId(int id);
-Tau timTheoMa(String maTau);
-void capNhat(Tau tau);
+	List<Tau> layTatCa();
+	Tau timTheoId(int id);
+	Tau timTheoMa(String maTau);
+	void capNhat(Tau tau);
+	static Tau getTauById(String maTau) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

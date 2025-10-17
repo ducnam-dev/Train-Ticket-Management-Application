@@ -2,6 +2,5 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry excluding="database/" kind="src" path="src"/>
-	<classpathentry kind="src" path="src/database"/>
 	<classpathentry kind="output" path="classes/production/Train-Ticket-Management-Application2"/>
 </classpath>
