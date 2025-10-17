@@ -10,7 +10,7 @@ public class ChuyenTau {
     public String maChuyenTau;
     public String tenChuyenTau;
     public LocalDate ngayKhoiHanh;
-    public LocalTime gioiKhoiHanh;
+    public LocalTime gioKhoiHanh;
     public Ga gaDi;
     public Ga gaDen;
     public Tau tau;
@@ -23,17 +23,18 @@ public class ChuyenTau {
 
     }
 
-    public ChuyenTau(String maChuyenTau, String tenChuyenTau, LocalDate ngayKhoiHanh, LocalTime gioiKhoiHanh, Ga gaDi, Ga gaDen, Tau tau, LocalDate ngayDenDuKien, LocalTime gioDenDuKien, NhanVien nhanVien) {
+    public ChuyenTau(String maChuyenTau, String tenChuyenTau, LocalDate ngayKhoiHanh, LocalTime gioKhoiHanh, Ga gaDi, Ga gaDen, Tau tau, LocalDate ngayDenDuKien, LocalTime gioDenDuKien, NhanVien nhanVien, TrangThaiChuyenTau thct) {
         this.maChuyenTau = maChuyenTau;
         this.tenChuyenTau = tenChuyenTau;
         this.ngayKhoiHanh = ngayKhoiHanh;
-        this.gioiKhoiHanh = gioiKhoiHanh;
+        this.gioKhoiHanh = gioKhoiHanh;
         this.gaDi = gaDi;
         this.gaDen = gaDen;
         this.tau = tau;
         this.ngayDenDuKien = ngayDenDuKien;
         this.gioDenDuKien = gioDenDuKien;
         this.nhanVien = nhanVien;
+        this.thct = thct;
     }
 
     public String getMaChuyenTau() {
@@ -60,12 +61,12 @@ public class ChuyenTau {
         this.ngayKhoiHanh = ngayKhoiHanh;
     }
 
-    public LocalTime getGioiKhoiHanh() {
-        return gioiKhoiHanh;
+    public LocalTime getGioKhoiHanh() {
+        return gioKhoiHanh;
     }
 
-    public void setGioiKhoiHanh(LocalTime gioiKhoiHanh) {
-        this.gioiKhoiHanh = gioiKhoiHanh;
+    public void setGioKhoiHanh(LocalTime gioKhoiHanh) {
+        this.gioKhoiHanh = gioKhoiHanh;
     }
 
     public Ga getGaDi() {
@@ -114,5 +115,13 @@ public class ChuyenTau {
 
     public void setNhanVien(NhanVien nhanVien) {
         this.nhanVien = nhanVien;
+    }
+
+    public TrangThaiChuyenTau getThct() {
+        return thct;
+    }
+
+    public void setThct(TrangThaiChuyenTau thct) {
+        this.thct = thct;
     }
 }
