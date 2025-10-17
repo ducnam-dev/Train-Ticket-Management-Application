@@ -1,17 +1,34 @@
 package gui.Panel;
 
+import dao.ChuyenTauDao;
+import dao.GaDao;
+import entity.ChuyenTau;
+import entity.Ga;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.JTextComponent; // Quan trọng để tránh lỗi ClassNotFound
 
 import java.awt.*;
+import java.util.List;
+import java.util.Vector;
+
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 /**
  * Lớp ManHinhBanVe: Chỉ chứa nội dung chính của màn hình Bán vé
  * - Đã loại bỏ GridBagLayout, thay bằng BorderLayout và BoxLayout.
  */
 public class ManHinhBanVe extends JPanel {
+
+    private JComboBox<Ga> cbGaDi, cbGaDen;
+    private JTextField dateField;
+    private JTable tableChuyenTau;
+    private DefaultTableModel tableModel;
+
 
     public ManHinhBanVe() {
         // Cấu hình BorderLayout cho Panel (dùng cho tiêu đề và nội dung chính)
@@ -103,7 +120,7 @@ public class ManHinhBanVe extends JPanel {
 
         return mainPanel;
     }
-    
+
     // Hàm phụ trợ giúp các khu vực con có Alignment X tốt hơn cho BoxLayout
     private void setAreaAlignment(JPanel panel) {
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -122,14 +139,29 @@ public class ManHinhBanVe extends JPanel {
         title.setTitleFont(title.getTitleFont().deriveFont(Font.BOLD, 14f));
         panel.setBorder(title);
 
-        // ... Nội dung FlowLayout giữ nguyên ...
+        // 1. Khởi tạo đối tượng DAO để lấy dữ liệu
+//        GaDao gaTauDAO = new GaDao();
+        // 2. Gọi phương thức để lấy danh sách ga từ CSDL
+        Vector<Ga> danhSachGa = new  GaDao().layDanhSachGa();
+        // 3. Tạo JComboBox sử dụng dữ liệu vừa lấy được
+
+        // Ga đi
         panel.add(new JLabel("Ga đi"));
-        panel.add(new JComboBox<>(new String[]{"Sài Gòn", "Hà Nội"}));
+        cbGaDi = new JComboBox<>(danhSachGa);
+        panel.add(cbGaDi);
+
+        // Ga đến
         panel.add(new JLabel("Ga đến"));
-        panel.add(new JComboBox<>(new String[]{"Hà Nội", "Sài Gòn"}));
+        cbGaDen = new JComboBox<>(danhSachGa);
+        panel.add(cbGaDen);
+
+         if (danhSachGa.size() > 1) {
+             cbGaDen.setSelectedIndex(1);
+         }
+
 
         panel.add(new JLabel("Ngày đi"));
-        JTextField dateField = new JTextField("30/9/2025", 8);
+        dateField = new JTextField("30/9/2025", 8);
         dateField.setPreferredSize(new Dimension(80, 25));
         panel.add(dateField);
 
@@ -138,38 +170,66 @@ public class ManHinhBanVe extends JPanel {
         searchButton.setForeground(Color.WHITE);
         searchButton.setPreferredSize(new Dimension(100, 25));
         panel.add(searchButton);
-        
+
+        // B. Thêm ActionListener cho nút Tìm chuyến
+        searchButton.addActionListener(e -> timKiemChuyenTau());
+        panel.add(searchButton);
+
         setAreaAlignment(panel);
         return panel;
+
     }
 
     // --- Khu vực 2: Danh sách chuyến tàu ---
-    private JPanel createKhuVucDanhSachChuyenTau() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        
-        TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY), "Danh sách chuyến tàu");
-        title.setTitleFont(title.getTitleFont().deriveFont(Font.BOLD, 14f));
-        panel.setBorder(title);
+//    private JPanel createKhuVucDanhSachChuyenTau() {
+//        JPanel panel = new JPanel(new BorderLayout());
+//        panel.setBackground(Color.WHITE);
+//
+//        TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY), "Danh sách chuyến tàu");
+//        title.setTitleFont(title.getTitleFont().deriveFont(Font.BOLD, 14f));
+//        panel.setBorder(title);
+//
+//        // ... JTable giữ nguyên ...
+//        String[] columnNames = {"Mã tàu", "Ghế trống", "Giờ đi"};
+//        Object[][] data = {
+//                {"SE1", "80/120", "18:00"},
+//                {"TN1", "90/100", "6:00"}
+//        };
+//        JTable table = new JTable(data, columnNames);
+//        table.setFillsViewportHeight(true);
+//        table.setRowHeight(30);
+//        table.setFont(table.getFont().deriveFont(Font.PLAIN, 14f));
+//        table.getTableHeader().setFont(table.getTableHeader().getFont().deriveFont(Font.BOLD));
+//
+//        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+//
+//        // Đặt kích thước cố định
+//        panel.setPreferredSize(new Dimension(0, 150));
+//        setAreaAlignment(panel); // Vẫn dùng Alignment để khớp với BoxLayout cha
+//        return panel;
+//    }
 
-        // ... JTable giữ nguyên ...
-        String[] columnNames = {"Mã tàu", "Ghế trống", "Giờ đi"};
-        Object[][] data = {
-                {"SE1", "80/120", "18:00"},
-                {"TN1", "90/100", "6:00"}
+    private JScrollPane createKhuVucDanhSachChuyenTau() {
+        // 1. Định nghĩa cột
+        String[] columnNames = {"Tên Chuyến", "Ngày đi", "Giờ đi"};
+
+        // 2. Khởi tạo tableModel (sử dụng biến thành viên)
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Không cho phép chỉnh sửa trực tiếp trên bảng
+                return false;
+            }
         };
-        JTable table = new JTable(data, columnNames);
-        table.setFillsViewportHeight(true);
-        table.setRowHeight(30);
-        table.setFont(table.getFont().deriveFont(Font.PLAIN, 14f));
-        table.getTableHeader().setFont(table.getTableHeader().getFont().deriveFont(Font.BOLD));
 
-        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        // 3. Khởi tạo tableChuyenTau (sử dụng biến thành viên)
+        tableChuyenTau = new JTable(tableModel);
 
-        // Đặt kích thước cố định
-        panel.setPreferredSize(new Dimension(0, 150));
-        setAreaAlignment(panel); // Vẫn dùng Alignment để khớp với BoxLayout cha
-        return panel;
+        // 4. Đặt JTable vào JScrollPane để có thanh cuộn
+        JScrollPane scrollPane = new JScrollPane(tableChuyenTau);
+        scrollPane.setPreferredSize(new Dimension(400, 300));
+
+        return scrollPane;
     }
 
     // --- Khu vực 3: Chọn toa và loại khách ---
@@ -189,11 +249,11 @@ public class ManHinhBanVe extends JPanel {
         topRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         topRow.add(new JLabel("Số khách:"));
         topRow.add(new JTextField("3", 3));
-        
+
         // Chiết khấu (Sử dụng GridLayout để căn đều 2 cột)
         JPanel loaiKhachInfo = new JPanel(new GridLayout(4, 2, 5, 5));
         loaiKhachInfo.setOpaque(false);
-        
+
         loaiKhachInfo.add(new JLabel("Người cao tuổi (từ 60 tuổi) -25%"));
         loaiKhachInfo.add(new JTextField("1", 3));
         loaiKhachInfo.add(new JLabel("Người lớn (từ 11 đến 59 tuổi)"));
@@ -224,16 +284,16 @@ public class ManHinhBanVe extends JPanel {
 
         toaPanel.add(createToaButton("Toa 5\nGhế mềm", null, null));
         toaPanel.add(createToaButton("Toa 4\nGhế mềm", null, null));
-        toaPanel.add(toa3); 
+        toaPanel.add(toa3);
         toaPanel.add(createToaButton("Toa 2\nGiường nằm\nkhoang 6", null, null));
         toaPanel.add(createToaButton("Toa 1\nGiường nằm\nkhoang 6", null, null));
 
         panel.add(toaPanel);
-        
+
         setAreaAlignment(panel);
         return panel;
     }
-    
+
     // Hàm phụ trợ tạo nút toa (Giữ nguyên)
     private JButton createToaButton(String text, Color bgColor, Color fgColor) {
         JButton button = new JButton("<html><center>" + text.replace("\n", "<br>") + "</center></html>");
@@ -281,7 +341,7 @@ public class ManHinhBanVe extends JPanel {
         legendPanel.add(createLegendItem(Color.BLACK, "Không trống"));
         legendPanel.add(createLegendItem(new Color(0, 123, 255), "Đang chọn"));
         panel.add(legendPanel);
-        
+
         setAreaAlignment(panel);
         return panel;
     }
@@ -289,7 +349,7 @@ public class ManHinhBanVe extends JPanel {
     // Tạo sơ đồ ghế (Sử dụng GridLayout)
     private JPanel createSeatMapSimplified() {
         // Tổng cộng có 4 hàng (3 tầng + 1 hàng Khoang) và 7 cột (1 nhãn Tầng + 6 khoang)
-        JPanel seatPanel = new JPanel(new GridLayout(4, 7, 5, 5)); 
+        JPanel seatPanel = new JPanel(new GridLayout(4, 7, 5, 5));
         seatPanel.setOpaque(false);
         seatPanel.setBorder(new EmptyBorder(10, 10, 10, 10)); // Padding cho sơ đồ ghế
 
@@ -304,7 +364,7 @@ public class ManHinhBanVe extends JPanel {
         // Thêm các nút Ghế và nhãn Tầng
         for (int i = 0; i < seats.length; i++) {
             // Cột 0: Nhãn Tầng
-            seatPanel.add(new JLabel(rows[i], SwingConstants.RIGHT)); 
+            seatPanel.add(new JLabel(rows[i], SwingConstants.RIGHT));
 
             // Cột 1-6: Các nút Ghế
             for (int j = 0; j < seats[i].length; j++) {
@@ -321,13 +381,13 @@ public class ManHinhBanVe extends JPanel {
                 seatPanel.add(seat);
             }
         }
-        
+
         // Hàng cuối: Nhãn Khoang (Dùng FlowLayout để căn chỉnh các nhãn tốt hơn nếu cần)
         for (String label : khoang) {
             JLabel kLabel = new JLabel(label);
             kLabel.setFont(kLabel.getFont().deriveFont(Font.BOLD, 11f));
             kLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            
+
             // Xử lý nút Cửa (giả lập là JLabel)
             if (label.equals("Cửa")) {
                 kLabel.setText("Cửa");
@@ -390,9 +450,9 @@ public class ManHinhBanVe extends JPanel {
         totalLabel.setFont(totalLabel.getFont().deriveFont(Font.BOLD, 14f));
         totalLabel.setForeground(new Color(255, 165, 0)); // Màu cam
         summaryPanel.add(totalLabel);
-        
+
         fullSummary.add(summaryPanel, BorderLayout.EAST);
-        
+
         setAreaAlignment(fullSummary);
         return fullSummary;
     }
@@ -424,13 +484,13 @@ public class ManHinhBanVe extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         buttonPanel.setOpaque(false);
         JButton cancelButton = new JButton("< Hủy");
-        cancelButton.setBackground(new Color(220, 53, 69)); 
+        cancelButton.setBackground(new Color(220, 53, 69));
         cancelButton.setForeground(Color.WHITE);
         cancelButton.setPreferredSize(new Dimension(80, 40));
         cancelButton.setFont(cancelButton.getFont().deriveFont(Font.BOLD, 14f));
 
         JButton nextButton = new JButton("Tiếp theo >");
-        nextButton.setBackground(new Color(0, 123, 255)); 
+        nextButton.setBackground(new Color(0, 123, 255));
         nextButton.setForeground(Color.WHITE);
         nextButton.setPreferredSize(new Dimension(100, 40));
         nextButton.setFont(nextButton.getFont().deriveFont(Font.BOLD, 14f));
@@ -453,13 +513,13 @@ public class ManHinhBanVe extends JPanel {
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Dòng 1: Mã ghế, Loại khách và Giá (Sử dụng FlowLayout hoặc BorderLayout)
-        JPanel headerRow = new JPanel(new BorderLayout()); 
+        JPanel headerRow = new JPanel(new BorderLayout());
         headerRow.setOpaque(false);
         headerRow.setBorder(new EmptyBorder(5, 0, 5, 0));
 
         JPanel leftHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         leftHeader.setOpaque(false);
-        
+
         JLabel maGheLabel = new JLabel(maGhe);
         maGheLabel.setFont(maGheLabel.getFont().deriveFont(Font.BOLD));
         leftHeader.add(maGheLabel);
@@ -467,13 +527,13 @@ public class ManHinhBanVe extends JPanel {
         JLabel loaiKhachLabel = new JLabel(loaiKhach);
         loaiKhachLabel.setFont(loaiKhachLabel.getFont().deriveFont(Font.BOLD));
         leftHeader.add(loaiKhachLabel);
-        
+
         headerRow.add(leftHeader, BorderLayout.WEST);
 
         JLabel giaLabel = new JLabel(gia);
         giaLabel.setForeground(Color.BLUE);
         headerRow.add(giaLabel, BorderLayout.EAST);
-        
+
         headerRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(headerRow);
 
@@ -497,9 +557,9 @@ public class ManHinhBanVe extends JPanel {
         detailGrid.add(new JLabel("CCCD*"));
         JTextField cccdField = new JTextField(cccd, 10);
         detailGrid.add(cccdField);
-        
+
         panel.add(detailGrid);
-        
+
         // Cần đảm bảo các JTextField có chiều rộng tối đa phù hợp (sử dụng BoxLayout)
         hoTenField.setMaximumSize(hoTenField.getPreferredSize());
         tuoiField.setMaximumSize(tuoiField.getPreferredSize());
@@ -509,17 +569,86 @@ public class ManHinhBanVe extends JPanel {
 
         return panel;
     }
-    
+
     // Hàm phụ trợ cho việc tùy chỉnh JTextComponent (giúp tránh lỗi NoClassDefFoundError: JTextComponent)
     private void customizeTextField(JTextComponent field) {
         field.setFont(new Font("Arial", Font.PLAIN, 16));
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
     }
 
+    /**
+     * Hàm tải dữ liệu từ cơ sở dữ liệu
+     *
+     * @return Danh sách chuyến tàu cần tìm
+     * Quy trình thực hiện (đã có lớp connectDB và ChuyenTauDao phù trách tìm trong csdl):
+     * 1. Kết nối đến cơ sở dữ liệu
+     * 2. Thực hiện truy vấn để lấy danh sách chuyến tàu dựa trên tiêu chí tìm kiếm
+     * 3. Chuyển đổi kết quả truy vấn thành danh sách các đối tượng ChuyenTau
+     * 4. Trả về danh sách chuyến tàu
+     * @throws Exception nếu có lỗi trong quá trình truy xuất dữ liệu
+     *                   <p>
+     * Sau đó gọi một hàm để hiện thị những dữ liệu này lên bảng JTable trong khu vực Danh sách chuyến tàu.
+     *
+     */
+//event tìm kiếm chuyến tàu
+    private void timKiemChuyenTau() {
+        // 1. Lấy dữ liệu từ giao diện
+//        String gaDi = (String) cbGaDi.getSelectedItem();
+//        String gaDen = (String) cbGaDen.getSelectedItem();
+        Ga gaDiSelected = (Ga) cbGaDi.getSelectedItem();
+        Ga gaDenSelected = (Ga) cbGaDen.getSelectedItem();
+        String ngayDiString = dateField.getText(); // Ví dụ: "30/9/2025"
 
+        // 2. Chuyển đổi định dạng ngày (RẤT QUAN TRỌNG)
+        String ngayDiSQL = null;
+        try {
+            // Định dạng đầu vào (từ người dùng)
+            SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy");
+            // Định dạng đầu ra (cho CSDL SQL Server)
+            SimpleDateFormat sqlFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+            java.util.Date date = inputFormat.parse(ngayDiString);
+            ngayDiSQL = sqlFormat.format(date);
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(null, "Ngày đi không hợp lệ. Vui lòng nhập theo định dạng dd/MM/yyyy.", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng nếu ngày nhập không đúng
+        }
+        String maGaDi = gaDiSelected.getMaGa();
+        String maGaDen = gaDenSelected.getMaGa();
+        System.out.println("Tìm kiếm theo " + ngayDiSQL + " từ " + maGaDi + " đến " + maGaDen);
+
+        // 3. Thực hiện truy vấn CSDL
+        ChuyenTauDao dao = new ChuyenTauDao(); // Khởi tạo DAO
+        List<ChuyenTau> ketQua = dao.timChuyenTau(maGaDi, maGaDen, ngayDiSQL);
+
+        // 4. Cập nhật kết quả lên giao diện
+        if (ketQua.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Không tìm thấy chuyến tàu nào phù hợp.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        //một JTable tên là 'tableChuyenTau' trên một Panel khác
+        System.out.println("Đang tải dữ liệu lên bảng chuyến tàu...");
+        loadDuLieuLenBang(ketQua);
+    }
+    // Phương thức này có thể nằm trong lớp ManHinhBanVe của bạn
+    private void loadDuLieuLenBang(List<ChuyenTau> danhSach) {
+        DefaultTableModel model = (DefaultTableModel) tableChuyenTau.getModel();
+        // 1. Xóa dữ liệu cũ
+        model.setRowCount(0);
+        // 2. Thêm dữ liệu mới
+        for (ChuyenTau ct : danhSach) {
+            Object[] rowData = {
+                    ct.getMaChuyenTau(),
+                    ct.getNgayKhoiHanh(),
+                    ct.getGioKhoiHanh(),
+            };
+            model.addRow(rowData);
+            System.out.println("Đã thêm chuyến tàu: " + ct.getMaChuyenTau());
+        }
+    }
     /**
      * Phương thức Main để kiểm tra giao diện ManHinhBanVe một cách độc lập.
      */

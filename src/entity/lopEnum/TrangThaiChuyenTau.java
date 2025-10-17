@@ -1,22 +1,31 @@
 package entity.lopEnum;
 
 public enum TrangThaiChuyenTau {
-    // Giá trị enum (thường là viết hoa, không dấu, dùng gạch dưới)
-    CHUA_MO_BAN_VE("Chưa mở bán vé"), 
-    DANG_MO_BAN_VE("Đang mở bán vé"),
-    DA_KHOI_HANH("Đã khởi hành"),
-    DA_HUY("Đã hủy");
+    // Nếu giá trị CSDL là "Đã Khởi Hành"
+    // CÁCH NÀY KHÔNG CHUẨN
+    // Đã Khởi Hành, // Không hợp lệ
 
-    // Trường để lưu trữ mô tả tiếng Việt
-    private final String moTa;
+    // CÁCH TỐT NHẤT: Thêm một field để lưu giá trị tiếng Việt
+    ĐÃ_KHỞI_HÀNH("Đã Khởi Hành"),
+    ĐANG_CHỜ("Đang Chờ");
 
-    // Constructor 
-    TrangThaiChuyenTau(String moTa) {
-        this.moTa = moTa;
+    private final String tenHienThi;
+
+    TrangThaiChuyenTau(String tenHienThi) {
+        this.tenHienThi = tenHienThi;
     }
 
-    // Phương thức getter
-    public String getMoTa() {
-        return moTa;
+    public String getTenHienThi() {
+        return tenHienThi;
+    }
+
+    // Phương thức chuyển đổi tùy chỉnh
+    public static TrangThaiChuyenTau fromString(String text) {
+        for (TrangThaiChuyenTau b : TrangThaiChuyenTau.values()) {
+            if (b.tenHienThi.equalsIgnoreCase(text)) {
+                return b;
+            }
+        }
+        throw new IllegalArgumentException("Không tìm thấy trạng thái: " + text);
     }
 }

@@ -1,4 +1,4 @@
-package src.database1;
+package database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,7 +14,7 @@ public class ConnectDB {
 	
 	public void connect() {
 		if(con == null) {
-			String url = "jdbc:sqlserver://localhost:1433;databasename=QuanLyBanVe";
+			String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyBanVeTau;trustServerCertificate=true";
 			String user = "sa";
 			String password = "sapassword";
 			try {
@@ -37,8 +37,8 @@ public class ConnectDB {
 				e.printStackTrace();
 			}
 	}
-	 public static Connection getConnection() {
-	        if (con == null) {
+	 public static Connection getConnection() throws SQLException {
+	        if (con == null || con.isClosed()) {
 	            
 	            getInstance().connect();  // Nếu chưa kết nối thì gọi connect
 	        }
