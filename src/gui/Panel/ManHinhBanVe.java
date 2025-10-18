@@ -173,7 +173,6 @@ public class ManHinhBanVe extends JPanel {
 
         // B. Thêm ActionListener cho nút Tìm chuyến
         searchButton.addActionListener(e -> timKiemChuyenTau());
-        panel.add(searchButton);
 
         setAreaAlignment(panel);
         return panel;
@@ -227,10 +226,13 @@ public class ManHinhBanVe extends JPanel {
 
         // 4. Đặt JTable vào JScrollPane để có thanh cuộn
         JScrollPane scrollPane = new JScrollPane(tableChuyenTau);
+//        scrollPane.setPreferredSize(new Dimension(400, 300));
         scrollPane.setPreferredSize(new Dimension(400, 300));
+        scrollPane.setMaximumSize(new Dimension(1200, 300));
 
         return scrollPane;
     }
+
 
     // --- Khu vực 3: Chọn toa và loại khách ---
     private JPanel createKhuVucChonLoaiKhach() {
