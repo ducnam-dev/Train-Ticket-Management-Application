@@ -1,8 +1,8 @@
 package view;
 
 import javax.swing.SwingUtilities;
-import gui.BanVeDashboard;
-import gui.LoginScreen;
+
+import gui.MainFrame.ManHinhDangNhap;
 
 public class Main {
     public static void main(String[] args) {
@@ -11,7 +11,7 @@ public class Main {
 //        });
 
         SwingUtilities.invokeLater(() -> {
-            new LoginScreen().setVisible(true);
+            new ManHinhDangNhap().setVisible(true);
         });
     }
 }
