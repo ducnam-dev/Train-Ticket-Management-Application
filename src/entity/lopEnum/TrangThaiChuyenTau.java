@@ -7,7 +7,7 @@ public enum TrangThaiChuyenTau {
 
     // CÁCH TỐT NHẤT: Thêm một field để lưu giá trị tiếng Việt
     ĐÃ_KHỞI_HÀNH("Đã Khởi Hành"),
-    ĐANG_CHỜ("Đang Chờ");
+    ĐANG_CHỜ("Chờ khởi hành");
 
     private final String tenHienThi;
 

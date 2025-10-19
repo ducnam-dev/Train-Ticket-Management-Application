@@ -20,117 +20,6 @@ public class ChuyenTauDao {
     public ChuyenTauDao() {
     	danhSachChuyenTau = new ArrayList<ChuyenTau>();
     }
-    // Lấy tất cả đồ uống từ cơ sở dữ liệu
-    public List<ChuyenTau> getAllTBChuyenTau() {
-        // Luôn tạo danh sách mới để tránh thêm trùng lặp nếu phương thức được gọi nhiều lần
-        List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
-        Connection con = null;
-        Statement statement = null;
-        ResultSet rs = null;
-
-        try {
-            // Lưu ý: Tùy thuộc vào cấu trúc ConnectDB, có thể là getInstance().getConnection() hoặc getConnection()
-            con = ConnectDB.getInstance().getConnection(); 
-            
-            // Sửa lại tên bảng và các cột cần thiết để tạo đối tượng ChuyenTau theo constructor mới
-            String sql = "SELECT MaChuyenTau, TenChuyenTau, NgayKhoiHanh, GioKhoiHanh, MaGaKhoiHanh, MaGaDen, MaTau, NgayDenDuKien, GioDenDuKien, MaNV, TrangThai FROM ChuyenTau";
-            
-            statement = con.createStatement();
-            rs = statement.executeQuery(sql);
-
-            while (rs.next()) {
-                // 1. Lấy dữ liệu thô
-                String maChuyenTau = rs.getString("MaChuyenTau");
-                String tenChuyenTau = rs.getString("TenChuyenTau");
-                
-                // Chuyển đổi java.sql.Date/Time sang java.time.LocalDate/LocalTime
-                LocalDate ngayKH = rs.getDate("NgayKhoiHanh").toLocalDate();
-                LocalTime gioKH = rs.getTime("GioKhoiHanh").toLocalTime();
-                
-                String maGaDi = rs.getString("MaGaKhoiHanh");
-                String maGaDen = rs.getString("MaGaDen");
-                String maTau = rs.getString("MaTau");
-                
-                LocalDate ngayDenDK = rs.getDate("NgayDenDuKien").toLocalDate();
-                LocalTime gioDenDK = rs.getTime("GioDenDuKien").toLocalTime();
-                
-                String maNhanVien = rs.getString("MaNV");
-
-                //Chuyến chuỗi của trạng thái chuyến tàu thành enum
-                String trangThai = rs.getString("TrangThai");
-                TrangThaiChuyenTau tt = TrangThaiChuyenTau.valueOf(trangThai);
-
-                // 2. Tra cứu (Lookup) các đối tượng từ mã
-                Ga gaDi = GaDao.getGaById(maGaDi);
-                Ga gaDen = GaDao.getGaById(maGaDen);
-                Tau tau = TauDAO.getTauById(maTau);
-                NhanVien nhanVien = NhanVienDao.getNhanVienById(maNhanVien);
-
-                // 3. Tạo đối tượng ChuyenTau bằng constructor phức tạp
-                ChuyenTau chuyenTau = new ChuyenTau(
-                        maChuyenTau,
-                        tenChuyenTau,
-                        ngayKH,
-                        gioKH,
-                        gaDi,
-                        gaDen,
-                        tau,
-                        ngayDenDK,
-                        gioDenDK,
-                        nhanVien,
-                        tt);
-                danhSachChuyenTau.add(chuyenTau);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new ArrayList<>(); // Trả về danh sách rỗng nếu có lỗi
-        } finally {
-            // Đóng tài nguyên (rất quan trọng)
-            try {
-                if (rs != null) rs.close();
-                if (statement != null) statement.close();
-                if (con != null) con.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        
-        // Cập nhật dsChuyenTau nội bộ và trả về danh sách
-        this.danhSachChuyenTau = (ArrayList<ChuyenTau>) danhSachChuyenTau;
-        return danhSachChuyenTau;
-    }
-
-    public boolean themChuyenTau(ChuyenTau ct) {
-        String sql = "INSERT INTO ChuyenTau (MaChuyenTau, TenChuyenTau, NgayKhoiHanh, GioKhoiHanh, MaGaKhoiHanh, MaGaDen, MaTau, NgayDenDuKien, GioDenDuKien, MaNV, TrangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection con = ConnectDB.getInstance().getConnection();
-             PreparedStatement stmt = con.prepareStatement(sql)) {
-
-            stmt.setString(1, ct.getMaChuyenTau());
-            stmt.setString(2, ct.getMaTau());
-            stmt.setDate(3, Date.valueOf(ct.getNgayKhoiHanh()));
-            stmt.setTime(4, Time.valueOf(ct.getGioKhoiHanh()));
-            stmt.setString(5, ct.getGaDi().getMaGa());
-            stmt.setString(6, ct.getGaDen().getMaGa());
-            stmt.setString(7, ct.getTau().getMaTau());
-            stmt.setDate(8, Date.valueOf(ct.getNgayDenDuKien()));
-            stmt.setTime(9, Time.valueOf(ct.getGioDenDuKien()));
-            stmt.setString(10, ct.getNhanVien().getMaNV());
-            // assuming ChuyenTau has a getTrangThai() returning String or int; adapt if different
-            stmt.setString(11, ct.getThct() == null ? "0" : ct.getThct().toString());
-
-            int rows = stmt.executeUpdate();
-            if (rows > 0) {
-                // keep in-memory list consistent
-                if (this.danhSachChuyenTau == null) this.danhSachChuyenTau = new ArrayList<>();
-                this.danhSachChuyenTau.add(ct);
-                return true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
 
     public List<ChuyenTau> timChuyenTau(String gaXP, String gaKT, String ngayDi) {
         List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
@@ -138,9 +27,8 @@ public class ChuyenTauDao {
 
         String sql = "SELECT * FROM ChuyenTau WHERE MaGaKhoiHanh = ? AND MaGaDen = ? AND NgayKhoiHanh = ?";
 
-        Connection con = null;
         try {
-                con = ConnectDB.getConnection();
+                Connection con = ConnectDB.getConnection();
                 try (PreparedStatement pstmt = con.prepareStatement(sql)) {
                     pstmt.setString(1, gaXP);
                     pstmt.setString(2, gaKT);
@@ -175,42 +63,6 @@ public class ChuyenTauDao {
             e.printStackTrace();
         }
         return danhSachChuyenTau;
-    }
-
-    public boolean capNhatChuyenTau(ChuyenTau ct) {
-        String sql = "UPDATE ChuyenTau SET TenChuyenTau = ?, NgayKhoiHanh = ?, GioKhoiHanh = ?, MaGaKhoiHanh = ?, MaGaDen = ?, MaTau = ?, NgayDenDuKien = ?, GioDenDuKien = ?, MaNV = ?, TrangThai = ? WHERE MaChuyenTau = ?";
-        try (Connection con = ConnectDB.getInstance().getConnection();
-             PreparedStatement stmt = con.prepareStatement(sql)) {
-
-            stmt.setString(1, ct.getMaTau());
-            stmt.setDate(2, Date.valueOf(ct.getNgayKhoiHanh()));
-            stmt.setTime(3, Time.valueOf(ct.getGioKhoiHanh()));
-            stmt.setString(4, ct.getGaDi().getMaGa());
-            stmt.setString(5, ct.getGaDen().getMaGa());
-            stmt.setString(6, ct.getTau().getMaTau());
-            stmt.setDate(7, Date.valueOf(ct.getNgayDenDuKien()));
-            stmt.setTime(8, Time.valueOf(ct.getGioDenDuKien()));
-            stmt.setString(9, ct.getNhanVien().getMaNV());
-            stmt.setString(10, ct.getThct() == null ? "0" : ct.getThct().toString());
-            stmt.setString(11, ct.getMaChuyenTau());
-
-            int rows = stmt.executeUpdate();
-            if (rows > 0) {
-                // update in-memory list
-                if (this.danhSachChuyenTau != null) {
-                    for (int i = 0; i < this.danhSachChuyenTau.size(); i++) {
-                        if (this.danhSachChuyenTau.get(i).getMaChuyenTau().equals(ct.getMaChuyenTau())) {
-                            this.danhSachChuyenTau.set(i, ct);
-                            break;
-                        }
-                    }
-                }
-                return true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     public boolean chuyenTrangThaiChuyenTau(String maChuyenTau, String trangThai) {
