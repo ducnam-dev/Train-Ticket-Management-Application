@@ -24,7 +24,7 @@ public class ConnectDB {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 	public static void disconnect() {
@@ -39,8 +39,10 @@ public class ConnectDB {
 	}
 	 public static Connection getConnection() throws SQLException {
 	        if (con == null || con.isClosed()) {
-	            
-	            getInstance().connect();  // Nếu chưa kết nối thì gọi connect
+	            getInstance().connect();
+                if (con == null){
+                    throw new SQLException("Failed to establish a database connection.");
+                }
 	        }
 	        return con;
 	    }

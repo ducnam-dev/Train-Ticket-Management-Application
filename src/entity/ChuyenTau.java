@@ -8,7 +8,7 @@ import entity.lopEnum.TrangThaiChuyenTau;
 
 public class ChuyenTau {
     public String maChuyenTau;
-    public String tenChuyenTau;
+    public String maTau;
     public LocalDate ngayKhoiHanh;
     public LocalTime gioKhoiHanh;
     public Ga gaDi;
@@ -23,9 +23,9 @@ public class ChuyenTau {
 
     }
 
-    public ChuyenTau(String maChuyenTau, String tenChuyenTau, LocalDate ngayKhoiHanh, LocalTime gioKhoiHanh, Ga gaDi, Ga gaDen, Tau tau, LocalDate ngayDenDuKien, LocalTime gioDenDuKien, NhanVien nhanVien, TrangThaiChuyenTau thct) {
+    public ChuyenTau(String maChuyenTau, String maTau, LocalDate ngayKhoiHanh, LocalTime gioKhoiHanh, Ga gaDi, Ga gaDen, Tau tau, LocalDate ngayDenDuKien, LocalTime gioDenDuKien, NhanVien nhanVien, TrangThaiChuyenTau thct) {
         this.maChuyenTau = maChuyenTau;
-        this.tenChuyenTau = tenChuyenTau;
+        this.maTau = maTau;
         this.ngayKhoiHanh = ngayKhoiHanh;
         this.gioKhoiHanh = gioKhoiHanh;
         this.gaDi = gaDi;
@@ -45,12 +45,12 @@ public class ChuyenTau {
         this.maChuyenTau = maChuyenTau;
     }
 
-    public String getTenChuyenTau() {
-        return tenChuyenTau;
+    public String getMaTau() {
+        return maTau;
     }
 
-    public void setTenChuyenTau(String tenChuyenTau) {
-        this.tenChuyenTau = tenChuyenTau;
+    public void setMaTau(String tenChuyenTau) {
+        this.maTau = tenChuyenTau;
     }
 
     public LocalDate getNgayKhoiHanh() {
