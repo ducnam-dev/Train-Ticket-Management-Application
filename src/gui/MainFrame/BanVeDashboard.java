@@ -2,6 +2,8 @@ package gui.MainFrame;
 
 import gui.Panel.ManHinhBanVe;
 import gui.Panel.ManHinhDoiVe;
+import gui.Panel.ManHinhKetCa;
+import gui.Panel.ManHinhMoCa;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,7 +16,7 @@ class TraCuuPanel extends JPanel { public TraCuuPanel() { add(new JLabel("Màn h
 public class BanVeDashboard extends JFrame implements ActionListener {
     private CardLayout cardLayout;
     private JPanel contentPanel;
-    private JButton btnBanVe, btnDoiVe, btnTraCuu;
+    private JButton btnBanVe, btnDoiVe, btnTraCuu, btnKetCa, btnMoCa;
     private final Color ACTIVE_COLOR = Color.WHITE;
     private final Color INACTIVE_COLOR = new Color(30, 144, 255); // Xanh dương
 
@@ -45,27 +47,31 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     private void initMenuPanel() {
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setPreferredSize(new Dimension(180, getHeight()));
+        menuPanel.setPreferredSize(new Dimension(150, getHeight()));
         menuPanel.setBackground(new Color(30, 144, 255)); // Màu nền menu
         
         menuPanel.add(createLogoPanel());
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 20))); // Khoảng cách
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 5))); // Khoảng cách
         
         // Tạo các nút điều hướng
         btnBanVe = createMenuItem("Bán vé", true);
         btnDoiVe = createMenuItem("Đổi vé", false);
         btnTraCuu = createMenuItem("Tra cứu vé", false);
-        
+        btnMoCa = createMenuItem("Mở ca", false);
+        btnKetCa = createMenuItem("Kết ca", false);
+
         menuPanel.add(btnBanVe);
         menuPanel.add(btnDoiVe);
         menuPanel.add(btnTraCuu);
+        menuPanel.add(btnKetCa);
+        menuPanel.add(btnMoCa);
         
         menuPanel.add(Box.createVerticalGlue()); // Đẩy các nút lên trên
 
         // Nút Đăng xuất
         JButton btnLogout = createMenuItem("Đăng xuất", false);
         menuPanel.add(btnLogout);
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 10))); 
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 0)));
 
         add(menuPanel, BorderLayout.WEST);
     }
@@ -84,11 +90,11 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     // Hàm tạo nút menu (tùy chỉnh màu khi active/inactive)
     private JButton createMenuItem(String text, boolean isActive) { 
         JButton button = new JButton(text);
-        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+        button.setAlignmentX(Component. CENTER_ALIGNMENT);
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         button.setBackground(isActive ? ACTIVE_COLOR : INACTIVE_COLOR);
         button.setForeground(isActive ? Color.BLACK : Color.WHITE);
-        button.setBorder(new EmptyBorder(10, 10, 10, 10));
+        button.setBorder(new EmptyBorder(10, 0, 10, 10));
         button.setFocusPainted(false);
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setFont(new Font("Arial", Font.BOLD, 16));
@@ -105,7 +111,9 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         // Đây là nơi bạn sẽ đặt lớp BanVeUI (đã vẽ ở câu hỏi trước)
         contentPanel.add(new ManHinhBanVe(), "banVe"); 
         contentPanel.add(new ManHinhDoiVe(), "doiVe");
-        contentPanel.add(new TraCuuPanel(), "traCuu"); 
+        contentPanel.add(new TraCuuPanel(), "traCuu");
+        contentPanel.add(new ManHinhMoCa(), "moCa");
+        contentPanel.add(new ManHinhKetCa(), "ketCa");
 
         add(contentPanel, BorderLayout.CENTER);
     }
@@ -114,6 +122,9 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         btnBanVe.addActionListener(this);
         btnDoiVe.addActionListener(this);
         btnTraCuu.addActionListener(this);
+        btnMoCa.addActionListener(this);
+        btnKetCa.addActionListener(this);
+
     }
     
     // --- 3. Xử lý sự kiện (Chuyển đổi trang) ---
@@ -126,6 +137,10 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         btnDoiVe.setForeground(Color.WHITE);
         btnTraCuu.setBackground(INACTIVE_COLOR);
         btnTraCuu.setForeground(Color.WHITE);
+        btnKetCa.setBackground(INACTIVE_COLOR);
+        btnKetCa.setForeground(Color.WHITE);
+        btnMoCa.setBackground(INACTIVE_COLOR);
+        btnMoCa.setForeground(Color.WHITE);
 
         Object src = e.getSource();
 
@@ -140,6 +155,16 @@ public class BanVeDashboard extends JFrame implements ActionListener {
             ((JButton) src).setForeground(Color.BLACK);
         } else if (src == btnTraCuu) {
             cardLayout.show(contentPanel, "traCuu");
+            ((JButton) src).setBackground(ACTIVE_COLOR);
+            ((JButton) src).setForeground(Color.BLACK);
+        }
+        else if (src == btnKetCa) {
+            cardLayout.show(contentPanel, "ketCa");
+            ((JButton) src).setBackground(ACTIVE_COLOR);
+            ((JButton) src).setForeground(Color.BLACK);
+        }
+        else if (src == btnMoCa) {
+            cardLayout.show(contentPanel, "moCa");
             ((JButton) src).setBackground(ACTIVE_COLOR);
             ((JButton) src).setForeground(Color.BLACK);
         }
