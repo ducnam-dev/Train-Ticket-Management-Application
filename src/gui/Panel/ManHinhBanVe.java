@@ -52,6 +52,11 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
 
     private JPanel pnlDanhSachGheDaCho;
 
+    // THÊM: Danh sách Mã Ghế đang được chọn (chờ mua)
+    private List<String> danhSachMaGheDaChon = new ArrayList<>();
+    // THÊM: Map để theo dõi trạng thái button (MaCho -> Button)
+    private java.util.Map<String, JButton> seatButtonsMap = new java.util.HashMap<>();
+
     // Constants
     private static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -270,16 +275,14 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
 
 
         // 3. Panel Ghế Đã Chọn (Thay thế nút giả lập) //Dùng để sử lý sự kiện trong tương lai
-        JPanel selectedSeatsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-        selectedSeatsPanel.setOpaque(false);
-        selectedSeatsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        pnlDanhSachGheDaCho = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        pnlDanhSachGheDaCho.setOpaque(false);
+        pnlDanhSachGheDaCho.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        selectedSeatsPanel.add(new JLabel("Ghế đã chọn:"));
-        // Thêm các nút ghế đã chọn động vào đây (hiện tại là giả lập)
-        selectedSeatsPanel.add(taoNutGheDaChon("A03-G07", "800.000"));
-        selectedSeatsPanel.add(taoNutGheDaChon("A01-G10", "800.000"));
+        pnlDanhSachGheDaCho.add(new JLabel("Ghế đã chọn:"));
 
-        panel.add(selectedSeatsPanel);
+
+        panel.add(pnlDanhSachGheDaCho);
 
         datCanhKhuVuc(panel);
         return panel;
@@ -291,12 +294,17 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
 
 
     // Hàm tạo nút giả lập ghế đã chọn
-    private JButton taoNutGheDaChon(String maGhe, String gia) {
-        JButton btn = new JButton(maGhe + " (" + gia + ")");
-        btn.setBackground(Color.white);
-        btn.setForeground(Color.BLACK);
+    private JButton taoNutGheDaChon(String maGhe) {
+        JButton btn = new JButton(maGhe); // Chỉ hiển thị mã ghế
+        btn.setBackground(new Color(0, 123, 255)); // Đổi màu nền cho đồng nhất với đang chọn
+        btn.setForeground(Color.WHITE);
         btn.setFont(btn.getFont().deriveFont(Font.BOLD, 12f));
         btn.setFocusPainted(false);
+        btn.setPreferredSize(new Dimension(120, 25));
+
+        // THÊM: Logic để hủy chọn khi click vào nút này
+        btn.addActionListener(e -> xuLyHuyChonGhe(maGhe));
+
         return btn;
     }
 
@@ -577,6 +585,12 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
     private ChoDatDAO choDatDao = new ChoDatDAO();
 
     private void xuLyChonToa(JButton currentButton, String maToa) {
+
+        danhSachMaGheDaChon.clear();
+        seatButtonsMap.clear(); // Xóa map các button cũ
+        capNhatDanhSachGheDaChonUI(); // Cập nhật UI
+
+
         if (lastSelectedToaButton != null) {
             lastSelectedToaButton.setBackground(Color.LIGHT_GRAY);
             lastSelectedToaButton.setForeground(Color.BLACK);
@@ -666,6 +680,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
      */
     private void veSoDoGhe(List<ChoDat> danhSachChoDat) {
         pnlSoDoGhe.removeAll();
+        seatButtonsMap.clear();
 
         // 1. Thiết lập pnlSoDoGhe (Container chính, sử dụng FlowLayout để bọc Grid)
         pnlSoDoGhe.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0)); // Căn trái, không có khoảng cách ngoài
@@ -714,10 +729,10 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
 
                 // Gắn sự kiện để xử lý việc đặt vé (chọn ghế)
                 btnCho.addActionListener(e -> {
-                    xuLyChoGhe(btnCho, cho.getMaCho());
+                    xuLyChonGhe(btnCho, cho.getMaCho());
                 });
             }
-
+            seatButtonsMap.put(cho.getMaCho(), btnCho);
             // Thêm nút vào Grid Container
             gridContainer.add(btnCho);
         }
@@ -730,10 +745,64 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         pnlSoDoGhe.repaint();
     }
 
-    // TODO: Thêm logic highlight/thêm vào giỏ hàng khi chọn ghế
-    private void xuLyChoGhe(JButton btnCho, String maCho) {
+    /**
+     * Logic chính để thêm/bỏ một ghế khỏi danh sách chọn.
+     * @param btnCho Nút ghế được click.
+     * @param maCho Mã chỗ đặt tương ứng.
+     */
+    private void xuLyChonGhe(JButton btnCho, String maCho) {
+        if (danhSachMaGheDaChon.contains(maCho)) {
+            // Trường hợp 1: Ghế đã được chọn -> HỦY CHỌN
+            danhSachMaGheDaChon.remove(maCho);
+            btnCho.setBackground(Color.LIGHT_GRAY);
+            btnCho.setForeground(Color.BLACK);
+            System.out.println("Đã hủy chọn ghế: " + maCho);
+        } else {
+            // Trường hợp 2: Ghế chưa được chọn -> CHỌN
+            danhSachMaGheDaChon.add(maCho);
+            btnCho.setBackground(new Color(0, 123, 255)); // Màu Đang chọn
+            btnCho.setForeground(Color.WHITE);
+            System.out.println("Đã chọn ghế: " + maCho);
+        }
 
-        System.out.println("Ghế " + maCho + " được chọn tạm thời.");
+        // Cập nhật UI của danh sách ghế đã chọn
+        capNhatDanhSachGheDaChonUI();
+    }
+
+    /**
+     * Logic xử lý khi click vào nút ghế trên danh sách đã chọn để hủy chọn.
+     * @param maCho Mã chỗ đặt cần hủy.
+     */
+    private void xuLyHuyChonGhe(String maCho) {
+        // Hủy chọn trong danh sách
+        danhSachMaGheDaChon.remove(maCho);
+
+        // Cập nhật trạng thái nút trên sơ đồ ghế
+        JButton btnCho = seatButtonsMap.get(maCho);
+        if (btnCho != null) {
+            btnCho.setBackground(Color.LIGHT_GRAY);
+            btnCho.setForeground(Color.BLACK);
+        }
+
+        // Cập nhật UI danh sách đã chọn
+        capNhatDanhSachGheDaChonUI();
+        System.out.println("Đã hủy chọn ghế: " + maCho + " từ danh sách.");
+    }
+
+    /**
+     * Xây dựng lại nội dung của selectedSeatsPanel dựa trên danh sách ghế đã chọn.
+     */
+    private void capNhatDanhSachGheDaChonUI() {
+        pnlDanhSachGheDaCho.removeAll();
+        pnlDanhSachGheDaCho.add(new JLabel("Ghế đã chọn:"));
+
+        for (String maCho : danhSachMaGheDaChon) {
+            JButton btnGhe = taoNutGheDaChon(maCho); // Gọi phương thức tạo nút
+            pnlDanhSachGheDaCho.add(btnGhe);
+        }
+
+        pnlDanhSachGheDaCho.revalidate();
+        pnlDanhSachGheDaCho.repaint();
     }
 
     // ======= MouseListener =======
