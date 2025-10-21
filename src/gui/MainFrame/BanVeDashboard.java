@@ -37,7 +37,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         cardLayout.show(contentPanel, "banVe");
 
         //full screen
-//        setExtendedState(JFrame.MAXIMIZED_BOTH); // Maximize window
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // Maximize window
 //        setUndecorated(true);
 
         setVisible(true);

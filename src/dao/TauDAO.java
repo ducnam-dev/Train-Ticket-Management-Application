@@ -5,12 +5,27 @@ import java.util.List;
 import entity.Tau;
 
 
-public interface TauDAO {
-	List<Tau> layTatCa();
-	Tau timTheoId(int id);
-	Tau timTheoMa(String maTau);
-	void capNhat(Tau tau);
-	static Tau getTauById(String maTau) {
+public class TauDAO {
+    List<Tau> layTatCa() {
+        return null;
+    }
+
+    Tau timTheoId(int id) {
+        return null;
+    }
+
+    Tau timTheoMa(String maTau) {
+        return null;
+    }
+
+    void capNhat(Tau tau) {
+
+    }
+
+    public TauDAO() {
+    }
+
+    static Tau getTauById(String maTau) {
 		// TODO Auto-generated method stub
 		return null;
 	}

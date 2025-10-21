@@ -10,7 +10,7 @@ public class ChoDat {
         private String khoang;
         private int tang;
         private TrangThaiChoDat trangThai;
-    private boolean daDat;
+        private boolean daDat; // Trạng thái đặt vé tạm thời trên chuyến tàu cụ thể
 
         public ChoDat() {}
 
@@ -73,4 +73,15 @@ public class ChoDat {
     public void setDaDat(boolean daDat) {
         this.daDat = daDat;
     }
+    @Override
+    public String toString() {
+        return "ChoDat{" +
+                "maCho='" + maCho + '\'' +
+                ", maToa='" + maToa + '\'' +
+                ", soCho='" + soCho + '\'' +
+                ", trangThai=" + trangThai+ // Hiển thị giá trị CSDL
+                ", daDat=" + daDat +
+                '}';
+    }
 }
+
