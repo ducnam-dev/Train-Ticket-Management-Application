@@ -1,15 +1,10 @@
-// java
 package gui.Panel;
 
 import dao.ChoDatDAO;
 import dao.ChuyenTauDao;
 import dao.GaDao;
 import dao.ToaDAO;
-import entity.ChoDat;
-import entity.ChuyenTau;
-import entity.Ga;
-import entity.Toa;
-import entity.lopEnum.TrangThaiChoDat;
+import entity.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -25,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * ManHinhBanVe: Panel bán vé - tách các phần UI và logic rõ ràng,
@@ -38,21 +35,47 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
     private JComboBox<Ga> cbGaDi;
     private JComboBox<Ga> cbGaDen;
     private JTextField dateField;
+
+    // Thay thế txtSoKhachTong bằng JLabel
+    private JLabel lblTongSoKhach;
+    private JTextField txtNguoiCaoTuoi;
+    private JTextField txtNguoiLon;
+    private JTextField txtTreCon;
+    private JTextField txtSinhVien;
+
     private JTable tableChuyenTau;
     private DefaultTableModel tableModel;
 
+    // UI State
+    private JPanel pnlDanhSachGheDaCho; // Panel chứa danh sách các nút ghế đã chọn
 
     // Data
     private Date date;
     private List<ChuyenTau> ketQua = new ArrayList<>();
-    private String maChuyenTauHienTai = null; // Biến lưu trữ Mã Chuyến tàu đang được chọn
+    private String maChuyenTauHienTai = null;
 
     // State
     private JButton lastSelectedToaButton = null;
+    private String maToaHienTai = null; // Thêm biến lưu MaToa hiện tại
+
+    // Map lưu trữ chi tiết Khách hàng tạm thời (MaChoDat -> TempKhachHang)
+    private Map<String, TempKhachHang> danhSachKhachHang = new HashMap<>();
+
+    // Map lưu trữ số lượng yêu cầu theo loại khách (đã tính tổng)
+    private Map<String, Integer> soLuongYeuCau = new HashMap<>();
+
+    // Map lưu ChoDat chi tiết của toa hiện tại (cho tra cứu nhanh)
+    private Map<String, ChoDat> tatCaChoDatToaHienTai = new HashMap<>();
+
+    // Danh sách các ghế đang được chọn (MaChoDat -> ChoDat)
+    private Map<String, ChoDat> danhSachGheDaChon = new HashMap<>();
+    // Map để theo dõi trạng thái button trên sơ đồ (MaCho -> Button)
+    private Map<String, JButton> seatButtonsMap = new HashMap<>();
 
     // Constants
     private static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private JScrollPane thongTinKhachScrollPane;
 
     public ManHinhBanVe() {
         setLayout(new BorderLayout(5, 5));
@@ -83,22 +106,27 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
 
     private JPanel taoNoiDungChinh() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 0));
-        mainPanel.setBackground(new Color(240, 242, 245));
+        mainPanel.setBackground(Color.WHITE);
 
         JPanel contentLeftPanel = new JPanel();
         contentLeftPanel.setLayout(new BoxLayout(contentLeftPanel, BoxLayout.Y_AXIS));
         contentLeftPanel.setOpaque(false);
         contentLeftPanel.setBorder(new EmptyBorder(0, 0, 0, 5));
 
+        // Thêm các khu vực con
         contentLeftPanel.add(createKhuVucTimKiem());
         contentLeftPanel.add(Box.createVerticalStrut(10));
+
         contentLeftPanel.add(createKhuVucDanhSachChuyenTau());
         contentLeftPanel.add(Box.createVerticalStrut(10));
+
         contentLeftPanel.add(createKhuVucChonLoaiKhach());
         contentLeftPanel.add(Box.createVerticalStrut(10));
+
         contentLeftPanel.add(createKhuVucChonViTriGhe());
         contentLeftPanel.add(Box.createVerticalStrut(10));
-        contentLeftPanel.add(createKhuVucTongTien());
+
+        contentLeftPanel.add(createKhuVucTongTien()); // Giữ lại khu vực tổng tiền
         contentLeftPanel.add(Box.createVerticalGlue());
 
         JScrollPane leftScrollPane = new JScrollPane(contentLeftPanel);
@@ -109,21 +137,22 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
 
         // Không cố định preferred size ở đây -> để split pane quản lý
         JPanel leftContainer = new JPanel(new BorderLayout());
-        leftContainer.setOpaque(false);
-        leftContainer.add(leftScrollPane, BorderLayout.NORTH);
-        leftContainer.add(Box.createVerticalGlue(), BorderLayout.CENTER);
+        leftContainer.setOpaque(true);
+
+        // Đặt leftScrollPane vào BorderLayout.CENTER để chiếm tối đa chiều dài
+        leftContainer.add(leftScrollPane, BorderLayout.CENTER);
 
         JPanel rightPanel = createKhuVucThongTinKhach();
 
         // DÙNG JSPLITPANE để tự động co giãn
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftContainer, rightPanel);
-        split.setResizeWeight(0.6); // tỷ lệ khi resize: 60% trái, 40% phải
+        split.setResizeWeight(0.75); // tỷ lệ khi resize 8/2
         split.setOneTouchExpandable(true);
         split.setDividerSize(6);
 
         mainPanel.add(split, BorderLayout.CENTER);
         return mainPanel;
-        }
+    }
 
     private JPanel createKhuVucTimKiem() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -180,6 +209,61 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         return scrollPane;
     }
 
+    // Phương thức giúp parse an toàn từ JTextField
+    private int parseTextFieldToInt(JTextField field) {
+        try {
+            if (field.getText().trim().isEmpty()) return 0;
+            return Integer.parseInt(field.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0; // Trả về 0 nếu không phải số
+        }
+    }
+
+    // Phương thức giúp thiết lập style cho JTextField trong khu vực chọn khách
+    private void tuChinhTextField(JTextComponent field) {
+        field.setFont(new Font("Arial", Font.PLAIN, 14));
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
+                BorderFactory.createEmptyBorder(2, 5, 2, 5)
+        ));
+        field.setMaximumSize(new Dimension(50, 25)); // Đảm bảo kích thước không quá lớn
+        field.setPreferredSize(new Dimension(50, 25));
+    }
+
+
+    // Logic chính để tính toán tổng số khách và kiểm tra giới hạn chọn
+    private void capNhatSoLuongYeuCau() {
+        int nguoiCaoTuoi = parseTextFieldToInt(txtNguoiCaoTuoi);
+        int nguoiLon = parseTextFieldToInt(txtNguoiLon);
+        int treCon = parseTextFieldToInt(txtTreCon);
+        int sinhVien = parseTextFieldToInt(txtSinhVien);
+
+        // ⭐ TÍNH TỔNG SỐ KHÁCH TỪ CÁC LOẠI CHI TIẾT
+        int tongSoKhachMoi = nguoiCaoTuoi + nguoiLon + treCon + sinhVien;
+
+        // Cập nhật nhãn TỔNG SỐ KHÁCH
+        if (lblTongSoKhach != null) {
+            lblTongSoKhach.setText(String.valueOf(tongSoKhachMoi));
+        }
+
+        // Cập nhật Map trạng thái (dùng nếu cần logic kiểm tra từng loại khách sau này)
+        soLuongYeuCau.clear();
+        soLuongYeuCau.put("NguoiCaoTuoi", nguoiCaoTuoi);
+        soLuongYeuCau.put("NguoiLon", nguoiLon);
+        soLuongYeuCau.put("TreCon", treCon);
+        soLuongYeuCau.put("SinhVien", sinhVien);
+
+        // Kiểm tra và cảnh báo nếu số lượng ghế đã chọn vượt quá tổng số khách mới
+        if (danhSachGheDaChon.size() > tongSoKhachMoi) {
+            JOptionPane.showMessageDialog(this,
+                    "Số lượng ghế đã chọn (" + danhSachGheDaChon.size() + ") vượt quá Tổng số khách mới (" + tongSoKhachMoi + "). Vui lòng hủy chọn bớt.",
+                    "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            // Lưu ý: Không tự động hủy chọn để tránh làm mất dữ liệu người dùng đã nhập trên form chi tiết.
+        }
+    }
+
+    // Trong class ManHinhBanVe
+
     private JPanel createKhuVucChonLoaiKhach() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -193,26 +277,42 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         JPanel topRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         topRow.setOpaque(false);
         topRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-        topRow.add(new JLabel("Số khách:"));
-        topRow.add(new JTextField("3", 3));
 
-        JPanel loaiKhachInfo = new JPanel(new GridLayout(4, 2, 5, 5));
-        loaiKhachInfo.setOpaque(false);
-        loaiKhachInfo.add(new JLabel("Người cao tuổi (từ 60 tuổi) -25%"));
-        loaiKhachInfo.add(new JTextField("1", 3));
-        loaiKhachInfo.add(new JLabel("Người lớn (từ 11 đến 59 tuổi)"));
-        loaiKhachInfo.add(new JTextField("2", 3));
-        JLabel treConLabel = new JLabel("Trẻ con (từ dưới 10 tuổi) -20%");
-        treConLabel.setForeground(Color.RED);
-        loaiKhachInfo.add(treConLabel);
-        loaiKhachInfo.add(new JTextField("0", 3));
-        JLabel sinhVienLabel = new JLabel("Sinh viên -10%");
-        sinhVienLabel.setForeground(Color.RED);
-        loaiKhachInfo.add(sinhVienLabel);
-        loaiKhachInfo.add(new JTextField("0", 3));
+        // ⭐ HIỂN THỊ TỔNG SỐ KHÁCH (Được tính toán)
+        topRow.add(new JLabel("Tổng số khách:"));
+        lblTongSoKhach = new JLabel("0");
+        lblTongSoKhach.setFont(lblTongSoKhach.getFont().deriveFont(Font.BOLD, 14f));
+        lblTongSoKhach.setForeground(new Color(220, 53, 69));
+        topRow.add(lblTongSoKhach);
 
+        // Thay thế loaiKhachInfo bằng một JPanel dọc để chứa các SpinBox
+        JPanel loaiKhachSpinBoxPanel = new JPanel();
+        loaiKhachSpinBoxPanel.setLayout(new BoxLayout(loaiKhachSpinBoxPanel, BoxLayout.Y_AXIS));
+        loaiKhachSpinBoxPanel.setOpaque(false);
+        loaiKhachSpinBoxPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Khởi tạo các fields (chỉ cần khởi tạo, giá trị được set trong createSpinBoxPanel)
+        txtNguoiLon = new JTextField(1);
+        txtTreCon = new JTextField(1);
+        txtNguoiCaoTuoi = new JTextField(1);
+        txtSinhVien = new JTextField(1);
+
+        // 1. Người lớn
+        loaiKhachSpinBoxPanel.add(createSpinBoxPanel("Người lớn (11-59 tuổi)", "1", null, txtNguoiLon));
+
+        // 2. Trẻ em
+        loaiKhachSpinBoxPanel.add(createSpinBoxPanel("Trẻ em (6-10 tuổi)", "0", "-25%", txtTreCon));
+
+        // 3. Người cao tuổi
+        loaiKhachSpinBoxPanel.add(createSpinBoxPanel("Người cao tuổi (> 60 tuổi)", "0", "-15%", txtNguoiCaoTuoi));
+
+        // 4. Sinh viên
+        loaiKhachSpinBoxPanel.add(createSpinBoxPanel("Sinh viên (Thẻ SV)", "0", "-10%", txtSinhVien));
+
+        // Giãn cách
         topRow.add(Box.createHorizontalStrut(20));
-        topRow.add(loaiKhachInfo);
+        // Thêm Panel chứa các SpinBox vào topRow
+        topRow.add(loaiKhachSpinBoxPanel);
         panel.add(topRow);
 
         pnlToa = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 10));
@@ -220,6 +320,10 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         pnlToa.setAlignmentX(Component.LEFT_ALIGNMENT);
         pnlToa.add(new JLabel("Chọn toa:"));
         panel.add(pnlToa);
+        panel.setMaximumSize(new Dimension(1200, 100));
+
+        // Cập nhật trạng thái ban đầu sau khi các fields đã được khởi tạo
+        capNhatSoLuongYeuCau();
 
         datCanhKhuVuc(panel);
         return panel;
@@ -235,61 +339,86 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         title.setTitleFont(title.getTitleFont().deriveFont(Font.BOLD, 14f));
         panel.setBorder(title);
 
-        pnlSoDoGhe = taoSoDoChoDonGian();
+        pnlSoDoGhe = new JPanel();
         pnlSoDoGhe.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(pnlSoDoGhe);
+
+        JScrollPane soDoScrollPane = new JScrollPane(pnlSoDoGhe);
+        soDoScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        soDoScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        soDoScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        soDoScrollPane.setPreferredSize(new Dimension(100, 150));
+        soDoScrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
+
+        panel.add(soDoScrollPane);
         panel.add(Box.createVerticalStrut(10));
 
-        JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        pricePanel.setOpaque(false);
-        pricePanel.add(new JButton("Ghế 7-Toa 3: 800.000"));
-        pricePanel.add(new JButton("Ghế 10-Toa 3: 800.000"));
 
-        JButton discountBtn = new JButton("-25%");
-        discountBtn.setForeground(Color.RED);
-        discountBtn.setBackground(new Color(224, 224, 224));
-        pricePanel.add(discountBtn);
-
-        pricePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(pricePanel);
-
+        // 1. Panel Chú Giải (Legend)
         JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
         legendPanel.setOpaque(false);
-        legendPanel.add(taoMucChuGiai(Color.GRAY.brighter(), "Chỗ trống"));
-        legendPanel.add(taoMucChuGiai(Color.BLACK, "Không trống"));
-        legendPanel.add(taoMucChuGiai(new Color(0, 123, 255), "Đang chọn"));
+        legendPanel.add(taoMucChuGiai(Color.LIGHT_GRAY, "Chỗ trống"));
+        legendPanel.add(taoMucChuGiai(Color.BLACK, "Đã đặt"));
+        legendPanel.add(taoMucChuGiai(new Color(0, 123, 255), "Đang chọn")); // Cập nhật màu
+        legendPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(legendPanel);
+        panel.add(Box.createVerticalStrut(5));
+
+
+        // 3. Panel Ghế Đã Chọn
+        pnlDanhSachGheDaCho = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        pnlDanhSachGheDaCho.setOpaque(false);
+        pnlDanhSachGheDaCho.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        pnlDanhSachGheDaCho.add(new JLabel("Ghế đã chọn:"));
+
+        // Khởi tạo lần đầu để hiển thị
+        capNhatDanhSachGheDaChonUI();
+
+        panel.add(pnlDanhSachGheDaCho);
 
         datCanhKhuVuc(panel);
         return panel;
     }
 
-    private JPanel taoSoDoChoDonGian() {
-        JPanel pnlSoDoGhe = new JPanel(new GridLayout(4, 7, 5, 5));
-        pnlSoDoGhe.setOpaque(false);
-        pnlSoDoGhe.setBorder(new EmptyBorder(10, 10, 10, 10));
 
+    // Hàm tạo nút ghế đã chọn
+    private JButton taoNutGheDaChon(String maGhe, String soThuTuToa, String soCho) {
+        // Định dạng hiển thị: T[STT_Toa] / G[SoCho]
+        String text = "Chỗ " + soCho + ", Toa " + soThuTuToa;
 
-        return pnlSoDoGhe;
+        JButton btn = new JButton(text);
+        btn.setBackground(new Color(0, 123, 255));
+        btn.setForeground(Color.WHITE);
+        btn.setFont(btn.getFont().deriveFont(Font.BOLD, 12f));
+        btn.setFocusPainted(false);
+        btn.setPreferredSize(new Dimension(120, 25));
+
+        // Logic để hủy chọn khi click vào nút này
+        btn.addActionListener(e -> xuLyHuyChonGhe(maGhe));
+
+        return btn;
     }
 
+
     private JPanel createKhuVucTongTien() {
+        // Giả lập khu vực tổng tiền
         JPanel fullSummary = new JPanel(new BorderLayout());
-        fullSummary.setBackground(Color.WHITE);
+        fullSummary.setBackground(Color.white);
         fullSummary.setBorder(new EmptyBorder(5, 10, 5, 10));
 
         JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         legendPanel.setOpaque(false);
-        legendPanel.add(taoMucChuGiai(Color.GRAY.brighter(), "Chỗ trống"));
+        legendPanel.add(taoMucChuGiai(Color.LIGHT_GRAY, "Chỗ trống"));
         legendPanel.add(taoMucChuGiai(Color.BLACK, "Không trống"));
         legendPanel.add(taoMucChuGiai(new Color(0, 123, 255), "Đang chọn"));
         fullSummary.add(legendPanel, BorderLayout.WEST);
 
         JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         summaryPanel.setOpaque(false);
-        summaryPanel.add(new JLabel("Đã chọn: 3/3"));
+        summaryPanel.add(new JLabel("Đã chọn: X/Y")); // Giá trị sẽ được cập nhật
 
-        JLabel totalLabel = new JLabel("Tổng tiền vé: 2.200.000 VNĐ");
+
+        JLabel totalLabel = new JLabel("Tổng tiền vé: 0 VNĐ");
         totalLabel.setFont(totalLabel.getFont().deriveFont(Font.BOLD, 14f));
         totalLabel.setForeground(new Color(255, 165, 0));
         summaryPanel.add(totalLabel);
@@ -298,6 +427,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         datCanhKhuVuc(fullSummary);
         return fullSummary;
     }
+
+
 
     private JPanel createKhuVucThongTinKhach() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -310,15 +441,22 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         infoScrollPanel.setOpaque(false);
         infoScrollPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        infoScrollPanel.add(createKhachPanel("A03-G07", "Người lớn 1", "800.000 VNĐ", "Bảo Duy", "20", "01234xxxxxx", "00111XXXXXX"));
-        infoScrollPanel.add(createKhachPanel("A01-G10", "Người lớn 2", "800.000 VNĐ", "Bảo Duy", "20", "09999xxxxxx", "00222XXXXXX"));
-        infoScrollPanel.add(createKhachPanel("A03-G8", "Người cao tuổi", "900.000 VNĐ", "Việt Hùng", "70", "05678xxxxxx", "00666XXXXXX"));
+        // Dữ liệu giả lập
+        infoScrollPanel.add(new JLabel("Chọn ghế để thêm thông tin."));
+        //làm khoảng cách dài hơn
         infoScrollPanel.add(Box.createVerticalGlue());
 
-        JScrollPane scrollPane = new JScrollPane(infoScrollPanel);
-        scrollPane.setBorder(null);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        infoScrollPanel.setPreferredSize(new Dimension(400, 300));
+
+
+        thongTinKhachScrollPane = new JScrollPane(infoScrollPanel);
+        thongTinKhachScrollPane.setBorder(null);
+        thongTinKhachScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        panel.add(thongTinKhachScrollPane, BorderLayout.CENTER);
+
+
+        // ⭐ GỌI CẬP NHẬT BAN ĐẦU
+        SwingUtilities.invokeLater(this::capNhatThongTinKhachUI);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         buttonPanel.setOpaque(false);
@@ -342,12 +480,27 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         return panel;
     }
 
-    private JPanel createKhachPanel(String maGhe, String loaiKhach, String gia, String hoTen, String tuoi, String sdt, String cccd) {
+    // Trong ManHinhBanVe.java
+
+    /**
+     * Tạo panel nhập thông tin chi tiết cho 1 khách hàng.
+     * Panel này hiển thị thông tin ghế và cho phép nhập chi tiết khách hàng,
+     * đồng thời gắn sự kiện để lưu dữ liệu vào đối tượng TempKhachHang.
+     * @param tempKhach Đối tượng TempKhachHang chứa Chi tiết ghế và Dữ liệu khách tạm thời.
+     * @return JPanel chứa form nhập liệu
+     */
+    private JPanel createKhachPanel(TempKhachHang tempKhach) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Giá trị binding từ TempKhachHang
+        String soCho = tempKhach.choDat.getSoCho();
+        String soThuTuToa = laySoThuTuToa(tempKhach.choDat.getMaToa());
+        String loaiKhachHienThi = getTenLoaiVeHienThi(tempKhach.maLoaiVe);
+        String gia = "Giá vé sẽ được tính"; // Placeholder
 
         JPanel headerRow = new JPanel(new BorderLayout());
         headerRow.setOpaque(false);
@@ -355,12 +508,25 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
 
         JPanel leftHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         leftHeader.setOpaque(false);
-        JLabel maGheLabel = new JLabel(maGhe);
+
+        // Hiển thị Mã Ghế và Toa
+        JLabel maGheLabel = new JLabel("Ghế: " + soCho + " / Toa: " + soThuTuToa);
         maGheLabel.setFont(maGheLabel.getFont().deriveFont(Font.BOLD));
         leftHeader.add(maGheLabel);
-        JLabel loaiKhachLabel = new JLabel(loaiKhach);
-        loaiKhachLabel.setFont(loaiKhachLabel.getFont().deriveFont(Font.BOLD));
-        leftHeader.add(loaiKhachLabel);
+
+        // ⭐ COMBOBOX CHỌN LOẠI VÉ
+        JComboBox<String> cbLoaiKhach = new JComboBox<>(getLoaiVeOptions());
+        cbLoaiKhach.setSelectedItem(loaiKhachHienThi);
+        cbLoaiKhach.setPreferredSize(new Dimension(120, 25));
+        cbLoaiKhach.setMaximumSize(new Dimension(120, 25));
+
+        cbLoaiKhach.addActionListener(e -> {
+            // Logic cập nhật Mã Loại Vé trong TempKhachHang
+            String maMoi = getMaLoaiVeFromHienThi((String) cbLoaiKhach.getSelectedItem());
+            tempKhach.maLoaiVe = maMoi;
+            // Cần gọi hàm tính lại giá vé ở đây nếu có logic giá
+        });
+        leftHeader.add(cbLoaiKhach);
 
         headerRow.add(leftHeader, BorderLayout.WEST);
 
@@ -375,28 +541,120 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         detailGrid.setOpaque(false);
         detailGrid.setBorder(new EmptyBorder(5, 0, 5, 0));
 
+        // Hàng 1 (Binding HoTen, Tuoi)
         detailGrid.add(new JLabel("Họ và tên*"));
-        JTextField hoTenField = new JTextField(hoTen, 10);
+        JTextField hoTenField = new JTextField(tempKhach.hoTen, 10);
         detailGrid.add(hoTenField);
         detailGrid.add(new JLabel("Tuổi"));
-        JTextField tuoiField = new JTextField(tuoi, 3);
+        JTextField tuoiField = new JTextField(String.valueOf(tempKhach.tuoi > 0 ? tempKhach.tuoi : ""), 3); // Hiện rỗng nếu tuổi = 0
         detailGrid.add(tuoiField);
 
+        // Hàng 2 (Binding SĐT, CCCD)
         detailGrid.add(new JLabel("Số điện thoại"));
-        JTextField sdtField = new JTextField(sdt, 10);
+        JTextField sdtField = new JTextField(tempKhach.sdt, 10);
         detailGrid.add(sdtField);
         detailGrid.add(new JLabel("CCCD*"));
-        JTextField cccdField = new JTextField(cccd, 10);
+        JTextField cccdField = new JTextField(tempKhach.cccd, 10);
         detailGrid.add(cccdField);
 
         panel.add(detailGrid);
 
+        // GẮN LISTENER ĐỂ LƯU DỮ LIỆU TỨC THỜI VÀO TEMPKHACHHANG (Focus Loss)
+        hoTenField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.hoTen = hoTenField.getText(); }});
+        cccdField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.cccd = cccdField.getText(); }});
+        sdtField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.sdt = sdtField.getText(); }});
+        tuoiField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                try {
+                    tempKhach.tuoi = Integer.parseInt(tuoiField.getText().trim());
+                } catch (Exception e) {
+                    tempKhach.tuoi = 0;
+                    // Có thể cảnh báo người dùng nếu giá trị không hợp lệ
+                }
+            }
+        });
+
+        // Thiết lập kích thước tối đa cho các trường nhập liệu
         hoTenField.setMaximumSize(hoTenField.getPreferredSize());
         tuoiField.setMaximumSize(tuoiField.getPreferredSize());
         sdtField.setMaximumSize(sdtField.getPreferredSize());
         cccdField.setMaximumSize(cccdField.getPreferredSize());
 
         return panel;
+    }
+
+
+    // Trong class ManHinhBanVe.java
+
+    /**
+     * Lấy mảng String chứa các tùy chọn Loại vé để hiển thị trong JComboBox.
+     * Các tùy chọn này được định dạng là "Tên Loại Vé (Mã Loại Vé)".
+     * * @return Mảng String các tùy chọn loại vé.
+     */
+    private String[] getLoaiVeOptions() {
+        // Sử dụng các hằng số MA_VE_... đã định nghĩa trong class ManHinhBanVe
+        return new String[] {
+                getTenLoaiVeHienThi(MA_VE_NL), // Người lớn
+                getTenLoaiVeHienThi(MA_VE_TE),  // Trẻ em
+                getTenLoaiVeHienThi(MA_VE_NCT), // Người cao tuổi
+                getTenLoaiVeHienThi(MA_VE_SV)   // Sinh viên
+        };
+    }
+    /**
+     * Ánh xạ Mã Loại Vé (String) sang chuỗi hiển thị đầy đủ cho UI.
+     * @param maLoaiVe Mã loại vé (VT01, VT02,...)
+     * @return Tên hiển thị (ví dụ: "Người lớn (VT01)").
+     */
+    private String getTenLoaiVeHienThi(String maLoaiVe) {
+        return switch (maLoaiVe) {
+            case "VT01" -> "Người lớn (VT01)";
+            case "VT02" -> "Trẻ em (VT02)";
+            case "VT03" -> "Người cao tuổi (VT03)";
+            case "VT04" -> "Sinh viên (VT04)";
+            default -> "Người lớn (VT01)";
+        };
+    }
+
+    private static final String MA_VE_NL = "VT01";
+    private static final String MA_VE_TE = "VT02";
+    private static final String MA_VE_NCT = "VT03";
+    private static final String MA_VE_SV = "VT04";
+
+    /**
+     * Ánh xạ ngược từ chuỗi hiển thị trong JComboBox sang Mã Loại Vé (String).
+     * @param tenHienThi Chuỗi hiển thị được chọn từ JComboBox.
+     * @return Mã Loại Vé tương ứng (ví dụ: "VT01").
+     */
+    private String getMaLoaiVeFromHienThi(String tenHienThi) {
+        if (tenHienThi.contains("(VT01)")) return "VT01";
+        if (tenHienThi.contains("(VT02)")) return "VT02";
+        if (tenHienThi.contains("(VT03)")) return "VT03";
+        if (tenHienThi.contains("(VT04)")) return "VT04";
+        return "VT01"; // Mặc định
+    }
+
+    /**
+     * Tạo danh sách các MaLoaiVe ưu tiên dựa trên số lượng yêu cầu.
+     */
+    private Vector<String> taoDanhSachLoaiVeUuTien() {
+        Vector<String> dsMaVe = new Vector<>();
+
+        // 1. Người cao tuổi (Ưu tiên giảm giá cao)
+        themLoaiVeVaoDanhSach(dsMaVe, MA_VE_NCT, soLuongYeuCau.getOrDefault("NguoiCaoTuoi", 0));
+        // 2. Trẻ em
+        themLoaiVeVaoDanhSach(dsMaVe, MA_VE_TE, soLuongYeuCau.getOrDefault("TreCon", 0));
+        // 3. Sinh viên
+        themLoaiVeVaoDanhSach(dsMaVe, MA_VE_SV, soLuongYeuCau.getOrDefault("SinhVien", 0));
+        // 4. Người lớn (Còn lại)
+        themLoaiVeVaoDanhSach(dsMaVe, MA_VE_NL, soLuongYeuCau.getOrDefault("NguoiLon", 0));
+
+        return dsMaVe;
+    }
+
+    private void themLoaiVeVaoDanhSach(Vector<String> ds, String maVe, int soLuong) {
+        for (int i = 0; i < soLuong; i++) {
+            ds.add(maVe);
+        }
     }
 
     // ======= Helpers / Styles =======
@@ -422,17 +680,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         return btn;
     }
 
-    private JButton taoNutGhe(String text) {
-        JButton button = new JButton("<html><center>" + text.replace(" ", "<br>") + "</center></html>");
-        button.setPreferredSize(new Dimension(50, 40));
-        button.setMargin(new Insets(1, 1, 1, 1));
-        button.setBackground(Color.GRAY.brighter());
-        button.setForeground(Color.BLACK);
-        button.setFont(button.getFont().deriveFont(Font.BOLD, 10f));
-        button.setFocusPainted(false);
-        return button;
-    }
-
     private JPanel taoMucChuGiai(Color color, String text) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         panel.setOpaque(false);
@@ -444,14 +691,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         panel.add(square);
         panel.add(new JLabel(text));
         return panel;
-    }
-
-    private void tuChinhTextField(JTextComponent field) {
-        field.setFont(new Font("Arial", Font.PLAIN, 16));
-        field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
     }
 
     // ======= Data / Actions =======
@@ -511,15 +750,114 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         try {
             ToaDAO toaTauDAO = new ToaDAO();
             danhSachToa = toaTauDAO.getDanhSachToaByMaTau(maTau);
-            for (Toa toa : danhSachToa) {
-                System.out.println("Toa: " + toa.getMaToa() + ", Loại: " + toa.getLoaiToa());
-            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi khi lấy danh sách toa tàu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
         napNutToa(danhSachToa);
     }
+    // Trong class ManHinhBanVe (Thêm vào phần Helpers / Styles)
+
+    /**
+     * Tạo một panel chứa label, JTextField và các nút +/- để tăng giảm giá trị.
+     * @param labelText Nhãn mô tả (ví dụ: "Người lớn (11-59)")
+     * @param initialValue Giá trị khởi tạo
+     * @param discountText Tỷ lệ giảm giá (hoặc null nếu không có)
+     * @param targetField JTextField sẽ được điều khiển
+     * @return JPanel chứa toàn bộ control
+     */
+    private JPanel createSpinBoxPanel(String labelText, String initialValue, String discountText, JTextField targetField) {
+        JPanel panel = new JPanel(new BorderLayout(5, 0));
+        panel.setOpaque(false);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.setBorder(new EmptyBorder(5, 0, 5, 0));
+
+        // --- LEFT: Label và Discount ---
+        JPanel labelDiscountPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        labelDiscountPanel.setOpaque(false);
+
+        // Label chính
+        JLabel mainLabel = new JLabel(labelText);
+        mainLabel.setFont(mainLabel.getFont().deriveFont(Font.BOLD, 14f));
+        labelDiscountPanel.add(mainLabel);
+
+        // Discount (nếu có)
+        if (discountText != null) {
+            JLabel discountLabel = new JLabel(discountText);
+            discountLabel.setForeground(new Color(230, 126, 34)); // Màu cam
+            discountLabel.setFont(discountLabel.getFont().deriveFont(Font.BOLD, 12f));
+            labelDiscountPanel.add(discountLabel);
+        }
+
+        panel.add(labelDiscountPanel, BorderLayout.WEST);
+
+        // --- RIGHT: Nút tăng giảm và input ---
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+        controlPanel.setOpaque(false);
+
+        // 1. Nút Giảm (-)
+        JButton btnMinus = new JButton("−");
+        btnMinus.setPreferredSize(new Dimension(30, 30));
+        btnMinus.setMargin(new Insets(0, 0, 0, 0));
+        styleSpinButton(btnMinus);
+
+        // 2. Input Field
+        targetField.setText(initialValue);
+        targetField.setHorizontalAlignment(JTextField.CENTER);
+        targetField.setPreferredSize(new Dimension(30, 30));
+        targetField.setMaximumSize(new Dimension(30, 30));
+        targetField.setEditable(false); // CHỈNH SỬA: Chỉ cho phép chỉnh bằng nút
+
+        // 3. Nút Tăng (+)
+        JButton btnPlus = new JButton("+");
+        btnPlus.setPreferredSize(new Dimension(30, 30));
+        btnPlus.setMargin(new Insets(0, 0, 0, 0));
+        styleSpinButton(btnPlus);
+
+        // Gắn sự kiện cho nút (+) và (-)
+        btnPlus.addActionListener(e -> changeQuantity(targetField, 1));
+        btnMinus.addActionListener(e -> changeQuantity(targetField, -1));
+
+        controlPanel.add(btnMinus);
+        controlPanel.add(targetField);
+        controlPanel.add(btnPlus);
+
+        panel.add(controlPanel, BorderLayout.EAST);
+
+        // Đảm bảo panel giãn ngang tối đa nhưng giữ chiều cao nhỏ
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+
+        return panel;
+    }
+
+    /**
+     * Helper để styling các nút tăng giảm
+     */
+    private void styleSpinButton(JButton btn) {
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(Color.BLACK);
+        btn.setFocusPainted(false);
+        btn.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+    }
+
+    /**
+     * Logic xử lý tăng/giảm số lượng
+     * @param field JTextField cần thay đổi giá trị
+     * @param delta Giá trị thay đổi (+1 hoặc -1)
+     */
+    private void changeQuantity(JTextField field, int delta) {
+        int currentValue = parseTextFieldToInt(field);
+        int newValue = currentValue + delta;
+
+        if (newValue < 0) {
+            newValue = 0; // Giới hạn dưới là 0
+        }
+
+        field.setText(String.valueOf(newValue));
+        capNhatSoLuongYeuCau(); // Gọi hàm tính toán lại tổng
+    }
+
+
 
     /**
      * Nạp nút toa vào panel
@@ -549,10 +887,14 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
     private ChoDatDAO choDatDao = new ChoDatDAO();
 
     private void xuLyChonToa(JButton currentButton, String maToa) {
+        maToaHienTai = maToa; // Cập nhật toa hiện tại
+
+        // 1. Đổi màu nút toa cũ
         if (lastSelectedToaButton != null) {
             lastSelectedToaButton.setBackground(Color.LIGHT_GRAY);
             lastSelectedToaButton.setForeground(Color.BLACK);
         }
+        // 2. Đổi màu nút toa mới
         currentButton.setBackground(new Color(0, 123, 255));
         currentButton.setForeground(Color.WHITE);
         lastSelectedToaButton = currentButton;
@@ -567,12 +909,15 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
             return;
         }
 
-        System.out.println("Đã chọn Toa: " + maToa + maChuyenTauHienTai + ". Tiến hành tải sơ đồ ghế." );
+        // KHÔNG LÀM MỚI DANH SÁCH GHẾ ĐÃ CHỌN: danhSachGheDaChon.clear();
+
+        System.out.println("Đã chọn Toa: " + maToa + ". Tiến hành tải sơ đồ ghế." );
 
         List<ChoDat> danhSachChoDat = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(
                 maToa,
                 maChuyenTauHienTai
         );
+
         //Xử lý và hiện thị
         if (danhSachChoDat.isEmpty()) {
             pnlSoDoGhe.removeAll();
@@ -580,40 +925,10 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
             pnlSoDoGhe.revalidate();
             pnlSoDoGhe.repaint();
         } else {
-            // 🔑 Kích hoạt phương thức vẽ sơ đồ ghế đã sửa ở trên
+            // Kích hoạt phương thức vẽ sơ đồ ghế
             veSoDoGhe(danhSachChoDat);
         }
     }
-
-//    private JPanel veSoDoGheGiườngNằm(List<ChoDat> danhSachChoDat) {
-//        // ... (logic khởi tạo seatPanel và các mảng Tầng/Khoang)
-//
-//        // Tạo Map để tra cứu dữ liệu nhanh chóng
-//        Map<String, ChoDat> choDatMap = new HashMap<>();
-//        for (ChoDat cho : danhSachChoDat) { choDatMap.put(cho.getSoCho(), cho); }
-//
-//        // Lặp qua cấu trúc UI cố định (Tầng/Khoang)
-//        // ... (logic lặp)
-//
-//        // Trong vòng lặp, khi lấy được ChoDat choHienTai:
-//        // ...
-//        if (choHienTai != null) {
-//            // Kiểm tra enum BAO_TRI: ưu tiên cao nhất
-//            if (choHienTai.getTrangThai() == TrangThaiChoDat.BAO_TRI) {
-//                // Màu XÁM, Vô hiệu hóa
-//            }
-//            // Kiểm tra trạng thái đặt vé: ưu tiên thứ hai
-//            else if (choHienTai.isDaDat()) {
-//                // Màu ĐỎ, Vô hiệu hóa
-//            } else {
-//                // Còn Trống: Xanh lá, Kích hoạt (enabled)
-//                // Gắn ActionListener gọi xuLyDatGhe(...)
-//            }
-//        }
-//        // ... (logic thêm button vào seatPanel)
-//
-//        return seatPanel;
-//    }
 
     /**
      * Lấy số thứ tự toa từ mã toa
@@ -622,61 +937,236 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
      */
     private String laySoThuTuToa(String maToa) {
         if (maToa != null && maToa.contains("-")) {
+            // Giả sử MaToa có dạng T[MaTau]-X[SoThuTu] ví dụ: T001-A
             return maToa.substring(maToa.lastIndexOf('-') + 1);
         }
         return maToa;
     }
 
+    // Kích thước cố định cho nút ghế
+    private static final Dimension SQUARE_SEAT_SIZE = new Dimension(60, 30);
     /**
-     * Vẽ sơ đồ ghế dựa trên danh sách chỗ đặt
-     * @param danhSachChoDat
+     * Vẽ sơ đồ ghế dựa trên danh sách chỗ đặt.
+     * @param danhSachChoDat List<ChoDat> danh sách chỗ đặt của toa được chọn.
      */
     private void veSoDoGhe(List<ChoDat> danhSachChoDat) {
-        if (pnlSoDoGhe == null) { pnlSoDoGhe = new JPanel(); }
         pnlSoDoGhe.removeAll();
+        seatButtonsMap.clear();
+        tatCaChoDatToaHienTai.clear(); // Xóa Map ChoDat của toa cũ
 
-        // ... (Thiết lập Layout)
-        int columns = 4;
-        int rows = (int) Math.ceil((double) danhSachChoDat.size() / columns);
-        pnlSoDoGhe.setLayout(new GridLayout(rows, columns, 5, 5));
+        pnlSoDoGhe.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        pnlSoDoGhe.setOpaque(true);
+        pnlSoDoGhe.setBackground(Color.WHITE);
+        pnlSoDoGhe.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // 🔑 Logic Chính: Lặp qua danh sách và áp dụng kiểu dáng
+
+        int rows = 4;
+        int columns = (int) Math.ceil((double) danhSachChoDat.size() / rows);
+        JPanel gridContainer = new JPanel(new GridLayout(rows, columns, 5, 5));
+        gridContainer.setOpaque(false);
+
         for (ChoDat cho : danhSachChoDat) {
-            JButton btnCho = new JButton(cho.getSoCho()); // Ví dụ: 01A, K1T1
-            btnCho.setPreferredSize(new Dimension(60, 40));
-            // 1. Kiểm tra trạng thái ĐÃ ĐẶT (lấy từ dữ liệu DAO) kiểm tra enum
-            if (cho.getTrangThai() == TrangThaiChoDat.DANG_SU_DUNG) {
-                // Trường hợp 1: ĐÃ ĐẶT
-                btnCho.setBackground(Color.RED); // Màu đỏ: Đã có người đặt
-                btnCho.setForeground(Color.WHITE);
-                btnCho.setEnabled(false);       // Vô hiệu hóa nút (không cho chọn)
-                btnCho.setToolTipText("Ghế đã được đặt");
+            JButton btnCho = new JButton(cho.getSoCho());
 
+            btnCho.setPreferredSize(SQUARE_SEAT_SIZE);
+            btnCho.setMinimumSize(SQUARE_SEAT_SIZE);
+            btnCho.setMaximumSize(SQUARE_SEAT_SIZE);
+            btnCho.setFont(btnCho.getFont().deriveFont(Font.BOLD, 12f));
+
+            // Kiểm tra trạng thái ĐANG CHỌN (trong Map danhSachGheDaChon)
+            boolean isSelected = danhSachGheDaChon.containsKey(cho.getMaCho());
+
+            boolean isBooked = cho.isDaDat();
+            tatCaChoDatToaHienTai.put(cho.getMaCho(), cho);
+
+            if (isSelected) {
+                // Trường hợp 1: ĐANG CHỌN
+                btnCho.setBackground(new Color(0, 123, 255));
+                btnCho.setForeground(Color.WHITE);
+                btnCho.setEnabled(true);
+                btnCho.setToolTipText("Ghế đang được chọn");
+            } else if (isBooked) {
+                // Trường hợp 2: KHÔNG KHẢ DỤ (Đã đặt, Bảo trì)
+                btnCho.setBackground(Color.BLACK);
+                btnCho.setForeground(Color.WHITE);
+                btnCho.setEnabled(false);
+                btnCho.setToolTipText("Ghế đã được bán");
             } else {
-                // Trường hợp 2: CÒN TRỐNG
-                btnCho.setBackground(new Color(0, 150, 0)); // Màu xanh lá cây: Còn trống
-                btnCho.setForeground(Color.WHITE);
-                btnCho.setEnabled(true);        // Kích hoạt nút (cho phép chọn)
-
-                // Gắn sự kiện để xử lý việc đặt vé (chọn ghế)
-                btnCho.addActionListener(e -> {
-                    xuLyDatGhe(btnCho, cho.getMaCho());
-                });
+                // Trường hợp 3: CÒN TRỐNG
+                btnCho.setBackground(Color.LIGHT_GRAY);
+                btnCho.setForeground(Color.BLACK);
+                btnCho.setEnabled(true);
             }
 
-            // Cài đặt chung
-            btnCho.setPreferredSize(new Dimension(60, 40));
-            pnlSoDoGhe.add(btnCho);
+            // Gắn sự kiện (chỉ cho ghế còn trống và ghế đang chọn)
+            if (btnCho.isEnabled()) {
+                btnCho.addActionListener(e -> xuLyChonGhe(btnCho, cho));
+            }
+
+            seatButtonsMap.put(cho.getMaCho(), btnCho);
+            gridContainer.add(btnCho);
         }
 
+        pnlSoDoGhe.add(gridContainer);
         pnlSoDoGhe.revalidate();
         pnlSoDoGhe.repaint();
     }
 
-    // TODO: Thêm logic highlight/thêm vào giỏ hàng khi chọn ghế
-    private void xuLyDatGhe(JButton btnCho, String maCho) {
-        // ... (Logic đổi màu ghế được chọn tạm thời và thêm vào danh sách vé)
-        System.out.println("Ghế " + maCho + " được chọn tạm thời.");
+    /**
+     * Logic chính để thêm/bỏ một ghế khỏi danh sách chọn.
+     * @param btnCho Nút ghế được click.
+     * @param cho ChoDat chi tiết của ghế.
+     */
+    private void xuLyChonGhe(JButton btnCho, ChoDat cho) {
+        String maCho = cho.getMaCho();
+        System.out.println("Xử lý chọn ghế: " + maCho);
+
+        // ⭐ Lấy tổng số khách YÊU CẦU hiện tại
+        int tongSoKhachYeuCau = parseTextFieldToInt(txtNguoiCaoTuoi) +
+                parseTextFieldToInt(txtNguoiLon) +
+                parseTextFieldToInt(txtTreCon) +
+                parseTextFieldToInt(txtSinhVien);
+
+        if (danhSachGheDaChon.containsKey(maCho)) {
+            // Trường hợp 1: Ghế đã được chọn -> HỦY CHỌN
+            danhSachGheDaChon.remove(maCho);
+            btnCho.setBackground(Color.LIGHT_GRAY);
+            btnCho.setForeground(Color.BLACK);
+            System.out.println("Đã hủy chọn ghế: " + maCho);
+        } else {
+            // Trường hợp 2: Ghế chưa được chọn -> CHỌN
+
+            // ⭐ KIỂM TRA LOGIC NGHIỆP VỤ: Đã chọn đủ số lượng chưa?
+            if (danhSachGheDaChon.size() >= tongSoKhachYeuCau) {
+                JOptionPane.showMessageDialog(this,
+                        "Đã chọn đủ " + tongSoKhachYeuCau + " ghế. Vui lòng thay đổi số lượng khách hoặc hủy chọn ghế cũ trước.",
+                        "Giới hạn chọn", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            danhSachGheDaChon.put(maCho, cho);
+            btnCho.setBackground(new Color(0, 123, 255));
+            btnCho.setForeground(Color.WHITE);
+            System.out.println("Đã chọn ghế: " + maCho);
+
+            // Tạo đối tượng TempKhachHang mới và lưu trữ
+            TempKhachHang tempKhach = new TempKhachHang(cho); // Tạo TempKhach
+
+            danhSachKhachHang.put(maCho, tempKhach); // ⭐ LƯU VÀO danhSachKhachHang (Đúng)
+            danhSachGheDaChon.put(maCho, cho);
+
+        }
+
+        // Cập nhật UI của danh sách ghế đã chọn
+        capNhatDanhSachGheDaChonUI();
+        capNhatThongTinKhachUI();
+    }
+    /**
+     * Xây dựng lại khu vực nhập thông tin khách hàng (bên phải) dựa trên danh sách ghế đã chọn.
+     * Phương thức này thực hiện:
+     * 1. Dọn dẹp khu vực hiển thị.
+     * 2. Lấy danh sách Loại vé ưu tiên (theo số lượng yêu cầu từ SpinBox).
+     * 3. Lặp qua danh sách ghế đã chọn (danhSachKhachHang), gán Mã Loại vé ưu tiên cho từng TempKhachHang.
+     * 4. Tạo và hiển thị các KhachPanel tương ứng.
+     */
+    private void capNhatThongTinKhachUI() {
+
+        // 1. Lấy infoScrollPanel từ JScrollPane
+        // Giả định thongTinKhachScrollPane đã được gán giá trị trong createKhuVucThongTinKhach()
+        if (thongTinKhachScrollPane == null) {
+            System.out.println("Lỗi: thongTinKhachScrollPane chưa được khởi tạo.");
+            return;
+        }
+        System.out.println("Cập nhật khu vực thông tin khách hàng...");
+
+        JPanel infoScrollPanel = (JPanel) thongTinKhachScrollPane.getViewport().getView();
+        infoScrollPanel.removeAll();
+
+        List<TempKhachHang> danhSachTemp = new ArrayList<>(danhSachKhachHang.values());
+
+        // Xử lý trường hợp không có ghế nào được chọn
+
+        if (danhSachTemp.isEmpty()) {
+            System.out.println("Không có ghế nào được chọn, hiển thị thông báo.");
+            infoScrollPanel.add(new JLabel("Chưa có ghế nào được chọn."));
+            infoScrollPanel.add(Box.createVerticalGlue());
+            infoScrollPanel.revalidate();
+            infoScrollPanel.repaint();
+            return;
+        }
+
+        // ⭐ LOGIC PHÂN PHỐI/GÁN LOẠI VÉ:
+        Vector<String> dsMaVeUuTien = taoDanhSachLoaiVeUuTien();
+
+        int soFormHienThi = danhSachTemp.size();
+
+        for (int i = 0; i < soFormHienThi; i++) {
+            TempKhachHang tempKhach = danhSachTemp.get(i);
+
+            // ⭐ Gán Mã Loại vé ưu tiên cho khách hàng theo thứ tự ưu tiên
+            if (i < dsMaVeUuTien.size()) {
+                String maUuTien = dsMaVeUuTien.get(i);
+
+                // Chỉ gán nếu khách hàng này chưa chọn thủ công loại vé khác,
+                // HOẶC nếu nó là lần cập nhật đầu tiên sau khi chọn ghế.
+                // Để đơn giản, ta sẽ GHI ĐÈ theo ưu tiên:
+                tempKhach.maLoaiVe = maUuTien;
+            }
+            // Nếu đã chọn nhiều ghế hơn tổng số lượng yêu cầu, các ghế thừa sẽ dùng mã mặc định ban đầu ("VT01").
+
+            // Tạo form cho khách hàng
+            JPanel khachPanel = createKhachPanel(tempKhach);
+            infoScrollPanel.add(khachPanel);
+        }
+
+
+        infoScrollPanel.add(Box.createVerticalGlue());
+        infoScrollPanel.revalidate();
+        infoScrollPanel.repaint();
+    }
+
+    /**
+     * Logic xử lý khi click vào nút ghế trên danh sách đã chọn để hủy chọn.
+     * @param maCho Mã chỗ đặt cần hủy.
+     */
+    private void xuLyHuyChonGhe(String maCho) {
+        // Hủy chọn trong danh sách Map
+        danhSachGheDaChon.remove(maCho);
+
+        // Cập nhật trạng thái nút trên sơ đồ ghế nếu nó thuộc toa hiện tại
+        JButton btnCho = seatButtonsMap.get(maCho);
+        if (btnCho != null) {
+            btnCho.setBackground(Color.LIGHT_GRAY);
+            btnCho.setForeground(Color.BLACK);
+        }
+
+        // Cập nhật UI danh sách đã chọn
+        capNhatDanhSachGheDaChonUI();
+
+        capNhatThongTinKhachUI();
+        System.out.println("Đã hủy chọn ghế: " + maCho + " từ danh sách.");
+    }
+
+    /**
+     * Xây dựng lại nội dung của pnlDanhSachGheDaCho dựa trên danh sách ghế đã chọn.
+     */
+    private void capNhatDanhSachGheDaChonUI() {
+        pnlDanhSachGheDaCho.removeAll();
+        pnlDanhSachGheDaCho.add(new JLabel("Ghế đã chọn (" + danhSachGheDaChon.size() + "):")); // Hiển thị số lượng
+
+        // Lấy danh sách các ChoDat đã chọn từ Map
+        for (ChoDat cho : danhSachGheDaChon.values()) {
+            // Lấy Số thứ tự Toa và Số chỗ để hiển thị
+            String soThuTuToa = laySoThuTuToa(cho.getMaToa());
+            String soCho = cho.getSoCho();
+
+            // Tạo nút với định dạng mới
+            JButton btnGhe = taoNutGheDaChon(cho.getMaCho(), soThuTuToa, soCho);
+            pnlDanhSachGheDaCho.add(btnGhe);
+        }
+
+        pnlDanhSachGheDaCho.revalidate();
+        pnlDanhSachGheDaCho.repaint();
     }
 
     // ======= MouseListener =======
@@ -686,11 +1176,44 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         int selectedRow = tableChuyenTau.getSelectedRow();
         if (selectedRow != -1 && ketQua != null && selectedRow < ketQua.size()) {
             String maTau = ketQua.get(selectedRow).getMaTau();
-            maChuyenTauHienTai = ketQua.get(selectedRow).getMaChuyenTau();
+            String maChuyenTauMoi = ketQua.get(selectedRow).getMaChuyenTau();
+
+            // Kiểm tra xem có phải là chuyến tàu mới không
+            if (!maChuyenTauMoi.equals(maChuyenTauHienTai)) {
+                // ⭐ 1. RESET DỮ LIỆU LOGIC
+                danhSachGheDaChon.clear();
+                danhSachKhachHang.clear();
+
+                // ⭐ 2. RESET CÁC BIẾN TRẠNG THÁI TOA VÀ MAPS
+                lastSelectedToaButton = null;
+                maToaHienTai = null;
+                seatButtonsMap.clear();
+                tatCaChoDatToaHienTai.clear();
+
+                // ⭐ 3. RESET UI
+                // Xóa danh sách ghế đã chọn hiển thị ở dưới
+                capNhatDanhSachGheDaChonUI();
+
+                // Xóa các nút toa (pnlToa)
+                pnlToa.removeAll();
+                pnlToa.add(new JLabel("Chọn toa: (Đang tải...)"));
+                pnlToa.revalidate();
+                pnlToa.repaint();
+
+                // Xóa sơ đồ ghế (pnlSoDoGhe)
+                pnlSoDoGhe.removeAll();
+                pnlSoDoGhe.add(new JLabel("Vui lòng chọn Toa."));
+                pnlSoDoGhe.revalidate();
+                pnlSoDoGhe.repaint();
+            }
+
+            maChuyenTauHienTai = maChuyenTauMoi;
             System.out.println("Chuyến tàu được chọn: " + maChuyenTauHienTai + " (Mã Tàu: " + maTau + ")");
             // Hiển thị danh sách toa tàu cho chuyến tàu được chọn
             hienThiDanhSachToaTau(maTau);
         }
+
+
     }
 
     @Override public void mousePressed(MouseEvent e) { }

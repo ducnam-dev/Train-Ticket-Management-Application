@@ -2,15 +2,13 @@ package gui.MainFrame;
 
 import gui.Panel.ManHinhBanVe;
 import gui.Panel.ManHinhDoiVe;
+import gui.Panel.TraCuuPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-
-class TraCuuPanel extends JPanel { public TraCuuPanel() { add(new JLabel("Màn hình Tra cứu")); setBackground(new Color(240, 255, 240)); } }
 
 public class BanVeDashboard extends JFrame implements ActionListener {
     private CardLayout cardLayout;
@@ -36,7 +34,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         initEventHandlers();
 
         cardLayout.show(contentPanel, "banVe");
-
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
     }
 

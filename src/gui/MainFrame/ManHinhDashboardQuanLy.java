@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2025 IUH. All rights reserved.
  */
-package gui.Panel;
+package gui.MainFrame;
 
 /*
  * @description
@@ -12,16 +12,14 @@ package gui.Panel;
  *@version:  1.0
  */
 
+import gui.Panel.ManHinhQuanLyNhanVien;
+import gui.Panel.ManhinhQuanLyChuyenTau;
+
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
  * Lớp này tạo giao diện Dashboard (Trang chủ) cho Quản lý.

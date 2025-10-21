@@ -14,7 +14,7 @@ public class ConnectDB {
 	
 	public void connect() {
 		if(con == null) {
-			String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyBanVeTau;trustServerCertificate=true";
+			String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyVeTauTest;trustServerCertificate=true";
 			String user = "sa";
 			String password = "sapassword";
 			try {
