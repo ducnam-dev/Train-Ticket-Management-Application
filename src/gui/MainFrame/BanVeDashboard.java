@@ -8,104 +8,178 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 class TraCuuPanel extends JPanel { public TraCuuPanel() { add(new JLabel("Màn hình Tra cứu")); setBackground(new Color(240, 255, 240)); } }
-//
+
 public class BanVeDashboard extends JFrame implements ActionListener {
     private CardLayout cardLayout;
     private JPanel contentPanel;
     private JButton btnBanVe, btnDoiVe, btnTraCuu;
-    private final Color ACTIVE_COLOR = Color.WHITE;
-    private final Color INACTIVE_COLOR = new Color(30, 144, 255); // Xanh dương
+
+    private final Color ACTIVE_COLOR = new Color(74, 184, 237);
+    private final Color INACTIVE_COLOR = new Color(34, 137, 203);
+
+    // Kích thước Icon tiêu chuẩn cho Menu
+    private static final int ICON_SIZE = 20;
 
     public BanVeDashboard() {
         setTitle("Hệ thống Quản lý Bán vé Tàu");
         setSize(1200, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        // Sử dụng BorderLayout cho JFrame
+
         setLayout(new BorderLayout());
 
         initMenuPanel();
         initContentPanel();
         initEventHandlers();
-        
-        // Hiển thị trang ManHinhBanVe ngay khi khởi động (theo yêu cầu màn hình)
+
         cardLayout.show(contentPanel, "banVe");
 
-        //full screen
-//        setExtendedState(JFrame.MAXIMIZED_BOTH); // Maximize window
-//        setUndecorated(true);
-
         setVisible(true);
+    }
+
+    // --- HÀM TIỆN ÍCH TẢI ICON MỚI (ĐÃ CHỈNH SỬA ĐƯỜNG DẪN) ---
+    /**
+     * Tải và điều chỉnh kích thước icon từ thư mục resources (an toàn khi đóng gói JAR).
+     */
+    private ImageIcon loadAndScaleIcon(String iconName, int width, int height) {
+        // >>> ĐÃ SỬA ĐƯỜNG DẪN: Sẽ tìm icon trong ClassPath tại /images/
+        String path = "/images/" + iconName;
+
+        java.net.URL imgURL = getClass().getResource(path);
+
+        if (imgURL != null) {
+            ImageIcon originalIcon = new ImageIcon(imgURL);
+            Image image = originalIcon.getImage();
+            Image scaledImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaledImage);
+        } else {
+            System.err.println("Lỗi: Không tìm thấy file icon tại đường dẫn: " + path);
+            return createPlaceholderIcon(width, height);
+        }
+    }
+
+    // Hàm tạo Icon Placeholder thay thế (Đã sửa lỗi trùng lặp biến)
+    private ImageIcon createPlaceholderIcon(int width, int height) {
+        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = img.createGraphics();
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
+        return new ImageIcon(img);
+    }
+    // -----------------------------------------------------------------
+
+    private JPanel createLogoIdPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(INACTIVE_COLOR);
+        panel.setBorder(new EmptyBorder(15, 0, 15, 0));
+
+        // ID
+        JLabel lblId = new JLabel("ID: QL200001", SwingConstants.RIGHT);
+        lblId.setForeground(Color.WHITE);
+        lblId.setFont(new Font("Arial", Font.PLAIN, 12));
+        lblId.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
+        // Placeholder Icon (Sử dụng logo-train.png làm logo chính)
+        JLabel lblIcon = new JLabel("  [Icon GA XE/User]", SwingConstants.CENTER);
+        // Thay placeholder bằng icon thực tế (logo-train.png)
+        ImageIcon logoIcon = loadAndScaleIcon("logo-train.png", 60, 60);
+        lblIcon.setIcon(logoIcon);
+        lblIcon.setText(""); // Xóa placeholder text
+        lblIcon.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        panel.add(lblId);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
+        panel.add(lblIcon);
+
+        return panel;
+    }
+
+    private JSeparator createSeparator() {
+        JSeparator separator = new JSeparator();
+        separator.setForeground(new Color(100, 180, 250));
+        separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        separator.setAlignmentX(Component.CENTER_ALIGNMENT);
+        return separator;
     }
 
     // --- 1. Panel Menu bên trái (Cố định) ---
     private void initMenuPanel() {
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setPreferredSize(new Dimension(180, getHeight()));
-        menuPanel.setBackground(new Color(30, 144, 255)); // Màu nền menu
-        
-        menuPanel.add(createLogoPanel());
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 20))); // Khoảng cách
-        
-        // Tạo các nút điều hướng
-        btnBanVe = createMenuItem("Bán vé", true);
-        btnDoiVe = createMenuItem("Đổi vé", false);
-        btnTraCuu = createMenuItem("Tra cứu vé", false);
-        
-        menuPanel.add(btnBanVe);
-        menuPanel.add(btnDoiVe);
-        menuPanel.add(btnTraCuu);
-        
-        menuPanel.add(Box.createVerticalGlue()); // Đẩy các nút lên trên
+        menuPanel.setPreferredSize(new Dimension(200, getHeight()));
+        menuPanel.setBackground(INACTIVE_COLOR);
 
-        // Nút Đăng xuất
-        JButton btnLogout = createMenuItem("Đăng xuất", false);
+        // Logo & ID Panel (Phần trên cùng)
+        menuPanel.add(createLogoIdPanel());
+
+        // >>> CẬP NHẬT TÊN ICON CHÍNH XÁC:
+        menuPanel.add(createMenuItem("Trang chủ", "home.png", false));
+        menuPanel.add(createSeparator());
+
+        menuPanel.add(createMenuItem("Mở ca", "moca.png", false)); // Đã sửa từ shift_icon.png
+        menuPanel.add(createSeparator());
+
+        btnBanVe = createMenuItem("Bán vé", "ticket_icon.png", true); // Giữ ticket_icon.png nếu bạn có
+        menuPanel.add(btnBanVe);
+        menuPanel.add(createSeparator());
+
+        btnDoiVe = createMenuItem("Đổi vé", "doive.png", false); // Đã sửa từ exchange_icon.png
+        menuPanel.add(btnDoiVe);
+        menuPanel.add(createSeparator());
+
+        menuPanel.add(createMenuItem("Trả vé", "trave.png", false)); // Đã sửa từ return_icon.png
+        menuPanel.add(createSeparator());
+        btnTraCuu = createMenuItem("Tra cứu vé", "tracuu.png", false); // Đã sửa từ search_icon.png
+        menuPanel.add(btnTraCuu);
+        menuPanel.add(createSeparator());
+        menuPanel.add(createMenuItem("Tra cứu hóa đơn", "hoadon.png", false)); // Đã sửa từ receipt_icon.png
+        menuPanel.add(createSeparator());
+
+        menuPanel.add(Box.createVerticalGlue());
+
+        JButton btnLogout = createMenuItem("Đăng xuất", "logout.png", false); // Đã sửa từ logout_icon.png
         menuPanel.add(btnLogout);
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 10))); 
+        menuPanel.add(createSeparator());
 
         add(menuPanel, BorderLayout.WEST);
     }
-    
-    // Tạo Panel cho Logo
-    private JPanel createLogoPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        panel.setBackground(new Color(30, 144, 255));
-        JLabel lblLogo = new JLabel("GA XE", SwingConstants.CENTER);
-        lblLogo.setFont(new Font("Arial", Font.BOLD, 24));
-        lblLogo.setForeground(Color.WHITE);
-        panel.add(lblLogo);
-        return panel;
-    }
 
-    // Hàm tạo nút menu (tùy chỉnh màu khi active/inactive)
-    private JButton createMenuItem(String text, boolean isActive) { 
+    // --- Hàm tạo nút menu (Đã dùng hàm tải icon mới) ---
+    private JButton createMenuItem(String text, String iconName, boolean isActive) {
         JButton button = new JButton(text);
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         button.setBackground(isActive ? ACTIVE_COLOR : INACTIVE_COLOR);
-        button.setForeground(isActive ? Color.BLACK : Color.WHITE);
-        button.setBorder(new EmptyBorder(10, 10, 10, 10));
+        button.setForeground(Color.WHITE);
+        button.setBorder(new EmptyBorder(10, 15, 10, 10));
         button.setFocusPainted(false);
+
         button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setFont(new Font("Arial", Font.BOLD, 16));
+        button.setIconTextGap(10);
+
+        button.setIcon(loadAndScaleIcon(iconName, ICON_SIZE, ICON_SIZE));
+
+        button.setFont(new Font("Arial", Font.PLAIN, 16));
         return button;
     }
 
-    // --- 2. Panel Nội dung Chính (Có thể thay đổi bằng CardLayout) ---
+    // --- Các phương thức thừa đã được giữ lại/xóa logic thừa ---
+    private JPanel createLogoPanel() { return new JPanel(); }
+    private Image getIconPath(String iconName) { return createPlaceholderIcon(ICON_SIZE, ICON_SIZE).getImage(); }
+
+    // --- 2. Panel Nội dung Chính ---
     private void initContentPanel() {
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
-        
-        // Thêm các "trang" nội dung vào CardLayout
-        contentPanel.add(new ManHinhBanVe());
-        // Đây là nơi bạn sẽ đặt lớp BanVeUI (đã vẽ ở câu hỏi trước)
-        contentPanel.add(new ManHinhBanVe(), "banVe"); 
+
+        contentPanel.add(new ManHinhBanVe(), "banVe");
         contentPanel.add(new ManHinhDoiVe(), "doiVe");
-        contentPanel.add(new TraCuuPanel(), "traCuu"); 
+        contentPanel.add(new TraCuuPanel(), "traCuu");
 
         add(contentPanel, BorderLayout.CENTER);
     }
@@ -115,33 +189,35 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         btnDoiVe.addActionListener(this);
         btnTraCuu.addActionListener(this);
     }
-    
+
     // --- 3. Xử lý sự kiện (Chuyển đổi trang) ---
     @Override
     public void actionPerformed(ActionEvent e) {
-        // Thiết lập lại màu cho tất cả các nút về INACTIVE
-        btnBanVe.setBackground(INACTIVE_COLOR);
-        btnBanVe.setForeground(Color.WHITE);
-        btnDoiVe.setBackground(INACTIVE_COLOR);
-        btnDoiVe.setForeground(Color.WHITE);
-        btnTraCuu.setBackground(INACTIVE_COLOR);
-        btnTraCuu.setForeground(Color.WHITE);
+        // Reset tất cả các nút về INACTIVE
+        JButton[] buttons = {btnBanVe, btnDoiVe, btnTraCuu};
+        for (JButton button : buttons) {
+             if(button != null) { // Kiểm tra null vì các nút khác chưa được khai báo
+                 button.setBackground(INACTIVE_COLOR);
+                 button.setForeground(Color.WHITE);
+             }
+        }
 
+        // Logic chuyển trang và làm nổi bật nút ACTIVE
         Object src = e.getSource();
+        String cardName = null;
 
-        // Chuyển đổi trang và đặt màu nút ACTIVE
         if (src == btnBanVe) {
-            cardLayout.show(contentPanel, "banVe");
-            ((JButton) src).setBackground(ACTIVE_COLOR);
-            ((JButton) src).setForeground(Color.BLACK);
+            cardName = "banVe";
         } else if (src == btnDoiVe) {
-            cardLayout.show(contentPanel, "doiVe");
-            ((JButton) src).setBackground(ACTIVE_COLOR);
-            ((JButton) src).setForeground(Color.BLACK);
+            cardName = "doiVe";
         } else if (src == btnTraCuu) {
-            cardLayout.show(contentPanel, "traCuu");
+            cardName = "traCuu";
+        }
+
+        if (cardName != null) {
+            cardLayout.show(contentPanel, cardName);
             ((JButton) src).setBackground(ACTIVE_COLOR);
-            ((JButton) src).setForeground(Color.BLACK);
+            ((JButton) src).setForeground(Color.WHITE);
         }
     }
 
