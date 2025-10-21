@@ -4,7 +4,10 @@ import dao.ChoDatDAO;
 import dao.ChuyenTauDao;
 import dao.GaDao;
 import dao.ToaDAO;
-import entity.*;
+import entity.ChoDat;
+import entity.ChuyenTau;
+import entity.Ga;
+import entity.Toa;
 import entity.lopEnum.TrangThaiChoDat;
 
 import javax.swing.*;
@@ -28,7 +31,7 @@ import java.util.Map;
  * ManHinhBanVe: Panel bán vé - tách các phần UI và logic rõ ràng,
  * mỗi khu vực có 1 phương thức tạo, helper methods gom nhóm.
  */
-public class ManHinhBanVe extends JPanel implements MouseListener {
+public class ManHinhBanVe2 extends JPanel implements MouseListener {
 
     // UI components (fields)
     private JPanel pnlToa;
@@ -70,14 +73,11 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
     // Map để theo dõi trạng thái button trên sơ đồ (MaCho -> Button)
     private Map<String, JButton> seatButtonsMap = new HashMap<>();
 
-    private Map<String, TempKhachHang> danhSachKhachHang = new HashMap<>();
-
     // Constants
     private static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    private JPanel infoScrollPanel;
 
-    public ManHinhBanVe() {
+    public ManHinhBanVe2() {
         setLayout(new BorderLayout(5, 5));
         setBorder(new EmptyBorder(10, 10, 10, 10));
         setBackground(new Color(240, 242, 245));
@@ -436,16 +436,20 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY),
                 "Thông tin khách hàng"));
 
-        infoScrollPanel = new JPanel();
+        JPanel infoScrollPanel = new JPanel();
         infoScrollPanel.setLayout(new BoxLayout(infoScrollPanel, BoxLayout.Y_AXIS));
         infoScrollPanel.setOpaque(false);
         infoScrollPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         // Dữ liệu giả lập
-//        createKhachPanel()
+        infoScrollPanel.add(createKhachPanel("A03-G07", "Người lớn 1", "800.000 VNĐ", "Bảo Duy", "20", "01234xxxxxx", "00111XXXXXX"));
+        infoScrollPanel.add(createKhachPanel("A01-G10", "Người lớn 2", "800.000 VNĐ", "Bảo Duy", "20", "09999xxxxxx", "00222XXXXXX"));
+        infoScrollPanel.add(createKhachPanel("A03-G8", "Người cao tuổi", "900.000 VNĐ", "Việt Hùng", "70", "05678xxxxxx", "00666XXXXXX"));
 
 
-        infoScrollPanel.add(Box.createVerticalGlue());
+//        infoScrollPanel.add(Box.createVerticalGlue());
+        infoScrollPanel.setPreferredSize(new Dimension(400, 300));
+
 
         JScrollPane scrollPane = new JScrollPane(infoScrollPanel);
         scrollPane.setBorder(null);
@@ -474,91 +478,12 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         return panel;
     }
 
-    // Định nghĩa các hằng số MaLoaiVe (giả định)
-    private static final String MA_NL = "VT01";
-    private static final String MA_TE = "VT02";
-    private static final String MA_NCT = "VT03"; // Giả định
-    private static final String MA_SV = "VT04"; // Giả định
-
-    // Phương thức mới: Gán Loại vé theo thứ tự ưu tiên (Quan trọng cho Batch Input)
-    private Vector<String> taoDanhSachLoaiVeUuTien() {
-        Vector<String> dsUuTien = new Vector<>();
-        // Dựa trên số lượng yêu cầu (Map soLuongYeuCau)
-
-        // 1. Người cao tuổi (Ưu tiên)
-        themLoaiVeVaoDanhSach(dsUuTien, MA_NCT, soLuongYeuCau.getOrDefault("NguoiCaoTuoi", 0));
-        // 2. Trẻ em
-        themLoaiVeVaoDanhSach(dsUuTien, MA_TE, soLuongYeuCau.getOrDefault("TreCon", 0));
-        // 3. Sinh viên
-        themLoaiVeVaoDanhSach(dsUuTien, MA_SV, soLuongYeuCau.getOrDefault("SinhVien", 0));
-        // 4. Người lớn (Cuối cùng)
-        themLoaiVeVaoDanhSach(dsUuTien, MA_NL, soLuongYeuCau.getOrDefault("NguoiLon", 0));
-
-        return dsUuTien;
-    }
-
-    private void themLoaiVeVaoDanhSach(Vector<String> ds, String maLoai, int soLuong) {
-        for (int i = 0; i < soLuong; i++) {
-            ds.add(maLoai);
-        }
-    }
-
-    /**
-     * Xây dựng lại khu vực nhập thông tin khách hàng (bên phải) dựa trên danh sách ghế đã chọn.
-     */
-    private void capNhatThongTinKhachUI() {
-        // Tìm panel chứa các form khách hàng (infoScrollPanel)
-        // Cần phải tìm lại component này vì nó nằm sâu trong JScrollPane
-        JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, pnlDanhSachGheDaCho);
-        infoScrollPanel = (JPanel) scrollPane.getViewport().getView();
-
-        infoScrollPanel.removeAll();
-
-        if (danhSachKhachHang.isEmpty()) {
-            infoScrollPanel.add(new JLabel("Chưa có ghế nào được chọn."));
-            infoScrollPanel.add(Box.createVerticalGlue());
-            infoScrollPanel.revalidate();
-            infoScrollPanel.repaint();
-            return;
-        }
-
-        // ⭐ LOGIC PHÂN PHỐI LOẠI VÉ:
-        Vector<String> dsLoaiVeUuTien = taoDanhSachLoaiVeUuTien();
-        List<TempKhachHang> danhSachTemp = new ArrayList<>(danhSachKhachHang.values());
-
-        // Đảm bảo Form khách hàng không vượt quá số lượng Loại vé yêu cầu
-        int soFormHienThi = Math.min(danhSachTemp.size(), dsLoaiVeUuTien.size());
-
-        for (int i = 0; i < soFormHienThi; i++) {
-            TempKhachHang tempKhach = danhSachTemp.get(i);
-            String maLoaiVeGoiY = dsLoaiVeUuTien.get(i);
-
-            // Cập nhật Mã Loại vé gợi ý vào đối tượng tạm thời
-            tempKhach.maLoaiVe = maLoaiVeGoiY;
-
-            // Tạo form cho khách hàng
-            JPanel khachPanel = createKhachPanel(tempKhach);
-            infoScrollPanel.add(khachPanel);
-        }
-
-        infoScrollPanel.add(Box.createVerticalGlue());
-        infoScrollPanel.revalidate();
-        infoScrollPanel.repaint();
-    }
-
-    /**
-     * Tạo panel nhập thông tin chi tiết cho 1 khách hàng
-     */
-    private JPanel createKhachPanel(TempKhachHang tempKhach) {
+    private JPanel createKhachPanel(String maGhe, String loaiKhach, String gia, String hoTen, String tuoi, String sdt, String cccd) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        // Giá trị giả lập
-        String loaiKhachHienThi = getTenLoaiVeHienThi(tempKhach.maLoaiVe);
-        String gia = "800.000 VNĐ";
 
         JPanel headerRow = new JPanel(new BorderLayout());
         headerRow.setOpaque(false);
@@ -566,24 +491,12 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
 
         JPanel leftHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         leftHeader.setOpaque(false);
-        JLabel maGheLabel = new JLabel(tempKhach.choDat.getSoCho() + " / " + laySoThuTuToa(tempKhach.choDat.getMaToa()));
+        JLabel maGheLabel = new JLabel(maGhe);
         maGheLabel.setFont(maGheLabel.getFont().deriveFont(Font.BOLD));
         leftHeader.add(maGheLabel);
-
-        // ⭐ COMBOBOX CHỌN LOẠI VÉ
-
-        JComboBox<String> cbLoaiKhach = new JComboBox<>(getLoaiVeOptions());
-        cbLoaiKhach.setSelectedItem(loaiKhachHienThi);
-        cbLoaiKhach.setPreferredSize(new Dimension(120, 25));
-        cbLoaiKhach.setMaximumSize(new Dimension(120, 25));
-
-        cbLoaiKhach.addActionListener(e -> {
-            // Logic cập nhật Mã Loại Vé trong TempKhachHang
-            String maMoi = getMaLoaiVeFromHienThi((String) cbLoaiKhach.getSelectedItem());
-            tempKhach.maLoaiVe = maMoi;
-            // TODO: Logic tính lại giá vé và cập nhật UI giá/tổng tiền
-        });
-        leftHeader.add(cbLoaiKhach);
+        JLabel loaiKhachLabel = new JLabel(loaiKhach);
+        loaiKhachLabel.setFont(loaiKhachLabel.getFont().deriveFont(Font.BOLD));
+        leftHeader.add(loaiKhachLabel);
 
         headerRow.add(leftHeader, BorderLayout.WEST);
 
@@ -598,66 +511,29 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
         detailGrid.setOpaque(false);
         detailGrid.setBorder(new EmptyBorder(5, 0, 5, 0));
 
-        // Hàng 1
         detailGrid.add(new JLabel("Họ và tên*"));
-        JTextField hoTenField = new JTextField(tempKhach.hoTen, 10);
+        JTextField hoTenField = new JTextField(hoTen, 10);
         detailGrid.add(hoTenField);
         detailGrid.add(new JLabel("Tuổi"));
-        JTextField tuoiField = new JTextField(String.valueOf(tempKhach.tuoi), 3);
+        JTextField tuoiField = new JTextField(tuoi, 3);
         detailGrid.add(tuoiField);
 
-        // Hàng 2
         detailGrid.add(new JLabel("Số điện thoại"));
-        JTextField sdtField = new JTextField(tempKhach.sdt, 10);
+        JTextField sdtField = new JTextField(sdt, 10);
         detailGrid.add(sdtField);
         detailGrid.add(new JLabel("CCCD*"));
-        JTextField cccdField = new JTextField(tempKhach.cccd, 10);
+        JTextField cccdField = new JTextField(cccd, 10);
         detailGrid.add(cccdField);
 
         panel.add(detailGrid);
 
-        // GẮN LISTENER ĐỂ LƯU DỮ LIỆU VÀO TEMPKHACHHANG
-        hoTenField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.hoTen = hoTenField.getText(); }});
-        cccdField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.cccd = cccdField.getText(); }});
-        sdtField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.sdt = sdtField.getText(); }});
-        tuoiField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { try { tempKhach.tuoi = Integer.parseInt(tuoiField.getText().trim()); } catch (Exception e) { tempKhach.tuoi = 0; } }});
-
+        hoTenField.setMaximumSize(hoTenField.getPreferredSize());
+        tuoiField.setMaximumSize(tuoiField.getPreferredSize());
+        sdtField.setMaximumSize(sdtField.getPreferredSize());
+        cccdField.setMaximumSize(cccdField.getPreferredSize());
 
         return panel;
     }
-
-    private String getTenLoaiVeHienThi(String maLoaiVe) {
-        switch (maLoaiVe) {
-            case "LV1": return "Ghế mềm";
-            case "LV2": return "Ghế cứng";
-            case "LV3": return "Giường nằm";
-            default: return "Không xác định";
-        }
-    }
-    private String[] getLoaiVeOptions() {
-        // Giả sử có 3 loại vé mặc định
-        return new String[] {
-                "Ghế cứng",
-                "Ghế mềm điều hoà",
-                "Giường nằm"
-        };
-    }
-    private String getMaLoaiVeFromHienThi(String tenLoaiVeHienThi) {
-        switch (tenLoaiVeHienThi) {
-            case "Ghế cứng":
-                return "LV1";
-            case "Ghế mềm điều hoà":
-                return "LV2";
-            case "Giường nằm":
-                return "LV3";
-            default:
-                return "UNKNOWN"; // hoặc null
-        }
-    }
-
-
-
-
 
     // ======= Helpers / Styles =======
 
@@ -1044,12 +920,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
                         "Giới hạn chọn", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            // Tạo đối tượng TempKhachHang mới và lưu trữ
-            TempKhachHang tempKhach = new TempKhachHang(cho);
 
-            danhSachKhachHang.put(maCho, tempKhach);
             danhSachGheDaChon.put(maCho, cho);
-
             btnCho.setBackground(new Color(0, 123, 255));
             btnCho.setForeground(Color.WHITE);
             System.out.println("Đã chọn ghế: " + maCho);
@@ -1057,7 +929,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
 
         // Cập nhật UI của danh sách ghế đã chọn
         capNhatDanhSachGheDaChonUI();
-        capNhatThongTinKhachUI();
     }
 
     /**
@@ -1103,8 +974,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
     }
 
     // ======= MouseListener =======
-
-    // Trong class ManHinhBanVe
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -1160,7 +1029,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener {
             JFrame frame = new JFrame("Panel Bán vé (Kiểm tra)");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setLayout(new BorderLayout());
-            frame.add(new ManHinhBanVe(), BorderLayout.CENTER);
+            frame.add(new ManHinhBanVe2(), BorderLayout.CENTER);
             frame.pack();
             frame.setSize(1200, 850);
             frame.setLocationRelativeTo(null);

@@ -16,8 +16,10 @@ public class ChoDatDAO {
         List<ChoDat> danhSachChoDat = new ArrayList<>();
 
         // Truy vấn được giữ nguyên
-        String sql = "SELECT cd.MaCho, cd.SoCho, cd.LoaiCho, cd.Khoang, cd.TrangThai AS TrangThaiCho, "
-                + "CASE WHEN v.MaVe IS NOT NULL AND v.TrangThai <> N'Đã hủy' THEN 1 ELSE 0 END AS DaDatTrenChuyenTau "
+        String sql = "SELECT cd.MaCho, cd.MaToa, cd.SoCho, cd.Khoang, cd.Tang, "
+                // Trả về 1 (Đã đặt) nếu tìm thấy một vé cho MaCho này trên MaChuyenTau này
+                // VÀ trạng thái của vé KHÔNG PHẢI là 'DA-HUY'
+                + "CASE WHEN v.MaVe IS NOT NULL AND v.TrangThai <> N'DA-HUY' THEN 1 ELSE 0 END AS DaDatTrenChuyenTau "
                 + "FROM ChoDat cd "
                 + "LEFT JOIN Ve v ON cd.MaCho = v.MaChoDat AND v.MaChuyenTau = ? "
                 + "WHERE cd.MaToa = ? "
@@ -35,17 +37,15 @@ public class ChoDatDAO {
                     while (rs.next()) {
                         String maCho = rs.getString("MaCho");
                         String soCho = rs.getString("SoCho");
-                        String loaiCho = rs.getString("LoaiCho");
-                        int khoang = rs.getInt("Khoang");
+                        String khoang = rs.getString("Khoang");
 
-                        // Lấy chuỗi trạng thái từ CSDL
-                        String trangThaiChoStr = rs.getString("TrangThaiCho");
+                        int tang = rs.getInt("Tang");
 
                         int daDatInt = rs.getInt("DaDatTrenChuyenTau"); // 1: Đã đặt, 0: Trống
 
                         // **SỬ DỤNG CONSTRUCTOR ĐÃ CẬP NHẬT**
                         // Constructor ChoDat sẽ tự động chuyển đổi trangThaiChoStr sang Enum
-                        ChoDat choDat = new ChoDat(maCho, maToa, soCho, loaiCho, khoang, trangThaiChoStr);
+                        ChoDat choDat = new ChoDat(maCho, maToa, soCho, khoang, tang);
 
                         // Cập nhật trạng thái đặt trên chuyến tàu cụ thể
                         choDat.setDaDat(daDatInt == 1);

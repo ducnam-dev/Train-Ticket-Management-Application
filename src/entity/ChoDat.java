@@ -1,26 +1,23 @@
 package entity;
 
-import entity.lopEnum.TrangThaiChoDat;
+//import entity.lopEnum.TrangThaiChoDat;
 
 public class ChoDat {
-        //maCho, maToa, soCho, khoang, tang, trangThai
         private String maCho;
         private String maToa;
         private String soCho;
         private String khoang;
         private int tang;
-        private TrangThaiChoDat trangThai;
         private boolean daDat; // Trạng thái đặt vé tạm thời trên chuyến tàu cụ thể
 
         public ChoDat() {}
 
-    public ChoDat(String maCho, String maToa, String soCho, String khoang, int tang, String trangThaiStr) {
+    public ChoDat(String maCho, String maToa, String soCho, String khoang, int tang) {
         this.maCho = maCho;
         this.maToa = maToa;
         this.soCho = soCho;
         this.khoang = khoang;
         this.tang = tang;
-        this.trangThai = trangThai = TrangThaiChoDat.fromString(trangThaiStr);
     }
 
     public String getMaCho() {
@@ -63,13 +60,10 @@ public class ChoDat {
         this.tang = tang;
     }
 
-    public TrangThaiChoDat getTrangThai() {
-        return trangThai;
+    public boolean isDaDat() {
+        return daDat;
     }
 
-    public void setTrangThai(TrangThaiChoDat trangThai) {
-        this.trangThai = trangThai;
-    }
     public void setDaDat(boolean daDat) {
         this.daDat = daDat;
     }
@@ -79,7 +73,6 @@ public class ChoDat {
                 "maCho='" + maCho + '\'' +
                 ", maToa='" + maToa + '\'' +
                 ", soCho='" + soCho + '\'' +
-                ", trangThai=" + trangThai+ // Hiển thị giá trị CSDL
                 ", daDat=" + daDat +
                 '}';
     }
