@@ -306,6 +306,15 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     public void switchToCard(String cardName) {
         cardLayout.show(contentPanel, cardName);
         // Tùy chọn: Highlight nút menu tương ứng nếu cần
-        // highlightActiveButton(btnTuongUng);
+        JButton btnTuongUng = null;
+        switch (cardName) {
+            case "banVe" -> btnTuongUng = btnBanVe;
+            case "doiVe" -> btnTuongUng = btnDoiVe;
+            case "traCuu" -> btnTuongUng = btnTraCuu;
+            case "trangChu" -> btnTuongUng = btnTrangChu;
+            case "moCa" -> btnTuongUng = btnMoCa;
+            case "KetCa" -> btnTuongUng = btnKetCa;
+        }
+        highlightActiveButton(btnTuongUng);
     }
 }

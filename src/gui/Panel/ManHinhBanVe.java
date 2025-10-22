@@ -1052,15 +1052,30 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             resetAllData();
 
             // Try to navigate to an existing TrangChuPanel if present; otherwise show a simple placeholder.
-            try {
-                Class<?> cls = Class.forName("gui.Panel.TrangChuPanel");
-                Component homePanel = (Component) cls.getDeclaredConstructor().newInstance();
-                switchToPanel(homePanel);
-            } catch (Exception ex) {
-                // fallback simple home panel
-                JPanel home = new JPanel(new BorderLayout());
-                home.add(new JLabel("Trang chủ", SwingConstants.CENTER), BorderLayout.CENTER);
-                switchToPanel(home);
+            // --- LOGIC CHUYỂN PANEL MỚI ---
+            // 1. Lấy cửa sổ cha (JFrame/BanVeDashboard)
+            Window w = SwingUtilities.getWindowAncestor(this);
+
+            if (w instanceof BanVeDashboard) {
+                BanVeDashboard dashboard = (BanVeDashboard) w;
+
+                // 2. Chuẩn bị dữ liệu và khởi tạo Panel xác nhận
+                // ManHinhXacNhanBanVe cần có constructor phù hợp
+                ManHinhTrangChuNVBanVe confirmPanel = new ManHinhTrangChuNVBanVe(
+
+                );
+
+                // 3. Thay thế panel cũ bằng panel mới và chuyển card
+                // * Cần có phương thức public trong BanVeDashboard để thực hiện việc này.
+                dashboard.addOrUpdateCard(confirmPanel, "trangChu");
+                dashboard.switchToCard("trangChu");
+                //4. Đổi màu nút
+//                dashboard.highlightButton("trangChu");
+
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
+                        "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
             }
 
         } else if (src == nextButton) {
