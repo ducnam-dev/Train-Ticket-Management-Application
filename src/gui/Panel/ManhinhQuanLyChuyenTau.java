@@ -12,16 +12,34 @@ package gui.Panel;
  *@version:  1.0
  */
 
-import gui.MainFrame.ManHinhDashboardQuanLy;
+// [THÊM] Import cho JDateChooser (cần có thư viện jcalendar.jar)
+import com.toedter.calendar.JDateChooser;
 
+// [THÊM] Import cho SQL và các thành phần Swing mới
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
+// [THÊM] Import lớp kết nối của bạn
+import database.ConnectDB;
+import gui.MainFrame.ManHinhDashboardQuanLy;
+
 
 /**
  * Lớp này tạo giao diện Quản lý Chuyến Tàu.
- * Đã NÂNG CẤP menu cho đồng bộ.
+ * ĐÃ NÂNG CẤP: Kết nối CSDL, dùng JComboBox, JDateChooser, JSpinner.
  * Đã THÊM đầy đủ sự kiện điều hướng (navigation).
  */
 public class ManhinhQuanLyChuyenTau extends JFrame {
@@ -34,15 +52,20 @@ public class ManhinhQuanLyChuyenTau extends JFrame {
     private static final Color BG_COLOR = new Color(245, 245, 245);
 
     // Font chữ
-    // Font chữ
     private static final Font FONT_BOLD_14 = new Font("Segoe UI", Font.BOLD, 14);
-    // THÊM DÒNG NÀY VÀO:
-    private static final Font FONT_PLAIN_14 = new Font("Segoe UI", Font.PLAIN, 14);
+    private static final Font FONT_PLAIN_14 = new Font("Segoe UI", Font.PLAIN, 14); // Đã thêm
     private static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 28);
+
+    // [MỚI] Khai báo các component để có thể truy cập từ các hàm khác
+    private JComboBox<String> cbMaTau;
+    private JComboBox<String> cbGaDi;
+    private JComboBox<String> cbGaDen;
+    private JDateChooser dateChooserNgayDi;
+    private JSpinner timeSpinnerGioDi;
+
 
     public ManhinhQuanLyChuyenTau() {
         setTitle("Quản lý chuyến tàu");
-        // Đặt kích thước lớn cho đồng bộ, dù màn hình này đơn giản hơn
         setSize(1600, 900);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -55,10 +78,19 @@ public class ManhinhQuanLyChuyenTau extends JFrame {
         // 2. Panel nội dung (Form và Bảng)
         JPanel contentPanel = createContentPanel();
         add(contentPanel, BorderLayout.CENTER);
+
+        // [MỚI] Tải dữ liệu từ CSDL lên các ComboBox
+        try {
+            loadDuLieuMaTau();
+            loadDuLieuGa();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải dữ liệu từ CSDL: " + e.getMessage(), "Lỗi CSDL", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     // =================================================================================
-    // KHU VỰC MENU BÊN TRÁI
+    // KHU VỰC MENU BÊN TRÁI (Giữ nguyên)
     // =================================================================================
 
     /**
@@ -223,7 +255,7 @@ public class ManhinhQuanLyChuyenTau extends JFrame {
     }
 
     // =================================================================================
-    // KHU VỰC NỘI DUNG (QUẢN LÝ CHUYẾN TÀU)
+    // KHU VỰC NỘI DUNG (QUẢN LÝ CHUYẾN TÀU) - ĐÃ SỬA
     // =================================================================================
 
     /**
@@ -245,14 +277,14 @@ public class ManhinhQuanLyChuyenTau extends JFrame {
         mainArea.setLayout(new BoxLayout(mainArea, BoxLayout.Y_AXIS)); // Xếp chồng form và bảng
         mainArea.setOpaque(false); // Làm trong suốt để hiển thị màu nền của panel cha
 
-        // 1. Form nhập liệu
+        // 1. Form nhập liệu [ĐÃ GỌI HÀM SỬA]
         JPanel formPanel = createFormPanel();
         mainArea.add(formPanel);
 
         // Thêm khoảng cách giữa form và bảng
         mainArea.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        // 2. Bảng dữ liệu
+        // 2. Bảng dữ liệu [ĐÃ GỌI HÀM SỬA]
         JPanel tablePanel = createTablePanel();
         mainArea.add(tablePanel);
 
@@ -262,7 +294,8 @@ public class ManhinhQuanLyChuyenTau extends JFrame {
     }
 
     /**
-     * Tạo panel chứa form nhập liệu. (Code từ màn hình đầu tiên)
+     * [ĐÃ SỬA] Tạo panel chứa form nhập liệu.
+     * Thay thế JTextField bằng JComboBox, JDateChooser, JSpinner.
      */
     private JPanel createFormPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
@@ -278,45 +311,74 @@ public class ManhinhQuanLyChuyenTau extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8); // Khoảng cách giữa các thành phần
         gbc.anchor = GridBagConstraints.WEST; // Căn lề trái
+        gbc.fill = GridBagConstraints.HORIZONTAL; // Các component co giãn theo chiều ngang
 
-        // Hàng 1: Mã chuyến tàu
+        // Hàng 1: Mã chuyến tàu (Giữ nguyên JTextField)
         gbc.gridx = 0; gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.NONE; // Label không co giãn
         fieldsPanel.add(new JLabel("Mã chuyến tàu:"), gbc);
+
         gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
         fieldsPanel.add(new JTextField(20), gbc);
 
-        // Hàng 2: Tên tàu
-        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
-        fieldsPanel.add(new JLabel("Tên tàu:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
-        fieldsPanel.add(new JTextField(20), gbc);
+        // Hàng 2: Mã Tàu (Thay JTextField bằng JComboBox)
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        fieldsPanel.add(new JLabel("Mã tàu:"), gbc); // Sửa "Tên tàu" -> "Mã tàu"
 
-        // Hàng 3: Ga đi và Ga đến
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 1; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        cbMaTau = new JComboBox<>();
+        cbMaTau.setFont(FONT_PLAIN_14);
+        fieldsPanel.add(cbMaTau, gbc);
+
+        // Hàng 3: Ga đi và Ga đến (Thay JTextField bằng JComboBox)
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
         fieldsPanel.add(new JLabel("Ga đi:"), gbc);
+
         gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
-        fieldsPanel.add(new JTextField(10), gbc);
+        cbGaDi = new JComboBox<>();
+        cbGaDi.setFont(FONT_PLAIN_14);
+        fieldsPanel.add(cbGaDi, gbc);
 
         gbc.gridx = 2; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0; gbc.insets = new Insets(8, 20, 8, 8); // Thêm lề trái
         fieldsPanel.add(new JLabel("Ga đến:"), gbc);
+
         gbc.gridx = 3; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5; gbc.insets = new Insets(8, 8, 8, 8);
-        fieldsPanel.add(new JTextField(10), gbc);
+        cbGaDen = new JComboBox<>();
+        cbGaDen.setFont(FONT_PLAIN_14);
+        fieldsPanel.add(cbGaDen, gbc);
 
-        // Hàng 4: Giờ đi
-        gbc.gridx = 0; gbc.gridy = 3; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        // Hàng 4: Giờ đi (Thay JTextField bằng JSpinner)
+        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
         fieldsPanel.add(new JLabel("Giờ đi:"), gbc);
-        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
-        fieldsPanel.add(new JTextField(10), gbc);
 
-        // Hàng 5: Ngày đi
-        gbc.gridx = 0; gbc.gridy = 4; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
-        fieldsPanel.add(new JLabel("Ngày đi:"), gbc);
         gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
-        fieldsPanel.add(new JTextField(10), gbc);
+        // Tạo Spinner chọn giờ
+        Date initTime = Calendar.getInstance().getTime();
+        SpinnerDateModel timeModel = new SpinnerDateModel(initTime, null, null, Calendar.HOUR_OF_DAY);
+        timeSpinnerGioDi = new JSpinner(timeModel);
+        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(timeSpinnerGioDi, "HH:mm");
+        timeSpinnerGioDi.setEditor(timeEditor);
+        timeSpinnerGioDi.setFont(FONT_PLAIN_14);
+        fieldsPanel.add(timeSpinnerGioDi, gbc);
+
+        // Hàng 5: Ngày đi (Thay JTextField bằng JDateChooser)
+        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        fieldsPanel.add(new JLabel("Ngày đi:"), gbc);
+
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5;
+        dateChooserNgayDi = new JDateChooser();
+        dateChooserNgayDi.setDateFormatString("dd/MM/yyyy");
+        dateChooserNgayDi.setFont(FONT_PLAIN_14);
+        fieldsPanel.add(dateChooserNgayDi, gbc);
+
 
         panel.add(fieldsPanel, BorderLayout.CENTER);
 
-        // --- Panel chứa các nút bấm ---
+        // --- Panel chứa các nút bấm (Giữ nguyên) ---
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.add(new JButton("Tìm"));
@@ -333,7 +395,8 @@ public class ManhinhQuanLyChuyenTau extends JFrame {
     }
 
     /**
-     * Tạo panel chứa bảng dữ liệu. (Code từ màn hình đầu tiên)
+     * [ĐÃ SỬA] Tạo panel chứa bảng dữ liệu.
+     * Sửa lại tên cột cho khớp CSDL (Tên tàu -> Mã tàu)
      */
     private JPanel createTablePanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -344,26 +407,70 @@ public class ManhinhQuanLyChuyenTau extends JFrame {
         ));
 
         // --- Tạo Bảng ---
-        String[] columnNames = {"Mã chuyến tàu", "Tên tàu", "Ga đi", "Ga đến", "Giờ đi", "Ngày đi"};
+        // Sửa "Tên tàu" -> "Mã tàu"
+        String[] columnNames = {"Mã chuyến tàu", "Mã tàu", "Ga đi", "Ga đến", "Giờ đi", "Ngày đi"};
         Object[][] data = {}; // Dữ liệu trống
 
         DefaultTableModel model = new DefaultTableModel(data, columnNames);
         JTable table = new JTable(model);
 
-        // Thiết lập style cho bảng
-        table.setFillsViewportHeight(true); // Đảm bảo bảng lấp đầy JScrollPane
-        table.setRowHeight(28); // Tăng chiều cao hàng
-        table.setFont(FONT_PLAIN_14);
+        table.setFillsViewportHeight(true);
+        table.setRowHeight(28);
+        table.setFont(FONT_PLAIN_14); // Sử dụng FONT_PLAIN_14
 
-        // Style cho Header của bảng
-        table.getTableHeader().setFont(FONT_BOLD_14);
+        table.getTableHeader().setFont(FONT_BOLD_14); // Sử dụng FONT_BOLD_14
         table.getTableHeader().setBackground(new Color(230, 230, 230));
 
-        // Thêm bảng vào JScrollPane để có thể cuộn
         JScrollPane scrollPane = new JScrollPane(table);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
+    }
+
+    // =================================================================================
+    // KHU VỰC TRUY VẤN CSDL (MỚI)
+    // =================================================================================
+
+    /**
+     * [MỚI] Tải danh sách Mã Tàu từ CSDL lên JComboBox
+     */
+    private void loadDuLieuMaTau() throws SQLException {
+        Connection conn = ConnectDB.getConnection();
+        String sql = "SELECT MaTau FROM Tau";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) cbMaTau.getModel();
+            model.removeAllElements(); // Xóa dữ liệu cũ
+
+            while (rs.next()) {
+                model.addElement(rs.getString("MaTau"));
+            }
+        }
+        // Lưu ý: Không đóng kết nối ở đây, để cho các hàm khác còn dùng
+        // ConnectDB.disconnect(); // KHÔNG NÊN
+    }
+
+    /**
+     * [MỚI] Tải danh sách Tên Ga từ CSDL lên 2 JComboBox
+     */
+    private void loadDuLieuGa() throws SQLException {
+        Connection conn = ConnectDB.getConnection();
+        String sql = "SELECT TenGa FROM Ga";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            DefaultComboBoxModel<String> modelGaDi = (DefaultComboBoxModel<String>) cbGaDi.getModel();
+            DefaultComboBoxModel<String> modelGaDen = (DefaultComboBoxModel<String>) cbGaDen.getModel();
+            modelGaDi.removeAllElements();
+            modelGaDen.removeAllElements();
+
+            while (rs.next()) {
+                String tenGa = rs.getString("TenGa");
+                modelGaDi.addElement(tenGa);
+                modelGaDen.addElement(tenGa);
+            }
+        }
     }
 
 
@@ -371,6 +478,18 @@ public class ManhinhQuanLyChuyenTau extends JFrame {
      * Phương thức main để chạy ứng dụng.
      */
     public static void main(String[] args) {
+        // [MỚI] Kết nối CSDL ngay khi ứng dụng khởi động
+        try {
+            ConnectDB.getInstance().connect();
+            System.out.println("Kết nối CSDL thành công!");
+        } catch (Exception e) {
+            System.err.println("Lỗi kết nối CSDL!");
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Không thể kết nối đến CSDL. Vui lòng kiểm tra lại.", "Lỗi kết nối", JOptionPane.ERROR_MESSAGE);
+            return; // Dừng ứng dụng nếu không kết nối được
+        }
+
+
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
