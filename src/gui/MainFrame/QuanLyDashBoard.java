@@ -4,7 +4,11 @@
  * Copyright (c) 2025 IUH. All rights reserved.
  */
 
-package gui;
+package gui.MainFrame;
+
+import gui.Panel.ManHinhBanVe;
+import gui.Panel.ManHinhDoiVe;
+import gui.Panel.TraCuuPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -170,6 +174,6 @@ public class QuanLyDashBoard extends JFrame implements ActionListener {
         }
 
         public static void main(String[] args) {
-            SwingUtilities.invokeLater(() -> new gui.QuanLyDashBoard());
+            SwingUtilities.invokeLater(() -> new QuanLyDashBoard());
         }
     }

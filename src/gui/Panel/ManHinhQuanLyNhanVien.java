@@ -38,7 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
 import com.toedter.calendar.JDateChooser; // Cần thư viện JCalendar
-
+import gui.MainFrame.ManHinhDashboardQuanLy;
 
 /**
  * Lớp này tạo giao diện Quản lý Tài khoản Nhân viên

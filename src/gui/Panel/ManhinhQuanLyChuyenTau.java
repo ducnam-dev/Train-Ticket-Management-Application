@@ -34,6 +34,7 @@ import java.text.SimpleDateFormat;
 
 // [THÊM] Import lớp kết nối của bạn
 import database.ConnectDB;
+import gui.MainFrame.ManHinhDashboardQuanLy;
 
 
 /**
