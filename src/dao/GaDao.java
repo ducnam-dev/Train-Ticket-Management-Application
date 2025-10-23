@@ -36,25 +36,19 @@ public class GaDao {
     // Trong GaDao.java
     public Vector<Ga> layDanhSachGa() {
         Vector<Ga> danhSachGa = new Vector<>();
-        String sql = "SELECT MaGa, TenGa, DiaChi FROM Ga"; // Bảng Ga của bạn
+        String sql = "SELECT MaGa, TenGa, DiaChi FROM Ga";
 
-        // ... Khai báo kết nối ...
-        try {
-             Connection con = ConnectDB.getInstance().getConnection();
+        try (Connection con = ConnectDB.getInstance().getConnection(); // Khai báo trong try-with-resources
              PreparedStatement pstmt = con.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery();
+             ResultSet rs = pstmt.executeQuery()) { // Khai báo ResultSet trong try-with-resources
 
             while (rs.next()) {
-                Ga ga = new Ga(rs.getString("MaGa"), rs.getString("TenGa")
-                , rs.getString("DiaChi"));
-//                String ma = rs.getString("MaGa");
-//                String ten = rs.getString("TenGa");
-//                String diaChi = rs.getString("DiaChi");
-                // Tạo đối tượng Ga mới và thêm vào danh sách
+                Ga ga = new Ga(rs.getString("MaGa"), rs.getString("TenGa"), rs.getString("DiaChi"));
                 danhSachGa.add(ga);
             }
 
         } catch (SQLException e) {
+            System.err.println("Lỗi khi tải danh sách Ga: " + e.getMessage());
             e.printStackTrace();
         }
         return danhSachGa;
