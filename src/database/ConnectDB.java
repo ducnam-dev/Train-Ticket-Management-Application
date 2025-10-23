@@ -46,4 +46,10 @@ public class ConnectDB {
 	        }
 	        return con;
 	    }
+        //closeConnection method
+    public static void closeConnection(Connection connection) throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
+    }
 }
