@@ -3,7 +3,7 @@ package gui.MainFrame;
 import control.XuLyTaiKhoan;
 import entity.TaiKhoan;
 import gui.MainFrame.BanVeDashboard; // Giả định lớp này tồn tại
-import gui.MainFrame.ManHinhDashboardQuanLy; // Giả định lớp này tồn tại
+//import gui.MainFrame.ManHinhDashboardQuanLy; // Giả định lớp này tồn tại
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -245,7 +245,7 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
                 // Phân quyền dựa trên MaNV chuẩn hóa:
                 if (maNV.startsWith("NVQL")) {
                     // Mở màn hình quản lý (Ví dụ: NVQL001, NVQL002)
-                    new ManHinhDashboardQuanLy().setVisible(true);
+                    new QuanLyDashboard().setVisible(true);
                 } else if (maNV.startsWith("NVBV")) {
                     // Mở màn hình bán vé (Ví dụ: NVBV001)
                     new BanVeDashboard().setVisible(true);

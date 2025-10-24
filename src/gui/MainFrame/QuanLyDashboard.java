@@ -1,9 +1,8 @@
 package gui.MainFrame;
 
 // Import các Panel cần hiển thị
-import gui.Panel.ManhinhQuanLyChuyenTau;
-import gui.Panel.ManHinhQuanLyKhuyenMai;
-import gui.Panel.ManHinhQuanLyNhanVien;
+import gui.Panel.*;
+import gui.Panel.ManHinhDashboardQuanLy;
 // import gui.Panel.ManHinhDashboardQuanLy; // Giả sử đây là Trang Chủ
 
 import javax.swing.*;
@@ -35,7 +34,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
 
     public QuanLyDashboard() {
         setTitle("Hệ thống Quản lý Vé Tàu");
-        setSize(1600, 900);
+        setSize(1400, 900);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -50,7 +49,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
 
 
         // Mặc định hiển thị màn hình Trang Chủ (Hoặc Quản lý chuyến tàu)
-        switchToCard("qlChuyenTau");
+        switchToCard("trangChu");
 
         // Thiết lập sự kiện cho các nút menu
         initEventHandlers();
@@ -196,9 +195,9 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
 
         // Thêm các màn hình quản lý vào CardLayout
         // Giả định ManHinhDashboardQuanLy là một JPanel
-        contentPanel.add(new JPanel(), "trangChu"); // Placeholder cho Trang Chủ
-        contentPanel.add(new JPanel(), "qlChuyenTau");
-        contentPanel.add(new JPanel(), "qlNhanVien");
+        contentPanel.add(new ManHinhDashboardQuanLy(), "trangChu"); // Placeholder cho Trang Chủ
+        contentPanel.add(new ManhinhQuanLyChuyenTau(), "qlChuyenTau");
+        contentPanel.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
         contentPanel.add(new ManHinhQuanLyKhuyenMai(), "qlKhuyenMai");
         contentPanel.add(new JPanel(), "traCuuHD"); // Placeholder
         contentPanel.add(new JPanel(), "qlGiaVe"); // Placeholder

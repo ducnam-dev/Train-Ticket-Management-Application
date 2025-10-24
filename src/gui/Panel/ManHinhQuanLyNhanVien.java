@@ -38,13 +38,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
 import com.toedter.calendar.JDateChooser; // Cần thư viện JCalendar
-import gui.MainFrame.ManHinhDashboardQuanLy;
+//import gui.MainFrame.ManHinhDashboardQuanLy;
 
 /**
  * Lớp này tạo giao diện Quản lý Tài khoản Nhân viên
  * [ĐÃ NÂNG CẤP] Kết nối CSDL, thực hiện đầy đủ chức năng CRUD.
  */
-public class ManHinhQuanLyNhanVien extends JFrame {
+public class ManHinhQuanLyNhanVien extends JPanel {
 
     // =================================================================================
     // CÁC MÀU SẮC VÀ FONT
@@ -95,14 +95,10 @@ public class ManHinhQuanLyNhanVien extends JFrame {
             JOptionPane.showMessageDialog(this, "Không thể kết nối CSDL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
 
-        setTitle("Quản lý tài khoản NV");
         setSize(1600, 900);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+
         setLayout(new BorderLayout());
 
-        JPanel navPanel = createNavPanel();
-        add(navPanel, BorderLayout.WEST);
 
         JPanel centerContentPanel = createCenterContentPanel();
         JPanel eastFormPanel = createEastFormPanel();
@@ -124,129 +120,7 @@ public class ManHinhQuanLyNhanVien extends JFrame {
     // KHU VỰC MENU BÊN TRÁI (Đã có điều hướng)
     // =================================================================================
 
-    private JPanel createNavPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(PRIMARY_COLOR);
-        panel.setPreferredSize(new Dimension(260, 0));
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-        headerPanel.setBackground(PRIMARY_COLOR);
-        headerPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JLabel logoLabel = new JLabel("GA XE");
-        logoLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
-        logoLabel.setForeground(Color.WHITE);
-        logoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JLabel idLabel = new JLabel("ID: NV200001");
-        idLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        idLabel.setForeground(Color.WHITE);
-        idLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        idLabel.setBorder(new EmptyBorder(5, 5, 20, 0));
-        headerPanel.add(logoLabel);
-        headerPanel.add(idLabel);
-        headerPanel.setMaximumSize(headerPanel.getPreferredSize());
-        panel.add(headerPanel);
-
-        // [1. Trang chủ]
-        JButton btnTrangChu = createNavItem("Trang chủ", "\uD83C\uDFE0");
-        btnTrangChu.addActionListener(e -> {
-            new ManHinhDashboardQuanLy().setVisible(true);
-            this.dispose();
-        });
-        panel.add(btnTrangChu);
-
-        // [2. Tra cứu hóa đơn]
-        JButton btnTraCuu = createNavItem("Tra cứu hóa đơn", "\uD83D\uDD0D");
-        btnTraCuu.addActionListener(e -> JOptionPane.showMessageDialog(this, "Chức năng Tra cứu hóa đơn đang được phát triển."));
-        panel.add(btnTraCuu);
-
-        // [3. Quản lý chuyến tàu]
-        JButton btnQLChuyenTau = createNavItem("Quản lý chuyến tàu", "\uD83D\uDE86");
-        btnQLChuyenTau.addActionListener(e -> {
-            new ManhinhQuanLyChuyenTau().setVisible(true);
-            this.dispose();
-        });
-        panel.add(btnQLChuyenTau);
-
-        // [4. Quản lý tài khoản NV] - Màn hình hiện tại
-        JButton selectedButton = createNavItem("Quản lý tài khoản NV", "\uD83D\uDC64");
-        selectedButton.setBackground(SELECTED_COLOR);
-        for (java.awt.event.MouseListener ml : selectedButton.getMouseListeners()) {
-            selectedButton.removeMouseListener(ml);
-        }
-        panel.add(selectedButton);
-
-        // [5. Quản lý giá vé]
-        JButton btnQLGiaVe = createNavItem("Quản lý giá vé", "\uD88D\uDCB2");
-        btnQLGiaVe.addActionListener(e -> JOptionPane.showMessageDialog(this, "Chức năng Quản lý giá vé đang được phát triển."));
-        panel.add(btnQLGiaVe);
-
-        // [6. Quản lý khuyến mãi]
-        JButton btnQLKhuyenMai = createNavItem("Quản lý khuyến mãi", "\uD83C\uDFF7");
-        btnQLKhuyenMai.addActionListener(e -> JOptionPane.showMessageDialog(this, "Chức năng Quản lý khuyến mãi đang được phát triển."));
-        panel.add(btnQLKhuyenMai);
-
-        // [7. Thống kê báo cáo]
-        JButton btnThongKe = createNavItem("Thống kê báo cáo", "\uD83D\uDCCA");
-        btnThongKe.addActionListener(e -> JOptionPane.showMessageDialog(this, "Chức năng Thống kê báo cáo đang được phát triển."));
-        panel.add(btnThongKe);
-
-        panel.add(Box.createVerticalGlue());
-        JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
-        separator.setForeground(new Color(255, 255, 255, 70));
-        separator.setBackground(PRIMARY_COLOR);
-        separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-        panel.add(separator);
-        panel.add(Box.createRigidArea(new Dimension(0, 5)));
-
-        // --- Nút Đăng xuất ---
-        JButton btnDangXuat = createNavItem("Đăng xuất", "\uD83D\uDEAA");
-        btnDangXuat.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn đăng xuất?", "Xác nhận đăng xuất", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                // new ManHinhDangNhap().setVisible(true);
-                this.dispose();
-            }
-        });
-        panel.add(btnDangXuat);
-
-        return panel;
-    }
-
-    private JButton createNavItem(String text, String iconText) {
-        JButton button = new JButton();
-        String htmlText = "<html>" +
-                "<span style='font-family:\"Segoe UI Emoji\"; font-size:15pt;'>" + iconText + "</span>" +
-                "&nbsp;&nbsp;&nbsp;" +
-                "<span style='font-family:\"Segoe UI\", Arial; font-size: 12pt; font-weight: bold;'>" + text.replace(" ", "&nbsp;") + "</span>" +
-                "</html>";
-        button.setText(htmlText);
-        button.setForeground(Color.WHITE);
-        button.setBackground(PRIMARY_COLOR);
-        button.setFocusPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setBorderPainted(false);
-        button.setOpaque(true);
-        button.setBorder(new EmptyBorder(10, 25, 10, 25));
-        int fixedHeight = 50;
-        Dimension itemSize = new Dimension(Integer.MAX_VALUE, fixedHeight);
-        button.setMaximumSize(itemSize);
-        button.setPreferredSize(new Dimension(260, fixedHeight));
-        button.setMinimumSize(new Dimension(0, fixedHeight));
-        final Color originalColor = PRIMARY_COLOR;
-        final Color hoverColor = new Color(0, 130, 235);
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (button.getBackground().equals(originalColor)) button.setBackground(hoverColor);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (button.getBackground().equals(hoverColor)) button.setBackground(originalColor);
-            }
-        });
-        return button;
-    }
 
     // =================================================================================
     // KHU VỰC NỘI DUNG (ĐÃ SỬA)
