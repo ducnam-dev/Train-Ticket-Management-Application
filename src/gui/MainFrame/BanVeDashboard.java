@@ -31,7 +31,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         initContentPanel();
         initEventHandlers();
 
-        cardLayout.show(contentPanel, "banVe");
+        cardLayout.show(contentPanel, "trangChu");
+        highlightActiveButton(btnTrangChu);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
     }

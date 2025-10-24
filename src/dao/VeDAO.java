@@ -1,11 +1,16 @@
 package dao;
 
-import java.util.List;
-
 import entity.Ve;
 
+/**
+ * DAO cho Vé. TODO: hiện tại là stub, cần implement phần lưu vào DB.
+ */
+public class VeDAO {
+    public VeDAO() {}
 
-public interface VeDAO {
-Ve taoVe(Ve ve);
-List<Ve> layTheoTau(int idTau);
+    public boolean save(Ve ve) {
+        // TODO: Lưu vé vào DB (bảng Ve), trường giaVe = ve.getGiaVe()
+        System.out.println("[VeDAO] save() gọi: " + ve);
+        return true;
+    }
 }
