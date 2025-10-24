@@ -24,7 +24,8 @@ public class ManHinhTraVe extends JPanel {
     private static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 18);
 
     // --- Components ---
-    private JButton btnTimKiem, btnHuyBo, btnXacNhan, btnLichSuTraVe;
+    // Đã xóa btnLichSuTraVe khỏi khai báo
+    private JButton btnTimKiem, btnHuyBo, btnXacNhan;
     private JComboBox<String> cbTimKiemTheo;
     private JTextField txtMaVeHoacSDT;
 
@@ -42,12 +43,9 @@ public class ManHinhTraVe extends JPanel {
         setBackground(BG_COLOR);
 
         // --- 2. KHỞI TẠO DAO ---
-        // SỬ DỤNG LỚP TRIỂN KHAI THỰC TẾ (yêu cầu VeDAOImpl phải tồn tại và được import)
         try {
-            // SỬ DỤNG LỚP TRIỂN KHAI THỰC TẾ
             veDAO = new VeDAOImpl();
         } catch (Exception e) {
-            // THÊM KHỐI CATCH: Báo cáo lỗi nếu không thể khởi tạo DAO/kết nối CSDL
             System.err.println("Không thể khởi tạo VeDAOImpl: " + e.getMessage());
             JOptionPane.showMessageDialog(this,
                     "Lỗi hệ thống: Không thể kết nối với CSDL hoặc khởi tạo DAO.",
@@ -111,13 +109,7 @@ public class ManHinhTraVe extends JPanel {
         JPanel searchRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         searchRow.setOpaque(false);
 
-        // 1. Nút Lịch sử Trả vé
-        btnLichSuTraVe = new JButton("Lịch sử trả vé");
-        btnLichSuTraVe.setFont(FONT_PLAIN_14);
-        btnLichSuTraVe.setBackground(Color.LIGHT_GRAY);
-        btnLichSuTraVe.setForeground(Color.BLACK);
-        searchRow.add(btnLichSuTraVe);
-        searchRow.add(Box.createRigidArea(new Dimension(10, 0)));
+        // 1. Nút Lịch sử Trả vé (ĐÃ XÓA)
 
         // 2. Tìm kiếm theo
         searchRow.add(new JLabel("Tìm kiếm theo:"));
@@ -239,7 +231,7 @@ public class ManHinhTraVe extends JPanel {
         btnTimKiem.addActionListener(e -> xuLyTimKiemVe());
         btnXacNhan.addActionListener(e -> xuLyHuyVe());
         btnHuyBo.addActionListener(e -> xoaTrangThongTin());
-        btnLichSuTraVe.addActionListener(e -> xuLyChuyenManHinhLichSu());
+        // Đã xóa btnLichSuTraVe.addActionListener(e -> xuLyChuyenManHinhLichSu());
     }
 
     private void xuLyTimKiemVe() {
@@ -287,7 +279,7 @@ public class ManHinhTraVe extends JPanel {
 
         if (confirm == JOptionPane.YES_OPTION) {
             // Giả sử getId() trả về Mã vé (String)
-            if (veDAO.huyVe(String.valueOf(veHienTai.getId()))) {
+            if (veDAO.huyVe(veHienTai.getId())) { // SỬ DỤNG veHienTai.getId() (String)
                 JOptionPane.showMessageDialog(this, "Trả vé thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 xoaTrangThongTin();
             } else {
@@ -310,22 +302,6 @@ public class ManHinhTraVe extends JPanel {
 
         btnXacNhan.setEnabled(true);
         cbLyDoTraVe.setEnabled(true);
-    }
-
-    private void xuLyChuyenManHinhLichSu() {
-        Window w = SwingUtilities.getWindowAncestor(this);
-        if (w instanceof JFrame) {
-            JFrame frame = (JFrame) w;
-
-            // THAO TÁC CẦN: Đảm bảo ManHinhLichSuTraVe tồn tại trong gói gui.Panel
-            ManHinhLichSuTraVe lichSuPanel = new ManHinhLichSuTraVe();
-
-            frame.setContentPane(lichSuPanel);
-            frame.revalidate();
-            frame.repaint();
-        } else {
-            JOptionPane.showMessageDialog(this, "Không thể chuyển màn hình. Vui lòng chạy từ JFrame.", "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     private void xoaTrangThongTin() {

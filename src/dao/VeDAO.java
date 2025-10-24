@@ -30,7 +30,7 @@ public interface VeDAO {
      * @return true nếu hủy thành công, ngược lại là false.
      */
     boolean huyVe(String maVe);
-    List<Object[]> getLichSuTraVe();
+
     /**
      * Lấy danh sách vé dựa trên Mã tàu.
      * @param idTau ID tàu.
