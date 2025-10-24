@@ -6,7 +6,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 import dao.VeDAO;
-import dao.impl.VeDAOImpl;
 import entity.Ve;
 
 /**
@@ -44,7 +43,7 @@ public class ManHinhTraVe extends JPanel {
 
         // --- 2. KHỞI TẠO DAO ---
         try {
-            veDAO = new VeDAOImpl();
+            veDAO = new VeDAO();
         } catch (Exception e) {
             System.err.println("Không thể khởi tạo VeDAOImpl: " + e.getMessage());
             JOptionPane.showMessageDialog(this,
@@ -287,7 +286,7 @@ public class ManHinhTraVe extends JPanel {
             }
         }
     }
-
+// à thì ra là thông tin giả lập thôi, không lấy từ DAO
     private void hienThiThongTinVe(Ve ve) {
         lblTenKHValue.setText(ve.getKhachHang() != null ? ve.getKhachHang() : "N/A");
         lblSDTValue.setText("0799014365"); // Giả lập dữ liệu SĐT (cần lấy từ DAO)

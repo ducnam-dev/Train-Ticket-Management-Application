@@ -1,12 +1,8 @@
 package gui.MainFrame;
 
 // Import các Panel cần hiển thị (Giả định các lớp này kế thừa từ JPanel)
-import gui.Panel.ManHinhBanVe;
+import gui.Panel.*;
 //import gui.Panel.ManHinhTraCuuVe;
-import gui.Panel.ManHinhTraCuuHoaDon;
-import gui.Panel.ManHinhTrangChuNVBanVe; // Trang chủ cho NV Bán vé
-import gui.Panel.ManHinhMoCa;
-import gui.Panel.ManHinhKetCa;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -32,7 +28,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     private final Map<String, JButton> menuButtons = new HashMap<>();
 
     // Các nút menu cần quản lý
-    private JButton btnTrangChu, btnMoCa, btnKetCa, btnBanVe, btnDoiVe, btnTraCuuVe, btnTraCuuHD, btnDangXuat;
+    private JButton btnTrangChu, btnMoCa, btnKetCa, btnBanVe, btnDoiVe, btnTraCuuVe, btnTraCuuHD, btnDangXuat, btnTraVe;
 
     public BanVeDashboard() {
         setTitle("Hệ thống Bán Vé Tàu - Nhân viên Bán Vé");
@@ -115,9 +111,14 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         // [5. Đổi vé]
         btnDoiVe = createNavItem("Đổi vé", "\u21C4", "doiVe"); // ⇄
         panel.add(btnDoiVe);
-
-        // --- Separator ---
         panel.add(createSeparator());
+
+        // [5 1. Trả vé]
+        btnTraVe = createNavItem("Trả vé", "\u21C4", "traVe"); // ⇄
+        panel.add(btnTraVe);
+        panel.add(createSeparator());
+        // --- Separator ---
+
 
         // [6. Tra cứu vé]
         btnTraCuuVe = createNavItem("Tra cứu vé", "\uD83D\uDD0D", "traCuuVe"); // 🔍
@@ -208,7 +209,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         contentPanel.add(new ManHinhMoCa(), "moCa");
         contentPanel.add(new ManHinhKetCa(), "ketCa");
         contentPanel.add(new ManHinhBanVe(), "banVeMoi");
-        contentPanel.add(new JPanel(), "doiVe"); // Placeholder
+        contentPanel.add(new JPanel(), "doiVe");
+        contentPanel.add(new ManHinhTraVe(), "traVe");
         contentPanel.add(new JPanel(), "traCuuVe");
         contentPanel.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
 

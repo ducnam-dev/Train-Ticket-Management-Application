@@ -149,7 +149,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         contentLeftPanel.add(Box.createVerticalStrut(10));
         contentLeftPanel.add(createKhuVucChonViTriGhe());
         contentLeftPanel.add(Box.createVerticalStrut(10));
-        contentLeftPanel.add(createKhuVucTongTien());
+
         contentLeftPanel.add(Box.createVerticalGlue());
 
         JScrollPane leftScrollPane = new JScrollPane(contentLeftPanel);
@@ -163,6 +163,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         leftContainer.add(leftScrollPane, BorderLayout.CENTER);
 
         JPanel rightPanel = createKhuVucThongTinKhach();
+        rightPanel.add(createKhuVucTongTien(), BorderLayout.SOUTH);
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftContainer, rightPanel);
         split.setResizeWeight(0.75);
         split.setOneTouchExpandable(true);
@@ -321,13 +322,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         JPanel fullSummary = new JPanel(new BorderLayout());
         fullSummary.setBackground(Color.white);
         fullSummary.setBorder(new EmptyBorder(5, 10, 5, 10));
-
-        JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
-        legendPanel.setOpaque(false);
-        legendPanel.add(taoMucChuGiai(Color.LIGHT_GRAY, "Chỗ trống"));
-        legendPanel.add(taoMucChuGiai(Color.BLACK, "Không trống"));
-        legendPanel.add(taoMucChuGiai(new Color(0, 123, 255), "Đang chọn"));
-        fullSummary.add(legendPanel, BorderLayout.WEST);
 
         JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         summaryPanel.setOpaque(false);
