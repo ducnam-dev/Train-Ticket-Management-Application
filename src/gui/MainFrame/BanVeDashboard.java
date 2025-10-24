@@ -11,7 +11,7 @@ import java.awt.event.ActionListener;
 public class BanVeDashboard extends JFrame implements ActionListener {
     private CardLayout cardLayout;
     private JPanel contentPanel;
-    private JButton btnBanVe, btnDoiVe, btnTraCuu, btnDangXuat, btnTrangChu, btnKetCa, btnMoCa;
+    private JButton btnBanVe, btnDoiVe, btnTraCuu, btnDangXuat, btnTrangChu, btnKetCa, btnMoCa, btnTraCuuHoaDon;
 
     private final Color ACTIVE_COLOR = new Color(74, 184, 237);
     private final Color INACTIVE_COLOR = new Color(34, 137, 203);
@@ -148,7 +148,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         menuPanel.add(btnTraCuu);
         menuPanel.add(createSeparator());
 
-        menuPanel.add(createMenuItem("Tra cứu hóa đơn", "hoadon.png", false)); // Đã sửa từ receipt_icon.png
+        btnTraCuuHoaDon = createMenuItem("Tra cứu hóa đơn", "hoadon.png", false); // Đã sửa từ receipt_icon.png
+        menuPanel.add(btnTraCuuHoaDon);
         menuPanel.add(createSeparator());
 
         menuPanel.add(new Label("Test"));
@@ -172,8 +173,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 //      button.setMinimumSize(new Dimension(0, 50));
         button.setPreferredSize(new Dimension(200, 50));
 
-        // 3.   CĂN CHỈNH NỘI DUNG (Đã đúng): Căn icon và chữ bên trong nút sang trái
-        button.setHorizontalAlignment(SwingConstants.LEFT);
+// 3.   CĂN CHỈNH NỘI DUNG (Đã đúng): Căn icon và chữ bên trong nút sang trái
+        button.setHorizontalAlignment(SwingConstants.CENTER);
 
         button.setBackground(isActive ? ACTIVE_COLOR : INACTIVE_COLOR);
         button.setForeground(Color.WHITE);
@@ -199,6 +200,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         contentPanel.add(new ManHinhTrangChuNVBanVe(), "trangChu");
         contentPanel.add(new ManHinhMoCa(), "moCa");
         contentPanel.add(new ManHinhKetCa(), "KetCa");
+        contentPanel.add(new ManHinhTraCuuHoaDon(), "traCuuHoaDon");
 
 
         add(contentPanel, BorderLayout.CENTER);
@@ -206,12 +208,13 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 
     private void initEventHandlers() {
         // register action listeners
-        JButton[] buttons = {btnBanVe, btnDoiVe, btnTraCuu, btnDangXuat, btnTrangChu, btnKetCa, btnMoCa};
+        JButton[] buttons = {btnBanVe, btnDoiVe, btnTraCuu, btnDangXuat, btnTrangChu, btnKetCa, btnMoCa, btnTraCuuHoaDon};
         for (JButton b : buttons) {
             if (b != null) b.addActionListener(this);
         }
     }
 
+    //Đổi màu nút active
     private void highlightActiveButton(JButton active) {
         JButton[] buttons = {btnBanVe, btnDoiVe, btnTraCuu, btnDangXuat, btnTrangChu, btnKetCa, btnMoCa};
         for (JButton b : buttons) {
@@ -224,7 +227,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         // Reset tất cả các nút về INACTIVE
-        JButton[] buttons = {btnBanVe, btnDoiVe, btnTraCuu, btnTrangChu, btnKetCa, btnMoCa, btnDangXuat};
+        JButton[] buttons = {btnBanVe, btnDoiVe, btnTraCuu, btnTrangChu, btnKetCa, btnMoCa, btnTraCuuHoaDon, btnDangXuat};
         for (JButton button : buttons) {
              if(button != null) { // Kiểm tra null vì các nút khác chưa được khai báo
                  button.setBackground(INACTIVE_COLOR);
@@ -248,6 +251,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
             cardName = "moCa";
         } else if (src == btnKetCa) {
             cardName = "KetCa";
+        } else if (src == btnTraCuuHoaDon) {
+            cardName = "traCuuHoaDon";
         } else if (src == btnDangXuat) {
             // Xử lý đăng xuất (đơn giản đóng ứng dụng)
             dispose();
@@ -307,15 +312,13 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     public void switchToCard(String cardName) {
         cardLayout.show(contentPanel, cardName);
         // Tùy chọn: Highlight nút menu tương ứng nếu cần
-        JButton btnTuongUng = null;
         switch (cardName) {
-            case "banVe" -> btnTuongUng = btnBanVe;
-            case "doiVe" -> btnTuongUng = btnDoiVe;
-            case "traCuu" -> btnTuongUng = btnTraCuu;
-            case "trangChu" -> btnTuongUng = btnTrangChu;
-            case "moCa" -> btnTuongUng = btnMoCa;
-            case "KetCa" -> btnTuongUng = btnKetCa;
+            case "banVe" -> highlightActiveButton(btnBanVe);
+            case "doiVe" -> highlightActiveButton(btnDoiVe);
+            case "traCuu" -> highlightActiveButton(btnTraCuu);
+            case "trangChu" -> highlightActiveButton(btnTrangChu);
+            case "moCa" -> highlightActiveButton(btnMoCa);
+            case "KetCa" -> highlightActiveButton(btnKetCa);
         }
-        highlightActiveButton(btnTuongUng);
     }
 }
