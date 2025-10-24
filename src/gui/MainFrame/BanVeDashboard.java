@@ -31,7 +31,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         initContentPanel();
         initEventHandlers();
 
-        cardLayout.show(contentPanel, "banVe");
+        cardLayout.show(contentPanel, "trangChu");
+        highlightActiveButton(btnTrangChu);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
     }
@@ -169,7 +170,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50)); // Chiều cao cố định 50px
-//        button.setMinimumSize(new Dimension(0, 50));
+//      button.setMinimumSize(new Dimension(0, 50));
         button.setPreferredSize(new Dimension(200, 50));
 
 // 3.   CĂN CHỈNH NỘI DUNG (Đã đúng): Căn icon và chữ bên trong nút sang trái

@@ -4,6 +4,10 @@ import dao.ChoDatDAO;
 import dao.ChuyenTauDao;
 import dao.GaDao;
 import dao.ToaDAO;
+import dao.GiaVeCoBanTheoGaDAO;
+import dao.LoaiChoDatDAO;
+import dao.LoaiVeDAO;
+import dao.VeDAO;
 import entity.*;
 import gui.MainFrame.BanVeDashboard;
 
@@ -17,7 +21,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.lang.foreign.Linker;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -25,8 +28,8 @@ import java.util.List;
 
 /**
  * ManHinhBanVe - Phiên bản đã sắp xếp thành module để quan sát.
- * Mỗi vùng (UI Builders, Data Actions, Helpers, Event Handlers, State) được
- * tách rõ ràng bằng comment tiếng Việt.
+ * Bổ sung tính năng tính giá vé per-seat (dựa trên bảng GiaVeCoBanTheoGa,
+ * hệ số LoaiChoDat và hệ số LoaiVe). Hiện các DAO mới là stub/mock để bạn triển khai DB.
  */
 public class ManHinhBanVe extends JPanel implements MouseListener, ActionListener {
 
@@ -58,7 +61,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private String maToaHienTai = null;
 
     // Map tạm thời: MaChoDat -> TempKhachHang
-    private Map<String, TempKhachHang> danhSachKhachHang = new HashMap<>();
+    private Map<String, TempKhachHang> danhSachKhachHang = new LinkedHashMap<>();
 
     // Map số lượng yêu cầu theo loại
     private Map<String, Integer> soLuongYeuCau = new HashMap<>();
@@ -78,6 +81,10 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
     // DAO
     private ChoDatDAO choDatDao = new ChoDatDAO();
+    private GiaVeCoBanTheoGaDAO giaVeCoBanDAO = new GiaVeCoBanTheoGaDAO();
+    private LoaiChoDatDAO loaiChoDatDAO = new LoaiChoDatDAO();
+    private LoaiVeDAO loaiVeDAO = new LoaiVeDAO();
+    private VeDAO veDAO = new VeDAO();
 
     // Mã loại vé (hằng)
     private static final String MA_VE_NL = "VT01";
@@ -86,7 +93,12 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private static final String MA_VE_SV = "VT04";
     private JButton cancelButton, nextButton;
     private JButton btnTimChuyen;
-    private Color contentPanel;
+
+    // Map lưu giá mỗi ghế (maCho -> giaVe đã làm tròn VNĐ)
+    private Map<String, Long> danhSachGiaVe = new HashMap<>();
+
+    // Label tổng tiền (phải là trường lớp để cập nhật)
+    private JLabel lblTotalPrice;
 
     // ====================
     // MODULE: Constructor + Layout chính
@@ -321,10 +333,10 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         summaryPanel.setOpaque(false);
         summaryPanel.add(new JLabel("Đã chọn: X/Y"));
 
-        JLabel totalLabel = new JLabel("Tổng tiền vé: 0 VNĐ");
-        totalLabel.setFont(totalLabel.getFont().deriveFont(Font.BOLD, 14f));
-        totalLabel.setForeground(new Color(255, 165, 0));
-        summaryPanel.add(totalLabel);
+        lblTotalPrice = new JLabel("Tổng tiền vé: 0 VNĐ");
+        lblTotalPrice.setFont(lblTotalPrice.getFont().deriveFont(Font.BOLD, 14f));
+        lblTotalPrice.setForeground(new Color(255, 165, 0));
+        summaryPanel.add(lblTotalPrice);
 
         fullSummary.add(summaryPanel, BorderLayout.EAST);
         datCanhKhuVuc(fullSummary);
@@ -378,14 +390,13 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         return panel;
     }
 
-    // Add these helper methods and the listener attachments into `ManHinhBanVe` class.
-
     // --- Helper: reset state/UI ---
     private void resetAllData() {
         danhSachGheDaChon.clear();
         danhSachKhachHang.clear();
         tatCaChoDatToaHienTai.clear();
         seatButtonsMap.clear();
+        danhSachGiaVe.clear();
 
         maChuyenTauHienTai = null;
         maToaHienTai = null;
@@ -409,6 +420,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             }
 
             capNhatThongTinKhachUI();
+            capNhatTongTienUI();
         });
     }
 
@@ -718,12 +730,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             return;
         }
 
-        //
-        // Giải thích: ở đây không gọi danhSachGheDaChon.clear() để giữ
-        // trạng thái ghế người dùng đã chọn khi chuyển giữa các toa
-        // của cùng một chuyến (nếu đó là hành vi mong muốn).
-        // Nếu muốn reset khi đổi toa, hãy mở comment để clear.
-        //
         System.out.println("Đã chọn Toa: " + maToa + ". Tiến hành tải sơ đồ ghế." );
 
         List<ChoDat> danhSachChoDat = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(
@@ -818,6 +824,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         if (danhSachGheDaChon.containsKey(maCho)) {
             danhSachGheDaChon.remove(maCho);
+            danhSachGiaVe.remove(maCho);
             btnCho.setBackground(Color.LIGHT_GRAY);
             btnCho.setForeground(Color.BLACK);
         } else {
@@ -827,21 +834,43 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                         "Giới hạn chọn", JOptionPane.WARNING_MESSAGE);
                 return;
             }
+
+            // Tạm gán loại vé ưu tiên ban đầu cho ghế này
+            TempKhachHang tempKhach = new TempKhachHang(cho);
+            Vector<String> dsMaVeUuTien = taoDanhSachLoaiVeUuTien();
+            if (!dsMaVeUuTien.isEmpty()) {
+                tempKhach.maLoaiVe = dsMaVeUuTien.get(danhSachGheDaChon.size() % dsMaVeUuTien.size());
+            } else {
+                tempKhach.maLoaiVe = MA_VE_NL;
+            }
+
+            // Tính giá cho ghế ngay khi chọn
+            try {
+                long gia = computeTicketPrice(cho, tempKhach.maLoaiVe);
+                danhSachGiaVe.put(maCho, gia);
+            } catch (Exception ex) {
+                // Theo yêu cầu: nếu không tìm thấy base fare -> cảnh báo và không cho chọn
+                JOptionPane.showMessageDialog(this,
+                        "Không thể tính giá cho ghế " + cho.getSoCho() + ": " + ex.getMessage(),
+                        "Lỗi tính giá", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             danhSachGheDaChon.put(maCho, cho);
             btnCho.setBackground(new Color(0, 123, 255));
             btnCho.setForeground(Color.WHITE);
 
-            TempKhachHang tempKhach = new TempKhachHang(cho);
             danhSachKhachHang.put(maCho, tempKhach);
-            // LƯU Ý: đã thêm vào cả danhSachGheDaChon trước đó
         }
 
         capNhatDanhSachGheDaChonUI();
         capNhatThongTinKhachUI();
+        capNhatTongTienUI();
     }
 
     private void xuLyHuyChonGhe(String maCho) {
         danhSachGheDaChon.remove(maCho);
+        danhSachGiaVe.remove(maCho);
         JButton btnCho = seatButtonsMap.get(maCho);
         if (btnCho != null) {
             btnCho.setBackground(Color.LIGHT_GRAY);
@@ -849,6 +878,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         }
         capNhatDanhSachGheDaChonUI();
         capNhatThongTinKhachUI();
+        capNhatTongTienUI();
     }
 
     private void capNhatDanhSachGheDaChonUI() {
@@ -886,7 +916,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         String soCho = tempKhach.choDat.getSoCho();
         String soThuTuToa = laySoThuTuToa(tempKhach.choDat.getMaToa());
         String loaiKhachHienThi = getTenLoaiVeHienThi(tempKhach.maLoaiVe);
-        String gia = "Giá vé sẽ được tính";
 
         JPanel headerRow = new JPanel(new BorderLayout());
         headerRow.setOpaque(false);
@@ -905,11 +934,22 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         cbLoaiKhach.addActionListener(e -> {
             String maMoi = getMaLoaiVeFromHienThi((String) cbLoaiKhach.getSelectedItem());
             tempKhach.maLoaiVe = maMoi;
+
+            // Recompute price for this seat and update UI
+            try {
+                long gia = computeTicketPrice(tempKhach.choDat, tempKhach.maLoaiVe);
+                danhSachGiaVe.put(tempKhach.choDat.getMaCho(), gia);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Không thể tính lại giá: " + ex.getMessage(), "Lỗi tính giá", JOptionPane.ERROR_MESSAGE);
+                danhSachGiaVe.remove(tempKhach.choDat.getMaCho());
+            }
+            capNhatThongTinKhachUI();
+            capNhatTongTienUI();
         });
         leftHeader.add(cbLoaiKhach);
         headerRow.add(leftHeader, BorderLayout.WEST);
 
-        JLabel giaLabel = new JLabel(gia);
+        JLabel giaLabel = new JLabel("Giá vé sẽ được tính");
         giaLabel.setForeground(Color.BLUE);
         headerRow.add(giaLabel, BorderLayout.EAST);
 
@@ -953,6 +993,21 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         tuoiField.setMaximumSize(tuoiField.getPreferredSize());
         sdtField.setMaximumSize(sdtField.getPreferredSize());
         cccdField.setMaximumSize(cccdField.getPreferredSize());
+
+        // Cập nhật label giá hiện tại nếu đã tính
+        Long giaTinh = danhSachGiaVe.get(tempKhach.choDat.getMaCho());
+        if (giaTinh != null) {
+            giaLabel.setText(formatVnd(giaTinh));
+        } else {
+            // thử tính giá nếu chưa có (ví dụ khi UI gọi)
+            try {
+                long gia = computeTicketPrice(tempKhach.choDat, tempKhach.maLoaiVe == null ? MA_VE_NL : tempKhach.maLoaiVe);
+                danhSachGiaVe.put(tempKhach.choDat.getMaCho(), gia);
+                giaLabel.setText(formatVnd(gia));
+            } catch (Exception ex) {
+                giaLabel.setText("Chưa có giá");
+            }
+        }
 
         return panel;
     }
@@ -1006,6 +1061,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             if (!maChuyenTauMoi.equals(maChuyenTauHienTai)) {
                 danhSachGheDaChon.clear();
                 danhSachKhachHang.clear();
+                danhSachGiaVe.clear();
 
                 lastSelectedToaButton = null;
                 maToaHienTai = null;
@@ -1051,26 +1107,15 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
             resetAllData();
 
-            // Try to navigate to an existing TrangChuPanel if present; otherwise show a simple placeholder.
-            // --- LOGIC CHUYỂN PANEL MỚI ---
-            // 1. Lấy cửa sổ cha (JFrame/BanVeDashboard)
             Window w = SwingUtilities.getWindowAncestor(this);
 
             if (w instanceof BanVeDashboard) {
                 BanVeDashboard dashboard = (BanVeDashboard) w;
 
-                // 2. Chuẩn bị dữ liệu và khởi tạo Panel xác nhận
-                // ManHinhXacNhanBanVe cần có constructor phù hợp
-                ManHinhTrangChuNVBanVe confirmPanel = new ManHinhTrangChuNVBanVe(
+                ManHinhTrangChuNVBanVe confirmPanel = new ManHinhTrangChuNVBanVe();
 
-                );
-
-                // 3. Thay thế panel cũ bằng panel mới và chuyển card
-                // * Cần có phương thức public trong BanVeDashboard để thực hiện việc này.
                 dashboard.addOrUpdateCard(confirmPanel, "trangChu");
                 dashboard.switchToCard("trangChu");
-                //4. Đổi màu nút
-//                dashboard.highlightButton("trangChu");
 
             } else {
                 JOptionPane.showMessageDialog(this,
@@ -1079,54 +1124,51 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             }
 
         } else if (src == nextButton) {
-            int required = parseTextFieldToInt(txtNguoiCaoTuoi)
-                    + parseTextFieldToInt(txtNguoiLon)
-                    + parseTextFieldToInt(txtTreCon)
-                    + parseTextFieldToInt(txtSinhVien);
-
-            if (required <= 0) {
-                JOptionPane.showMessageDialog(this,
-                        "Vui lòng chọn số lượng khách hợp lệ.",
-                        "Lỗi", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (danhSachGheDaChon.size() != required) {
-                JOptionPane.showMessageDialog(this,
-                        "Số ghế đã chọn (" + danhSachGheDaChon.size() + ") không khớp với Tổng số khách (" + required + ").",
-                        "Lỗi", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // --- LOGIC CHUYỂN PANEL MỚI ---
-            // 1. Lấy cửa sổ cha (JFrame/BanVeDashboard)
-            Window w = SwingUtilities.getWindowAncestor(this);
-
-            if (w instanceof BanVeDashboard) {
-                BanVeDashboard dashboard = (BanVeDashboard) w;
-
-                // 2. Chuẩn bị dữ liệu và khởi tạo Panel xác nhận
-                // ManHinhXacNhanBanVe cần có constructor phù hợp
-                ManHinhXacNhanBanVe confirmPanel = new ManHinhXacNhanBanVe(
-                        danhSachGheDaChon,
-                        danhSachKhachHang,
-                        maChuyenTauHienTai,
-                        date
-                );
-
-                // 3. Thay thế panel cũ bằng panel mới và chuyển card
-                // * Cần có phương thức public trong BanVeDashboard để thực hiện việc này.
-                dashboard.addOrUpdateCard(confirmPanel, "xacNhanBanVe");
-                dashboard.switchToCard("xacNhanBanVe");
-
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
-                        "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
-            }
+            xuLyNutTiepTheo();
         }
     }
 
+    private void xuLyNutTiepTheo() {
+        int required = parseTextFieldToInt(txtNguoiCaoTuoi)
+                + parseTextFieldToInt(txtNguoiLon)
+                + parseTextFieldToInt(txtTreCon)
+                + parseTextFieldToInt(txtSinhVien);
+
+        if (required <= 0) {
+            JOptionPane.showMessageDialog(this,
+                    "Vui lòng chọn số lượng khách hợp lệ.",
+                    "Lỗi", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (danhSachGheDaChon.size() != required) {
+            JOptionPane.showMessageDialog(this,
+                    "Số ghế đã chọn (" + danhSachGheDaChon.size() + ") không khớp với Tổng số khách (" + required + ").",
+                    "Lỗi", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Window w = SwingUtilities.getWindowAncestor(this);
+
+        if (w instanceof BanVeDashboard) {
+            BanVeDashboard dashboard = (BanVeDashboard) w;
+
+            ManHinhXacNhanBanVe confirmPanel = new ManHinhXacNhanBanVe(
+                    danhSachGheDaChon,
+                    danhSachKhachHang,
+                    maChuyenTauHienTai,
+                    date
+            );
+
+            dashboard.addOrUpdateCard(confirmPanel, "xacNhanBanVe");
+            dashboard.switchToCard("xacNhanBanVe");
+
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
+                    "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     // ====================
     // MODULE: Main (để chạy độc lập)
@@ -1142,5 +1184,68 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
         });
+    }
+
+    // ====================
+    // MODULE: Giá vé helpers
+    // ====================
+    private long roundUpToNextTen(long value) {
+        return ((value + 9) / 10) * 10;
+    }
+
+    private long computeTicketPrice(ChoDat cho, String maLoaiVe) throws Exception {
+        Ga gaDi = (Ga) cbGaDi.getSelectedItem();
+        Ga gaDen = (Ga) cbGaDen.getSelectedItem();
+        if (gaDi == null || gaDen == null) throw new Exception("Ga đi hoặc ga đến chưa được chọn.");
+
+        long base = giaVeCoBanDAO.getGiaCoBan(gaDi.getMaGa(), gaDen.getMaGa());
+        if (base <= 0) throw new Exception("Không tìm thấy giá cơ bản cho cặp ga.");
+
+        // Lấy loại toa từ ToaDAO bằng cách lấy danh sách toa của tàu hiện tại rồi tìm maToa
+        ToaDAO tdao = new ToaDAO();
+        String maTau = null;
+        if (maChuyenTauHienTai != null) {
+            for (ChuyenTau ct : ketQua) {
+                if (maChuyenTauHienTai.equals(ct.getMaChuyenTau())) {
+                    maTau = ct.getMaTau();
+                    break;
+                }
+            }
+        }
+        if (maTau == null) throw new Exception("Không xác định được mã tàu để tra loại toa.");
+
+        List<Toa> toas = tdao.getDanhSachToaByMaTau(maTau);
+        String loaiToa = null;
+        if (toas != null) {
+            for (Toa t : toas) {
+                if (t.getMaToa().equals(cho.getMaToa())) {
+                    loaiToa = t.getLoaiToa();
+                    break;
+                }
+            }
+        }
+        if (loaiToa == null) throw new Exception("Không tìm thấy thông tin loại toa cho ghế.");
+
+        double heSoToa = loaiChoDatDAO.getHeSoByLoaiToa(loaiToa);
+        double heSoLoaiVe = loaiVeDAO.getHeSoByMaLoaiVe(maLoaiVe);
+
+        double price = base * heSoToa * heSoLoaiVe;
+        long rounded = roundUpToNextTen(Math.round(price));
+        return rounded;
+    }
+
+    private void capNhatTongTienUI() {
+        long total = 0L;
+        for (Long v : danhSachGiaVe.values()) total += v == null ? 0L : v;
+        lblTotalPrice.setText("Tổng tiền vé: " + formatVnd(total));
+    }
+
+    private String formatVnd(long amount) {
+        try {
+            java.text.NumberFormat nf = java.text.NumberFormat.getInstance(new Locale("vi", "VN"));
+            return nf.format(amount) + " VNĐ";
+        } catch (Exception e) {
+            return amount + " VNĐ";
+        }
     }
 }
