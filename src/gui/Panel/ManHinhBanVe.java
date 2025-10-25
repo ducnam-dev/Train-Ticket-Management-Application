@@ -349,13 +349,13 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         infoScrollPanel.add(new JLabel("Chọn ghế để thêm thông tin."));
         infoScrollPanel.add(Box.createVerticalGlue());
-//        infoScrollPanel.setPreferredSize(new Dimension(400, 300));
+//        infoScrollPanel.setPreferredSize(new Dimension(800, 300));
 
         thongTinKhachScrollPane = new JScrollPane(infoScrollPanel);
         thongTinKhachScrollPane.setBorder(null);
         thongTinKhachScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        thongTinKhachScrollPane.setPreferredSize(new Dimension(400, 300));
-        panel.add(thongTinKhachScrollPane, BorderLayout.NORTH);
+        thongTinKhachScrollPane.setPreferredSize(new Dimension(700, 300));
+        panel.add(thongTinKhachScrollPane, BorderLayout.CENTER);
 
         SwingUtilities.invokeLater(this::capNhatThongTinKhachUI);
 
@@ -396,9 +396,14 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         fullSummary.add(summaryPanel, BorderLayout.EAST);
         datCanhKhuVuc(fullSummary);
 
+        JPanel footerPanel = new JPanel();
+        footerPanel.setLayout(new BoxLayout(footerPanel, BoxLayout.Y_AXIS));
+        footerPanel.setOpaque(false);
 
-        panel.add(buttonPanel);
-        panel.add(fullSummary);
+        footerPanel.add(fullSummary);
+        footerPanel.add(buttonPanel);
+
+        panel.add(footerPanel, BorderLayout.SOUTH);
 
         return panel;
     }
