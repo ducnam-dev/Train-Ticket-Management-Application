@@ -15,7 +15,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -163,7 +162,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         leftContainer.add(leftScrollPane, BorderLayout.CENTER);
 
         JPanel rightPanel = createKhuVucThongTinKhach();
-        rightPanel.add(createKhuVucTongTien(), BorderLayout.SOUTH);
+//        rightPanel.add(createKhuVucTongTien(), BorderLayout.SOUTH);
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftContainer, rightPanel);
         split.setResizeWeight(0.75);
         split.setOneTouchExpandable(true);
@@ -254,10 +253,10 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         txtNguoiCaoTuoi = new JTextField(1);
         txtSinhVien = new JTextField(1);
 
-        loaiKhachSpinBoxPanel.add(createSpinBoxPanel("Người lớn (11-59 tuổi)", "1", null, txtNguoiLon));
-        loaiKhachSpinBoxPanel.add(createSpinBoxPanel("Trẻ em (6-10 tuổi)", "0", "-25%", txtTreCon));
-        loaiKhachSpinBoxPanel.add(createSpinBoxPanel("Người cao tuổi (> 60 tuổi)", "0", "-15%", txtNguoiCaoTuoi));
-        loaiKhachSpinBoxPanel.add(createSpinBoxPanel("Sinh viên (Thẻ SV)", "0", "-10%", txtSinhVien));
+        loaiKhachSpinBoxPanel.add(ToaPanelTangGiam("Người lớn (11-59 tuổi)", "1", null, txtNguoiLon));
+        loaiKhachSpinBoxPanel.add(ToaPanelTangGiam("Trẻ em (6-10 tuổi)", "0", "-25%", txtTreCon));
+        loaiKhachSpinBoxPanel.add(ToaPanelTangGiam("Người cao tuổi (> 60 tuổi)", "0", "-15%", txtNguoiCaoTuoi));
+        loaiKhachSpinBoxPanel.add(ToaPanelTangGiam("Sinh viên (Thẻ SV)", "0", "-10%", txtSinhVien));
 
         topRow.add(Box.createHorizontalStrut(20));
         topRow.add(loaiKhachSpinBoxPanel);
@@ -350,12 +349,13 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         infoScrollPanel.add(new JLabel("Chọn ghế để thêm thông tin."));
         infoScrollPanel.add(Box.createVerticalGlue());
-        infoScrollPanel.setPreferredSize(new Dimension(400, 300));
+//        infoScrollPanel.setPreferredSize(new Dimension(400, 300));
 
         thongTinKhachScrollPane = new JScrollPane(infoScrollPanel);
         thongTinKhachScrollPane.setBorder(null);
         thongTinKhachScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        panel.add(thongTinKhachScrollPane, BorderLayout.CENTER);
+        thongTinKhachScrollPane.setPreferredSize(new Dimension(400, 300));
+        panel.add(thongTinKhachScrollPane, BorderLayout.NORTH);
 
         SwingUtilities.invokeLater(this::capNhatThongTinKhachUI);
 
@@ -379,7 +379,165 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         //Đăng ký sự kiện
         cancelButton.addActionListener(this);
         nextButton.addActionListener(this);
-        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        JPanel fullSummary = new JPanel(new BorderLayout());
+        fullSummary.setBackground(Color.white);
+        fullSummary.setBorder(new EmptyBorder(5, 10, 5, 10));
+
+        JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        summaryPanel.setOpaque(false);
+        summaryPanel.add(new JLabel("Đã chọn: X/Y"));
+
+        lblTotalPrice = new JLabel("Tổng tiền vé: 0 VNĐ");
+        lblTotalPrice.setFont(lblTotalPrice.getFont().deriveFont(Font.BOLD, 14f));
+        lblTotalPrice.setForeground(new Color(255, 165, 0));
+        summaryPanel.add(lblTotalPrice);
+
+        fullSummary.add(summaryPanel, BorderLayout.EAST);
+        datCanhKhuVuc(fullSummary);
+
+
+        panel.add(buttonPanel);
+        panel.add(fullSummary);
+
+        return panel;
+    }
+
+    private JPanel createKhachPanel(TempKhachHang tempKhach) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        // Vẫn giữ border mờ để phân tách các form khách hàng
+        panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        String soCho = tempKhach.choDat.getSoCho();
+        String soThuTuToa = laySoThuTuToa(tempKhach.choDat.getMaToa());
+        String loaiKhachHienThi = getTenLoaiVeHienThi(tempKhach.maLoaiVe);
+
+        // --- Cố định kích thước cho các Field và ComboBox ---
+        final int FIELD_HEIGHT = 28;
+        final int W_TEXT = 120;
+        final int W_COMBO = 120;
+        final Dimension FIXED_FIELD_SIZE = new Dimension(W_TEXT, FIELD_HEIGHT);
+        final Dimension FIXED_COMBO_SIZE = new Dimension(W_COMBO, FIELD_HEIGHT);
+        final Dimension FIXED_TUOI_SIZE = new Dimension(50, FIELD_HEIGHT);
+
+        // --- 1. Header Row (Ghế, Loại khách, Giá) ---
+        JPanel headerRow = new JPanel(new BorderLayout());
+        headerRow.setOpaque(false);
+        headerRow.setBorder(new EmptyBorder(5, 0, 5, 0));
+        headerRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, FIELD_HEIGHT + 10)); // Cố định chiều cao
+
+        JPanel leftHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftHeader.setOpaque(false);
+        JLabel maGheLabel = new JLabel("Ghế: " + soCho + " / Toa: " + soThuTuToa);
+        maGheLabel.setFont(maGheLabel.getFont().deriveFont(Font.BOLD));
+        leftHeader.add(maGheLabel);
+
+        JComboBox<String> cbLoaiKhach = new JComboBox<>(getLoaiVeOptions());
+        cbLoaiKhach.setSelectedItem(loaiKhachHienThi);
+
+        // Cố định kích thước ComboBox
+        cbLoaiKhach.setPreferredSize(FIXED_COMBO_SIZE);
+        cbLoaiKhach.setMaximumSize(FIXED_COMBO_SIZE);
+
+        cbLoaiKhach.addActionListener(e -> {
+            String maMoi = getMaLoaiVeFromHienThi((String) cbLoaiKhach.getSelectedItem());
+            tempKhach.maLoaiVe = maMoi;
+
+            // Recompute price for this seat and update UI
+            try {
+                long gia = computeTicketPrice(tempKhach.choDat, tempKhach.maLoaiVe);
+                danhSachGiaVe.put(tempKhach.choDat.getMaCho(), gia);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Không thể tính lại giá: " + ex.getMessage(), "Lỗi tính giá", JOptionPane.ERROR_MESSAGE);
+                danhSachGiaVe.remove(tempKhach.choDat.getMaCho());
+            }
+            capNhatThongTinKhachUI();
+            capNhatTongTienUI();
+        });
+        leftHeader.add(cbLoaiKhach);
+        headerRow.add(leftHeader, BorderLayout.WEST);
+
+        JLabel giaLabel = new JLabel("Giá vé sẽ được tính");
+        giaLabel.setForeground(Color.BLUE);
+        headerRow.add(giaLabel, BorderLayout.EAST);
+
+        headerRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(headerRow);
+
+        // --- 2. Detail Grid (Họ tên, Tuổi, SDT, CCCD) ---
+        JPanel detailGrid = new JPanel(new GridLayout(2, 4, 10, 5));
+        detailGrid.setOpaque(false);
+        detailGrid.setBorder(new EmptyBorder(5, 0, 5, 0));
+        detailGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Đặt chiều cao ưu tiên cho Grid
+        int gridHeight = 2 * FIELD_HEIGHT + 10;
+        detailGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, gridHeight));
+
+
+        detailGrid.add(new JLabel("Họ và tên*"));
+        JTextField hoTenField = new JTextField(tempKhach.hoTen, 10);
+        detailGrid.add(hoTenField);
+        detailGrid.add(new JLabel("Tuổi"));
+        JTextField tuoiField = new JTextField(String.valueOf(tempKhach.tuoi > 0 ? tempKhach.tuoi : ""), 3);
+        detailGrid.add(tuoiField);
+
+        detailGrid.add(new JLabel("Số điện thoại"));
+        JTextField sdtField = new JTextField(tempKhach.sdt, 10);
+        detailGrid.add(sdtField);
+        detailGrid.add(new JLabel("CCCD*"));
+        JTextField cccdField = new JTextField(tempKhach.cccd, 10);
+        detailGrid.add(cccdField);
+
+        panel.add(detailGrid);
+
+        // --- 3. Cố định kích thước các TextField ---
+        hoTenField.setPreferredSize(FIXED_FIELD_SIZE);
+        hoTenField.setMaximumSize(FIXED_FIELD_SIZE);
+        tuoiField.setPreferredSize(FIXED_TUOI_SIZE);
+        tuoiField.setMaximumSize(FIXED_TUOI_SIZE);
+        sdtField.setPreferredSize(FIXED_FIELD_SIZE);
+        sdtField.setMaximumSize(FIXED_FIELD_SIZE);
+        cccdField.setPreferredSize(FIXED_FIELD_SIZE);
+        cccdField.setMaximumSize(FIXED_FIELD_SIZE);
+
+
+        // --- 4. Focus Listeners (Giữ nguyên) ---
+        hoTenField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.hoTen = hoTenField.getText(); }});
+        cccdField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.cccd = cccdField.getText(); }});
+        sdtField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.sdt = sdtField.getText(); }});
+        tuoiField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                try {
+                    tempKhach.tuoi = Integer.parseInt(tuoiField.getText().trim());
+                } catch (Exception e) {
+                    tempKhach.tuoi = 0;
+                }
+            }
+        });
+
+        // --- 5. Cập nhật label giá (Giữ nguyên) ---
+        Long giaTinh = danhSachGiaVe.get(tempKhach.choDat.getMaCho());
+        if (giaTinh != null) {
+            giaLabel.setText(formatVnd(giaTinh));
+        } else {
+            // thử tính giá nếu chưa có (ví dụ khi UI gọi)
+            try {
+                long gia = computeTicketPrice(tempKhach.choDat, tempKhach.maLoaiVe == null ? MA_VE_NL : tempKhach.maLoaiVe);
+                danhSachGiaVe.put(tempKhach.choDat.getMaCho(), gia);
+                giaLabel.setText(formatVnd(gia));
+            } catch (Exception ex) {
+                giaLabel.setText("Chưa có giá");
+            }
+        }
+
+        // --- 6. Cố định chiều cao tổng thể của panel khách hàng ---
+        int totalPanelHeight = FIELD_HEIGHT + 10 + gridHeight + 10;
+        panel.setPreferredSize(new Dimension(400, totalPanelHeight));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, totalPanelHeight));
 
         return panel;
     }
@@ -416,6 +574,42 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             capNhatThongTinKhachUI();
             capNhatTongTienUI();
         });
+    }
+
+
+    private void capNhatThongTinKhachUI() {
+        if (thongTinKhachScrollPane == null) {
+            System.out.println("Lỗi: thongTinKhachScrollPane chưa được khởi tạo.");
+            return;
+        }
+        JPanel infoScrollPanel = (JPanel) thongTinKhachScrollPane.getViewport().getView();
+        infoScrollPanel.removeAll();
+
+        List<TempKhachHang> danhSachTemp = new ArrayList<>(danhSachKhachHang.values());
+
+        if (danhSachTemp.isEmpty()) {
+            infoScrollPanel.add(new JLabel("Chưa có ghế nào được chọn."));
+            infoScrollPanel.add(Box.createVerticalGlue());
+            infoScrollPanel.revalidate();
+            infoScrollPanel.repaint();
+            return;
+        }
+
+        Vector<String> dsMaVeUuTien = taoDanhSachLoaiVeUuTien();
+        int soFormHienThi = danhSachTemp.size();
+
+        for (int i = 0; i < soFormHienThi; i++) {
+            TempKhachHang tempKhach = danhSachTemp.get(i);
+            if (i < dsMaVeUuTien.size()) {
+                tempKhach.maLoaiVe = dsMaVeUuTien.get(i);
+            }
+            JPanel khachPanel = createKhachPanel(tempKhach);
+            infoScrollPanel.add(khachPanel);
+        }
+
+        infoScrollPanel.add(Box.createVerticalGlue());
+        infoScrollPanel.revalidate();
+        infoScrollPanel.repaint();
     }
 
     // --- Helper: switch main frame to another panel ---
@@ -481,7 +675,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     // ====================
     // MODULE: SpinBox helpers
     // ====================
-    private JPanel createSpinBoxPanel(String labelText, String initialValue, String discountText, JTextField targetField) {
+    private JPanel ToaPanelTangGiam(String labelText, String initialValue, String discountText, JTextField targetField) {
         JPanel panel = new JPanel(new BorderLayout(5, 0));
         panel.setOpaque(false);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -900,146 +1094,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         return btn;
     }
 
-    private JPanel createKhachPanel(TempKhachHang tempKhach) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setOpaque(false);
-        panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        String soCho = tempKhach.choDat.getSoCho();
-        String soThuTuToa = laySoThuTuToa(tempKhach.choDat.getMaToa());
-        String loaiKhachHienThi = getTenLoaiVeHienThi(tempKhach.maLoaiVe);
-
-        JPanel headerRow = new JPanel(new BorderLayout());
-        headerRow.setOpaque(false);
-        headerRow.setBorder(new EmptyBorder(5, 0, 5, 0));
-
-        JPanel leftHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        leftHeader.setOpaque(false);
-        JLabel maGheLabel = new JLabel("Ghế: " + soCho + " / Toa: " + soThuTuToa);
-        maGheLabel.setFont(maGheLabel.getFont().deriveFont(Font.BOLD));
-        leftHeader.add(maGheLabel);
-
-        JComboBox<String> cbLoaiKhach = new JComboBox<>(getLoaiVeOptions());
-        cbLoaiKhach.setSelectedItem(loaiKhachHienThi);
-        cbLoaiKhach.setPreferredSize(new Dimension(120, 25));
-        cbLoaiKhach.setMaximumSize(new Dimension(120, 25));
-        cbLoaiKhach.addActionListener(e -> {
-            String maMoi = getMaLoaiVeFromHienThi((String) cbLoaiKhach.getSelectedItem());
-            tempKhach.maLoaiVe = maMoi;
-
-            // Recompute price for this seat and update UI
-            try {
-                long gia = computeTicketPrice(tempKhach.choDat, tempKhach.maLoaiVe);
-                danhSachGiaVe.put(tempKhach.choDat.getMaCho(), gia);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Không thể tính lại giá: " + ex.getMessage(), "Lỗi tính giá", JOptionPane.ERROR_MESSAGE);
-                danhSachGiaVe.remove(tempKhach.choDat.getMaCho());
-            }
-            capNhatThongTinKhachUI();
-            capNhatTongTienUI();
-        });
-        leftHeader.add(cbLoaiKhach);
-        headerRow.add(leftHeader, BorderLayout.WEST);
-
-        JLabel giaLabel = new JLabel("Giá vé sẽ được tính");
-        giaLabel.setForeground(Color.BLUE);
-        headerRow.add(giaLabel, BorderLayout.EAST);
-
-        headerRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(headerRow);
-
-        JPanel detailGrid = new JPanel(new GridLayout(2, 4, 10, 5));
-        detailGrid.setOpaque(false);
-        detailGrid.setBorder(new EmptyBorder(5, 0, 5, 0));
-
-        detailGrid.add(new JLabel("Họ và tên*"));
-        JTextField hoTenField = new JTextField(tempKhach.hoTen, 10);
-        detailGrid.add(hoTenField);
-        detailGrid.add(new JLabel("Tuổi"));
-        JTextField tuoiField = new JTextField(String.valueOf(tempKhach.tuoi > 0 ? tempKhach.tuoi : ""), 3);
-        detailGrid.add(tuoiField);
-
-        detailGrid.add(new JLabel("Số điện thoại"));
-        JTextField sdtField = new JTextField(tempKhach.sdt, 10);
-        detailGrid.add(sdtField);
-        detailGrid.add(new JLabel("CCCD*"));
-        JTextField cccdField = new JTextField(tempKhach.cccd, 10);
-        detailGrid.add(cccdField);
-
-        panel.add(detailGrid);
-
-        hoTenField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.hoTen = hoTenField.getText(); }});
-        cccdField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.cccd = cccdField.getText(); }});
-        sdtField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.sdt = sdtField.getText(); }});
-        tuoiField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                try {
-                    tempKhach.tuoi = Integer.parseInt(tuoiField.getText().trim());
-                } catch (Exception e) {
-                    tempKhach.tuoi = 0;
-                }
-            }
-        });
-
-        hoTenField.setMaximumSize(hoTenField.getPreferredSize());
-        tuoiField.setMaximumSize(tuoiField.getPreferredSize());
-        sdtField.setMaximumSize(sdtField.getPreferredSize());
-        cccdField.setMaximumSize(cccdField.getPreferredSize());
-
-        // Cập nhật label giá hiện tại nếu đã tính
-        Long giaTinh = danhSachGiaVe.get(tempKhach.choDat.getMaCho());
-        if (giaTinh != null) {
-            giaLabel.setText(formatVnd(giaTinh));
-        } else {
-            // thử tính giá nếu chưa có (ví dụ khi UI gọi)
-            try {
-                long gia = computeTicketPrice(tempKhach.choDat, tempKhach.maLoaiVe == null ? MA_VE_NL : tempKhach.maLoaiVe);
-                danhSachGiaVe.put(tempKhach.choDat.getMaCho(), gia);
-                giaLabel.setText(formatVnd(gia));
-            } catch (Exception ex) {
-                giaLabel.setText("Chưa có giá");
-            }
-        }
-
-        return panel;
-    }
-
-    private void capNhatThongTinKhachUI() {
-        if (thongTinKhachScrollPane == null) {
-            System.out.println("Lỗi: thongTinKhachScrollPane chưa được khởi tạo.");
-            return;
-        }
-        JPanel infoScrollPanel = (JPanel) thongTinKhachScrollPane.getViewport().getView();
-        infoScrollPanel.removeAll();
-
-        List<TempKhachHang> danhSachTemp = new ArrayList<>(danhSachKhachHang.values());
-
-        if (danhSachTemp.isEmpty()) {
-            infoScrollPanel.add(new JLabel("Chưa có ghế nào được chọn."));
-            infoScrollPanel.add(Box.createVerticalGlue());
-            infoScrollPanel.revalidate();
-            infoScrollPanel.repaint();
-            return;
-        }
-
-        Vector<String> dsMaVeUuTien = taoDanhSachLoaiVeUuTien();
-        int soFormHienThi = danhSachTemp.size();
-
-        for (int i = 0; i < soFormHienThi; i++) {
-            TempKhachHang tempKhach = danhSachTemp.get(i);
-            if (i < dsMaVeUuTien.size()) {
-                tempKhach.maLoaiVe = dsMaVeUuTien.get(i);
-            }
-            JPanel khachPanel = createKhachPanel(tempKhach);
-            infoScrollPanel.add(khachPanel);
-        }
-
-        infoScrollPanel.add(Box.createVerticalGlue());
-        infoScrollPanel.revalidate();
-        infoScrollPanel.repaint();
-    }
 
     // ====================
     // MODULE: Event handlers (Mouse)
