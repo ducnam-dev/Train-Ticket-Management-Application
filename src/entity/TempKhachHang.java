@@ -15,4 +15,20 @@ public class TempKhachHang {
         this.choDat = choDat;
         // Bắt đầu với thông tin ghế để dễ dàng truy vấn
     }
+
+    /**
+     * Phương thức này chuyển MaLoaiVe thành tên hiển thị (tương tự như trong ManHinhBanVe).
+     * @return Tên loại vé dễ đọc.
+     */
+    public String tenLoaiVeHienThi() {
+        if (maLoaiVe == null) return "Chưa xác định";
+        return switch (maLoaiVe) {
+            case "VT01" -> "Người lớn";
+            case "VT02" -> "Trẻ em";
+            case "VT03" -> "Người cao tuổi";
+            case "VT04" -> "Sinh viên";
+            default -> "Khác";
+        };
+    }
+
 }
