@@ -25,14 +25,7 @@ public class GaDao {
         return instance;
     }
 
-    private static final String URL = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyBanVeTau;trustServerCertificate=true";
-    private static final String USER = "sa";
-    private static final String PASS = "sapassword";
 
-    /**
-     * Lấy danh sách tên ga từ CSDL.
-     * @return Vector chứa tên tất cả các ga, hoặc Vector rỗng nếu có lỗi.
-     */
     // Trong GaDao.java
     public Vector<Ga> layDanhSachGa() {
         Vector<Ga> danhSachGa = new Vector<>();

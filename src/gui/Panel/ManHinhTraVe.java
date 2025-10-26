@@ -289,11 +289,11 @@ public class ManHinhTraVe extends JPanel {
 // à thì ra là thông tin giả lập thôi, không lấy từ DAO
     private void hienThiThongTinVe(Ve ve) {
         lblTenKHValue.setText(ve.getKhachHang() != null ? ve.getKhachHang() : "N/A");
-        lblSDTValue.setText("0799014365"); // Giả lập dữ liệu SĐT (cần lấy từ DAO)
-        lblTuyenDuongValue.setText("Sài Gòn - Hà Nội"); // Giả lập (cần lấy từ DAO)
-        lblToaValue.setText("05"); // Giả lập
-        lblThoiGianValue.setText("09:00:00 18/12/2025"); // Giả lập
-        lblSoGheValue.setText("A01"); // Giả lập
+        lblSDTValue.setText(""); // Giả lập dữ liệu SĐT (cần lấy từ DAO)
+        lblTuyenDuongValue.setText(""); // Giả lập (cần lấy từ DAO)
+        lblToaValue.setText(""); // Giả lập
+        lblThoiGianValue.setText(""); // Giả lập
+        lblSoGheValue.setText(""); // Giả lập
         lblGiaGocValue.setText(String.format("%,.0f VNĐ", ve.getGia()));
 
         double tienHoanTra = ve.getGia() * 0.9;
@@ -326,7 +326,10 @@ public class ManHinhTraVe extends JPanel {
     // =========================================================================
 
     public static void main(String[] args) {
-        try { UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel"); } catch (Exception e) {}
+        try { UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel"); }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Demo Màn hình Trả vé");
