@@ -5,14 +5,19 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Vector;
 
 /**
  * Lớp này tạo giao diện Quản lý Khuyến Mãi.
  * Chức năng: Tạo, Sửa, Kết thúc, Gia hạn KM.
  */
-public class ManHinhQuanLyKhuyenMai extends JPanel {
+public class ManHinhQuanLyKhuyenMai extends JPanel implements ActionListener { // Implement ActionListener
 
     // =================================================================================
     // CÁC MÀU SẮC VÀ FONT (Dùng lại từ ManhinhQuanLyChuyenTau)
@@ -22,6 +27,9 @@ public class ManHinhQuanLyKhuyenMai extends JPanel {
     private static final Font FONT_BOLD_14 = new Font("Segoe UI", Font.BOLD, 14);
     private static final Font FONT_PLAIN_14 = new Font("Segoe UI", Font.PLAIN, 14);
     private static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 28);
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DecimalFormat VND_FORMAT = new DecimalFormat("###,###,##0");
+
 
     // Khai báo các component
     private JTextField txtMaKM;
@@ -34,6 +42,9 @@ public class ManHinhQuanLyKhuyenMai extends JPanel {
     private JTextArea txtAreaMoTa;
     private JTable table;
     private DefaultTableModel tableModel;
+
+    // Các nút chức năng
+    private JButton btnThem, btnSua, btnKetThuc, btnGiaHan, btnLamMoi, btnThemDK;
 
 
     public ManHinhQuanLyKhuyenMai() {
@@ -67,6 +78,7 @@ public class ManHinhQuanLyKhuyenMai extends JPanel {
 
         // Load dữ liệu ban đầu
         loadDataToTable();
+        lamMoiForm(); // Reset/Clear form
     }
 
     /**
@@ -92,7 +104,7 @@ public class ManHinhQuanLyKhuyenMai extends JPanel {
 
         // Mã KM
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0; fieldsPanel.add(new JLabel("Mã KM:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; txtMaKM = new JTextField(15); fieldsPanel.add(txtMaKM, gbc);
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; txtMaKM = new JTextField(15); txtMaKM.setEditable(false); fieldsPanel.add(txtMaKM, gbc);
 
         // Tên KM
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0; fieldsPanel.add(new JLabel("Tên KM:"), gbc);
@@ -100,11 +112,11 @@ public class ManHinhQuanLyKhuyenMai extends JPanel {
 
         // Ngày Bắt Đầu
         gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0; fieldsPanel.add(new JLabel("Ngày bắt đầu:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0; dateChooserBatDau = new JDateChooser(); fieldsPanel.add(dateChooserBatDau, gbc);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0; dateChooserBatDau = new JDateChooser(); dateChooserBatDau.setDateFormatString("dd/MM/yyyy"); fieldsPanel.add(dateChooserBatDau, gbc);
 
         // Ngày Kết Thúc
         gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0; fieldsPanel.add(new JLabel("Ngày kết thúc:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0; dateChooserKetThuc = new JDateChooser(); fieldsPanel.add(dateChooserKetThuc, gbc);
+        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0; dateChooserKetThuc = new JDateChooser(); dateChooserKetThuc.setDateFormatString("dd/MM/yyyy"); fieldsPanel.add(dateChooserKetThuc, gbc);
 
         // Loại Áp Dụng (VE_DON / HOA_DON)
         gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0; fieldsPanel.add(new JLabel("Áp dụng cho:"), gbc);
@@ -159,7 +171,6 @@ public class ManHinhQuanLyKhuyenMai extends JPanel {
 
     /**
      * Tạo panel chứa các trường cho Điều kiện Khuyến Mãi (LoaiKhach, SoLuong,...)
-     * Giả định đây là khu vực để nhập dữ liệu cho bảng DieuKienKhuyenMai.
      */
     private JPanel createDieuKienPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
@@ -179,7 +190,8 @@ public class ManHinhQuanLyKhuyenMai extends JPanel {
         panel.add(txtGiaTriDK);
 
         // Nút Thêm Điều kiện
-        JButton btnThemDK = new JButton("Thêm điều kiện");
+        btnThemDK = new JButton("Thêm điều kiện");
+        btnThemDK.addActionListener(this); // Đăng ký sự kiện
         panel.add(btnThemDK);
 
         // Bảng nhỏ hiển thị các điều kiện đã thêm (cho giao diện)
@@ -195,23 +207,18 @@ public class ManHinhQuanLyKhuyenMai extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         buttonPanel.setBackground(Color.WHITE);
 
-        JButton btnThem = new JButton("Tạo Khuyến Mãi");
-        JButton btnSua = new JButton("Cập Nhật");
-        JButton btnKetThuc = new JButton("Kết Thúc KM");
-        JButton btnGiaHan = new JButton("Gia Hạn KM");
-        JButton btnLamMoi = new JButton("Làm Mới");
+        btnThem = new JButton("Tạo Khuyến Mãi");
+        btnSua = new JButton("Cập Nhật");
+        btnKetThuc = new JButton("Kết Thúc KM");
+        btnGiaHan = new JButton("Gia Hạn KM");
+        btnLamMoi = new JButton("Làm Mới");
 
-        // Thiết lập sự kiện
-        btnThem.addActionListener(e -> { JOptionPane.showMessageDialog(this, "Thêm KM..."); /* Logic DAO */ });
-        btnSua.addActionListener(e -> { JOptionPane.showMessageDialog(this, "Sửa KM..."); /* Logic DAO */ });
-        btnKetThuc.addActionListener(e -> {
-            // Logic kết thúc: Cập nhật TrangThai = 'DaKetThuc' và NgayKetThuc = Hôm nay
-            JOptionPane.showMessageDialog(this, "Kết thúc KM...");
-        });
-        btnGiaHan.addActionListener(e -> {
-            // Logic gia hạn: Cập nhật NgayKetThuc = Ngày mới từ DateChooser
-            JOptionPane.showMessageDialog(this, "Gia hạn KM...");
-        });
+        // Đăng ký sự kiện
+        btnThem.addActionListener(this);
+        btnSua.addActionListener(this);
+        btnKetThuc.addActionListener(this);
+        btnGiaHan.addActionListener(this);
+        btnLamMoi.addActionListener(this);
 
         buttonPanel.add(btnThem);
         buttonPanel.add(btnSua);
@@ -266,17 +273,20 @@ public class ManHinhQuanLyKhuyenMai extends JPanel {
      * [Giả định] Đổ dữ liệu mẫu lên bảng
      */
     private void loadDataToTable() {
-        // Đây là logic giả định, trong thực tế cần truy vấn CSDL
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        // Đây là logic giả định, trong thực tế cần truy vấn CSDL (Ví dụ: KhuyenMaiDAO.getAll())
+        tableModel.setRowCount(0); // Xóa dữ liệu cũ
 
         Object[][] data = {
-                {"KM_TE_1_6", "Trẻ em 1/6", "2026-06-01", "2026-06-01", "VE_DON", "30.0%", "0", "HoatDong"},
-                {"KM_4VE", "Mua 4 vé -10%", "2025-10-01", "2026-01-31", "HOA_DON", "10.0%", "0", "HoatDong"},
-                {"KM_50K_500", "Giảm 50k / 500k", "2025-01-01", "2026-12-31", "HOA_DON", "0.0%", "50,000", "HoatDong"},
-                {"KM_HE_20", "Hè giảm 20%", "2025-06-01", "2025-08-31", "HOA_DON", "20.0%", "0", "DaKetThuc"}
+                {"KM001", "Trẻ em 1/6", "2026-06-01", "2026-06-01", "VE_DON", 30.0, 0, "HoatDong"},
+                {"KM002", "Mua 4 vé -10%", "2025-10-01", "2026-01-31", "HOA_DON", 10.0, 0, "HoatDong"},
+                {"KM003", "Giảm 50k / 500k", "2025-01-01", "2026-12-31", "HOA_DON", 0.0, 50000, "HoatDong"},
+                {"KM004", "Hè giảm 20%", "2025-06-01", "2025-08-31", "HOA_DON", 20.0, 0, "DaKetThuc"}
         };
 
         for (Object[] row : data) {
+            // Định dạng lại các giá trị số và ngày cho hiển thị trên bảng
+            row[5] = row[5] + "%";
+            row[6] = VND_FORMAT.format(row[6]);
             tableModel.addRow(row);
         }
     }
@@ -288,24 +298,184 @@ public class ManHinhQuanLyKhuyenMai extends JPanel {
         try {
             txtMaKM.setText(tableModel.getValueAt(row, 0).toString());
             txtTenKM.setText(tableModel.getValueAt(row, 1).toString());
-            // Cần logic phức tạp hơn để chuyển từ String sang Date cho JDateChooser
-            // dateChooserBatDau.setDate(df.parse(tableModel.getValueAt(row, 2).toString()));
-            // dateChooserKetThuc.setDate(df.parse(tableModel.getValueAt(row, 3).toString()));
+
+            // Chuyển đổi String sang Date cho JDateChooser
+            dateChooserBatDau.setDate(DATE_FORMAT.parse(tableModel.getValueAt(row, 2).toString()));
+            dateChooserKetThuc.setDate(DATE_FORMAT.parse(tableModel.getValueAt(row, 3).toString()));
             cbLoaiApDung.setSelectedItem(tableModel.getValueAt(row, 4).toString());
 
-            // Xử lý giá trị số
+            // Xử lý Phần Trăm Giảm (Đưa về giá trị 0.xx)
             String phanTramStr = tableModel.getValueAt(row, 5).toString().replace("%", "");
             spinnerPhanTram.setValue(Double.parseDouble(phanTramStr) / 100.0);
 
-            String tienGiamStr = tableModel.getValueAt(row, 6).toString().replace(",", "");
+            // Xử lý Tiền Giảm Trừ (Đưa về giá trị số nguyên)
+            String tienGiamStr = tableModel.getValueAt(row, 6).toString().replaceAll("[^\\d]", "");
             spinnerTienGiam.setValue(Integer.parseInt(tienGiamStr));
 
-            // TrangThai và Mô tả cần được load từ CSDL sau khi có MaKM
+            // Mô tả và Điều kiện cần được load từ CSDL sau khi có MaKM
+            txtAreaMoTa.setText("Chi tiết KM: " + txtMaKM.getText()); // Giả định
+
+            // Kích hoạt các nút Sửa/Kết thúc/Gia hạn
+            btnSua.setEnabled(true);
+            btnKetThuc.setEnabled("HoatDong".equals(tableModel.getValueAt(row, 7)));
+            btnGiaHan.setEnabled(true);
+            btnThem.setEnabled(false); // Không cho thêm khi đang sửa
+
+            // Xóa chọn bảng
+            table.clearSelection();
+
 
         } catch (Exception e) {
-            System.err.println("Lỗi đổ dữ liệu lên form: " + e.getMessage());
-            // e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi đổ dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    // =================================================================================
+    // LOGIC XỬ LÝ SỰ KIỆN (ActionListener)
+    // =================================================================================
+
+    /**
+     * Lấy dữ liệu từ form và thực hiện kiểm tra cơ bản.
+     * @return true nếu dữ liệu hợp lệ.
+     */
+    private boolean validateAndGetFormData() {
+        String tenKM = txtTenKM.getText().trim();
+        Date ngayBD = dateChooserBatDau.getDate();
+        Date ngayKT = dateChooserKetThuc.getDate();
+        double phanTram = (Double) spinnerPhanTram.getValue();
+        int tienGiam = (Integer) spinnerTienGiam.getValue();
+
+        if (tenKM.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tên Khuyến Mãi không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            txtTenKM.requestFocus();
+            return false;
+        }
+        if (ngayBD == null || ngayKT == null) {
+            JOptionPane.showMessageDialog(this, "Ngày Bắt Đầu và Ngày Kết Thúc không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (ngayKT.before(ngayBD)) {
+            JOptionPane.showMessageDialog(this, "Ngày Kết Thúc phải sau hoặc bằng Ngày Bắt Đầu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (phanTram > 0 && tienGiam > 0) {
+            JOptionPane.showMessageDialog(this, "Chỉ được chọn GIẢM THEO PHẦN TRĂM hoặc GIẢM THEO SỐ TIỀN, không được chọn cả hai.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (phanTram == 0.0 && tienGiam == 0) {
+            JOptionPane.showMessageDialog(this, "Phải chọn mức giảm giá.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        // Cần thêm logic kiểm tra trùng MaKM khi THÊM MỚI
+
+        return true;
+    }
+
+    private void lamMoiForm() {
+        txtMaKM.setText(generateNewMaKM()); // Tạo mã KM mới
+        txtTenKM.setText("");
+        dateChooserBatDau.setDate(null);
+        dateChooserKetThuc.setDate(null);
+        cbLoaiApDung.setSelectedIndex(0);
+        spinnerPhanTram.setValue(0.0);
+        spinnerTienGiam.setValue(0);
+        txtAreaMoTa.setText("");
+
+        // Kích hoạt/Vô hiệu hóa nút
+        btnThem.setEnabled(true);
+        btnSua.setEnabled(false);
+        btnKetThuc.setEnabled(false);
+        btnGiaHan.setEnabled(false);
+        table.clearSelection();
+    }
+
+    private String generateNewMaKM() {
+        // [Logic DAO]: Tìm mã KM lớn nhất và tăng lên 1
+        return "KM" + (int)(Math.random() * 9000 + 1000); // Mã giả định
+    }
+
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Object src = e.getSource();
+
+        if (src == btnLamMoi) {
+            lamMoiForm();
+            loadDataToTable(); // Tải lại bảng
+        }
+        else if (src == btnThem) {
+            handleThemKhuyenMai();
+        }
+        else if (src == btnSua) {
+            handleCapNhatKhuyenMai();
+        }
+        else if (src == btnKetThuc) {
+            handleKetThucKhuyenMai();
+        }
+        else if (src == btnGiaHan) {
+            handleGiaHanKhuyenMai();
+        }
+        else if (src == btnThemDK) {
+            JOptionPane.showMessageDialog(this, "Logic Thêm Điều Kiện sẽ được thực hiện tại đây (cần bảng DieuKienKhuyenMai).", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void handleThemKhuyenMai() {
+        if (!validateAndGetFormData()) return;
+
+        // [Logic DAO]: Gọi DAO.themKhuyenMai(...)
+        JOptionPane.showMessageDialog(this, "Tạo Khuyến Mãi thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        loadDataToTable();
+        lamMoiForm();
+    }
+
+    private void handleCapNhatKhuyenMai() {
+        if (txtMaKM.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn Khuyến Mãi cần Cập Nhật.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (!validateAndGetFormData()) return;
+
+        // [Logic DAO]: Gọi DAO.capNhatKhuyenMai(...)
+        JOptionPane.showMessageDialog(this, "Cập Nhật Khuyến Mãi [" + txtMaKM.getText() + "] thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        loadDataToTable();
+        lamMoiForm();
+    }
+
+    private void handleKetThucKhuyenMai() {
+        if (txtMaKM.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn Khuyến Mãi cần Kết Thúc.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có chắc chắn muốn KẾT THÚC Khuyến Mãi [" + txtMaKM.getText() + "] ngay lập tức?",
+                "Xác nhận Kết thúc", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // [Logic DAO]: Gọi DAO.ketThucKhuyenMai(MaKM, NgayHomNay)
+            JOptionPane.showMessageDialog(this, "Đã Kết Thúc Khuyến Mãi [" + txtMaKM.getText() + "].", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            loadDataToTable();
+            lamMoiForm();
+        }
+    }
+
+    private void handleGiaHanKhuyenMai() {
+        if (txtMaKM.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn Khuyến Mãi cần Gia Hạn.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        Date ngayKetThucMoi = dateChooserKetThuc.getDate();
+        if (ngayKetThucMoi == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn Ngày Kết Thúc mới cho Khuyến Mãi.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // [Logic DAO]: Gọi DAO.giaHanKhuyenMai(MaKM, NgayKetThucMoi)
+        JOptionPane.showMessageDialog(this, "Gia Hạn Khuyến Mãi [" + txtMaKM.getText() + "] đến " + DATE_FORMAT.format(ngayKetThucMoi) + " thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        loadDataToTable();
+        lamMoiForm();
     }
 
 

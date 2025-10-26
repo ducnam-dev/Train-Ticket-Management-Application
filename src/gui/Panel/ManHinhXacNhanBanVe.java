@@ -3,7 +3,6 @@ package gui.Panel;
 
 import entity.ChoDat;
 import entity.DieuKienKhuyenMai;
-import entity.TempKhachHang;
 import entity.KhuyenMai;
 import dao.KhuyenMaiDAO;
 import gui.MainFrame.BanVeDashboard;
@@ -13,6 +12,7 @@ import javax.swing.border.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.Method;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class ManHinhXacNhanBanVe extends JPanel {
     private Map<String, ChoDat> danhSachGhe;
-    private Map<String, TempKhachHang> danhSachKhach;
+    private Map<String, Object> danhSachKhach;
     private final Map<String, Long> danhSachGiaVe;
     private String maChuyen;
     private Date ngayDi;
@@ -51,20 +51,21 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private static final Color MAU_XANH_BTN = new Color(0, 180, 110);
     private static final Color MAU_CAM_BTN = new Color(255, 140, 0);
 
+
     public ManHinhXacNhanBanVe() {
         this(null, null, null, null, null);
     }
 
     public ManHinhXacNhanBanVe(Map<String, ChoDat> danhSachGheDaChon,
-                               Map<String, TempKhachHang> danhSachKhachHang,
+                               Map<String, ?> danhSachKhachHang, // Nhận Map với giá trị generic
                                String maChuyenTau,
                                Date ngayDi,
                                Map<String, Long> danhSachGiaVe) {
+
         this.danhSachGhe = new LinkedHashMap<>(danhSachGheDaChon);
-        this.danhSachKhach = new LinkedHashMap<>(danhSachKhachHang);
+        this.danhSachKhach = new LinkedHashMap<>((Map<String, Object>) danhSachKhachHang); // Ép kiểu an toàn (cần kiểm tra)
         this.maChuyen = maChuyenTau;
         this.ngayDi = ngayDi;
-        // keep a copy to avoid external modification
         this.danhSachGiaVe = danhSachGiaVe != null ? new HashMap<>(danhSachGiaVe) : new HashMap<>();
 
 
@@ -74,6 +75,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
         taiKhuyenMaiTuDB();
         capNhatTongVaGiaoDien();
     }
+
+
 
     private void khoiTaoGiaoDien() {
         setLayout(new BorderLayout());
@@ -95,6 +98,31 @@ public class ManHinhXacNhanBanVe extends JPanel {
         chia.setRightComponent(taoPanelHoaDon());
 
         add(chia, BorderLayout.CENTER);
+    }
+
+    private <T> T getKhachField(Object khach, String fieldName, Class<T> type) {
+        if (khach == null) return null;
+        try {
+            // Thử truy cập accessor method (cho Record)
+            Method method = khach.getClass().getMethod(fieldName);
+            Object result = method.invoke(khach);
+            return type.cast(result);
+        } catch (Exception e) {
+            // Thất bại, trả về null hoặc giá trị mặc định
+            return null;
+        }
+    }
+    // Helper để lấy tên loại vé (Vì Record ChiTietKhach có tenLoaiVeHienThi)
+    private String getTenLoaiVeHienThi(Object khach) {
+        String maLoaiVe = getKhachField(khach, "maLoaiVe", String.class);
+        if (maLoaiVe == null) return "Chưa xác định";
+        return switch (maLoaiVe) {
+            case "VT01" -> "Người lớn";
+            case "VT02" -> "Trẻ em";
+            case "VT03" -> "Người cao tuổi";
+            case "VT04" -> "Sinh viên";
+            default -> "Khác";
+        };
     }
 
     private JPanel taoPanelTrai() {
@@ -150,12 +178,21 @@ public class ManHinhXacNhanBanVe extends JPanel {
             List<ChoDat> choList = new ArrayList<>(danhSachGhe.values());
             choList.sort(Comparator.comparing(ChoDat::getMaToa).thenComparing(ChoDat::getSoCho));
             for (ChoDat c : choList) {
-                TempKhachHang tk = (danhSachKhach != null) ? danhSachKhach.get(c.getMaCho()) : null;
-                String ten = tk != null && tk.hoTen != null ? tk.hoTen : "-";
-                String tuoi = (tk != null && tk.tuoi != 0) ? String.valueOf(tk.tuoi) : "-";
-                String sdt = (tk != null && (tk.sdt != null && !tk.sdt.isEmpty())) ? tk.sdt : "-";
-                String cccd = (tk != null && tk.cccd != null && !tk.cccd.isEmpty()) ? tk.cccd : "-";
-                model.addRow(new Object[]{c.getMaToa() + "-" + c.getSoCho(), ten, tuoi, sdt, cccd});
+                // SỬA: Lấy đối tượng khách hàng dưới dạng Object
+                Object khach = (danhSachKhach != null) ? danhSachKhach.get(c.getMaCho()) : null;
+
+                // SỬA: Sử dụng helper để truy cập dữ liệu
+                String ten = getKhachField(khach, "hoTen", String.class);
+                Integer tuoiObj = getKhachField(khach, "tuoi", Integer.class);
+                String sdt = getKhachField(khach, "sdt", String.class);
+                String cccd = getKhachField(khach, "cccd", String.class);
+
+                String tenStr = (ten != null && !ten.isEmpty()) ? ten : "-";
+                String tuoiStr = (tuoiObj != null && tuoiObj > 0) ? String.valueOf(tuoiObj) : "-";
+                String sdtStr = (sdt != null && !sdt.isEmpty()) ? sdt : "-";
+                String cccdStr = (cccd != null && !cccd.isEmpty()) ? cccd : "-";
+
+                model.addRow(new Object[]{c.getMaToa() + "-" + c.getSoCho(), tenStr, tuoiStr, sdtStr, cccdStr});
             }
         } else {
             model.addRow(new Object[]{"-", "Chưa có khách", "-", "-", "-"});
@@ -315,17 +352,19 @@ public class ManHinhXacNhanBanVe extends JPanel {
             // Nhóm các ghế có cùng loại vé và đơn giá
             Map<String, MapGroup> groups = new LinkedHashMap<>();
 
-            for (Map.Entry<String, TempKhachHang> entry : danhSachKhach.entrySet()) {
+            // SỬA: Lặp qua danhSachKhach (kiểu Object)
+            for (Map.Entry<String, Object> entry : danhSachKhach.entrySet()) {
                 String maCho = entry.getKey();
-                TempKhachHang khach = entry.getValue();
-                String maLoaiVe = khach.maLoaiVe;
-                Long giaDonVi = danhSachGiaVe.get(maCho); // Giá đã được tính (đơn giá + chiết khấu nếu có)
+                Object khach = entry.getValue(); // Đối tượng ChiTietKhach/Record
 
-                if (giaDonVi != null) {
-                    // Sử dụng mã loại vé làm key nhóm
+                // SỬA: Sử dụng helper để lấy các trường cần thiết
+                String maLoaiVe = getKhachField(khach, "maLoaiVe", String.class);
+                Long giaDonVi = danhSachGiaVe.get(maCho); // Giá đã được tính
+
+                if (giaDonVi != null && maLoaiVe != null) {
                     if (!groups.containsKey(maLoaiVe)) {
-                        // Giá đơn vị ở đây là giá đã giảm (nếu có chiết khấu loại vé)
-                        groups.put(maLoaiVe, new MapGroup(khach.tenLoaiVeHienThi(), giaDonVi));
+                        // SỬA: Sử dụng helper để lấy tên hiển thị
+                        groups.put(maLoaiVe, new MapGroup(getTenLoaiVeHienThi(khach), giaDonVi));
                     }
                     groups.get(maLoaiVe).soLuong++;
                 }
@@ -336,14 +375,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
             for (Map.Entry<String, MapGroup> entry : groups.entrySet()) {
                 MapGroup group = entry.getValue();
 
-                // Giả định: Thuế VAT 10% được tính trên giá TRƯỚC VAT
-                // Trong hàm computeTicketPrice, bạn đã tính giá cuối cùng
-                // Để đơn giản, ta tính ngược lại:
-                double giaTruocVAT = group.giaDonVi / 1.1; // Giá trước VAT
-                double thueVAT = group.giaDonVi - giaTruocVAT; // Phần thuế VAT
-
-                double tongTienTruocVAT = giaTruocVAT * group.soLuong;
-                double tongThue = thueVAT * group.soLuong;
+                // Tính toán giá trước VAT và VAT
+                double giaTruocVAT = group.giaDonVi / 1.1;
                 double thanhTienCoVAT = group.giaDonVi * group.soLuong;
 
                 modelHd.addRow(new Object[]{

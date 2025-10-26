@@ -60,8 +60,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private String maToaHienTai = null;
 
     // Map tạm thời: MaChoDat -> TempKhachHang
-    private Map<String, TempKhachHang> danhSachKhachHang = new LinkedHashMap<>();
-
+    private Map<String, ChiTietKhach> danhSachKhachHang = new LinkedHashMap<>();
     // Map số lượng yêu cầu theo loại
     private Map<String, Integer> soLuongYeuCau = new HashMap<>();
 
@@ -77,6 +76,41 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
     private static final SimpleDateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private JScrollPane thongTinKhachScrollPane;
+
+    private static record ChiTietKhach(
+            ChoDat choDat,
+            String maLoaiVe,
+            String hoTen,
+            String cccd,
+            String sdt,
+            int tuoi
+    ) {
+        // PHƯƠNG THỨC HỖ TRỢ BẤT BIẾN (WITH)
+        // Dùng khi người dùng thay đổi loại vé
+        public ChiTietKhach withMaLoaiVe(String newMaLoaiVe) {
+            return new ChiTietKhach(this.choDat, newMaLoaiVe, this.hoTen, this.cccd, this.sdt, this.tuoi);
+        }
+
+        // Dùng khi người dùng thay đổi Họ tên
+        public ChiTietKhach withHoTen(String newHoTen) {
+            return new ChiTietKhach(this.choDat, this.maLoaiVe, newHoTen, this.cccd, this.sdt, this.tuoi);
+        }
+
+        // Dùng khi người dùng thay đổi CCCD
+        public ChiTietKhach withCccd(String newCccd) {
+            return new ChiTietKhach(this.choDat, this.maLoaiVe, this.hoTen, newCccd, this.sdt, this.tuoi);
+        }
+
+        // Dùng khi người dùng thay đổi SDT
+        public ChiTietKhach withSdt(String newSdt) {
+            return new ChiTietKhach(this.choDat, this.maLoaiVe, this.hoTen, this.cccd, newSdt, this.tuoi);
+        }
+
+        // Dùng khi người dùng thay đổi Tuổi
+        public ChiTietKhach withTuoi(int newTuoi) {
+            return new ChiTietKhach(this.choDat, this.maLoaiVe, this.hoTen, this.cccd, this.sdt, newTuoi);
+        }
+    }
 
     // DAO
     private ChoDatDAO choDatDao = new ChoDatDAO();
@@ -101,6 +135,23 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private JPanel loaiKhachSpinBoxPanel;
     private JTextField txtTongSoKhach;
     private JPanel pnlTongSoKhachControl;
+
+    // 1. Helper để cập nhật maLoaiVe (Dùng khi người dùng chọn ComboBox)
+
+    // 2. Helper chung để cập nhật bất kỳ trường nào (Dùng trong FocusListener)
+    private void updateKhachRecord(String maCho, String newValue, String fieldName) {
+        ChiTietKhach original = danhSachKhachHang.get(maCho);
+        if (original == null) return;
+
+        ChiTietKhach updated = switch (fieldName) {
+            case "hoTen" -> new ChiTietKhach(original.choDat(), original.maLoaiVe(), newValue, original.cccd(), original.sdt(), original.tuoi());
+            case "cccd" -> new ChiTietKhach(original.choDat(), original.maLoaiVe(), original.hoTen(), newValue, original.sdt(), original.tuoi());
+            case "sdt" -> new ChiTietKhach(original.choDat(), original.maLoaiVe(), original.hoTen(), original.cccd(), newValue, original.tuoi());
+            case "tuoi" -> new ChiTietKhach(original.choDat(), original.maLoaiVe(), original.hoTen(), original.cccd(), original.sdt(), parseTextFieldToInt(new JTextField(newValue)));
+            default -> original;
+        };
+        danhSachKhachHang.put(maCho, updated);
+    }
 
     // ====================
     // MODULE: Constructor + Layout chính
@@ -174,6 +225,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         mainPanel.add(split, BorderLayout.CENTER);
         return mainPanel;
     }
+
 
     private JPanel createKhuVucTimKiem() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -512,7 +564,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         return panel;
     }
 
-    private JPanel createKhachPanel(TempKhachHang tempKhach) {
+    private JPanel createKhachPanel(ChiTietKhach khach) { // SỬA: Nhận ChiTietKhach
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
@@ -520,9 +572,9 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        String soCho = tempKhach.choDat.getSoCho();
-        String soThuTuToa = laySoThuTuToa(tempKhach.choDat.getMaToa());
-        String loaiKhachHienThi = getTenLoaiVeHienThi(tempKhach.maLoaiVe);
+        String soCho = khach.choDat().getSoCho(); // SỬA: Truy cập qua accessor
+        String soThuTuToa = laySoThuTuToa(khach.choDat().getMaToa()); // SỬA: Truy cập qua accessor
+        String loaiKhachHienThi = getTenLoaiVeHienThi(khach.maLoaiVe()); // SỬA: Truy cập qua accessor
 
         // --- Cố định kích thước cho các Field và ComboBox ---
         final int FIELD_HEIGHT = 28;
@@ -553,15 +605,21 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         cbLoaiKhach.addActionListener(e -> {
             String maMoi = getMaLoaiVeFromHienThi((String) cbLoaiKhach.getSelectedItem());
-            tempKhach.maLoaiVe = maMoi;
+
+            // SỬA: Tạo bản sao mới của Record với maLoaiVe được cập nhật và thay thế nó trong Map
+            ChiTietKhach updatedKhach = new ChiTietKhach(
+                    khach.choDat(), khach.maLoaiVe(), khach.hoTen(), khach.cccd(), khach.sdt(), khach.tuoi()
+            ).withMaLoaiVe(maMoi); // SỬ DỤNG PHƯƠNG THỨC WITH HỖ TRỢ BÊN DƯỚI
+
+            danhSachKhachHang.put(khach.choDat().getMaCho(), updatedKhach); // Cập nhật Map
 
             // Recompute price for this seat and update UI
             try {
-                long gia = computeTicketPrice(tempKhach.choDat, tempKhach.maLoaiVe);
-                danhSachGiaVe.put(tempKhach.choDat.getMaCho(), gia);
+                long gia = computeTicketPrice(updatedKhach.choDat(), updatedKhach.maLoaiVe());
+                danhSachGiaVe.put(updatedKhach.choDat().getMaCho(), gia);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Không thể tính lại giá: " + ex.getMessage(), "Lỗi tính giá", JOptionPane.ERROR_MESSAGE);
-                danhSachGiaVe.remove(tempKhach.choDat.getMaCho());
+                danhSachGiaVe.remove(updatedKhach.choDat().getMaCho());
             }
             capNhatThongTinKhachUI();
             capNhatTongTienUI();
@@ -588,55 +646,54 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
 
         detailGrid.add(new JLabel("Họ và tên*"));
-        JTextField hoTenField = new JTextField(tempKhach.hoTen, 10);
+        JTextField hoTenField = new JTextField(khach.hoTen(), 10); // SỬA: Truy cập qua accessor
         detailGrid.add(hoTenField);
         detailGrid.add(new JLabel("Tuổi"));
-        JTextField tuoiField = new JTextField(String.valueOf(tempKhach.tuoi > 0 ? tempKhach.tuoi : ""), 3);
+        JTextField tuoiField = new JTextField(String.valueOf(khach.tuoi() > 0 ? khach.tuoi() : ""), 3); // SỬA: Truy cập qua accessor
         detailGrid.add(tuoiField);
 
         detailGrid.add(new JLabel("Số điện thoại"));
-        JTextField sdtField = new JTextField(tempKhach.sdt, 10);
+        JTextField sdtField = new JTextField(khach.sdt(), 10); // SỬA: Truy cập qua accessor
         detailGrid.add(sdtField);
         detailGrid.add(new JLabel("CCCD*"));
-        JTextField cccdField = new JTextField(tempKhach.cccd, 10);
+        JTextField cccdField = new JTextField(khach.cccd(), 10); // SỬA: Truy cập qua accessor
         detailGrid.add(cccdField);
 
         panel.add(detailGrid);
 
-        // --- 3. Cố định kích thước các TextField ---
-        hoTenField.setPreferredSize(FIXED_FIELD_SIZE);
-        hoTenField.setMaximumSize(FIXED_FIELD_SIZE);
-        tuoiField.setPreferredSize(FIXED_TUOI_SIZE);
-        tuoiField.setMaximumSize(FIXED_TUOI_SIZE);
-        sdtField.setPreferredSize(FIXED_FIELD_SIZE);
-        sdtField.setMaximumSize(FIXED_FIELD_SIZE);
-        cccdField.setPreferredSize(FIXED_FIELD_SIZE);
-        cccdField.setMaximumSize(FIXED_FIELD_SIZE);
+        // ... (Code cố định kích thước giữ nguyên)
 
-
-        // --- 4. Focus Listeners (Giữ nguyên) ---
-        hoTenField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.hoTen = hoTenField.getText(); }});
-        cccdField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.cccd = cccdField.getText(); }});
-        sdtField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) { tempKhach.sdt = sdtField.getText(); }});
+        // --- 4. Focus Listeners (Giữ nguyên - CẦN SỬA ĐỂ CẬP NHẬT RECORD) ---
+        hoTenField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) {
+            updateKhachRecord(khach.choDat().getMaCho(), hoTenField.getText(), "hoTen");
+        }});
+        cccdField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) {
+            updateKhachRecord(khach.choDat().getMaCho(), cccdField.getText(), "cccd");
+        }});
+        sdtField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) {
+            updateKhachRecord(khach.choDat().getMaCho(), sdtField.getText(), "sdt");
+        }});
         tuoiField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 try {
-                    tempKhach.tuoi = Integer.parseInt(tuoiField.getText().trim());
+                    int tuoiMoi = Integer.parseInt(tuoiField.getText().trim());
+                    updateKhachRecord(khach.choDat().getMaCho(), String.valueOf(tuoiMoi), "tuoi");
                 } catch (Exception e) {
-                    tempKhach.tuoi = 0;
+                    updateKhachRecord(khach.choDat().getMaCho(), "0", "tuoi");
                 }
             }
         });
 
+
         // --- 5. Cập nhật label giá (Giữ nguyên) ---
-        Long giaTinh = danhSachGiaVe.get(tempKhach.choDat.getMaCho());
+        Long giaTinh = danhSachGiaVe.get(khach.choDat().getMaCho()); // SỬA: Truy cập qua accessor
         if (giaTinh != null) {
             giaLabel.setText(formatVnd(giaTinh));
         } else {
             // thử tính giá nếu chưa có (ví dụ khi UI gọi)
             try {
-                long gia = computeTicketPrice(tempKhach.choDat, tempKhach.maLoaiVe == null ? MA_VE_NL : tempKhach.maLoaiVe);
-                danhSachGiaVe.put(tempKhach.choDat.getMaCho(), gia);
+                long gia = computeTicketPrice(khach.choDat(), khach.maLoaiVe()); // SỬA: Truy cập qua accessor
+                danhSachGiaVe.put(khach.choDat().getMaCho(), gia);
                 giaLabel.setText(formatVnd(gia));
             } catch (Exception ex) {
                 giaLabel.setText("Chưa có giá");
@@ -694,10 +751,10 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         JPanel infoScrollPanel = (JPanel) thongTinKhachScrollPane.getViewport().getView();
         infoScrollPanel.removeAll();
 
-        // Lấy danh sách khách hàng tạm thời (chỉ những ghế đang được chọn)
-        List<TempKhachHang> danhSachTemp = new ArrayList<>(danhSachKhachHang.values());
+        // SỬA: Lấy danh sách ChiTietKhach
+        List<ChiTietKhach> danhSachChiTiet = new ArrayList<>(danhSachKhachHang.values());
 
-        if (danhSachTemp.isEmpty()) {
+        if (danhSachChiTiet.isEmpty()) {
             infoScrollPanel.add(new JLabel("Chưa có ghế nào được chọn."));
             infoScrollPanel.add(Box.createVerticalGlue());
             infoScrollPanel.revalidate();
@@ -705,14 +762,9 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             return;
         }
 
-        // KHÔNG CÒN CẦN THIẾT: Vector<String> dsMaVeUuTien = taoDanhSachLoaiVeUuTien();
-
-        // Vòng lặp chỉ hiển thị các form khách hàng có trong danhSachKhachHang
-        for (TempKhachHang tempKhach : danhSachTemp) {
-            // **QUAN TRỌNG:** Giữ nguyên maLoaiVe hiện tại của tempKhach (đã được gán MA_VE_NL khi chọn ghế)
-            // và để người dùng tự chọn loại vé qua ComboBox trong createKhachPanel.
-
-            JPanel khachPanel = createKhachPanel(tempKhach);
+        // SỬA: Vòng lặp chỉ hiển thị các form ChiTietKhach
+        for (ChiTietKhach khach : danhSachChiTiet) {
+            JPanel khachPanel = createKhachPanel(khach);
             infoScrollPanel.add(khachPanel);
         }
 
@@ -736,6 +788,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                     "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+
 
     // --- Small helper to show instantiation error ---
     private void showInstantiationError(String className, Exception ex) {
@@ -1008,6 +1062,9 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     // ====================
     // MODULE: Chọn/Hủy ghế, cập nhật UI danh sách & form khách
     // ====================
+    // ====================
+// MODULE: Chọn/Hủy ghế, cập nhật UI danh sách & form khách
+// ====================
     private void xuLyChonGhe(JButton btnCho, ChoDat cho) {
         String maCho = cho.getMaCho();
 
@@ -1017,7 +1074,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             // --- Logic Hủy chọn ghế ---
             danhSachGheDaChon.remove(maCho);
             danhSachGiaVe.remove(maCho);
-            danhSachKhachHang.remove(maCho);
+            danhSachKhachHang.remove(maCho); // Xóa Record ChiTietKhach
             btnCho.setBackground(Color.LIGHT_GRAY);
             btnCho.setForeground(Color.BLACK);
         } else {
@@ -1029,18 +1086,22 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                 return;
             }
 
-            // Tạm gán loại vé ưu tiên ban đầu cho ghế này
-            TempKhachHang tempKhach = new TempKhachHang(cho);
-
-            // SỬA: Gán cứng loại vé mặc định vì không còn logic phân loại tự động
-            tempKhach.maLoaiVe = MA_VE_NL;
+            // SỬA: Tạo đối tượng ChiTietKhach (Record) mới
+            ChiTietKhach chiTietKhach = new ChiTietKhach(
+                    cho,            // choDat
+                    MA_VE_NL,       // maLoaiVe mặc định
+                    "",             // hoTen mặc định
+                    "",             // cccd mặc định
+                    "",             // sdt mặc định
+                    0               // tuoi mặc định
+            );
 
             // Tính giá cho ghế ngay khi chọn
             try {
-                long gia = computeTicketPrice(cho, tempKhach.maLoaiVe);
+                // SỬA: Truyền maLoaiVe từ Record mới
+                long gia = computeTicketPrice(cho, chiTietKhach.maLoaiVe());
                 danhSachGiaVe.put(maCho, gia);
             } catch (Exception ex) {
-                // Theo yêu cầu: nếu không tìm thấy base fare -> cảnh báo và không cho chọn
                 JOptionPane.showMessageDialog(this,
                         "Không thể tính giá cho ghế " + cho.getSoCho() + ": " + ex.getMessage(),
                         "Lỗi tính giá", JOptionPane.ERROR_MESSAGE);
@@ -1051,7 +1112,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             btnCho.setBackground(new Color(0, 123, 255));
             btnCho.setForeground(Color.WHITE);
 
-            danhSachKhachHang.put(maCho, tempKhach);
+            // SỬA: Thêm Record ChiTietKhach vào Map
+            danhSachKhachHang.put(maCho, chiTietKhach);
         }
 
         capNhatDanhSachGheDaChonUI();
@@ -1201,9 +1263,11 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         }
 
         // Bổ sung: Kiểm tra thông tin khách hàng bắt buộc (Họ tên, CCCD)
-        for (TempKhachHang tempKhach : danhSachKhachHang.values()) {
-            if (tempKhach.hoTen == null || tempKhach.hoTen.trim().isEmpty() ||
-                    tempKhach.cccd == null || tempKhach.cccd.trim().isEmpty()) {
+        for (ChiTietKhach khach : danhSachKhachHang.values()) {
+            // CẬP NHẬT: Sử dụng accessor methods (hoTen(), cccd()) của Record
+            if (khach.hoTen() == null || khach.hoTen().trim().isEmpty() ||
+                    khach.cccd() == null || khach.cccd().trim().isEmpty()) {
+
                 JOptionPane.showMessageDialog(this,
                         "Vui lòng nhập đầy đủ Họ tên và CCCD cho tất cả " + required + " khách hàng.",
                         "Lỗi", JOptionPane.WARNING_MESSAGE);
