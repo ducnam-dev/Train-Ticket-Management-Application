@@ -62,5 +62,34 @@ public class ChoDatDAO {
         }
         return danhSachChoDat;
     }
+    public static ChoDat getChoDatById(String maCho) {
+        ChoDat cd = null;
+        String sql = "SELECT MaCho, MaToa, SoCho, Khoang, Tang, TrangThai FROM ChoDat WHERE MaCho = ?";
 
+        // Sử dụng try-with-resources để đảm bảo tài nguyên được đóng
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setString(1, maCho);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    cd = new ChoDat(
+                            rs.getString("MaCho"),
+                            rs.getString("MaToa"),
+                            rs.getString("SoCho"),
+                            rs.getString("Khoang"),
+                            rs.getInt("Tang")
+                            // TrangThai không được dùng trong constructor hiện tại
+                    );
+                    // Giả sử trạng thái "Đã bán" trong CSDL là true
+                    String trangThaiDb = rs.getString("TrangThai");
+                    cd.setDaDat(trangThaiDb != null && trangThaiDb.equals("Đã bán"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tra cứu Chỗ đặt theo ID: " + e.getMessage());
+        }
+        return cd;
+    }
 }

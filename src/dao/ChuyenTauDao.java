@@ -1,4 +1,3 @@
-
 package dao;
 
 import java.sql.*;
@@ -15,11 +14,70 @@ import database.ConnectDB;
 import entity.lopEnum.TrangThaiChuyenTau;
 
 public class ChuyenTauDao {
-	private ArrayList<ChuyenTau> danhSachChuyenTau;
-    
+    private ArrayList<ChuyenTau> danhSachChuyenTau;
+
     public ChuyenTauDao() {
-    	danhSachChuyenTau = new ArrayList<ChuyenTau>();
+        danhSachChuyenTau = new ArrayList<ChuyenTau>();
     }
+
+    /**
+     * Tra cứu chi tiết Chuyến tàu bằng Mã Chuyến Tàu.
+     * Phương thức này cần thiết để các DAO khác (như VeDAO) có thể tra cứu Entity đầy đủ.
+     * @param maChuyenTau Mã chuyến tàu.
+     * @return Đối tượng ChuyenTau đầy đủ hoặc null.
+     */
+    public static ChuyenTau getChuyenTauById(String maChuyenTau) {
+        ChuyenTau ct = null;
+        String sql = "SELECT * FROM ChuyenTau WHERE MaChuyenTau = ?";
+
+        // Sử dụng try-with-resources để đảm bảo tài nguyên được đóng
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setString(1, maChuyenTau);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // 1. Lấy các mã khóa ngoại và dữ liệu cơ bản
+                    String maTau = rs.getString("MaTau");
+                    String maNV = rs.getString("MaNV");
+                    String maGaDiDb = rs.getString("MaGaKhoiHanh");
+                    String maGaDenDb = rs.getString("MaGaDen");
+                    String trangThai = rs.getString("TrangThai");
+
+                    // 2. Tra cứu Entity phụ thuộc (GIẢ ĐỊNH CÁC DAO NÀY ĐÃ TỒN TẠI VÀ CHẠY ĐƯỢC)
+                    TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
+                    Ga gaDi = GaDao.getGaById(maGaDiDb);
+                    Ga gaDen = GaDao.getGaById(maGaDenDb);
+                    Tau tau = TauDAO.getTauById(maTau);
+                    NhanVien nv = NhanVienDao.getNhanVienById(maNV);
+
+                    // 3. Khởi tạo đối tượng ChuyenTau
+                    ct = new ChuyenTau(
+                            maChuyenTau,
+                            maTau,
+                            rs.getDate("NgayKhoiHanh").toLocalDate(),
+                            rs.getTime("GioKhoiHanh").toLocalTime(),
+                            gaDi,
+                            gaDen,
+                            tau,
+                            rs.getDate("NgayDenDuKien").toLocalDate(),
+                            rs.getTime("GioDenDuKien").toLocalTime(),
+                            nv,
+                            tt
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tra cứu Chuyến tàu theo ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return ct;
+    }
+
+    // =================================================================================
+    // CÁC PHƯƠNG THỨC HIỆN CÓ CỦA BẠN (GIỮ NGUYÊN)
+    // =================================================================================
 
     public List<ChuyenTau> timChuyenTau(String gaXP, String gaKT, String ngayDi) {
         List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
@@ -28,36 +86,36 @@ public class ChuyenTauDao {
         String sql = "SELECT * FROM ChuyenTau WHERE MaGaKhoiHanh = ? AND MaGaDen = ? AND NgayKhoiHanh = ?";
 
         try {
-                Connection con = ConnectDB.getConnection();
-                try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-                    pstmt.setString(1, gaXP);
-                    pstmt.setString(2, gaKT);
-                    pstmt.setString(3, ngayDi); // Đã format lại
-                    try (ResultSet rs = pstmt.executeQuery()) {
-                        while (rs.next()) {
-                            String maChuyenTau = rs.getString("MaChuyenTau");
-                            String maTau = rs.getString("MaTau");
-                            String maNV = rs.getString("MaNV");
-                            String maGaDiDb = rs.getString("MaGaKhoiHanh");
-                            String maGaDenDb = rs.getString("MaGaDen");
-                            LocalDate ngayKH = rs.getDate("NgayKhoiHanh").toLocalDate();
-                            LocalTime gioKH = rs.getTime("GioKhoiHanh").toLocalTime();
-                            LocalDate ngayDen = rs.getDate("NgayDenDuKien").toLocalDate();
-                            LocalTime gioDen = rs.getTime("GioDenDuKien").toLocalTime();
-                            String trangThai = rs.getString("TrangThai");
+            Connection con = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+                pstmt.setString(1, gaXP);
+                pstmt.setString(2, gaKT);
+                pstmt.setString(3, ngayDi); // Đã format lại
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        String maChuyenTau = rs.getString("MaChuyenTau");
+                        String maTau = rs.getString("MaTau");
+                        String maNV = rs.getString("MaNV");
+                        String maGaDiDb = rs.getString("MaGaKhoiHanh");
+                        String maGaDenDb = rs.getString("MaGaDen");
+                        LocalDate ngayKH = rs.getDate("NgayKhoiHanh").toLocalDate();
+                        LocalTime gioKH = rs.getTime("GioKhoiHanh").toLocalTime();
+                        LocalDate ngayDen = rs.getDate("NgayDenDuKien").toLocalDate();
+                        LocalTime gioDen = rs.getTime("GioDenDuKien").toLocalTime();
+                        String trangThai = rs.getString("TrangThai");
 
-                            TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
+                        TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
 
-                            Ga gaDi = GaDao.getGaById(maGaDiDb);
-                            Ga gaDen = GaDao.getGaById(maGaDenDb);
-                            Tau tau = TauDAO.getTauById(maTau);
-                            NhanVien nv = NhanVienDao.getNhanVienById(maNV);
+                        Ga gaDi = GaDao.getGaById(maGaDiDb);
+                        Ga gaDen = GaDao.getGaById(maGaDenDb);
+                        Tau tau = TauDAO.getTauById(maTau);
+                        NhanVien nv = NhanVienDao.getNhanVienById(maNV);
 
-                            ChuyenTau ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
-                            danhSachChuyenTau.add(ct);
-                        }
+                        ChuyenTau ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
+                        danhSachChuyenTau.add(ct);
                     }
-                }// PreparedStatement is closed here
+                }
+            }// PreparedStatement is closed here
         } catch (SQLException e) {
             System.err.println("Lỗi khi tìm chuyến tàu: ");
             e.printStackTrace();
