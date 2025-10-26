@@ -8,23 +8,28 @@ import java.util.Vector;
 
 public class GaDao {
 
-	public static Ga getGaById(String maGaDi) {
-		return null;
-	}
-	private static GaDao instance;
-	public static GaDao getInstance() {
-        if (instance == null) {
-            // Đồng bộ hóa (synchronized) để đảm bảo an toàn đa luồng khi khởi tạo
-            synchronized (GaDao.class) {
-                if (instance == null) {
-                    // Tạo instance chỉ một lần
-                    instance = new GaDao();
+    public static Ga getGaById(String maGa) {
+        Ga ga = null;
+        String sql = "SELECT MaGa, TenGa, DiaChi FROM Ga WHERE MaGa = ?";
+
+        // ĐÃ SỬA: KHÔNG DÙNG TRY-WITH-RESOURCES CHO CON
+        Connection con = null;
+        try {
+            con = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+                pstmt.setString(1, maGa);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        ga = new Ga(rs.getString("MaGa"), rs.getString("TenGa"), rs.getString("DiaChi"));
+                    }
                 }
             }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tra cứu Ga theo ID: " + e.getMessage());
+            e.printStackTrace();
         }
-        return instance;
+        return ga;
     }
-
     private static final String URL = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyBanVeTau;trustServerCertificate=true";
     private static final String USER = "sa";
     private static final String PASS = "sapassword";

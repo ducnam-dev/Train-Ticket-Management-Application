@@ -7,9 +7,16 @@ import java.awt.*;
 
 import dao.VeDAO;
 import entity.Ve;
+// Import các Entity chi tiết cần thiết để hiển thị
+import entity.KhachHang;
+import entity.ChuyenTau;
+import entity.ChoDat;
+// Import lớp triển khai DAO (Giả định VeDAO là lớp triển khai)
+// import dao.VeDAO; // Vì VeDAO là class triển khai, không cần import VeDAOImpl
 
 /**
  * ManHinhTraVe: Tái hiện giao diện Trả vé theo mẫu, tích hợp logic tìm kiếm/hủy vé.
+ * Đã sửa lỗi hiển thị dữ liệu giả lập.
  */
 public class ManHinhTraVe extends JPanel {
 
@@ -23,7 +30,6 @@ public class ManHinhTraVe extends JPanel {
     private static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 18);
 
     // --- Components ---
-    // Đã xóa btnLichSuTraVe khỏi khai báo
     private JButton btnTimKiem, btnHuyBo, btnXacNhan;
     private JComboBox<String> cbTimKiemTheo;
     private JTextField txtMaVeHoacSDT;
@@ -43,9 +49,10 @@ public class ManHinhTraVe extends JPanel {
 
         // --- 2. KHỞI TẠO DAO ---
         try {
+            // SỬ DỤNG LỚP VeDAO TRỰC TIẾP (vì bạn xác nhận VeDAO là lớp triển khai)
             veDAO = new VeDAO();
         } catch (Exception e) {
-            System.err.println("Không thể khởi tạo VeDAOImpl: " + e.getMessage());
+            System.err.println("Không thể khởi tạo VeDAO: " + e.getMessage());
             JOptionPane.showMessageDialog(this,
                     "Lỗi hệ thống: Không thể kết nối với CSDL hoặc khởi tạo DAO.",
                     "Lỗi nghiêm trọng", JOptionPane.ERROR_MESSAGE);
@@ -286,16 +293,39 @@ public class ManHinhTraVe extends JPanel {
             }
         }
     }
-// à thì ra là thông tin giả lập thôi, không lấy từ DAO
+    // à thì ra là thông tin giả lập thôi, không lấy từ DAO
     private void hienThiThongTinVe(Ve ve) {
-        lblTenKHValue.setText(ve.getKhachHang() != null ? ve.getKhachHang() : "N/A");
-        lblSDTValue.setText("0799014365"); // Giả lập dữ liệu SĐT (cần lấy từ DAO)
-        lblTuyenDuongValue.setText("Sài Gòn - Hà Nội"); // Giả lập (cần lấy từ DAO)
-        lblToaValue.setText("05"); // Giả lập
-        lblThoiGianValue.setText("09:00:00 18/12/2025"); // Giả lập
-        lblSoGheValue.setText("A01"); // Giả lập
-        lblGiaGocValue.setText(String.format("%,.0f VNĐ", ve.getGia()));
+        KhachHang kh = ve.getKhachHangChiTiet();
+        ChuyenTau ct = ve.getChuyenTauChiTiet();
+        ChoDat cd = ve.getChoDatChiTiet();
 
+        // 1. THÔNG TIN KHÁCH HÀNG
+        lblTenKHValue.setText(ve.getKhachHang() != null ? ve.getKhachHang() : "N/A");
+        lblSDTValue.setText(kh != null ? kh.getSdt() : "---");
+
+        // 2. THÔNG TIN CHUYẾN TÀU & GA
+        if (ct != null && ct.getGaDi() != null && ct.getGaDen() != null) {
+            String tuyenDuong = ct.getGaDi().getTenGa() + " - " + ct.getGaDen().getTenGa();
+            String thoiGianKH = ct.getNgayKhoiHanh().toString() + " " + ct.getGioKhoiHanh().toString();
+
+            lblTuyenDuongValue.setText(tuyenDuong);
+            lblThoiGianValue.setText(thoiGianKH);
+        } else {
+            lblTuyenDuongValue.setText("---");
+            lblThoiGianValue.setText("---");
+        }
+
+        // 3. THÔNG TIN CHỖ ĐẶT
+        if (cd != null) {
+            lblToaValue.setText(cd.getMaToa());
+            lblSoGheValue.setText(cd.getSoCho());
+        } else {
+            lblToaValue.setText("---");
+            lblSoGheValue.setText("---");
+        }
+
+        // 4. GIÁ CẢ (Giữ nguyên)
+        lblGiaGocValue.setText(String.format("%,.0f VNĐ", ve.getGia()));
         double tienHoanTra = ve.getGia() * 0.9;
         lblTienHoanTraValue.setText(String.format("%,.0f VNĐ", tienHoanTra));
 

@@ -11,25 +11,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChoDatDAO {
-    // Trong lớp ChoDatDao (hoặc GheDao)
+
+    /**
+     * Lấy danh sách chỗ đặt theo Mã toa và Mã chuyến tàu.
+     * ĐÃ SỬA LỖI: KHÔNG dùng try-with-resources cho Connection.
+     */
     public List<ChoDat> getDanhSachChoDatByMaToaVaTrangThai(String maToa, String maChuyenTau) {
         List<ChoDat> danhSachChoDat = new ArrayList<>();
 
-        // Truy vấn được giữ nguyên
         String sql = "SELECT cd.MaCho, cd.MaToa, cd.SoCho, cd.Khoang, cd.Tang, "
-                // Trả về 1 (Đã đặt) nếu tìm thấy một vé cho MaCho này trên MaChuyenTau này
-                // VÀ trạng thái của vé KHÔNG PHẢI là 'DA-HUY'
                 + "CASE WHEN v.MaVe IS NOT NULL AND v.TrangThai <> N'DA-HUY' THEN 1 ELSE 0 END AS DaDatTrenChuyenTau "
                 + "FROM ChoDat cd "
                 + "LEFT JOIN Ve v ON cd.MaCho = v.MaChoDat AND v.MaChuyenTau = ? "
                 + "WHERE cd.MaToa = ? "
                 + "ORDER BY cd.SoCho";
 
+        Connection con = null; // KHAI BÁO BÊN NGOÀI
         try {
-            // Giả sử ConnectDB.getConnection() trả về Connection
-            Connection con = ConnectDB.getConnection();
+            con = ConnectDB.getConnection();
 
-            try(PreparedStatement pstmt = con.prepareStatement(sql)) {
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) { // Dùng try-with-resources cho pstmt
+
                 pstmt.setString(1, maChuyenTau);
                 pstmt.setString(2, maToa);
 
@@ -40,17 +42,10 @@ public class ChoDatDAO {
                         String khoang = rs.getString("Khoang");
 
                         int tang = rs.getInt("Tang");
+                        int daDatInt = rs.getInt("DaDatTrenChuyenTau");
 
-                        int daDatInt = rs.getInt("DaDatTrenChuyenTau"); // 1: Đã đặt, 0: Trống
-
-                        // **SỬ DỤNG CONSTRUCTOR ĐÃ CẬP NHẬT**
-                        // Constructor ChoDat sẽ tự động chuyển đổi trangThaiChoStr sang Enum
                         ChoDat choDat = new ChoDat(maCho, maToa, soCho, khoang, tang);
-
-                        // Cập nhật trạng thái đặt trên chuyến tàu cụ thể
                         choDat.setDaDat(daDatInt == 1);
-
-                        System.out.println("Danh sách cách chỗ tìm thấy" + choDat);
 
                         danhSachChoDat.add(choDat);
                     }
@@ -63,4 +58,39 @@ public class ChoDatDAO {
         return danhSachChoDat;
     }
 
+    /**
+     * Tra cứu chi tiết Chỗ đặt bằng Mã Chỗ (MaCho).
+     * ĐÃ SỬA LỖI: KHÔNG dùng try-with-resources cho Connection.
+     */
+    public static ChoDat getChoDatById(String maCho) {
+        ChoDat cd = null;
+        String sql = "SELECT MaCho, MaToa, SoCho, Khoang, Tang FROM ChoDat WHERE MaCho = ?";
+
+        Connection con = null; // KHAI BÁO BÊN NGOÀI
+        try {
+            con = ConnectDB.getConnection();
+
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) { // Dùng try-with-resources cho pstmt
+
+                pstmt.setString(1, maCho);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        cd = new ChoDat(
+                                rs.getString("MaCho"),
+                                rs.getString("MaToa"),
+                                rs.getString("SoCho"),
+                                rs.getString("Khoang"),
+                                rs.getInt("Tang")
+                        );
+                        cd.setDaDat(false);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tra cứu Chỗ đặt theo ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return cd;
+    }
 }
