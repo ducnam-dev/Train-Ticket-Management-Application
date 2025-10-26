@@ -6,3 +6,16 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+# Java build artifacts
+*.class
+*.jar
+
+# Build directories (quan trọng nhất)
+build/
+dist/
+out/
+classes/
+
+# macOS system files
+.DS_Store
