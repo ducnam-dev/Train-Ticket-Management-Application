@@ -19,7 +19,6 @@ public class KhuyenMai {
     private long giaTienGiamTru;     // VND
     private String loaiApDung;
     private String trangThai;
-
     private List<DieuKienKhuyenMai> dieuKienList = new ArrayList<>();
 
     public KhuyenMai() {}
