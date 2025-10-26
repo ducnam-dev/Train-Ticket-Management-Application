@@ -16,7 +16,7 @@ public class ToaDAO {
     // Phương thức LẤY DANH SÁCH TOA THEO MÃ TÀU (Cần thiết để biết các toa tàu có trong một chuyến tàu)
     // Lưu ý: Trong thiết kế DB của bạn, Toa liên kết với Tau (MaTau),
     // nên để tìm toa cho một chuyến tàu, ta cần tìm MaTau của chuyến tàu đó trước.
-    public List<Toa> getDanhSachToaByMaTau(String maTau) {
+    public List<Toa> layToaTheoMaTau(String maTau) {
         List<Toa> danhSachToa = new ArrayList<>();
 
         // Truy vấn lấy các toa thuộc một tàu

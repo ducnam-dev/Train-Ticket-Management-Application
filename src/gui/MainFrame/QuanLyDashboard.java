@@ -282,10 +282,12 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
     // MAIN
     // =================================================================================
     public static void main(String[] args) {
+        try{
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception e){
+            // Dùng giao diện mặc định
+        }
         SwingUtilities.invokeLater(() -> {
-            // Đảm bảo kết nối CSDL nếu cần cho các Panel
-            // ConnectDB.getInstance().connect();
-
             new QuanLyDashboard().setVisible(true);
         });
     }

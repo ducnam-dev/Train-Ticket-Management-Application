@@ -322,7 +322,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     // =================================================================================
     public static void main(String[] args) {
         try {
-            // Thiết lập Look and Feel
+            // Thiết lập Look and Feel để làm đẹp hơn chương trình
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         } catch (Exception e) {
             e.printStackTrace();
