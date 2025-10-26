@@ -259,7 +259,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         loaiKhachSpinBoxPanel.add(ToaPanelTangGiam("Sinh viên (Thẻ SV)", "0", "-10%", txtSinhVien));
 
         topRow.add(Box.createHorizontalStrut(20));
-        topRow.add(loaiKhachSpinBoxPanel);
+//        topRow.add(loaiKhachSpinBoxPanel);
         panel.add(topRow);
 
         pnlToa = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 10));
@@ -315,25 +315,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         datCanhKhuVuc(panel);
         return panel;
-    }
-
-    private JPanel createKhuVucTongTien() {
-        JPanel fullSummary = new JPanel(new BorderLayout());
-        fullSummary.setBackground(Color.white);
-        fullSummary.setBorder(new EmptyBorder(5, 10, 5, 10));
-
-        JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
-        summaryPanel.setOpaque(false);
-        summaryPanel.add(new JLabel("Đã chọn: X/Y"));
-
-        lblTotalPrice = new JLabel("Tổng tiền vé: 0 VNĐ");
-        lblTotalPrice.setFont(lblTotalPrice.getFont().deriveFont(Font.BOLD, 14f));
-        lblTotalPrice.setForeground(new Color(255, 165, 0));
-        summaryPanel.add(lblTotalPrice);
-
-        fullSummary.add(summaryPanel, BorderLayout.EAST);
-        datCanhKhuVuc(fullSummary);
-        return fullSummary;
     }
 
     private JPanel createKhuVucThongTinKhach() {
