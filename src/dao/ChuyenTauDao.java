@@ -25,7 +25,7 @@ public class ChuyenTauDao {
         List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
         // Định dạng ngày: SQL Server thường dùng yyyy-MM-dd. Đổi "30/09/2025" thành "2025-09-30"
 
-        String sql = "SELECT * FROM ChuyenTau WHERE MaGaKhoiHanh = ? AND MaGaDen = ? AND NgayKhoiHanh = ?";
+        String sql = "SELECT * FROM ChuyenTau WHERE GaDi = ? AND MaGaDen = ? AND GaDen = ?";
 
         try {
                 Connection con = ConnectDB.getConnection();
@@ -38,8 +38,8 @@ public class ChuyenTauDao {
                             String maChuyenTau = rs.getString("MaChuyenTau");
                             String maTau = rs.getString("MaTau");
                             String maNV = rs.getString("MaNV");
-                            String maGaDiDb = rs.getString("MaGaKhoiHanh");
-                            String maGaDenDb = rs.getString("MaGaDen");
+                            String maGaDiDb = rs.getString("GaDi");
+                            String maGaDenDb = rs.getString("GaDen");
                             LocalDate ngayKH = rs.getDate("NgayKhoiHanh").toLocalDate();
                             LocalTime gioKH = rs.getTime("GioKhoiHanh").toLocalTime();
                             LocalDate ngayDen = rs.getDate("NgayDenDuKien").toLocalDate();
