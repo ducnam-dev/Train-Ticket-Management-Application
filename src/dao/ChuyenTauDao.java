@@ -93,4 +93,41 @@ public class ChuyenTauDao {
         return false;
     }
 
+//    layChuyenTauBangMa
+    public static ChuyenTau getChuyenTauById(String maChuyenTau) {
+        ChuyenTau ct = null;
+        String sql = "SELECT * FROM ChuyenTau WHERE MaChuyenTau = ?";
+
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setString(1, maChuyenTau);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String maTau = rs.getString("MaTau");
+                    String maNV = rs.getString("MaNV");
+                    String maGaDiDb = rs.getString("GaDi");
+                    String maGaDenDb = rs.getString("GaDen");
+                    LocalDate ngayKH = rs.getDate("NgayKhoiHanh").toLocalDate();
+                    LocalTime gioKH = rs.getTime("GioKhoiHanh").toLocalTime();
+                    LocalDate ngayDen = rs.getDate("NgayDenDuKien").toLocalDate();
+                    LocalTime gioDen = rs.getTime("GioDenDuKien").toLocalTime();
+                    String trangThai = rs.getString("TrangThai");
+
+                    TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
+
+                    Ga gaDi = GaDao.getGaById(maGaDiDb);
+                    Ga gaDen = GaDao.getGaById(maGaDenDb);
+                    Tau tau = TauDAO.getTauById(maTau);
+                    NhanVien nv = NhanVienDao.getNhanVienById(maNV);
+
+                    ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tra cứu Chuyến Tàu theo ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return ct;
+    }
 }
