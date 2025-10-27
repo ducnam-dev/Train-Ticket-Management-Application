@@ -61,28 +61,29 @@ public class HoaDonDAO {
 
     /**
      * Truy vấn MaHD lớn nhất bắt đầu bằng một tiền tố dài (HD[CC][YYMMDD][MaNV]...).
-     * @param maHdPatternPrefix Tiền tố đầy đủ của MaHD
+     * @param maHdPatternPrefixDayDu Tiền tố đầy đủ của MaHD
      * @return MaHD lớn nhất tìm được, hoặc null nếu không tìm thấy.
      * @throws SQLException
      */
-    public static String getLastMaHoaDonByPrefix(String maHdPatternPrefix) throws SQLException {
+    // Trong HoaDonDAO.java
+    public static String getLastMaHoaDonByPrefix(String maHdPatternPrefixDayDu) throws SQLException {
         String lastMaHD = null;
-        // NOTE: Câu truy vấn SQL phải khớp với cấu trúc MaHD trong CSDL
+
+        // Sử dụng tiền tố đầy đủ (VD: HD012810250001) và thêm ký tự đại diện (%)
+        String fixedPrefix = maHdPatternPrefixDayDu + "%";
+
         String sql = "SELECT TOP 1 MaHD FROM HoaDon WHERE MaHD LIKE ? ORDER BY MaHD DESC";
 
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, maHdPatternPrefix);
+            pstmt.setString(1, fixedPrefix);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    lastMaHD = rs.getString("MaHD");
+                    lastMaHD = rs.getString("MaHD"); // Lấy mã đầy đủ (VD: HD0128102500010004)
                 }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-
         }
         return lastMaHD;
     }
