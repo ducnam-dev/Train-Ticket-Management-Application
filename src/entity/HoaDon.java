@@ -61,4 +61,18 @@ public class HoaDon {
     public int hashCode() {
         return Objects.hash(maHD);
     }
+
+    @Override
+    public String toString() {
+        return "HoaDon{" +
+                "maHD='" + maHD + '\'' +
+                ", maKhachHang='" + maKhachHang + '\'' +
+                ", maNVLap='" + maNVLap + '\'' +
+                ", maKM='" + maKM + '\'' +
+                ", tongTien=" + tongTien +
+                ", ngayLap=" + ngayLap +
+                ", phuongThuc='" + phuongThuc + '\'' +
+                ", loaiHoaDon='" + loaiHoaDon + '\'' +
+                '}';
+    }
 }

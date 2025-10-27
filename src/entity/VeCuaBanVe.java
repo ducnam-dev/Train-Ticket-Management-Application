@@ -62,4 +62,18 @@ public class VeCuaBanVe {
     public int hashCode() {
         return Objects.hash(maVe);
     }
+
+    @Override
+    public String toString() {
+        return "VeCuaBanVe{" +
+                "maVe='" + maVe + '\'' +
+                ", maChuyenTau='" + maChuyenTau + '\'' +
+                ", maChoDat='" + maChoDat + '\'' +
+                ", maNV='" + maNV + '\'' +
+                ", maKhachHang='" + maKhachHang + '\'' +
+                ", maLoaiVe='" + maLoaiVe + '\'' +
+                ", giaVe=" + giaVe +
+                ", trangThai='" + trangThai + '\'' +
+                '}';
+    }
 }

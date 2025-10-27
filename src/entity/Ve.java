@@ -7,6 +7,8 @@ public class Ve {
     private int soGhe;
     private double gia;
 
+    private String maLoaiVe; // Thêm thuộc tính mã loại vé
+
     private KhachHang khachHangChiTiet;
     private ChuyenTau chuyenTauChiTiet;
     private ChoDat choDatChiTiet;
@@ -22,6 +24,7 @@ public class Ve {
         this.soGhe = soGhe;
         this.gia = gia;
     }
+
 
     public String getId() {
         return id;

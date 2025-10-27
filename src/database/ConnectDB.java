@@ -60,4 +60,17 @@ public class ConnectDB {
         }
         return con;
     }
+
+    public static void close(Connection conn) {
+        if (conn != null) {
+            try {
+                // Kiểm tra xem conn có phải là kết nối toàn cục không
+                if (conn != con) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

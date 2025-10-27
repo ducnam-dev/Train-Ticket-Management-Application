@@ -1,10 +1,9 @@
 // java
 package gui.Panel;
 
-import dao.HoaDonDAO;
-import dao.VeCuaBanVeDAO;
+import dao.*;
+//import dao.VeCuaBanVeDAO;
 import entity.*;
-import dao.KhuyenMaiDAO;
 import gui.MainFrame.BanVeDashboard;
 
 import javax.swing.*;
@@ -45,17 +44,24 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private JButton btnXoaKhuyenMai;
     private JLabel lblThongTinKhuyenMai;
 
+    //UI Hoa don
+    private JLabel lblMaHoaDon; // FIX: Biến mới để hiển thị Mã HD
+    private JLabel lblNguoiLapHD; // FIX: Biến mới để hiển thị Người lập
+    private JLabel lblDienThoaiNV; // FIX: Biến mới để hiển thị SĐT NV
+
     // Khuyen mai dang ap dung
     private KhuyenMai khuyenMaiApDung = null;
 
     // DAO
     private KhuyenMaiDAO khuyenMaiDAO = new KhuyenMaiDAO();
+    private final KhachHangDAO khachHangDAO = new KhachHangDAO();
+    private final VeCuaBanVeDAO veDao = new VeCuaBanVeDAO();
 
     private static final Color MAU_XANH_BTN = new Color(0, 180, 110);
     private static final Color MAU_CAM_BTN = new Color(255, 140, 0);
 
     // Thêm dòng này để khai báo biến mock
-    private static  String MA_NV_LAP_HD_MOCK = "NVBV001";
+    private static  String MA_NV_LAP_HD_MOCK = "NVBV0001";
 
     public ManHinhXacNhanBanVe() {
         this(null, null, null, null, null);
@@ -530,6 +536,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         Tong t = new Tong();
         t.subtotal = subtotal;
         double discount = 0;
+
         if (km != null && km.getMaKM() != null && !km.getMaKM().isEmpty()) {
             if (km.getPhanTramGiam() > 0) {
                 discount = subtotal * km.getPhanTramGiam();
@@ -539,9 +546,11 @@ public class ManHinhXacNhanBanVe extends JPanel {
             discount = Math.min(discount, subtotal);
         }
         t.discount = discount;
+
         double taxable = Math.max(0, subtotal - discount);
         t.vat = taxable * 0.10;
         t.total = taxable + t.vat;
+
         return t;
     }
 
@@ -617,7 +626,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         String maHdPatternPrefix = "HD" + soHieuCa + ngayStr + maNV + "%";
 
         String lastSTT = null;
-        // NOTE: Giả định có hàm getLastMaHoaDonByPrefix trong VeCuaBanVeDAO
+        //Dùng hóa đơn DAO
         String lastMaHD = HoaDonDAO.getLastMaHoaDonByPrefix(maHdPatternPrefix);
 
         if (lastMaHD != null) {
@@ -626,29 +635,139 @@ public class ManHinhXacNhanBanVe extends JPanel {
         }
         return lastSTT;
     }
-    private void xacNhanThanhToan() {
-        // --- B1: Lấy dữ liệu cần thiết ---
+
+    /**
+     * Kiểm tra dữ liệu khách hàng trong danhSachKhach (dành cho mục đích debug).
+     */
+    private void kiemTraDuLieuKhach() {
+        System.out.println("--- DANH SÁCH KHÁCH HÀNG KIỂM TRA ---");
+
+        if (danhSachKhach == null) {
+            System.out.println("danhSachKhach là NULL.");
+            return;
+        }
+
+        // In toàn bộ Map, bao gồm key (Mã ghế) và value (Đối tượng Khách hàng)
+        danhSachKhach.forEach((key, value) -> {
+            System.out.println("Ghế [" + key + "]: " + value);
+
+            // Kiểm tra cụ thể trường 'maKhachHang'
+            String maKhach = getKhachField(value, "maKhachHang", String.class);
+            System.out.println("  -> MaKhachHang trích xuất: " + maKhach);
+        });
+        System.out.println("-------------------------------------");
+    }
+
+
+    // =====================================================================================
+// PHƯƠNG THỨC XỬ LÝ KHÁCH HÀNG (B1)
+// =====================================================================================
+    /**
+     * Xử lý Khách hàng: Tìm kiếm, tạo mới (nếu chưa có), và trả về Map các Entity KhachHang đã hoàn chỉnh MaKH.
+     *
+     * @param maKhachHangDaiDienOut (Output) Biến array 1 phần tử để chứa MaKhachHang đại diện cho Hóa đơn.
+     * @return Map<MaCho, KhachHang entity đã xử lý>.
+     * @throws SQLException Nếu có lỗi CSDL khi tạo mã KH.
+     */
+    private Map<String, KhachHang> xuLyVaTaoKhachHangEntities(String[] maKhachHangDaiDienOut) throws SQLException {
+        Map<String, KhachHang> danhSachKhachHangEntity = new HashMap<>();
+
+        // Nếu không có khách nào, trả về Map rỗng
+        if (danhSachKhach == null || danhSachKhach.isEmpty()) {
+            maKhachHangDaiDienOut[0] = "KHVL001"; // Gán mặc định
+            return danhSachKhachHangEntity;
+        }
+
+        // Lặp qua danh sách khách hàng từ UI để tạo/tìm Entity KhachHang
+        for (Map.Entry<String, Object> entry : danhSachKhach.entrySet()) {
+            Object khach = entry.getValue();
+
+            // Trích xuất các trường dữ liệu thô
+            String cccd = getKhachField(khach, "cccd", String.class);
+            String sdt = getKhachField(khach, "sdt", String.class);
+            String hoTen = getKhachField(khach, "hoTen", String.class);
+            Integer tuoi = getKhachField(khach, "tuoi", Integer.class);
+            String gioiTinh = getKhachField(khach, "gioiTinh", String.class); // Thêm nếu cần
+
+            KhachHang khachHangDaTonTai = null;
+            // Chỉ tìm khi có CCCD
+            if (cccd != null && !cccd.isEmpty()) {
+                khachHangDaTonTai = khachHangDAO.findKhachHangByCCCD(cccd);
+            }
+
+            KhachHang khachHangCanLuu;
+
+            if (khachHangDaTonTai == null) {
+                // TẠO MÃ KH MỚI VÀ ENTITY MỚI
+                String maKHNew = khachHangDAO.taoMaKhachHangMoi();
+
+                // TẠO THỰC THỂ KHÁCH HÀNG (Giả định constructor 5 tham số)
+                khachHangCanLuu = new KhachHang(
+                        maKHNew,
+                        hoTen,
+                        cccd,
+                        tuoi != null ? tuoi : 0,
+                        sdt
+                        // BỔ SUNG: Nếu có trường GioiTinh, bạn cần thêm tham số này vào constructor/setter
+                );
+            } else {
+                khachHangCanLuu = khachHangDaTonTai;
+            }
+
+            danhSachKhachHangEntity.put(entry.getKey(), khachHangCanLuu);
+
+            // Gán Mã KH đại diện: Mã KH của người đầu tiên trong Map
+            if (maKhachHangDaiDienOut[0] == null) {
+                maKhachHangDaiDienOut[0] = khachHangCanLuu.getMaKH();
+            }
+        }
+
+        // Nếu danh sách không rỗng nhưng chưa gán được MaKH đại diện (lỗi logic), dùng KHVL001
+        if (maKhachHangDaiDienOut[0] == null) {
+            maKhachHangDaiDienOut[0] = "KHVL001";
+        }
+
+        return danhSachKhachHangEntity;
+    }
+
+    // =====================================================================================
+// PHƯƠNG THỨC TẠO ENTITY VÀ GỌI TRANSACTION (B2, B3, B4)
+// =====================================================================================
+
+    private void thucHienGiaoDichBanVe(Map<String, KhachHang> danhSachKhachHangEntity, String maKhachHangDaiDienStr, KhachHang khachHangDaiDienObj) {
+
+        // --- B1: Lấy và Chuẩn bị Dữ liệu ---
         String maHD = taoMaHoaDon();
-        double tongTien = tinhTongHoaDon(tinhGiaVe(), khuyenMaiApDung).total;
+
+        Tong tongKetQua = tinhTongHoaDon(tinhGiaVe(), khuyenMaiApDung);
+        double tongTienPhaiThanhToan = tongKetQua.total;
         String phuongThuc = cbHinhThuc.getSelectedItem().toString();
-        // Giả định LoaiHoaDon là "Bán vé trực tiếp" hoặc "Online"
         String loaiHoaDon = "Bán vé trực tiếp";
+        String maNVLap = MA_NV_LAP_HD_MOCK;
 
-        // Giả định MaNVLap lấy từ thông tin đăng nhập (Cần sửa thực tế)
-        String maNVLap = "NVBV001";
+        // Kiểm tra tiền khách đưa
+        // ... (logic kiểm tra tiền khách đưa, giữ nguyên) ...
+        try {
+            String raw = txtTienKhachDua.getText().replaceAll("[^0-9]", "");
+            long tienKhachDua = Long.parseLong(raw);
+            if (tienKhachDua < Math.round(tongTienPhaiThanhToan)) {
+                JOptionPane.showMessageDialog(this, "Tiền khách đưa không đủ để thanh toán.", "Lỗi thanh toán", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số tiền khách đưa hợp lệ.", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-        // FIX: Giả định Khách hàng là Khách vãng lai mặc định (KHVL001),
-        // hoặc phải lấy từ Khách hàng đầu tiên trong danhSachKhach
-        String maKhachHang = "KHVL001";
 
         // --- B2: Tạo thực thể Hóa đơn (HoaDon) ---
         HoaDon hoaDon = new HoaDon(
                 maHD,
-                maKhachHang,
+                maKhachHangDaiDienStr, // FIX: Sử dụng Mã KH đã được xác định/tìm thấy
                 maNVLap,
                 khuyenMaiApDung != null ? khuyenMaiApDung.getMaKM() : null,
-                tongTien,
-                java.time.LocalDateTime.now(), // NgayLap là LocalDateTime
+                Math.round(tongTienPhaiThanhToan),
+                java.time.LocalDateTime.now(),
                 phuongThuc,
                 loaiHoaDon
         );
@@ -656,16 +775,27 @@ public class ManHinhXacNhanBanVe extends JPanel {
         // --- B3: Tạo danh sách thực thể Vé (VeCuaBanVe) ---
         List<VeCuaBanVe> danhSachVeMoi = new ArrayList<>();
 
-        // SỬA: Lặp qua danh sách ghế đã chọn và tạo thực thể Vé cho mỗi ghế
         for (Map.Entry<String, ChoDat> entry : danhSachGhe.entrySet()) {
             ChoDat cho = entry.getValue();
-            long giaVeLong = danhSachGiaVe.get(cho.getMaCho()); // Giá đã bao gồm chiết khấu loại vé và VAT
-            double giaVeFinal = giaVeLong * (1 - (khuyenMaiApDung != null ? khuyenMaiApDung.getPhanTramGiam() : 0));
 
-            // Lấy thông tin khách hàng liên quan đến ghế này (nếu có)
-            Object khach = danhSachKhach.get(cho.getMaCho());
-            String maKhach = (khach != null) ? getKhachField(khach, "maKhachHang", String.class) : maKhachHang;
-            String maLoaiVe = (khach != null) ? getKhachField(khach, "maLoaiVe", String.class) : "VT01";
+            // Lấy KhachHang Entity đã xử lý từ Map mới
+            KhachHang khachHangChoVe = danhSachKhachHangEntity.get(entry.getKey());
+
+            // Lấy giá cơ bản đã có chiết khấu loại vé (từ UI)
+            long giaVeBase = danhSachGiaVe.get(cho.getMaCho());
+
+            // Tính toán lại giá trị cuối cùng sau khi áp dụng chiết khấu KM (nếu có)
+            double phanTramGiam = (khuyenMaiApDung != null) ? khuyenMaiApDung.getPhanTramGiam() : 0.0;
+            double giaSauKhuyenMai = giaVeBase * (1 - phanTramGiam);
+
+            // Lấy MaKhachHang đã được xác định từ Entity
+            String maKhach = khachHangChoVe.getMaKH();
+
+            // Lấy MaLoaiVe (Giả định nằm trong đối tượng khách thô, hoặc lấy mặc định)
+            Object khachTho = danhSachKhach.get(cho.getMaCho());
+            String maLoaiVe = (khachTho != null) ? getKhachField(khachTho, "maLoaiVe", String.class) : "VT01";
+
+            kiemTraDuLieuKhach();
 
             // Tạo đối tượng VeCuaBanVe
             VeCuaBanVe ve = new VeCuaBanVe(
@@ -673,32 +803,95 @@ public class ManHinhXacNhanBanVe extends JPanel {
                     maChuyen,
                     cho.getMaCho(),
                     maNVLap,
-                    maKhach,
+                    maKhach, // FIX: MaKhach đã được xử lý
                     maLoaiVe,
-                    Math.round(giaVeFinal), // Chuyển đổi thành Long để phù hợp với decimal(18,0)
-                    "DA_BAN" // Trạng thái mặc định
+                    Math.round(giaSauKhuyenMai),
+                    "DA_BAN"
             );
             danhSachVeMoi.add(ve);
         }
 
         // --- B4: Gọi DAO để thực hiện Transaction ---
         try {
-            // Giả định VeCuaBanVeDAO đã tồn tại và có hàm banVeTau(HoaDon, List<VeCuaBanVe>, KhachHang)
-            // KhachHang cần được tạo từ Khach vãng lai mặc định hoặc từ danhSachKhach
-            KhachHang khachHang = new KhachHang();
-            khachHang.setMaKH(maKhachHang);
+            // FIX: Truyền KhachHang entity đại diện (đã có MaKH hợp lệ)
+            boolean success = veDao.banVeTrongTransaction(hoaDon, danhSachVeMoi, khachHangDaiDienObj);
 
-            VeCuaBanVeDAO veDao = new VeCuaBanVeDAO(); // Khởi tạo DAO
-            boolean success = veDao.banVeTau(hoaDon, danhSachVeMoi, khachHang);
 
             if (success) {
-                JOptionPane.showMessageDialog(this, "Thanh toán thành công! Mã HD: " + maHD, "Thành công", JOptionPane.INFORMATION_MESSAGE);
-                // Xóa form hoặc chuyển màn hình sau khi hoàn tất
+                System.out.println("Số lượng vé được thêm " + danhSachVeMoi.size());
+                for (VeCuaBanVe ve : danhSachVeMoi){
+                    System.out.println("Mã vé được tạo: " + ve.getMaVe());
+                }
+                System.out.println("Đã thêm được hóa đơn: " + maHD);
+                // Xây dựng thông báo chi tiết
+                StringBuilder sb = new StringBuilder("Thanh toán thành công!\n");
+                sb.append("Mã Hóa đơn: ").append(maHD).append("\n");
+                sb.append("--- Danh sách Mã Vé đã tạo ---\n");
+
+                // Lặp qua danh sách Entity đã được cập nhật MaVe từ DAO
+                for (VeCuaBanVe ve : danhSachVeMoi) {
+                    sb.append(ve.getMaVe()).append(" (Ghế: ").append(ve.getMaChoDat()).append(")\n");
+                }
+
+                JOptionPane.showMessageDialog(this,
+                        sb.toString(), // Hiển thị thông tin chi tiết
+                        "Thành công",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+
             } else {
-                JOptionPane.showMessageDialog(this, "Lỗi: Không thể hoàn tất giao dịch. Vui lòng kiểm tra lại.", "Lỗi thanh toán", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Giao dịch không hoàn tất. Vui lòng kiểm tra lại.", "Lỗi thanh toán", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Lỗi CSDL: " + e.getMessage(), "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Lỗi CSDL: Không thể hoàn tất giao dịch. " + e.getMessage(), "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+
+    // =====================================================================================
+// PHƯƠNG THỨC GỐC ĐƯỢC CẬP NHẬT
+// =====================================================================================
+
+    private void xacNhanThanhToan() {
+        String[] maKhachHangDaiDienArr = new String[1]; // Biến hứng Mã KH đại diện
+        Map<String, KhachHang> danhSachKhachHangEntity;
+
+        try {
+            // BƯỚC 1: Xử lý và tạo Entity Khách hàng
+            danhSachKhachHangEntity = xuLyVaTaoKhachHangEntities(maKhachHangDaiDienArr);
+
+            // FIX: Trích xuất MaKH đại diện và tìm Entity tương ứng
+            String maKhachHangDaiDienStr = maKhachHangDaiDienArr[0];
+
+// FIX: Xác định đối tượng KhachHang Entity đại diện đầy đủ
+            KhachHang khachHangDaiDienObj;
+
+            if (maKhachHangDaiDienStr.equals("KHVL001")) {
+                // Nếu là khách vãng lai, tạo đối tượng KHVL001 mặc định.
+                // CẦN ĐẢM BẢO constructor này khớp với lớp KhachHang của bạn (6 tham số giả định).
+                khachHangDaiDienObj = new KhachHang(
+                        "KHVL001",
+                        "Khách Vãng Lai",
+                        "000000000000", // CCCD mặc định (Nếu bảng yêu cầu NOT NULL)
+                        0,
+                        "",
+                        null
+                );
+            } else {
+                // Nếu là khách đã có dữ liệu, lấy đối tượng Entity đã được tạo/tìm thấy trong vòng lặp xử lý khách hàng.
+                // Vì đây là khách đầu tiên, ta có thể tìm nó trong Map danhSachKhachHangEntity.
+                // Ta lấy khách hàng bất kỳ từ Map, vì chúng ta đang giả định tất cả đều là một giao dịch
+                khachHangDaiDienObj = danhSachKhachHangEntity.values().iterator().next();
+            }
+
+
+
+            // BƯỚC 2, 3, 4: Tạo Entity, gọi Transaction
+            thucHienGiaoDichBanVe(danhSachKhachHangEntity, maKhachHangDaiDienStr, khachHangDaiDienObj);
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Lỗi CSDL nghiêm trọng: " + e.getMessage(), "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
@@ -706,6 +899,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private void ketThuc() {
         JOptionPane.showMessageDialog(this, "Kết thúc (chưa nối backend).");
     }
+
     /**
      * Lấy số hiệu ca làm việc hiện tại (Mặc định là "01").
      * Cần thay thế bằng logic truy vấn thực tế.
@@ -724,11 +918,22 @@ public class ManHinhXacNhanBanVe extends JPanel {
         try {
             // Lấy các thành phần
             String soHieuCa = getSoHieuCaHienTai();
-            String maNV = MA_NV_LAP_HD_MOCK;
+            String maNVDayDu = MA_NV_LAP_HD_MOCK;
+
+            // 1. TRÍCH XUẤT 4 KÝ TỰ CUỐI CỦA MÃ NV
+            String maNVRutGon;
+            if (maNVDayDu != null && maNVDayDu.length() >= 4) {
+                // Lấy 4 ký tự cuối (ví dụ: "V001")
+                maNVRutGon = maNVDayDu.substring(maNVDayDu.length() - 4);
+            } else {
+                // Trường hợp MaNV quá ngắn hoặc null, dùng mã an toàn (chỉ nên xảy ra khi debug)
+                maNVRutGon = "0000";
+            }
+
             String ngayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
 
             // Lấy số thứ tự cuối cùng và tính số tiếp theo
-            String lastSTTStr = getLastSoThuTuHoaDon(soHieuCa, maNV);
+            String lastSTTStr = getLastSoThuTuHoaDon(soHieuCa, maNVRutGon);
             int nextNumber = 1;
 
             if (lastSTTStr != null) {
@@ -743,7 +948,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
             String soThuTuStr = String.format("%04d", nextNumber);
 
             // Gộp và trả về mã mới
-            return "HD" + soHieuCa + ngayStr + maNV + soThuTuStr;
+            return "HD" + soHieuCa + ngayStr + maNVRutGon + soThuTuStr;
 
         } catch (SQLException e) {
             System.err.println("Lỗi CSDL khi tạo Mã Hóa Đơn: " + e.getMessage());
