@@ -28,11 +28,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 // [THÊM] Import lớp kết nối của bạn
+import dao.GaDao;
+import dao.TauDAO;
 import database.ConnectDB;
 //import gui.MainFrame.ManHinhDashboardQuanLy;
 
@@ -75,13 +77,8 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
         add(contentPanel, BorderLayout.CENTER);
 
         // [MỚI] Tải dữ liệu từ CSDL lên các ComboBox
-        try {
-            loadDuLieuMaTau();
-            loadDuLieuGa();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Lỗi khi tải dữ liệu từ CSDL: " + e.getMessage(), "Lỗi CSDL", JOptionPane.ERROR_MESSAGE);
-        }
+        loadDuLieuMaTau();
+        loadDuLieuGa();
     }
 
     // =================================================================================
@@ -273,74 +270,99 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
     // =================================================================================
 
     /**
-     * [MỚI] Tải danh sách Mã Tàu từ CSDL lên JComboBox
+     * Tải danh sách Mã Tàu từ DAO lên JComboBox.
      */
-    private void loadDuLieuMaTau() throws SQLException {
-        Connection conn = ConnectDB.getConnection();
-        String sql = "SELECT MaTau FROM Tau";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+    private void loadDuLieuMaTau() {
+        try {
+            // 1. Lấy dữ liệu từ DAO
+            List<String> danhSachMaTau = TauDAO.layDanhSachMaTau();
 
+            // 2. Cập nhật JComboBox
             DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) cbMaTau.getModel();
             model.removeAllElements(); // Xóa dữ liệu cũ
 
-            while (rs.next()) {
-                model.addElement(rs.getString("MaTau"));
+            for (String maTau : danhSachMaTau) {
+                model.addElement(maTau);
             }
+        } catch (SQLException e) {
+            // Xử lý lỗi CSDL
+            hienThiThongBaoLoi("Lỗi tải danh sách Mã Tàu: " + e.getMessage());
+            e.printStackTrace();
         }
-        // Lưu ý: Không đóng kết nối ở đây, để cho các hàm khác còn dùng
-        // ConnectDB.disconnect(); // KHÔNG NÊN
     }
 
     /**
-     * [MỚI] Tải danh sách Tên Ga từ CSDL lên 2 JComboBox
+     * Tải danh sách Tên Ga từ DAO lên 2 JComboBox.
      */
-    private void loadDuLieuGa() throws SQLException {
-        Connection conn = ConnectDB.getConnection();
-        String sql = "SELECT TenGa FROM Ga";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+    private void loadDuLieuGa() {
+        try {
+            // 1. Lấy dữ liệu từ DAO (SỬA ĐỔI TẠI ĐÂY: Dùng Vector thay vì List)
+            List<String> danhSachTenGa = GaDao.layDanhSachTenGa();
 
+            // 2. Cập nhật JComboBox
             DefaultComboBoxModel<String> modelGaDi = (DefaultComboBoxModel<String>) cbGaDi.getModel();
             DefaultComboBoxModel<String> modelGaDen = (DefaultComboBoxModel<String>) cbGaDen.getModel();
+
+            // Bạn có thể dùng constructor của DefaultComboBoxModel để nạp dữ liệu nhanh hơn
+            // hoặc tiếp tục dùng vòng lặp như sau:
+
             modelGaDi.removeAllElements();
             modelGaDen.removeAllElements();
 
-            while (rs.next()) {
-                String tenGa = rs.getString("TenGa");
+            for (String tenGa : danhSachTenGa) {
                 modelGaDi.addElement(tenGa);
                 modelGaDen.addElement(tenGa);
             }
+
+        /* // CÁCH KHÁC VÀ HIỆU QUẢ HƠN: Tạo Model mới từ Vector (áp dụng cho cả 2 JComboBox)
+        DefaultComboBoxModel<String> newModel = new DefaultComboBoxModel<>(danhSachTenGa);
+
+        cbGaDi.setModel(newModel);
+
+        // Cần tạo một model mới cho cbGaDen nếu bạn muốn model của nó độc lập
+        DefaultComboBoxModel<String> newModelGaDen = new DefaultComboBoxModel<>(danhSachTenGa);
+        cbGaDen.setModel(newModelGaDen);
+        */
+
+        } catch (SQLException e) {
+            // Xử lý lỗi CSDL
+            hienThiThongBaoLoi("Lỗi tải danh sách Tên Ga: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
+    // Phương thức giả định để hiển thị lỗi
+    private void hienThiThongBaoLoi(String message) {
+        System.err.println(message);
+        // Trong ứng dụng Swing thực tế, bạn sẽ dùng JOptionPane.showMessageDialog
+    }
 
     /**
      * Phương thức main để chạy ứng dụng.
      */
     public static void main(String[] args) {
         // [MỚI] Kết nối CSDL ngay khi ứng dụng khởi động
-        try {
-            ConnectDB.getInstance().connect();
-            System.out.println("Kết nối CSDL thành công!");
-        } catch (Exception e) {
-            System.err.println("Lỗi kết nối CSDL!");
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Không thể kết nối đến CSDL. Vui lòng kiểm tra lại.", "Lỗi kết nối", JOptionPane.ERROR_MESSAGE);
-            return; // Dừng ứng dụng nếu không kết nối được
-        }
-
-
-        try {
-            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            // Dùng giao diện mặc định
-        }
+//        try {
+//            ConnectDB.getInstance().connect();
+//            System.out.println("Kết nối CSDL thành công!");
+//        } catch (Exception e) {
+//            System.err.println("Lỗi kết nối CSDL!");
+//            e.printStackTrace();
+//            JOptionPane.showMessageDialog(null, "Không thể kết nối đến CSDL. Vui lòng kiểm tra lại.", "Lỗi kết nối", JOptionPane.ERROR_MESSAGE);
+//            return; // Dừng ứng dụng nếu không kết nối được
+//        }
+//
+//
+//        try {
+//            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (Exception e) {
+//            // Dùng giao diện mặc định
+//        }
 
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Panel Mở ca (Kiểm tra)");

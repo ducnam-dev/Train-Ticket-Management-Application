@@ -26,7 +26,7 @@ public class ConnectDB {
 
         if(!isConnectionValid) {
             // Logic tạo kết nối chỉ chạy khi kết nối là NULL hoặc không hợp lệ/đã đóng
-            String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyVeTauTest;trustServerCertificate=true";
+            String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyVeTauTest2;trustServerCertificate=true";
             String user = "sa";
             String password = "sapassword";
             try {
@@ -59,5 +59,18 @@ public class ConnectDB {
             }
         }
         return con;
+    }
+
+    public static void close(Connection conn) {
+        if (conn != null) {
+            try {
+                // Kiểm tra xem conn có phải là kết nối toàn cục không
+                if (conn != con) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

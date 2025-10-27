@@ -11,7 +11,7 @@ public class Ga {
 		this.tenGa = tenGa;
 		this.diaChi = diaChi;
 	}
-	
+	public Ga(){};
 	public String getMaGa() {
 		return maGa;
 	}

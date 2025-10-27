@@ -20,7 +20,15 @@ public class KhachHang {
         this.gioiTinh = gioiTinh;
     }
 
-//Viết ràng buộc vào đây
+    public KhachHang(String maKH, String hoTen, String soCCCD, int tuoi, String sdt) {
+        this.maKH = maKH;
+        this.hoTen = hoTen;
+        this.soCCCD = soCCCD;
+        this.tuoi = tuoi;
+        this.sdt = sdt;
+    }
+
+    //Viết ràng buộc vào đây
     public String getMaKH() {
         return maKH;
     }
