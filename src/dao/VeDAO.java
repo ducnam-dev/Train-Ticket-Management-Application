@@ -51,7 +51,7 @@ public class VeDAO {
                         String maChoDatDb = rs.getString("MaChoDat");
 
                         KhachHang kh = KhachHangDAO.getKhachHangById(maKHDb);
-                        ChuyenTau ct = ChuyenTauDao.getChuyenTauById(maCTDb);
+                        ChuyenTau ct = ChuyenTauDao.layChuyenTauBangMa(maCTDb);
                         //tạo ra thực thể chuyến tàu từ mã chuyến tàu có ga đi ga đến loại Ga
                         ChoDat cd = ChoDatDAO.getChoDatById(maChoDatDb);
 

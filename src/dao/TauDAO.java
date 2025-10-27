@@ -31,11 +31,39 @@ public class TauDAO {
     public TauDAO() {
     }
 
-    static Tau getTauById(String maTau) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * Lấy thông tin chi tiết về một đối tượng Tau dựa trên Mã Tàu.
+     * @param maTau Mã số hiệu tàu (varchar(10) trong CSDL).
+     * @return Đối tượng Tau nếu tìm thấy, ngược lại là null.
+     */
+    public static Tau getTauById(String maTau) {
+        Tau tau = null;
 
+        // Câu truy vấn: Lấy tất cả thông tin của tàu dựa trên số hiệu (MaTau)
+        String sql = "SELECT SoHieu, TrangThai FROM Tau WHERE SoHieu = ?";
+
+        // Sử dụng try-with-resources để đảm bảo Connection và PreparedStatement được đóng
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            // Đặt tham số cho truy vấn
+            pstmt.setString(1, maTau);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String soHieu = rs.getString("SoHieu");
+                    String trangThai = rs.getString("TrangThai");
+                    tau = new Tau(soHieu, trangThai);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm thông tin Tàu theo Mã " + maTau + ": " + e.getMessage());
+            e.printStackTrace();
+            // Trả về null nếu có lỗi CSDL
+            return null;
+        }
+        return tau;
+    }
     /**
      * Lấy danh sách Số Hiệu Tàu từ CSDL.
      * @return Danh sách các chuỗi SoHieu.

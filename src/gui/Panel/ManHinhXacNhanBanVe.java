@@ -462,7 +462,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
             none.setTenKM("-- Khong ap dung --");
             cbKhuyenMai.addItem(none);
 
-            List<KhuyenMai> promos = khuyenMaiDAO.getAllActivePromosWithConditions();
+            List<KhuyenMai> promos = khuyenMaiDAO.layTatCaKMHoatDongVoiDK();
             if (promos != null) {
                 System.out.println("Đã tải " + promos.size() + " khuyến mãi từ DB.");
                 for (KhuyenMai km : promos) {

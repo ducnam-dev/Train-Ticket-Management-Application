@@ -21,7 +21,10 @@ public class KhuyenMaiDAO {
      * query so sánh với '1' hoặc 'ACTIVE' (case-insensitive).
      * Nếu bạn dùng giá trị khác cho TrangThai, chỉnh WHERE tương ứng.
      */
-    public List<KhuyenMai> getAllActivePromosWithConditions() {
+//    getAllActivePromosWithConditions tên tiếng VIệt là lấyTấtCảKhuyếnMãiHoạtĐộngVớiĐiềuKiện
+
+
+    public List<KhuyenMai> layTatCaKMHoatDongVoiDK() {
         List<KhuyenMai> list = new ArrayList<>();
         String sql = "SELECT MaKM, TenKM, NgayBatDau, NgayKetThuc, MoTa, PhanTramGiam, GiaTienGiamTru, LoaiApDung, TrangThai " +
                 "FROM KhuyenMai " +

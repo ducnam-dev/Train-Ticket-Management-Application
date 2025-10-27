@@ -411,7 +411,7 @@ public class NhanVienDao {
         }
     }
 
-    private static NhanVien taoDoiTuongNhanVienTuResultSet(ResultSet rs) throws SQLException {
+    public static NhanVien taoDoiTuongNhanVienTuResultSet(ResultSet rs) throws SQLException {
         // 1. Trích xuất LocalDate trực tiếp từ ResultSet.
         // JDBC 4.2+ (bắt buộc) hỗ trợ toLocalDate() từ java.sql.Date.
 
