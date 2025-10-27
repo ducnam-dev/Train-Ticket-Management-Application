@@ -1,5 +1,7 @@
 package entity;
 
+import dao.ChuyenTauDao;
+
 import java.util.Objects;
 import java.time.LocalDate; // Giữ lại LocalDate để nhất quán
 

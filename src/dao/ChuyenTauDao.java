@@ -21,7 +21,7 @@ public class ChuyenTauDao {
         danhSachChuyenTau = new ArrayList<ChuyenTau>();
     }
 
-
+    //Ga bằng mã GA (gaXP, gaKT), ngày đi
     public List<ChuyenTau> timChuyenTau(String gaXP, String gaKT, String ngayDi) {
         List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
         // Định dạng ngày: SQL Server thường dùng yyyy-MM-dd. Đổi "30/09/2025" thành "2025-09-30"
@@ -49,13 +49,14 @@ public class ChuyenTauDao {
 
                         TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
 
-                        Ga gaDi = GaDao.getGaById(maGaDiDb);
-                        Ga gaDen = GaDao.getGaById(maGaDenDb);
+                        Ga gaDi = GaDao.layGaBangMa(maGaDiDb);
+                        Ga gaDen = GaDao.layGaBangMa(maGaDenDb);
                         Tau tau = TauDAO.getTauById(maTau);
                         NhanVien nv = NhanVienDao.getNhanVienById(maNV);
 
                         ChuyenTau ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
                         danhSachChuyenTau.add(ct);
+                        ct.toString();
                     }
                 }
             }
@@ -116,12 +117,16 @@ public class ChuyenTauDao {
 
                     TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
 
-                    Ga gaDi = GaDao.getGaById(maGaDiDb);
-                    Ga gaDen = GaDao.getGaById(maGaDenDb);
+                    System.out.println(maGaDiDb + " - " + maGaDenDb);
+
+                    Ga gaDi = GaDao.layGaBangTen(maGaDiDb);
+                    Ga gaDen = GaDao.layGaBangTen(maGaDenDb);
                     Tau tau = TauDAO.getTauById(maTau);
                     NhanVien nv = NhanVienDao.getNhanVienById(maNV);
 
                     ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
+                   System.out.println("Chuyến tàu tìm thấy:" + ct.toString());
+
                 }
             }
         } catch (SQLException e) {

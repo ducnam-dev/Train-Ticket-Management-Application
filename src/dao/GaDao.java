@@ -10,10 +10,61 @@ import java.util.Vector;
 
 public class GaDao {
 
-	public static Ga getGaById(String maGaDi) {
-		return null;
-	}
-	private static GaDao instance;
+	public static Ga layGaBangMa(String maGaDi) {
+		Ga ga = null;
+        String sql = "SELECT MaGa, TenGa, DiaChi FROM Ga WHERE MaGa = ?";
+
+        try (Connection con = ConnectDB.getInstance().getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setString(1, maGaDi);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    ga = new Ga(rs.getString("MaGa"), rs.getString("TenGa"), rs.getString("DiaChi"));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tải Ga theo MaGa: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return ga;
+    }
+
+    public static Ga layGaBangTen(String tenGa) {
+        Ga ga = null;
+
+        // SỬA SQL: Tìm kiếm theo cột TenGa thay vì MaGa
+        String sql = "SELECT MaGa, TenGa, DiaChi FROM Ga WHERE TenGa = ?";
+
+        // Sử dụng try-with-resources để đảm bảo Connection và PreparedStatement được đóng
+        try (Connection con = ConnectDB.getInstance().getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            // ĐẶT THAM SỐ: Gán biến 'tenGa' vào vị trí số 1 của câu truy vấn
+            pstmt.setString(1, tenGa);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Ánh xạ kết quả sang đối tượng Ga
+                    ga = new Ga(
+                            rs.getString("MaGa"),
+                            rs.getString("TenGa"),
+                            rs.getString("DiaChi")
+                    );
+                }
+            }
+
+        } catch (SQLException e) {
+            // Thêm thông tin về tham số tìm kiếm vào thông báo lỗi để dễ debug
+            System.err.println("Lỗi khi tải Ga theo TenGa: " + tenGa + " - Chi tiết: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return ga;
+    }
+
+
+    private static GaDao instance;
 	public static GaDao getInstance() {
         if (instance == null) {
             // Đồng bộ hóa (synchronized) để đảm bảo an toàn đa luồng khi khởi tạo

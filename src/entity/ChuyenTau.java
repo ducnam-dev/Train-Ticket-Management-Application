@@ -124,4 +124,22 @@ public class ChuyenTau {
     public void setThct(TrangThaiChuyenTau thct) {
         this.thct = thct;
     }
+
+
+    @Override
+    public String toString() {
+        return "ChuyenTau{" +
+                "maChuyenTau='" + maChuyenTau + '\'' +
+                ", maTau='" + maTau + '\'' +
+                ", ngayKhoiHanh=" + ngayKhoiHanh +
+                ", gioKhoiHanh=" + gioKhoiHanh +
+                ", gaDi=" + gaDi +
+                ", gaDen=" + gaDen +
+                ", tau=" + tau +
+                ", ngayDenDuKien=" + ngayDenDuKien +
+                ", gioDenDuKien=" + gioDenDuKien +
+                ", nhanVien=" + nhanVien +
+                ", thct=" + thct +
+                '}';
+    }
 }

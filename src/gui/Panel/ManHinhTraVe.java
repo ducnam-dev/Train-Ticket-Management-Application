@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.time.format.DateTimeFormatter;
 
 import dao.VeDAO;
 import entity.Ve;
@@ -124,7 +125,7 @@ public class ManHinhTraVe extends JPanel {
         searchRow.add(cbTimKiemTheo);
 
         // 3. Input
-        txtMaVeHoacSDT = new JTextField(15);
+        txtMaVeHoacSDT = new JTextField( 15);
         txtMaVeHoacSDT.setFont(FONT_PLAIN_14);
         searchRow.add(txtMaVeHoacSDT);
 
@@ -267,33 +268,10 @@ public class ManHinhTraVe extends JPanel {
         }
     }
 
-    private void xuLyHuyVe() {
-        if (veHienTai == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng tìm kiếm vé trước khi xác nhận trả vé.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
 
-        String lyDo = (String) cbLyDoTraVe.getSelectedItem();
-        if (lyDo == null || lyDo.equals("Chọn lý do trả vé")) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn lý do trả vé.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
 
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Xác nhận hủy vé " + veHienTai.getId() + " và hoàn trả " + lblTienHoanTraValue.getText() + "?",
-                "Xác nhận Trả vé", JOptionPane.YES_NO_OPTION);
+    // Trong lớp Form/UI của bạn
 
-        if (confirm == JOptionPane.YES_OPTION) {
-            // Giả sử getId() trả về Mã vé (String)
-            if (veDAO.huyVe(veHienTai.getId())) { // SỬ DỤNG veHienTai.getId() (String)
-                JOptionPane.showMessageDialog(this, "Trả vé thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                xoaTrangThongTin();
-            } else {
-                JOptionPane.showMessageDialog(this, "Lỗi khi cập nhật trạng thái vé.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-    // à thì ra là thông tin giả lập thôi, không lấy từ DAO
     private void hienThiThongTinVe(Ve ve) {
         KhachHang kh = ve.getKhachHangChiTiet();
         ChuyenTau ct = ve.getChuyenTauChiTiet();
@@ -331,6 +309,34 @@ public class ManHinhTraVe extends JPanel {
 
         btnXacNhan.setEnabled(true);
         cbLyDoTraVe.setEnabled(true);
+    }
+
+
+    private void xuLyHuyVe() {
+        if (veHienTai == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng tìm kiếm vé trước khi xác nhận trả vé.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String lyDo = (String) cbLyDoTraVe.getSelectedItem();
+        if (lyDo == null || lyDo.equals("Chọn lý do trả vé")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn lý do trả vé.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Xác nhận hủy vé " + veHienTai.getId() + " và hoàn trả " + lblTienHoanTraValue.getText() + "?",
+                "Xác nhận Trả vé", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Giả sử getId() trả về Mã vé (String)
+            if (veDAO.huyVe(veHienTai.getId())) { // SỬ DỤNG veHienTai.getId() (String)
+                JOptionPane.showMessageDialog(this, "Trả vé thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                xoaTrangThongTin();
+            } else {
+                JOptionPane.showMessageDialog(this, "Lỗi khi cập nhật trạng thái vé.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void xoaTrangThongTin() {

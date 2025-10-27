@@ -22,58 +22,45 @@ public class VeDAO {
     public Ve getChiTietVeChoTraVe(String maVe, String sdt) {
         Ve ve = null;
 
-        // Câu truy vấn JOIN phức tạp để lấy tất cả các mã khóa ngoại và dữ liệu thô
         String sql = "SELECT V.MaVe, V.GiaVe, V.TrangThai, V.MaKhachHang, V.MaChuyenTau, V.MaChoDat, " +
                 "KH.HoTen AS TenKhachHang, KH.SoDienThoai, " +
-                "CT.NgayKhoiHanh, CT.GioKhoiHanh, " +
-                "GA_DI.TenGa AS GaDi, GA_DEN.TenGa AS GaDen, " +
+                "CT.NgayKhoiHanh, CT.GioKhoiHanh, CT.GaDi, CT.GaDen, " + // <- added comma and space
                 "CD.SoCho, T.MaToa " +
                 "FROM Ve V " +
                 "LEFT JOIN KhachHang KH ON V.MaKhachHang = KH.MaKhachHang " +
                 "LEFT JOIN ChuyenTau CT ON V.MaChuyenTau = CT.MaChuyenTau " +
-                "LEFT JOIN Ga GA_DI ON CT.MaGaKhoiHanh = GA_DI.MaGa " +
-                "LEFT JOIN Ga GA_DEN ON CT.MaGaDen = GA_DEN.MaGa " +
                 "LEFT JOIN ChoDat CD ON V.MaChoDat = CD.MaCho " +
                 "LEFT JOIN Toa T ON CD.MaToa = T.MaToa " +
                 "WHERE (V.MaVe = ? OR KH.SoDienThoai = ?) AND V.TrangThai <> N'DA-HUY'";
 
-        Connection con = null; // Khai báo Connection bên ngoài khối try-with-resources
+        Connection con = null;
         try {
-            con = ConnectDB.getConnection(); // Lấy kết nối
-
-            // BẮT ĐẦU KHỐI TRY-WITH-RESOURCES CHÍNH
+            con = ConnectDB.getConnection();
             try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-
                 pstmt.setString(1, maVe != null && !maVe.isEmpty() ? maVe : "NULL_MAVE");
                 pstmt.setString(2, sdt != null && !sdt.isEmpty() ? sdt : "NULL_SDT");
 
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
                         ve = new Ve();
-
-                        // Gán các thuộc tính cơ bản
                         ve.setId(rs.getString("MaVe"));
                         ve.setGia(rs.getDouble("GiaVe"));
 
-                        // Lấy Mã Khóa ngoại
                         String maKHDb = rs.getString("MaKhachHang");
                         String maCTDb = rs.getString("MaChuyenTau");
                         String maChoDatDb = rs.getString("MaChoDat");
 
-                        // GỌI DAO PHỤ TRỢ (Tra cứu Entities chi tiết):
                         KhachHang kh = KhachHangDAO.getKhachHangById(maKHDb);
                         ChuyenTau ct = ChuyenTauDao.getChuyenTauById(maCTDb);
+                        //tạo ra thực thể chuyến tàu từ mã chuyến tàu có ga đi ga đến loại Ga
                         ChoDat cd = ChoDatDAO.getChoDatById(maChoDatDb);
 
-                        // Gán các Entity chi tiết vào Ve (Yêu cầu Entity Ve đã được sửa)
                         ve.setKhachHangChiTiet(kh);
                         ve.setChuyenTauChiTiet(ct);
                         ve.setChoDatChiTiet(cd);
 
-                        // Gán thuộc tính UI cần thiết (dùng thuộc tính từ Entity chi tiết)
                         if (kh != null) {
-                            ve.setKhachHang(kh.getHoTen()); // Họ tên
-                            // Nếu Ve có trường SoDienThoai, bạn sẽ gán: ve.setSoDienThoai(kh.getSdt());
+                            ve.setKhachHang(kh.getHoTen());
                         }
                         if (cd != null && cd.getSoCho() != null) {
                             try {
@@ -83,14 +70,12 @@ public class VeDAO {
                             }
                         }
                     }
-                } // ResultSet đóng
-            } // PreparedStatement đóng
-
-        } catch (SQLException e) { // BẮT LỖI TỪ KẾT NỐI VÀ DAO PHỤ TRỢ
+                }
+            }
+        } catch (SQLException e) {
             System.err.println("Lỗi khi tìm chi tiết vé từ CSDL: " + e.getMessage());
             e.printStackTrace();
         }
-
         return ve;
     }
 
