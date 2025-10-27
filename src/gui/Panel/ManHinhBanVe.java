@@ -7,7 +7,6 @@ import dao.ToaDAO;
 import dao.GiaVeCoBanTheoGaDAO;
 import dao.LoaiChoDatDAO;
 import dao.LoaiVeDAO;
-import dao.VeDAO;
 import entity.*;
 import gui.MainFrame.BanVeDashboard;
 
@@ -117,7 +116,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private GiaVeCoBanTheoGaDAO giaVeCoBanDAO = new GiaVeCoBanTheoGaDAO();
     private LoaiChoDatDAO loaiChoDatDAO = new LoaiChoDatDAO();
     private LoaiVeDAO loaiVeDAO = new LoaiVeDAO();
-    private VeDAO veDAO = new VeDAO();
 
     // Mã loại vé (hằng)
     private static final String MA_VE_NL = "VT01";
@@ -895,8 +893,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             return;
         }
 
-        String maGaDi = gaDiSelected.getMaGa();
-        String maGaDen = gaDenSelected.getMaGa();
+        String tenGaDi =  gaDiSelected.getTenGa(); //Sửa tối 26/10
+        String tenGaDen = gaDenSelected.getTenGa();//Sửa tôí 26/10
         String ngayDiString = dateField.getText();
         String ngayDiSQL;
         try {
@@ -908,7 +906,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         }
 
         ChuyenTauDao dao = new ChuyenTauDao();
-        ketQua = dao.timChuyenTau(maGaDi, maGaDen, ngayDiSQL);
+        System.out.println("Tìm chuyến tàu từ " + tenGaDi + " đến " + tenGaDen + " vào ngày " + ngayDiSQL);
+        ketQua = dao.timChuyenTau(tenGaDi, tenGaDen, ngayDiSQL); //Sửa tối 26/10
 
         if (ketQua == null || ketQua.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Không tìm thấy chuyến tàu nào phù hợp.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
@@ -1214,32 +1213,36 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         }
 
         else if (src == cancelButton) {
-            int confirm = JOptionPane.showConfirmDialog(this,
-                    "Bạn có muốn hủy toàn bộ dữ liệu và quay về Trang chủ?",
-                    "Xác nhận", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            if (confirm != JOptionPane.YES_OPTION) return;
-
-            resetAllData();
-
-            Window w = SwingUtilities.getWindowAncestor(this);
-
-            if (w instanceof BanVeDashboard) {
-                BanVeDashboard dashboard = (BanVeDashboard) w;
-
-                ManHinhTrangChuNVBanVe confirmPanel = new ManHinhTrangChuNVBanVe();
-
-                dashboard.addOrUpdateCard(confirmPanel, "trangChu");
-                dashboard.switchToCard("trangChu");
-
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
-                        "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
-            }
-
+            huyBoDatVe();
         } else if (src == nextButton) {
             xuLyNutTiepTheo();
         }
+    }
+
+    private void huyBoDatVe() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có muốn hủy toàn bộ dữ liệu và quay về Trang chủ?",
+                "Xác nhận", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        resetAllData();
+
+        Window w = SwingUtilities.getWindowAncestor(this);
+
+        if (w instanceof BanVeDashboard) {
+            BanVeDashboard dashboard = (BanVeDashboard) w;
+
+            ManHinhTrangChuNVBanVe confirmPanel = new ManHinhTrangChuNVBanVe();
+
+            dashboard.addOrUpdateCard(confirmPanel, "trangChu");
+            dashboard.switchToCard("trangChu");
+
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
+                    "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
+        }
+
     }
 
     // Sửa đổi phương thức xuLyNutTiepTheo

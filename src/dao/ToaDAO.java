@@ -20,9 +20,9 @@ public class ToaDAO {
         List<Toa> danhSachToa = new ArrayList<>();
 
         // Truy vấn lấy các toa thuộc một tàu
-        String sql = "SELECT MaToa, MaTau, LoaiToa "
+        String sql = "SELECT MaToa, SoHieuTau, LoaiToa "
                 + "FROM Toa "
-                + "WHERE MaTau = ?";
+                + "WHERE SoHieuTau = ?";
 
         try {Connection con = ConnectDB.getConnection();
 
@@ -34,7 +34,7 @@ public class ToaDAO {
                 while (rs.next()) {
                     // 1. Lấy dữ liệu thô
                     String maToa = rs.getString("MaToa");
-                    String maTauDB = rs.getString("MaTau");
+                    String maTauDB = rs.getString("SoHieuTau");
                     String loaiToaStr = rs.getString("LoaiToa");
 
                     // 2. Tra cứu (Lookup) đối tượng Tau
@@ -67,7 +67,7 @@ public class ToaDAO {
             pstmt.setString(1, maToa);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    String maTauDB = rs.getString("MaTau");
+                    String maTauDB = rs.getString("SoHieuTau");
                     String loaiToaStr = rs.getString("LoaiToa");
 
                     Tau tau = TauDAO.getTauById(maTauDB);

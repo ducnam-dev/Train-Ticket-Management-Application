@@ -1,9 +1,9 @@
 // java
 package gui.Panel;
 
-import entity.ChoDat;
-import entity.DieuKienKhuyenMai;
-import entity.KhuyenMai;
+import dao.HoaDonDAO;
+import dao.VeCuaBanVeDAO;
+import entity.*;
 import dao.KhuyenMaiDAO;
 import gui.MainFrame.BanVeDashboard;
 
@@ -13,8 +13,11 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
@@ -51,6 +54,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private static final Color MAU_XANH_BTN = new Color(0, 180, 110);
     private static final Color MAU_CAM_BTN = new Color(255, 140, 0);
 
+    // Thêm dòng này để khai báo biến mock
+    private static  String MA_NV_LAP_HD_MOCK = "NVBV001";
 
     public ManHinhXacNhanBanVe() {
         this(null, null, null, null, null);
@@ -301,6 +306,16 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
         JPanel panelNut = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panelNut.setOpaque(false);
+
+        // NÚT HỦY (MỚI)
+        JButton btnHuy = new JButton("Hủy");
+        btnHuy.setForeground(Color.BLACK); // Màu chữ đen
+        btnHuy.setBackground(new Color(220, 220, 220)); // Màu nền xám nhạt
+        btnHuy.setFocusPainted(false);
+        btnHuy.setPreferredSize(new Dimension(140, 36));
+        btnHuy.addActionListener(e -> huyBoThanhToan());
+        panelNut.add(btnHuy);
+
         JButton btnXacNhan = new JButton("Xác nhận thanh toán");
         btnXacNhan.setForeground(Color.WHITE);
         btnXacNhan.setBackground(MAU_XANH_BTN);
@@ -559,12 +574,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
             }
         }
         return subtotal;
-
-        // Code cũ:
-        // if (danhSachGhe == null) return 0;
-        // int count = danhSachGhe.size();
-        // double gia1 = 800000;
-        // return count * gia1;
     }
 
     private void capNhatTienThoi() {
@@ -586,20 +595,161 @@ public class ManHinhXacNhanBanVe extends JPanel {
         }
     }
 
+    /**
+     * Xác nhận thanh toán: Tạo Hóa đơn và Vé, gọi DAO để lưu vào DB trong Transaction.
+     * Giao diện và logic đã được chuẩn bị sẵn.
+     * FIX: Cần sửa lại phần lấy mã khách hàng và nhân viên lập hóa đơn theo thực tế.
+     *
+     */
+    /**
+     * Truy vấn số thứ tự cuối cùng của Hóa đơn trong ngày/ca/NV hiện tại.
+     * @param soHieuCa Số hiệu Ca (2 ký tự, e.g., "01").
+     * @param maNV Mã Nhân viên lập.
+     * @return Số thứ tự (NNNN) của Hóa đơn lớn nhất, hoặc null nếu chưa có.
+     * @throws SQLException Nếu có lỗi CSDL.
+     */
+    private String getLastSoThuTuHoaDon(String soHieuCa, String maNV) throws SQLException {
+        // Format ngày hiện tại thành YYMMDD
+        String ngayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
+
+        // Pattern MaHD: HD[CC][YYMMDD][MaNV][STT]
+        // Vì MaNV có thể dài, ta chỉ dùng prefix HD[CC][YYMMDD]
+        String maHdPatternPrefix = "HD" + soHieuCa + ngayStr + maNV + "%";
+
+        String lastSTT = null;
+        // NOTE: Giả định có hàm getLastMaHoaDonByPrefix trong VeCuaBanVeDAO
+        String lastMaHD = HoaDonDAO.getLastMaHoaDonByPrefix(maHdPatternPrefix);
+
+        if (lastMaHD != null) {
+            // Lấy 4 ký tự cuối (số thứ tự)
+            lastSTT = lastMaHD.substring(lastMaHD.length() - 4);
+        }
+        return lastSTT;
+    }
     private void xacNhanThanhToan() {
-        // TODO: khi lưu hóa đơn vào DB, lưu khuyenMaiApDung.getMaKM() vào trường MaKM của hóa đơn nếu có
-        JOptionPane.showMessageDialog(this, "Xác nhận thanh toán (chưa nối backend). Mã KM: " +
-                (khuyenMaiApDung != null ? khuyenMaiApDung.getMaKM() : "Không có"), "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        // --- B1: Lấy dữ liệu cần thiết ---
+        String maHD = taoMaHoaDon();
+        double tongTien = tinhTongHoaDon(tinhGiaVe(), khuyenMaiApDung).total;
+        String phuongThuc = cbHinhThuc.getSelectedItem().toString();
+        // Giả định LoaiHoaDon là "Bán vé trực tiếp" hoặc "Online"
+        String loaiHoaDon = "Bán vé trực tiếp";
+
+        // Giả định MaNVLap lấy từ thông tin đăng nhập (Cần sửa thực tế)
+        String maNVLap = "NVBV001";
+
+        // FIX: Giả định Khách hàng là Khách vãng lai mặc định (KHVL001),
+        // hoặc phải lấy từ Khách hàng đầu tiên trong danhSachKhach
+        String maKhachHang = "KHVL001";
+
+        // --- B2: Tạo thực thể Hóa đơn (HoaDon) ---
+        HoaDon hoaDon = new HoaDon(
+                maHD,
+                maKhachHang,
+                maNVLap,
+                khuyenMaiApDung != null ? khuyenMaiApDung.getMaKM() : null,
+                tongTien,
+                java.time.LocalDateTime.now(), // NgayLap là LocalDateTime
+                phuongThuc,
+                loaiHoaDon
+        );
+
+        // --- B3: Tạo danh sách thực thể Vé (VeCuaBanVe) ---
+        List<VeCuaBanVe> danhSachVeMoi = new ArrayList<>();
+
+        // SỬA: Lặp qua danh sách ghế đã chọn và tạo thực thể Vé cho mỗi ghế
+        for (Map.Entry<String, ChoDat> entry : danhSachGhe.entrySet()) {
+            ChoDat cho = entry.getValue();
+            long giaVeLong = danhSachGiaVe.get(cho.getMaCho()); // Giá đã bao gồm chiết khấu loại vé và VAT
+            double giaVeFinal = giaVeLong * (1 - (khuyenMaiApDung != null ? khuyenMaiApDung.getPhanTramGiam() : 0));
+
+            // Lấy thông tin khách hàng liên quan đến ghế này (nếu có)
+            Object khach = danhSachKhach.get(cho.getMaCho());
+            String maKhach = (khach != null) ? getKhachField(khach, "maKhachHang", String.class) : maKhachHang;
+            String maLoaiVe = (khach != null) ? getKhachField(khach, "maLoaiVe", String.class) : "VT01";
+
+            // Tạo đối tượng VeCuaBanVe
+            VeCuaBanVe ve = new VeCuaBanVe(
+                    null, // MaVe sẽ được tạo tự động trong DAO
+                    maChuyen,
+                    cho.getMaCho(),
+                    maNVLap,
+                    maKhach,
+                    maLoaiVe,
+                    Math.round(giaVeFinal), // Chuyển đổi thành Long để phù hợp với decimal(18,0)
+                    "DA_BAN" // Trạng thái mặc định
+            );
+            danhSachVeMoi.add(ve);
+        }
+
+        // --- B4: Gọi DAO để thực hiện Transaction ---
+        try {
+            // Giả định VeCuaBanVeDAO đã tồn tại và có hàm banVeTau(HoaDon, List<VeCuaBanVe>, KhachHang)
+            // KhachHang cần được tạo từ Khach vãng lai mặc định hoặc từ danhSachKhach
+            KhachHang khachHang = new KhachHang();
+            khachHang.setMaKH(maKhachHang);
+
+            VeCuaBanVeDAO veDao = new VeCuaBanVeDAO(); // Khởi tạo DAO
+            boolean success = veDao.banVeTau(hoaDon, danhSachVeMoi, khachHang);
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Thanh toán thành công! Mã HD: " + maHD, "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                // Xóa form hoặc chuyển màn hình sau khi hoàn tất
+            } else {
+                JOptionPane.showMessageDialog(this, "Lỗi: Không thể hoàn tất giao dịch. Vui lòng kiểm tra lại.", "Lỗi thanh toán", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Lỗi CSDL: " + e.getMessage(), "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 
     private void ketThuc() {
         JOptionPane.showMessageDialog(this, "Kết thúc (chưa nối backend).");
     }
+    /**
+     * Lấy số hiệu ca làm việc hiện tại (Mặc định là "01").
+     * Cần thay thế bằng logic truy vấn thực tế.
+     * @return Chuỗi 2 ký tự đại diện cho số hiệu ca.
+     */
+    private String getSoHieuCaHienTai() {
+        // TODO: Thay thế bằng logic truy vấn thực tế.
+        return "01";
+    }
 
+    /**
+     * Tạo mã Hóa đơn mới theo quy tắc: HD[CC][YYMMDD][MaNV][STT].
+     * @return Mã Hóa đơn mới, ví dụ: HD01251027NVBV0010001
+     */
     private String taoMaHoaDon() {
-        return "HD" + System.currentTimeMillis();
-        //    return "HD" + ca + ddmmyy + MaNV + stt
+        try {
+            // Lấy các thành phần
+            String soHieuCa = getSoHieuCaHienTai();
+            String maNV = MA_NV_LAP_HD_MOCK;
+            String ngayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
 
+            // Lấy số thứ tự cuối cùng và tính số tiếp theo
+            String lastSTTStr = getLastSoThuTuHoaDon(soHieuCa, maNV);
+            int nextNumber = 1;
+
+            if (lastSTTStr != null) {
+                try {
+                    nextNumber = Integer.parseInt(lastSTTStr) + 1;
+                } catch (NumberFormatException e) {
+                    System.err.println("Lỗi phân tích số thứ tự cuối cùng: " + e.getMessage());
+                }
+            }
+
+            // Định dạng số thứ tự (0001)
+            String soThuTuStr = String.format("%04d", nextNumber);
+
+            // Gộp và trả về mã mới
+            return "HD" + soHieuCa + ngayStr + maNV + soThuTuStr;
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi CSDL khi tạo Mã Hóa Đơn: " + e.getMessage());
+            // Trả về mã dự phòng để tránh crash (Nên có logic quản lý lỗi tốt hơn)
+            return "HDERR" + System.currentTimeMillis();
+        }
     }
 
     private static class Tong {
@@ -607,6 +757,29 @@ public class ManHinhXacNhanBanVe extends JPanel {
         double discount;
         double vat;
         double total;
+    }
+
+    private void huyBoThanhToan() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có muốn hủy toàn bộ dữ liệu và quay về Trang chủ?",
+                "Xác nhận", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        Window w = SwingUtilities.getWindowAncestor(this);
+
+        if (w instanceof BanVeDashboard) {
+            BanVeDashboard dashboard = (BanVeDashboard) w;
+
+            ManHinhTrangChuNVBanVe confirmPanel = new ManHinhTrangChuNVBanVe();
+
+            dashboard.addOrUpdateCard(confirmPanel, "trangChu");
+            dashboard.switchToCard("trangChu");
+
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
+                    "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     // main test neu can

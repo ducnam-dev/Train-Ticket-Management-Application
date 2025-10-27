@@ -1,50 +1,42 @@
 package entity;
 
-public class ChiTietHoaDon {
-    private String hoTen;
-    private String soCCCD;
-    private String loaiVe;
-    private int giaVe;
-    private double khuyenMai;
-    private double thanhTien;
+import java.util.Objects;
 
+public class ChiTietHoaDon {
+    private String maHD; // Khóa chính tổ hợp
+    private String maVe; // Khóa chính tổ hợp
+    private int soLuong;
+
+    // Constructor đầy đủ
+    public ChiTietHoaDon(String maHD, String maVe, int soLuong) {
+        this.maHD = maHD;
+        this.maVe = maVe;
+        this.soLuong = soLuong;
+    }
+
+    // Constructor mặc định
     public ChiTietHoaDon() {
     }
 
-    public ChiTietHoaDon(String hoTen, String soCCCD, String loaiVe, int giaVe, double khuyenMai, double thanhTien) {
-        setGiaVe(giaVe);
-        setHoTen(hoTen);
-        setSoCCCD(soCCCD);
-        setLoaiVe(loaiVe);
-        setKhuyenMai(khuyenMai);
-        setThanhTien(thanhTien);
+    // Getters và Setters
+    public String getMaHD() { return maHD; }
+    public void setMaHD(String maHD) { this.maHD = maHD; }
+    public String getMaVe() { return maVe; }
+    public void setMaVe(String maVe) { this.maVe = maVe; }
+    public int getSoLuong() { return soLuong; }
+    public void setSoLuong(int soLuong) { this.soLuong = soLuong; }
+
+    // Rất quan trọng khi sử dụng khóa tổng hợp: phải dựa trên cả hai trường
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChiTietHoaDon that = (ChiTietHoaDon) o;
+        return Objects.equals(maHD, that.maHD) && Objects.equals(maVe, that.maVe);
     }
 
-    public String getHoTen() { return hoTen; }
-    public void setHoTen(String hoTen) { this.hoTen = hoTen; }
-
-    public String getSoCCCD() { return soCCCD; }
-    public void setSoCCCD(String soCCCD) { this.soCCCD = soCCCD; }
-
-    public String getLoaiVe() { return loaiVe; }
-    public void setLoaiVe(String loaiVe) { this.loaiVe = loaiVe; }
-
-    public int getGiaVe() { return giaVe; }
-    public void setGiaVe(int giaVe) { this.giaVe = giaVe; }
-
-    public double getKhuyenMai() { return khuyenMai; }
-    public void setKhuyenMai(double khuyenMai) { this.khuyenMai = khuyenMai; }
-
-    public double getThanhTien() { return thanhTien; }
-    public void setThanhTien(double thanhTien) { this.thanhTien = thanhTien; }
-
     @Override
-    public String toString() {
-        return "HoTen: " + hoTen +
-                ", SoCCCD: " + soCCCD +
-                ", LoaiVe: " + loaiVe +
-                ", GiaVe: " + giaVe +
-                ", KhuyenMai: " + khuyenMai +
-                ", ThanhTien: " + thanhTien;
+    public int hashCode() {
+        return Objects.hash(maHD, maVe);
     }
 }

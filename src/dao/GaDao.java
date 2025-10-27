@@ -4,6 +4,8 @@ import database.ConnectDB;
 import entity.Ga;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 public class GaDao {
@@ -27,7 +29,7 @@ public class GaDao {
 
 
     // Trong GaDao.java
-    public Vector<Ga> layDanhSachGa() {
+    public static Vector<Ga> layDanhSachGa() {
         Vector<Ga> danhSachGa = new Vector<>();
         String sql = "SELECT MaGa, TenGa, DiaChi FROM Ga";
 
@@ -45,6 +47,26 @@ public class GaDao {
             e.printStackTrace();
         }
         return danhSachGa;
+    }
+
+    //---
+
+    /**
+     * Lấy danh sách Tên Ga từ CSDL.
+     * @return Danh sách các chuỗi TenGa.
+     * @throws SQLException Nếu có lỗi xảy ra khi truy vấn CSDL.
+     */
+    public static List<String> layDanhSachTenGa() throws SQLException {
+        List<String> danhSachTenGa = new ArrayList<>();
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement("SELECT TenGa FROM Ga");
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                danhSachTenGa.add(rs.getString("TenGa"));
+            }
+        }
+        return danhSachTenGa;
     }
 
 }
