@@ -18,19 +18,17 @@ import java.util.*;
 public class NhanVienDao {
 
     // =================================================================================
-    // 1. GET NHÂN VIÊN BY ID (GET Chi tiết Nhân Viên)
+    // 1. GET NHÂN VIÊN BY ID
     // =================================================================================
 
     public static NhanVien getNhanVienById(String maNV) throws SQLException {
         NhanVien nv = null;
         String sql = "SELECT * FROM NhanVien WHERE MaNV = ?";
 
-        try (Connection con = ConnectDB.getConnection();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
+        Connection con = ConnectDB.getConnection();
 
-            // FIX: Đảm bảo tham số được gán
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setString(1, maNV);
-
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     nv = taoDoiTuongNhanVienTuResultSet(rs);
@@ -41,42 +39,31 @@ public class NhanVienDao {
             e.printStackTrace();
             throw e;
         }
-
         return nv;
     }
 
     // =================================================================================
-    // 2. GET TẤT CẢ TÀI KHOẢN (Liên kết NhanVien và TaiKhoan)
+    // 2. GET TẤT CẢ TÀI KHOẢN (Dùng JOIN đơn giản)
     // =================================================================================
 
-    /**
-     * Lấy tất cả các tài khoản đang tồn tại, bao gồm cả thông tin nhân viên liên quan.
-     */
     public List<TaiKhoan> getAllTaiKhoan() throws SQLException {
         List<TaiKhoan> danhSachTK = new ArrayList<>();
 
-        // JOIN NhanVien và TaiKhoan để lấy tất cả dữ liệu trong một lần truy vấn
         String sql = "SELECT NV.*, TK.TenDangNhap, TK.MatKhau, TK.NgayTao, TK.TrangThai " +
                 "FROM TaiKhoan TK JOIN NhanVien NV ON TK.MaNV = NV.MaNV";
 
-        // Sử dụng try-with-resources
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
+        Connection conn = ConnectDB.getConnection();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                // Bước 1: Ánh xạ dữ liệu cột NhanVien
                 NhanVien nv = taoDoiTuongNhanVienTuResultSet(rs);
-                System.out.println("Đang xử lý NhanVien with MaNV: " + nv.getMaNV());
-                // Bước 2: Ánh xạ dữ liệu cột TaiKhoan và liên kết nv vào tk
-                // (Truyền nv vào hàm ánh xạ TaiKhoan để thiết lập thuộc tính nhanVien)
                 TaiKhoan tk = taoDoiTuongTaiKhoanTuResultSet(rs, nv);
-                System.out.println("Đang xử lý TaiKhaon with MaNV: " + tk.getTenDangNhap());
                 if (tk != null) {
                     danhSachTK.add(tk);
-
-                }else{
-                    System.out.println("TaiKhoan null for MaNV: " + nv.getMaNV());
+                } else {
+                    System.out.println("TaiKhoan null for MaNV: " + (nv != null ? nv.getMaNV() : "NULL NV"));
                 }
             }
         } catch (SQLException e) {
@@ -86,85 +73,64 @@ public class NhanVienDao {
         return danhSachTK;
     }
 
-    //getAllNhanVien
-    // Giả định phương thức này được thêm vào lớp NhanVienDao
     public List<NhanVien> getAllNhanVien() throws SQLException {
         List<NhanVien> danhSachNV = new ArrayList<>();
-
-        // Câu truy vấn lấy tất cả các cột từ bảng NhanVien
         String sql = "SELECT * FROM NhanVien";
 
-        // Sử dụng try-with-resources để đảm bảo Connection, PreparedStatement, ResultSet được đóng
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
+        Connection conn = ConnectDB.getConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
-
             while (rs.next()) {
-                // Ánh xạ từng dòng ResultSet sang đối tượng NhanVien
                 NhanVien nv = taoDoiTuongNhanVienTuResultSet(rs);
-
-                // Chỉ thêm vào danh sách nếu ánh xạ thành công
                 if (nv != null) {
                     danhSachNV.add(nv);
                 }
             }
-
         } catch (SQLException e) {
             System.err.println("Lỗi khi tải toàn bộ danh sách Nhân Viên:");
             e.printStackTrace();
-            throw e; // Ném lỗi để tầng trên xử lý
+            throw e;
         }
-
         return danhSachNV;
     }
-    // =================================================================================
-    // 3. GET TÀI KHOẢN BY MÃ NV (Dùng cho fillFormFromTable)
-    // =================================================================================
 
-    /**
-     * Lấy thông tin Tài Khoản và Nhân Viên liên quan bằng MaNV.
-     */
-//    public TaiKhoan findTaiKhoanByMaNV(String maNV) throws SQLException {
-//        TaiKhoan tk = null;
-//        String sql = "SELECT NV.*, TK.TenDangNhap, TK.MatKhau, TK.NgayTao, TK.TrangThai " +
-//                "FROM TaiKhoan TK JOIN NhanVien NV ON TK.MaNV = NV.MaNV WHERE NV.MaNV = ?";
-//
-//        try (Connection conn = ConnectDB.getConnection();
-//             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//
-//            pstmt.setString(1, maNV);
-//
-//            try (ResultSet rs = pstmt.executeQuery()) {
-//                if (rs.next()) {
-//                    NhanVien nv = taoDoiTuongNhanVienTuResultSet(rs);
-//                    tk = taoDoiTuongTaiKhoanTuResultSet(rs, nv);
-//                }
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            throw e;
-//        }
-//        return tk;
-//    }
+    // =================================================================================
+    // 3. GET TÀI KHOẢN BY MÃ NV (Dùng JOIN đơn giản)
+    // =================================================================================
+    public TaiKhoan findTaiKhoanByMaNV(String maNV) throws SQLException {
+        TaiKhoan tk = null;
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
+        String sql = "SELECT * FROM NhanVien n JOIN TaiKhoan t ON n.MaNV = t.MaNV WHERE n.MaNV = ?";
+
+        try {
+            conn = ConnectDB.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, maNV);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                NhanVien nv = taoDoiTuongNhanVienTuResultSet(rs);
+                tk = taoDoiTuongTaiKhoanTuResultSet(rs, nv);
+            }
+        } finally {
+            closeResource(rs);
+            closeResource(pstmt);
+        }
+        return tk;
+    }
 
     // =================================================================================
     // 4. GET LAST MÃ NV BY PREFIX
     // =================================================================================
-
-    /**
-     * Truy vấn cơ sở dữ liệu để tìm Mã Nhân Viên (MaNV) có giá trị lớn nhất
-     * bắt đầu bằng một tiền tố cụ thể (ví dụ: NVBV, NVQL).
-     */
     public String getLastMaNhanVienByPrefix(String prefix) throws SQLException {
         String lastMaNV = null;
         String sql = "SELECT TOP 1 MaNV FROM NhanVien WHERE MaNV LIKE ? ORDER BY MaNV DESC";
 
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
+        Connection conn = ConnectDB.getConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, prefix + "%");
-
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     lastMaNV = rs.getString("MaNV");
@@ -177,32 +143,38 @@ public class NhanVienDao {
     }
 
     // =================================================================================
-    // 5. CÁC PHƯƠNG THỨC ÁNH XẠ (MAPPING) - Đặt là private static
+    // 5. CRUD VÀ CÁC PHƯƠNG THỨC KHÁC
     // =================================================================================
-
-
-
-
-
 
     public boolean addNhanVien(NhanVien nv, TaiKhoan tk) throws SQLException {
         Connection conn = null;
         PreparedStatement pstmtNV = null;
         PreparedStatement pstmtTK = null;
         boolean success = false;
+
         if (nv == null || tk == null || nv.getHoTen() == null || nv.getHoTen().trim().isEmpty()
                 || tk.getTenDangNhap() == null || tk.getTenDangNhap().trim().isEmpty()
                 || tk.getMatKhau() == null || tk.getMatKhau().isEmpty()
                 || nv.getGioiTinh() == null) {
             throw new IllegalArgumentException("Thông tin Nhân viên hoặc Tài khoản không hợp lệ.");
         }
+
         String sqlNV = "INSERT INTO NhanVien (MaNV, HoTen, SoCCCD, NgaySinh, Email, SDT, GioiTinh, DiaChi, NgayVaoLam, ChucVu) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String sqlTK = "INSERT INTO TaiKhoan (TenDangNhap, MaNV, MatKhau, NgayTao, TrangThai) VALUES (?, ?, ?, ?, ?)";
+
         try {
             conn = ConnectDB.getConnection();
             conn.setAutoCommit(false);
-            String maNV = generateNewMaNV(conn, tk.getTenDangNhap().substring(0, Math.min(4, tk.getTenDangNhap().length())));
-            nv.setMaNV(maNV);
+
+            String prefix = tk.getTenDangNhap().substring(0, Math.min(4, tk.getTenDangNhap().length()));
+
+            // [ĐÃ SỬA] Gọi hàm generateNewMaNV để tạo mã 4 số
+            String newMaNV = generateNewMaNV(conn, prefix);
+
+            // Sửa lỗi Race Condition
+            nv.setMaNV(newMaNV);
+            tk.setTenDangNhap(newMaNV);
+
             pstmtNV = conn.prepareStatement(sqlNV);
             setNhanVienParameters(pstmtNV, nv, true);
             pstmtNV.executeUpdate();
@@ -216,7 +188,7 @@ public class NhanVienDao {
         } catch (SQLException e) {
             if (conn != null) conn.rollback();
             System.err.println("Lỗi khi thêm nhân viên: " + e.getMessage());
-            if (e.getMessage() != null && e.getMessage().contains("PRIMARY KEY constraint") && e.getMessage().contains("PK_TaiKhoan"))
+            if (e.getMessage() != null && e.getMessage().contains("PRIMARY KEY constraint"))
                 throw new SQLException("Tên đăng nhập '" + tk.getTenDangNhap() + "' đã tồn tại.", e.getSQLState(), e);
             throw e;
         } finally {
@@ -234,8 +206,10 @@ public class NhanVienDao {
         boolean success = false;
         if (nv == null || tk == null || nv.getMaNV() == null || nv.getMaNV().isEmpty())
             throw new IllegalArgumentException("Thông tin Nhân viên hoặc Mã NV không hợp lệ để cập nhật.");
+
         String sqlNV = "UPDATE NhanVien SET HoTen = ?, SoCCCD = ?, NgaySinh = ?, Email = ?, SDT = ?, GioiTinh = ?, DiaChi = ?, NgayVaoLam = ?, ChucVu = ? WHERE MaNV = ?";
         String sqlTK = "UPDATE TaiKhoan SET MatKhau = ?, TrangThai = ? WHERE MaNV = ?";
+
         try {
             conn = ConnectDB.getConnection();
             conn.setAutoCommit(false);
@@ -283,34 +257,14 @@ public class NhanVienDao {
         return rowsAffected > 0;
     }
 
-    public TaiKhoan findTaiKhoanByMaNV(String maNV) throws SQLException {
-        TaiKhoan tk = null;
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        String sql = "SELECT * FROM NhanVien n JOIN TaiKhoan t ON n.MaNV = t.MaNV WHERE n.MaNV = ?";
-        try {
-            conn = ConnectDB.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, maNV);
-            rs = pstmt.executeQuery();
-            if (rs.next()) {
-                NhanVien nv = taoDoiTuongNhanVienTuResultSet(rs);
-                tk = taoDoiTuongTaiKhoanTuResultSet(rs, nv);
-            }
-        } finally {
-            closeResource(rs);
-            closeResource(pstmt);
-        }
-        return tk;
-    }
-
     public List<TaiKhoan> searchNhanVien(String searchBy, String searchTerm, String status) throws SQLException {
         List<TaiKhoan> danhSachTK = new ArrayList<>();
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
+
         StringBuilder sql = new StringBuilder("SELECT * FROM NhanVien n JOIN TaiKhoan t ON n.MaNV = t.MaNV WHERE t.TrangThai = ? ");
+
         String searchColumn = "";
         switch (searchBy) {
             case "Mã nhân viên":
@@ -329,6 +283,7 @@ public class NhanVienDao {
         boolean hasSearchTerm = searchTerm != null && !searchTerm.trim().isEmpty() && !searchColumn.isEmpty();
         if (hasSearchTerm) sql.append(" AND ").append(searchColumn).append(" LIKE ?");
         sql.append(" ORDER BY n.MaNV");
+
         try {
             conn = ConnectDB.getConnection();
             pstmt = conn.prepareStatement(sql.toString());
@@ -353,6 +308,7 @@ public class NhanVienDao {
         String sqlTotal = "SELECT COUNT(*) FROM TaiKhoan WHERE TrangThai = N'Đang hoạt động'";
         String sqlNV = "SELECT COUNT(*) FROM NhanVien nv JOIN TaiKhoan tk ON nv.MaNV = tk.MaNV WHERE nv.ChucVu = N'Nhân viên bán vé' AND tk.TrangThai = N'Đang hoạt động'";
         String sqlQL = "SELECT COUNT(*) FROM NhanVien nv JOIN TaiKhoan tk ON nv.MaNV = tk.MaNV WHERE nv.ChucVu IN (N'Quản lý', N'Trưởng phòng') AND tk.TrangThai = N'Đang hoạt động'";
+
         Connection conn = null;
         PreparedStatement pstmtTotal = null, pstmtNV = null, pstmtQL = null;
         ResultSet rsTotal = null, rsNV = null, rsQL = null;
@@ -380,6 +336,11 @@ public class NhanVienDao {
         return stats;
     }
 
+    // =================================================================================
+    // 7. CÁC HÀM TIỆN ÍCH (HELPER METHODS)
+    // =================================================================================
+
+    // [ĐÃ SỬA] Tạo mã 4 số (ví dụ: NVBV0001)
     private String generateNewMaNV(Connection conn, String prefix) throws SQLException {
         String sql = "SELECT TOP 1 MaNV FROM NhanVien WHERE MaNV LIKE ? ORDER BY MaNV DESC";
         PreparedStatement pstmt = null;
@@ -402,68 +363,62 @@ public class NhanVienDao {
             closeResource(rs);
             closeResource(pstmt);
         }
-        return String.format("%s%03d", prefix, nextNumber);
+        // [SỬA] Format 4 SỐ
+        return String.format("%s%04d", prefix, nextNumber);
     }
 
+    // Giữ nguyên
     private static void closeResource(AutoCloseable resource) {
         if (resource != null) {
             try { resource.close(); } catch (Exception e) { e.printStackTrace(); }
         }
     }
 
+    // Giữ nguyên
     public static NhanVien taoDoiTuongNhanVienTuResultSet(ResultSet rs) throws SQLException {
-        // 1. Trích xuất LocalDate trực tiếp từ ResultSet.
-        // JDBC 4.2+ (bắt buộc) hỗ trợ toLocalDate() từ java.sql.Date.
-
-        // Đảm bảo cột NgaySinh/NgayVaoLam tồn tại và có kiểu DATE trong CSDL
         java.sql.Date sqlNgaySinh = rs.getDate("NgaySinh");
         java.sql.Date sqlNgayVaoLam = rs.getDate("NgayVaoLam");
 
-        // Chuyển đổi sang LocalDate
         java.time.LocalDate ngaySinhLocal = (sqlNgaySinh != null) ? sqlNgaySinh.toLocalDate() : null;
         java.time.LocalDate ngayVaoLamLocal = (sqlNgayVaoLam != null) ? sqlNgayVaoLam.toLocalDate() : null;
 
-        // 2. Sử dụng Constructor 10 tham số mới của NhanVien
         return new NhanVien(
                 rs.getString("MaNV"),
                 rs.getString("HoTen"),
                 rs.getString("SoCCCD"),
-                ngaySinhLocal, // <--- Đã sửa thành LocalDate
+                ngaySinhLocal,
                 rs.getString("Email"),
                 rs.getString("SDT"),
                 rs.getString("GioiTinh"),
                 rs.getString("DiaChi"),
-                ngayVaoLamLocal, // <--- Đã sửa thành LocalDate
+                ngayVaoLamLocal,
                 rs.getString("ChucVu")
         );
     }
 
+    // Giữ nguyên
     private static TaiKhoan taoDoiTuongTaiKhoanTuResultSet(ResultSet rs, NhanVien nv) throws SQLException {
         Timestamp sqlNgayTao = rs.getTimestamp("NgayTao");
         LocalDate localNgayTao = (sqlNgayTao != null)
                 ? sqlNgayTao.toLocalDateTime().toLocalDate()
-                : null; // Trả về null nếu CSDL là NULL, tránh gán ngày hiện tại một cách tùy tiện.
+                : null;
 
-        // FIX LỜI GỌI CONSTRUCTOR:
-        // Sửa lời gọi để khớp với constructor 5 tham số có chứa NhanVien,
-        // và đảm bảo thứ tự tham số khớp với constructor đã được sửa trong entity.TaiKhoan.
-        // Constructor mẫu: (String tenDangNhap, String matKhau, LocalDate ngayTao, String trangThai, NhanVien nhanVien)
         return new TaiKhoan(
                 rs.getString("TenDangNhap"),
                 rs.getString("MatKhau"),
-                localNgayTao, // Tham số 3: LocalDate
-                rs.getString("TrangThai"), // Tham số 4: String
-                nv // Tham số 5: NhanVien (LIÊN KẾT)
+                localNgayTao,
+                rs.getString("TrangThai"),
+                nv
         );
     }
 
+    // Giữ nguyên
     private void setNhanVienParameters(PreparedStatement pstmt, NhanVien nv, boolean isAdding) throws SQLException {
         int index = 1;
         if (isAdding) pstmt.setString(index++, nv.getMaNV());
         pstmt.setString(index++, nv.getHoTen());
         pstmt.setString(index++, nv.getSoCCCD());
 
-        // NgaySinh may be String, LocalDate, Date; convert to java.sql.Date if possible
         java.sql.Date sqlNgaySinh = toSqlDateFromObject(nv.getNgaySinh());
         if (sqlNgaySinh != null) pstmt.setDate(index++, sqlNgaySinh);
         else pstmt.setNull(index++, Types.DATE);
@@ -481,6 +436,7 @@ public class NhanVienDao {
         if (!isAdding) pstmt.setString(index++, nv.getMaNV());
     }
 
+    // Giữ nguyên
     private void setTaiKhoanParameters(PreparedStatement pstmt, TaiKhoan tk, String maNV) throws SQLException {
         pstmt.setString(1, tk.getTenDangNhap());
         pstmt.setString(2, maNV);
@@ -493,7 +449,7 @@ public class NhanVienDao {
         pstmt.setString(5, tk.getTrangThai());
     }
 
-    // Helper: convert various date representations to java.sql.Date
+
     private java.sql.Date toSqlDateFromObject(Object obj) {
         if (obj == null) return null;
         if (obj instanceof java.sql.Date) return (java.sql.Date) obj;
@@ -502,7 +458,6 @@ public class NhanVienDao {
         if (obj instanceof String) {
             String s = ((String) obj).trim();
             if (s.isEmpty()) return null;
-            // try ISO first, then dd/MM/yyyy
             try {
                 LocalDate ld = LocalDate.parse(s, DateTimeFormatter.ISO_LOCAL_DATE);
                 return java.sql.Date.valueOf(ld);
@@ -511,7 +466,6 @@ public class NhanVienDao {
                     Date parsed = new SimpleDateFormat("dd/MM/yyyy").parse(s);
                     return new java.sql.Date(parsed.getTime());
                 } catch (ParseException ex) {
-                    // cannot parse
                     return null;
                 }
             }
@@ -519,7 +473,7 @@ public class NhanVienDao {
         return null;
     }
 
-    // Helper: convert LocalDate/Date/String to Timestamp for TaiKhoan.NgayTao
+    // Giữ nguyên
     private Timestamp toTimestampFromObject(Object obj) {
         if (obj == null) return null;
         if (obj instanceof Timestamp) return (Timestamp) obj;

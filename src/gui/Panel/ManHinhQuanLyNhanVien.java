@@ -1,3 +1,4 @@
+// java
 /*
  * @ (#) ManHinhQuanLyNhanVien.java    1.0 26/10/2025 // Cập nhật ngày
  *
@@ -14,10 +15,10 @@ package gui.Panel;
  */
 
 // Import cần thiết
-import database.ConnectDB;
+import database.ConnectDB; // Mặc dù không dùng trực tiếp, DAO cần nó
 import entity.NhanVien;
 import entity.TaiKhoan;
-import dao.NhanVienDao; // Đảm bảo import đúng DAO
+import dao.NhanVienDao; // Import DAO
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -31,9 +32,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId; // Cần cho việc chuyển đổi kiểu Date
@@ -104,17 +102,19 @@ public class ManHinhQuanLyNhanVien extends JPanel {
 
         add(mainContentWrapper, BorderLayout.CENTER);
 
-        loadTableData();
-        updateSummaryBoxes();
-        clearEmployeeForm();
+        // Tải dữ liệu và khởi tạo form
+        try {
+            loadTableData();
+            updateSummaryBoxes();
+            clearEmployeeForm();
+        } catch (Exception e) {
+            handleSQLException("Lỗi khởi tạo màn hình quản lý nhân viên", e);
+        }
     }
 
     // =================================================================================
     // KHU VỰC TẠO GIAO DIỆN (UI Creation)
     // =================================================================================
-
-    // Giữ nguyên các hàm tạo UI (createCenterContentPanel, createSummaryPanel, createSummaryBox,
-    // createSearchPanel, createMainTablePanel, createEastFormPanel, createNotesPanel, createEmployeeFormPanel)
 
     private JPanel createCenterContentPanel() {
         JPanel panel = new JPanel();
@@ -219,7 +219,9 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         btnAdd.addActionListener(e -> {
             clearEmployeeForm();
             formBorder.setTitle("Thêm nhân viên mới");
-            panel.repaint();
+            // Cần repaint panel chứa border để cập nhật title
+            Component formPanelComponent = getFormComponentIfPresent(this, "Thông tin nhân viên");
+            if(formPanelComponent != null) formPanelComponent.repaint();
             maNV_dangSua = null;
         });
         headerPanel.add(btnAdd, BorderLayout.EAST);
@@ -251,7 +253,8 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         table.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
                 int selectedRow = table.getSelectedRow();
-                if(selectedRow >= 0) {
+                // Ngăn chặn việc fill form khi nhấp vào cột nút
+                if(selectedRow >= 0 && table.getSelectedColumn() != optionColumnIndex) {
                     String maNV = table.getValueAt(selectedRow, 1).toString();
                     fillFormFromTable(maNV);
                 }
@@ -370,9 +373,17 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         JButton btnXoaTrang = new JButton("Xóa trắng"); btnXoaTrang.setFont(FONT_BOLD_14);
         JButton btnLuu = new JButton("Lưu"); btnLuu.setFont(FONT_BOLD_14); btnLuu.setBackground(COLOR_GREEN); btnLuu.setForeground(Color.WHITE);
         buttonPanel.add(btnHuy); buttonPanel.add(btnXoaTrang); buttonPanel.add(btnLuu);
+
+        // Thêm sự kiện cho nút
         btnLuu.addActionListener(e -> saveEmployee());
         btnXoaTrang.addActionListener(e -> clearEmployeeForm());
-        btnHuy.addActionListener(e -> clearEmployeeForm());
+        btnHuy.addActionListener(e -> {
+            clearEmployeeForm();
+            formBorder.setTitle("Thêm nhân viên mới");
+            // Cần repaint panel chứa border để cập nhật title
+            Component formPanelComponent = getFormComponentIfPresent(this, "Thông tin nhân viên");
+            if(formPanelComponent != null) formPanelComponent.repaint();
+        });
 
         panel.add(fieldsPanel, BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.SOUTH);
@@ -381,7 +392,7 @@ public class ManHinhQuanLyNhanVien extends JPanel {
 
 
     // =================================================================================
-    // LỚP NỘI TẠI CHO NÚT BẢNG (Giữ nguyên)
+    // LỚP NỘI TẠI CHO NÚT BẢNG
     // =================================================================================
     class ButtonColumnRenderer extends JPanel implements TableCellRenderer {
         private final JButton btnEdit, btnDelete;
@@ -393,6 +404,7 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         }
         @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean isSelected, boolean hasFocus, int row, int col) { if (isSelected) setBackground(t.getSelectionBackground()); else setBackground(Color.WHITE); return this;}
     }
+
     class ButtonColumnEditor extends AbstractCellEditor implements TableCellEditor, TableCellRenderer {
         private final JPanel panel; private final JButton btnEdit, btnDelete; private JTable table; private int row;
         public ButtonColumnEditor(JCheckBox checkBox) {
@@ -400,8 +412,27 @@ public class ManHinhQuanLyNhanVien extends JPanel {
             btnEdit = new JButton("\u270E"); btnEdit.setToolTipText("Sửa"); btnEdit.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16)); btnEdit.setMargin(new Insets(2, 5, 2, 5)); btnEdit.setBackground(new Color(255, 193, 7)); btnEdit.setForeground(Color.BLACK);
             btnDelete = new JButton("\uD83D\uDDD1"); btnDelete.setToolTipText("Xóa"); btnDelete.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16)); btnDelete.setMargin(new Insets(2, 5, 2, 5)); btnDelete.setBackground(new Color(220, 53, 69)); btnDelete.setForeground(Color.WHITE);
             panel.add(btnEdit); panel.add(btnDelete);
-            btnEdit.addActionListener(new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { fireEditingStopped(); String maNV = table.getValueAt(row, 1).toString(); fillFormFromTable(maNV); } });
-            btnDelete.addActionListener(new AbstractAction() { @Override public void actionPerformed(ActionEvent e) { fireEditingStopped(); String maNV = table.getValueAt(row, 1).toString(); int confirm = JOptionPane.showConfirmDialog(table, "Xóa nhân viên: " + maNV + "?", "Xác nhận", JOptionPane.YES_NO_OPTION); if (confirm == JOptionPane.YES_OPTION) softDeleteEmployee(maNV); } });
+
+            btnEdit.addActionListener(new AbstractAction() {
+                @Override public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                    String maNV = table.getValueAt(row, 1).toString();
+                    fillFormFromTable(maNV);
+                }
+            });
+            btnDelete.addActionListener(new AbstractAction() {
+                @Override public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                    String maNV = table.getValueAt(row, 1).toString();
+                    String hoTen = table.getValueAt(row, 2).toString();
+                    int confirm = JOptionPane.showConfirmDialog(table,
+                            "Bạn có chắc muốn cập nhật trạng thái 'Ngừng hoạt động' cho nhân viên: \n" + hoTen + " (" + maNV + ")?",
+                            "Xác nhận", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        softDeleteEmployee(maNV);
+                    }
+                }
+            });
         }
         @Override public Component getTableCellEditorComponent(JTable t, Object v, boolean isSelected, int r, int c) { this.table = t; this.row = r; panel.setBackground(t.getSelectionBackground()); return panel; }
         @Override public Object getCellEditorValue() { return ""; }
@@ -413,7 +444,9 @@ public class ManHinhQuanLyNhanVien extends JPanel {
     // CÁC HÀM XỬ LÝ NGHIỆP VỤ VÀ CHUYỂN ĐỔI KIỂU DỮ LIỆU
     // =================================================================================
 
-    // [BỔ SUNG] Hàm chuyển đổi từ java.time.LocalDate sang java.util.Date
+    /**
+     * Chuyển đổi từ java.time.LocalDate sang java.util.Date (cho JDateChooser).
+     */
     private java.util.Date convertLocalDateToUtilDate(java.time.LocalDate localDate) {
         if (localDate == null) {
             return null;
@@ -421,23 +454,27 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         return java.util.Date.from(localDate.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant());
     }
 
-    // [BỔ SUNG] Hàm chuyển đổi từ java.util.Date sang java.time.LocalDate
+    /**
+     * Chuyển đổi từ java.util.Date (từ JDateChooser) sang java.time.LocalDate.
+     */
     private java.time.LocalDate convertUtilDateToLocalDate(java.util.Date utilDate) {
         if (utilDate == null) return null;
         return utilDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
 
+    /**
+     * Tải toàn bộ dữ liệu từ DAO lên JTable.
+     */
     private void loadTableData() {
         model.setRowCount(0);
         try {
             List<TaiKhoan> danhSachTK = nhanVienDao.getAllTaiKhoan();
             int stt = 1;
             for (TaiKhoan tk : danhSachTK) {
-                NhanVien nv = tk.getNhanVien();
-                System.out.println(nv.getMaNV());
+                NhanVien nv = tk.getNhanVien(); // DAO đã JOIN và gán nv vào tk
 
-                // Xử lý NULL: Nếu NhanVien là NULL, dùng MaNV từ TaiKhoan hoặc chuỗi trống
+                // Xử lý an toàn nếu có dữ liệu mồ côi (tk không có nv)
                 String maNV = (nv != null) ? nv.getMaNV() : tk.getMaNV();
                 String hoTen = (nv != null) ? nv.getHoTen() : "Không tìm thấy NV";
                 String gioiTinh = (nv != null) ? nv.getGioiTinh() : "";
@@ -445,12 +482,12 @@ public class ManHinhQuanLyNhanVien extends JPanel {
 
                 Vector<Object> row = new Vector<>();
                 row.add(stt++);
-                row.add(maNV); // <--- Đã sửa: Sử dụng biến maNV đã kiểm tra NULL
+                row.add(maNV);
                 row.add(hoTen);
                 row.add(gioiTinh);
                 row.add(chucVu);
                 row.add(tk.getTrangThai());
-                row.add("");
+                row.add(""); // Cột rỗng cho các nút Tùy chọn
                 model.addRow(row);
             }
         } catch (SQLException e) {
@@ -458,6 +495,9 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         }
     }
 
+    /**
+     * Cập nhật các ô thống kê (Tổng số, Nhân viên, Quản lý).
+     */
     private void updateSummaryBoxes() {
         try {
             Map<String, Integer> stats = nhanVienDao.getStatistics();
@@ -466,9 +506,13 @@ public class ManHinhQuanLyNhanVien extends JPanel {
             lblQuanLy.setText(stats.getOrDefault("quanLy", 0).toString());
         } catch (SQLException e) {
             System.err.println("Lỗi khi cập nhật thống kê: " + e.getMessage());
+            // Không show popup cho lỗi này, chỉ log
         }
     }
 
+    /**
+     * Xóa trắng form, đưa về trạng thái "Thêm mới".
+     */
     private void clearEmployeeForm() {
         txtHoTen.setText("");
         txtEmail.setText("");
@@ -479,26 +523,34 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         cbChucVu.setSelectedIndex(0);
         cbTrangThai.setSelectedIndex(0);
         dateNgayVaoLam.setDate(null);
-        dateNgayTao.setDate(new Date());
+        dateNgayTao.setDate(new Date()); // Gán ngày hiện tại
         bgGender.clearSelection();
         txtGhiChu.setText("");
-        maNV_dangSua = null;
+        maNV_dangSua = null; // Chuyển về chế độ Thêm mới
 
         txtTenDangNhap.setEditable(false);
-        autoGenerateUsername();
+        autoGenerateUsername(); // Tự động tạo mã mới
 
         formBorder.setTitle("Thêm nhân viên mới");
+        // Cần repaint panel chứa border để cập nhật title
         Component formPanelComponent = getFormComponentIfPresent(this, "Thông tin nhân viên");
+        if(formPanelComponent == null) formPanelComponent = getFormComponentIfPresent(this, "Thêm nhân viên mới");
         if(formPanelComponent != null) formPanelComponent.repaint();
     }
 
-    // Helper tìm component theo TitledBorder (giữ nguyên)
+    /**
+     * Helper tìm component theo TitledBorder (để repaint).
+     */
     private Component getFormComponentIfPresent(Container container, String title) {
         for (Component comp : container.getComponents()) {
             if (comp instanceof JComponent) {
                 JComponent jcomp = (JComponent) comp;
                 if (jcomp.getBorder() instanceof TitledBorder) {
-                    if (((TitledBorder) jcomp.getBorder()).getTitle().equals(title)) {
+                    TitledBorder border = (TitledBorder) jcomp.getBorder();
+                    // Tiêu đề có thể đang là "Thêm..." hoặc "Sửa..."
+                    if (border.getTitle().startsWith("Thông tin") ||
+                            border.getTitle().startsWith("Thêm") ||
+                            border.getTitle().startsWith("Sửa")) {
                         return comp;
                     }
                 }
@@ -511,13 +563,16 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         return null;
     }
 
-    // [ĐÃ SỬA] Hàm điền form (Sử dụng hàm convertLocalDateToUtilDate)
+    /**
+     * Điền thông tin chi tiết của nhân viên lên form khi nhấp vào bảng.
+     */
     private void fillFormFromTable(String maNV) {
         try {
             TaiKhoan tk = nhanVienDao.findTaiKhoanByMaNV(maNV);
             if (tk != null) {
-                maNV_dangSua = maNV;
+                maNV_dangSua = maNV; // Chuyển sang chế độ Sửa
                 NhanVien nv = tk.getNhanVien();
+
                 txtHoTen.setText(nv.getHoTen());
                 txtEmail.setText(nv.getEmail());
                 txtSoCCCD.setText(nv.getSoCCCD());
@@ -525,7 +580,7 @@ public class ManHinhQuanLyNhanVien extends JPanel {
                 cbChucVu.setSelectedItem(nv.getChucVu());
                 txtSoDienThoai.setText(nv.getSdt());
 
-                // FIX: Chuyển đổi LocalDate sang java.util.Date cho JDateChooser
+                // Chuyển đổi LocalDate (từ Entity) sang util.Date (cho JDateChooser)
                 dateNgayVaoLam.setDate(convertLocalDateToUtilDate(nv.getNgayVaoLam()));
 
                 if ("Nam".equalsIgnoreCase(nv.getGioiTinh())) radNam.setSelected(true);
@@ -533,18 +588,17 @@ public class ManHinhQuanLyNhanVien extends JPanel {
                 else bgGender.clearSelection();
 
                 txtTenDangNhap.setText(tk.getTenDangNhap());
-                txtTenDangNhap.setEnabled(false);
+                txtTenDangNhap.setEditable(false); // Không cho sửa tên đăng nhập (PK)
 
                 txtMatKhau.setText(tk.getMatKhau());
                 cbTrangThai.setSelectedItem(tk.getTrangThai());
 
-                // FIX: Chuyển đổi LocalDate sang java.util.Date cho JDateChooser
+                // Chuyển đổi LocalDate (từ Entity) sang util.Date (cho JDateChooser)
                 dateNgayTao.setDate(convertLocalDateToUtilDate(tk.getNgayTao()));
 
                 formBorder.setTitle("Sửa thông tin nhân viên: " + maNV);
-                Component formPanelComponent = getFormComponentIfPresent(this, "Sửa thông tin nhân viên: " + maNV);
-                if(formPanelComponent == null) formPanelComponent = getFormComponentIfPresent(this, "Thông tin nhân viên");
-                if(formPanelComponent == null) formPanelComponent = getFormComponentIfPresent(this, "Thêm nhân viên mới");
+                // Cần repaint panel chứa border để cập nhật title
+                Component formPanelComponent = getFormComponentIfPresent(this, "Thông tin nhân viên");
                 if(formPanelComponent != null) formPanelComponent.repaint();
 
             } else {
@@ -555,24 +609,30 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         }
     }
 
+    /**
+     * Cập nhật trạng thái nhân viên thành 'Ngừng hoạt động'.
+     */
     private void softDeleteEmployee(String maNV) {
         try {
             boolean success = nhanVienDao.softDeleteNhanVien(maNV);
             if (success) {
-                JOptionPane.showMessageDialog(this, "Đã cập nhật trạng thái nhân viên " + maNV + " thành 'Ngừng hoạt động'.");
+                JOptionPane.showMessageDialog(this, "Đã cập nhật trạng thái nhân viên " + maNV + " thành 'Ngừng hoạt động'.", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 loadTableData();
                 updateSummaryBoxes();
                 clearEmployeeForm();
             } else {
-                JOptionPane.showMessageDialog(this, "Xóa mềm thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Không tìm thấy nhân viên để cập nhật trạng thái!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException e) {
-            handleSQLException("Lỗi khi xóa nhân viên", e);
+            handleSQLException("Lỗi khi cập nhật trạng thái nhân viên", e);
         }
     }
 
-    // [ĐÃ SỬA TOÀN BỘ] Hàm lưu nhân viên
+    /**
+     * Lưu (Thêm mới hoặc Cập nhật) thông tin nhân viên.
+     */
     private void saveEmployee() {
+        // 1. Thu thập dữ liệu từ Form
         String hoTen = txtHoTen.getText().trim();
         String email = txtEmail.getText().trim();
         String cccd = txtSoCCCD.getText().trim();
@@ -580,7 +640,7 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         String chucVu = cbChucVu.getSelectedItem().toString();
         String sdt = txtSoDienThoai.getText().trim();
 
-        // FIX: Chuyển đổi từ util.Date sang LocalDate
+        // Chuyển đổi từ util.Date (JDateChooser) sang LocalDate (Entity)
         LocalDate ngayVaoLamLocal = convertUtilDateToLocalDate(dateNgayVaoLam.getDate());
         LocalDate ngayTaoLocal = convertUtilDateToLocalDate(dateNgayTao.getDate());
 
@@ -589,24 +649,26 @@ public class ManHinhQuanLyNhanVien extends JPanel {
 
         String gioiTinh = radNam.isSelected() ? "Nam" : (radNu.isSelected() ? "Nữ" : null);
 
-        // Lấy MaNV (dùng tên đăng nhập làm MaNV ban đầu)
-        String maNV = maNV_dangSua == null ? txtTenDangNhap.getText() : maNV_dangSua;
+        // Lấy MaNV (dùng tên đăng nhập làm MaNV ban đầu khi Thêm mới)
+        // Khi Cập nhật, maNV_dangSua đã có giá trị
+        String maNV = (maNV_dangSua == null) ? txtTenDangNhap.getText() : maNV_dangSua;
+        String tenDangNhap = txtTenDangNhap.getText(); // Dùng để DAO lấy prefix
 
-        String tenDangNhap = txtTenDangNhap.getText();
         String matKhau = new String(txtMatKhau.getPassword());
         String trangThai = cbTrangThai.getSelectedItem().toString();
 
+        // 2. Validate dữ liệu
         if (hoTen.isEmpty() || tenDangNhap.isEmpty() || matKhau.isEmpty() || gioiTinh == null || ngayVaoLamLocal == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ: Họ tên, Giới tính, Ngày vào làm, Mật khẩu.", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ các trường bắt buộc:\n* Họ tên\n* Giới tính\n* Ngày vào làm\n* Mật khẩu", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // FIX: Khởi tạo NhanVien (10 tham số - Đã sửa để khớp với kiểu LocalDate)
+        // 3. Tạo đối tượng Entity
         NhanVien nv = new NhanVien(
-                maNV,                   // 1. maNV (String)
+                maNV,                   // 1. maNV (String) - Sẽ bị ghi đè bởi DAO nếu Thêm mới
                 hoTen,                  // 2. hoTen (String)
                 cccd,                   // 3. soCCCD (String)
-                ngaySinhLocal,          // 4. ngaySinh (LocalDate)
+                ngaySinhLocal,          // 4. ngaySinh (LocalDate) - Luôn là null
                 email,                  // 5. email (String)
                 sdt,                    // 6. sdt (String)
                 gioiTinh,               // 7. gioiTinh (String)
@@ -615,33 +677,41 @@ public class ManHinhQuanLyNhanVien extends JPanel {
                 chucVu                  // 10. chucVu (String)
         );
 
-        // FIX: Khởi tạo TaiKhoan (Sử dụng ngayTaoLocal - LocalDate)
-        // CẦN ĐẢM BẢO LỚP TaiKhoan CÓ CONSTRUCTOR NÀY VÀ NgayTao nhận LocalDate!
+        // tenDangNhap ở đây chỉ dùng để DAO lấy prefix khi thêm mới
         TaiKhoan tk = new TaiKhoan(tenDangNhap, matKhau, ngayTaoLocal, trangThai, nv);
 
+        // 4. Gọi DAO
         try {
             boolean success;
             if (maNV_dangSua == null) { // Thêm mới
                 success = nhanVienDao.addNhanVien(nv, tk);
-                if (success) JOptionPane.showMessageDialog(this, "Thêm nhân viên mới thành công!");
+                if (success) {
+                    JOptionPane.showMessageDialog(this, "Thêm nhân viên mới thành công!\nMã nhân viên: " + nv.getMaNV(), "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                }
             } else { // Cập nhật
                 success = nhanVienDao.updateNhanVien(nv, tk);
-                if (success) JOptionPane.showMessageDialog(this, "Cập nhật thông tin nhân viên thành công!");
+                if (success) {
+                    JOptionPane.showMessageDialog(this, "Cập nhật thông tin nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
 
+            // 5. Làm mới giao diện
             if (success) {
                 loadTableData();
                 updateSummaryBoxes();
                 clearEmployeeForm();
             }
         } catch (SQLException e) {
+            // Hiển thị lỗi đã được xử lý (ví dụ: "Tên đăng nhập đã tồn tại")
             handleSQLException("Lỗi khi lưu nhân viên", e);
         }
     }
 
-    // [ĐÃ SỬA] Hàm tự động tạo Mã Nhân Viên (giữ nguyên logic đã sửa)
+    /**
+     * Tự động tạo Tên đăng nhập (Mã NV) khi thay đổi Chức vụ ở chế độ Thêm mới.
+     */
     private void autoGenerateUsername() {
-        if (maNV_dangSua == null) {
+        if (maNV_dangSua == null) { // Chỉ chạy khi ở chế độ "Thêm mới"
             String selectedRole = cbChucVu.getSelectedItem().toString();
             String prefix = "";
             switch (selectedRole) {
@@ -652,35 +722,43 @@ public class ManHinhQuanLyNhanVien extends JPanel {
             }
 
             try {
+                // Gọi DAO để lấy mã cuối cùng
                 String lastMaNV = nhanVienDao.getLastMaNhanVienByPrefix(prefix);
                 int nextNumber = 1;
+
                 if (lastMaNV != null) {
                     try {
                         String numberPart = lastMaNV.substring(prefix.length());
                         nextNumber = Integer.parseInt(numberPart) + 1;
                     } catch (NumberFormatException | IndexOutOfBoundsException e) {
                         System.err.println("Không thể phân tích số từ mã NV cuối: " + lastMaNV + ". Sử dụng số 1.");
+                        nextNumber = 1; // Fallback
                     }
                 }
-                String newMaNV = String.format("%s%03d", prefix, nextNumber);
 
+                // [ĐÃ SỬA] Định dạng mã mới 4 số, ví dụ: NVBV0001
+                String newMaNV = String.format("%s%04d", prefix, nextNumber);
                 txtTenDangNhap.setText(newMaNV);
                 txtTenDangNhap.setEditable(false);
 
             } catch (SQLException e) {
                 handleSQLException("Lỗi khi tạo Mã Nhân Viên tự động", e);
-                txtTenDangNhap.setText("");
+                txtTenDangNhap.setText(""); // Xóa nếu có lỗi
             }
         } else {
+            // Nếu đang ở chế độ "Sửa", không cho phép tự động tạo
             txtTenDangNhap.setEditable(false);
         }
     }
 
+    /**
+     * Thực hiện tìm kiếm theo các tiêu chí và tải lại bảng.
+     */
     private void searchEmployees() {
         String searchBy = cbSearchType.getSelectedItem().toString();
         String searchTerm = txtSearchInput.getText().trim();
         String status = cbSearchStatus.getSelectedItem().toString();
-        model.setRowCount(0);
+        model.setRowCount(0); // Xóa bảng
 
         try {
             List<TaiKhoan> results = nhanVienDao.searchNhanVien(searchBy, searchTerm, status);
@@ -706,9 +784,11 @@ public class ManHinhQuanLyNhanVien extends JPanel {
         }
     }
 
-    // [MỚI] Hàm xử lý lỗi SQL tập trung
-    private void handleSQLException(String messagePrefix, SQLException e) {
-        e.printStackTrace();
+    /**
+     * Hàm xử lý lỗi SQL tập trung, hiển thị thông báo cho người dùng.
+     */
+    private void handleSQLException(String messagePrefix, Exception e) {
+        e.printStackTrace(); // In lỗi đầy đủ ra console để debug
         JOptionPane.showMessageDialog(this, messagePrefix + ": " + e.getMessage(), "Lỗi CSDL", JOptionPane.ERROR_MESSAGE);
     }
 

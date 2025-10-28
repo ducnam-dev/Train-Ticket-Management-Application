@@ -80,7 +80,7 @@ public class GaDao {
 
 
     // Trong GaDao.java
-    public static Vector<Ga> layDanhSachGa() {
+    public static Vector<Ga> layDanhSachGa ()  {
         Vector<Ga> danhSachGa = new Vector<>();
         String sql = "SELECT MaGa, TenGa, DiaChi FROM Ga";
 
