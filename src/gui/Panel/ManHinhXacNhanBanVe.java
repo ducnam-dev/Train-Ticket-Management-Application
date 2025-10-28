@@ -67,6 +67,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
     // Thêm dòng này để khai báo biến mock
     private static  String MA_NV_LAP_HD_MOCK = "NVBV0001";
+    private DefaultTableModel model;
 
     public ManHinhXacNhanBanVe() {
         this(null, null, null, null, null);
@@ -186,7 +187,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         panelDanhSach.setBorder(BorderFactory.createTitledBorder("Danh sách khách hàng"));
 
         String[] cot = {"Ghế", "Họ và tên", "Tuổi", "Số điện thoại", "CCCD"};
-        DefaultTableModel model = new DefaultTableModel(cot, 0) {
+        model = new DefaultTableModel(cot, 0) {
             public boolean isCellEditable(int row, int column) { return false; }
         };
 
@@ -326,6 +327,13 @@ public class ManHinhXacNhanBanVe extends JPanel {
         btnHuy.setPreferredSize(new Dimension(140, 36));
         btnHuy.addActionListener(e -> huyBoThanhToan());
         panelNut.add(btnHuy);
+
+        JButton btnQuayLai = new JButton("Quay lại");
+        btnQuayLai.setBackground(new Color(150, 150, 150));
+        btnQuayLai.setForeground(Color.WHITE);
+        btnQuayLai.setPreferredSize(new Dimension(140, 36));
+        btnQuayLai.addActionListener(e -> quayLai());
+        panelNut.add(btnQuayLai);
 
         JButton btnXacNhan = new JButton("Xác nhận thanh toán");
         btnXacNhan.setForeground(Color.WHITE);
@@ -467,12 +475,14 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
         JPanel panelKetThuc = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panelKetThuc.setOpaque(false);
+
         JButton btnKetThuc = new JButton("Kết thúc >");
         btnKetThuc.setBackground(MAU_CAM_BTN);
         btnKetThuc.setForeground(Color.WHITE);
         btnKetThuc.setPreferredSize(new Dimension(140, 36));
         btnKetThuc.addActionListener(e -> ketThuc());
         panelKetThuc.add(btnKetThuc);
+
         chan.add(panelKetThuc, BorderLayout.SOUTH);
 
         panelHoaDon.add(chan, BorderLayout.SOUTH);
@@ -525,6 +535,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
             this.soLuong = 0;
         }
     }
+
+
 
     // Tai khuyen mai tu DB vao combobox
     private void taiKhuyenMaiTuDB() {
@@ -768,6 +780,11 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 danhSachKhachHangMoiCanLuu.add(khachHangCanLuu);
             } else {
                 khachHangCanLuu = khachHangDaTonTai;
+
+                // BỔ SUNG: Cập nhật các thuộc tính mới nhận từ form vào Entity cũ
+                khachHangCanLuu.setHoTen(hoTen);
+                khachHangCanLuu.setTuoi(tuoi != null ? tuoi : 0);
+                khachHangCanLuu.setSdt(sdt);
             }
 
             danhSachKhachHangEntity.put(entry.getKey(), khachHangCanLuu);
@@ -989,8 +1006,29 @@ public class ManHinhXacNhanBanVe extends JPanel {
         }
     }
 
+    /**
+     * Hành động cho nút "Kết thúc >" (Chuyển về trang chủ sau khi thanh toán xong).
+     */
     private void ketThuc() {
-        JOptionPane.showMessageDialog(this, "Kết thúc (chưa nối backend).");
+        // NOTE: Hàm này chỉ nên được gọi sau khi transaction thành công!
+
+        // 1. Reset dữ liệu của màn hình hiện tại
+        resetAllData();
+
+        // 2. Chuyển Panel
+        chuyenManHinh("trangChu");
+    }
+
+    /**
+     * Hành động cho nút "Quay lại" (Về màn hình bán vé chính).
+     */
+    private void quayLai() {
+        // NOTE: Giả định Panel bán vé chính là ManHinhBanVe (hoặc ManHinhBanVeChinh)
+
+        // KHÔNG reset dữ liệu ở đây, dữ liệu phải được giữ lại cho màn hình trước.
+        resetAllData();
+
+        chuyenManHinh("manHinhBanVe");
     }
 
     /**
@@ -1065,21 +1103,53 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 "Xác nhận", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (confirm != JOptionPane.YES_OPTION) return;
 
+        // 1. Reset dữ liệu của màn hình hiện tại
+        resetAllData();
+        // 2. Chuyển Panel
+        chuyenManHinh("trangChu");
+    }
+
+    /**
+     * Helper chung để chuyển đổi giữa các Panel trong Dashboard.
+     */
+    private void chuyenManHinh(String cardName) {
         Window w = SwingUtilities.getWindowAncestor(this);
 
         if (w instanceof BanVeDashboard) {
             BanVeDashboard dashboard = (BanVeDashboard) w;
 
-            ManHinhTrangChuNVBanVe confirmPanel = new ManHinhTrangChuNVBanVe();
+            if ("trangChu".equals(cardName)) {
+                // Cần tạo lại Panel Trang chủ nếu nó không phải là static
+                dashboard.addOrUpdateCard(new ManHinhTrangChuNVBanVe(), "trangChu");
+            }
 
-            dashboard.addOrUpdateCard(confirmPanel, "trangChu");
-            dashboard.switchToCard("trangChu");
+            dashboard.switchToCard(cardName);
 
         } else {
             JOptionPane.showMessageDialog(this,
-                    "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
+                    "Lỗi chuyển hướng hệ thống.",
                     "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
         }
+    }
+    private void resetAllData() {
+        // 1. Dọn dẹp dữ liệu nội bộ
+        if (danhSachGhe != null) danhSachGhe.clear();
+        if (danhSachKhach != null) danhSachKhach.clear();
+        if (danhSachGiaVe != null) danhSachGiaVe.clear();
+        khuyenMaiApDung = null;
+
+        // 2. Reset UI Components (Nếu cần)
+        if (model != null) model.setRowCount(0); // Dọn dẹp bảng khách hàng
+        if (tbHoaDon != null && tbHoaDon.getModel() instanceof DefaultTableModel) {
+            ((DefaultTableModel) tbHoaDon.getModel()).setRowCount(0);
+        }
+
+        // 3. Cập nhật các JLabel về trạng thái ban đầu
+        lblMaHoaDon.setText("Chưa tạo");
+        lblMaHoaDon.setForeground(Color.BLACK);
+        lblNguoiLapHD.setText("Đang tải...");
+
+        capNhatTongVaGiaoDien(); // Tính toán lại tổng tiền (sẽ là 0)
     }
 
     // main test neu can
