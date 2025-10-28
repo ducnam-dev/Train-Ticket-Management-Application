@@ -96,7 +96,74 @@ public class VeDAO {
             return false;
         }
     }
+    /**
+     * Tra cứu danh sách vé dựa trên Họ tên, Số điện thoại hoặc CCCD (cho màn hình Tra cứu).
+     * KHÔNG LỌC TRẠNG THÁI DA-HUY.
+     */
+    public List<Ve> timVeTheoKhachHang(String hoTen, String sdt, String cccd) {
+        List<Ve> danhSachVe = new ArrayList<>();
 
+        // SQL: Truy vấn linh hoạt bằng HoTen (LIKE), SĐT (LIKE), và CCCD (LIKE).
+        // Loại bỏ điều kiện lọc trạng thái để hiển thị cả vé Đã bán và Đã hủy.
+        String sql = "SELECT V.MaVe, V.GiaVe, V.TrangThai, V.MaKhachHang, V.MaChuyenTau, V.MaChoDat " +
+                "FROM Ve V " +
+                "JOIN KhachHang KH ON V.MaKhachHang = KH.MaKhachHang " +
+                "WHERE KH.HoTen LIKE ? AND (KH.SoDienThoai LIKE ? OR KH.CCCD LIKE ?)";
+
+        Connection con = null;
+        try {
+            con = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+                // 1. Thiết lập tham số (Sử dụng % để tìm kiếm linh hoạt)
+                String hoTenParam = (hoTen != null && !hoTen.isEmpty()) ? "%" + hoTen + "%" : "%";
+                // LƯU Ý: Nếu tham số là null, ta dùng % để tìm tất cả.
+                String sdtParam = (sdt != null && !sdt.isEmpty()) ? "%" + sdt + "%" : "%";
+                String cccdParam = (cccd != null && !cccd.isEmpty()) ? "%" + cccd + "%" : "%";
+
+                pstmt.setString(1, hoTenParam);
+                pstmt.setString(2, sdtParam);
+                pstmt.setString(3, cccdParam);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        Ve ve = new Ve();
+
+                        // Lấy dữ liệu thô
+                        String maKHDb = rs.getString("MaKhachHang");
+                        String maCTDb = rs.getString("MaChuyenTau");
+                        String maChoDatDb = rs.getString("MaChoDat");
+
+                        // Gán thuộc tính cơ bản
+                        ve.setId(rs.getString("MaVe"));
+                        ve.setGia(rs.getDouble("GiaVe"));
+                        // NOTE: Cần Entity Ve có setter/getter cho TrangThai để UI hiển thị đúng
+                        // ve.setTrangThai(rs.getString("TrangThai"));
+
+                        // 2. GỌI DAO PHỤ TRỢ (Tra cứu Entities chi tiết)
+                        KhachHang kh = (maKHDb != null) ? KhachHangDAO.getKhachHangById(maKHDb) : null;
+                        ChuyenTau ct = (maCTDb != null) ? ChuyenTauDao.getChuyenTauById(maCTDb) : null;
+                        ChoDat cd = (maChoDatDb != null) ? ChoDatDAO.getChoDatById(maChoDatDb) : null;
+
+                        // 3. Gán Entity chi tiết vào Ve
+                        ve.setKhachHangChiTiet(kh);
+                        ve.setChuyenTauChiTiet(ct);
+                        ve.setChoDatChiTiet(cd);
+
+                        if (kh != null) {
+                            ve.setKhachHang(kh.getHoTen());
+                        }
+
+                        danhSachVe.add(ve);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm vé theo Khách hàng: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return danhSachVe;
+    }
     //Tren là của Nam
 
     //  PHẦN CỦA DUY BÊN DƯỚI

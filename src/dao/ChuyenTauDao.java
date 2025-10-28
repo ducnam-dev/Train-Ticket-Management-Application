@@ -141,32 +141,6 @@ public class ChuyenTauDao {
         }
         return danhSachChuyenTau;
     }
-    public boolean chuyenTrangThaiChuyenTau(String maChuyenTau, String trangThai) {
-        String sql = "UPDATE ChuyenTau SET TrangThai = ? WHERE MaChuyenTau = ?";
-        try (Connection con = ConnectDB.getInstance().getConnection();
-             PreparedStatement stmt = con.prepareStatement(sql)) {
-
-            stmt.setString(1, trangThai);
-            stmt.setString(2, maChuyenTau);
-
-            int rows = stmt.executeUpdate();
-            if (rows > 0) {
-                if (this.danhSachChuyenTau != null) {
-                    for (ChuyenTau ct : this.danhSachChuyenTau) {
-                        if (ct.getMaChuyenTau().equals(maChuyenTau)) {
-                            // assuming setter exists
-                            ct.setThct(TrangThaiChuyenTau.valueOf(trangThai));
-                            break;
-                        }
-                    }
-                }
-                return true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 
 //    layChuyenTauBangMa
     public static ChuyenTau layChuyenTauBangMa(String maChuyenTau) {
@@ -210,6 +184,57 @@ public class ChuyenTauDao {
         return ct;
     }
 
+    public static ChuyenTau getChuyenTauById(String maChuyenTau) { // ĐÃ HỢP NHẤT TỪ layChuyenTauBangMa
+        ChuyenTau ct = null;
+        String sql = "SELECT * FROM ChuyenTau WHERE MaChuyenTau = ?";
+
+        Connection con = null; // KHẮC PHỤC LỖI KẾT NỐI
+        try {
+            con = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+                pstmt.setString(1, maChuyenTau);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        // 1. Lấy các mã khóa ngoại
+                        String maTau = rs.getString("MaTau"); // Khóa ngoại tàu
+                        String maNV = rs.getString("MaNV").trim();
+                        String maGaDiDb = rs.getString("GaDi");
+                        String maGaDenDb = rs.getString("GaDen");
+                        String trangThai = rs.getString("TrangThai");
+
+                        TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
+
+                        // 2. Tra cứu Entity phụ thuộc (Đã sửa lỗi đóng kết nối)
+                        Ga gaDi = GaDao.getGaById(maGaDiDb);
+                        Ga gaDen = GaDao.getGaById(maGaDenDb);
+                        Tau tau = TauDAO.getTauById(maTau);
+                        NhanVien nv = NhanVienDao.getNhanVienById(maNV);
+
+                        // 3. Khởi tạo đối tượng ChuyenTau
+                        ct = new ChuyenTau(
+                                maChuyenTau,
+                                maTau,
+                                rs.getDate("NgayKhoiHanh").toLocalDate(),
+                                rs.getTime("GioKhoiHanh").toLocalTime(),
+                                gaDi,
+                                gaDen,
+                                tau,
+                                rs.getDate("NgayDenDuKien").toLocalDate(),
+                                rs.getTime("GioDenDuKien").toLocalTime(),
+                                nv,
+                                tt
+                        );
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tra cứu Chuyến tàu theo ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return ct;
+    }
 
 
 }

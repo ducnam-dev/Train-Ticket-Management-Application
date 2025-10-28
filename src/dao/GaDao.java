@@ -119,5 +119,40 @@ public class GaDao {
         }
         return danhSachTenGa;
     }
+    public static Ga getGaById(String maGa) {
+        Ga ga = null;
+        String sql = "SELECT MaGa, TenGa, DiaChi FROM Ga WHERE MaGa = ?";
+
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            con = ConnectDB.getConnection(); // Lấy kết nối tĩnh
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, maGa);
+
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                // Khởi tạo Ga (Dựa trên Entity Ga.java của bạn: maGa, tenGa, diaChi)
+                ga = new Ga(rs.getString("MaGa"), rs.getString("TenGa"), rs.getString("DiaChi"));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tra cứu Ga theo ID: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // Đóng các tài nguyên phụ trợ (ResultSet, PreparedStatement)
+            // LƯU Ý: KHÔNG ĐÓNG CONNECTION 'con'
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return ga;
+    }
 
 }
