@@ -74,68 +74,7 @@ public class VeDAO {
         }
         return ve;
     }
-    public Ve getChiTietVeChoTraCuuVe(String maVe, String sdt) {
-        Ve ve = null;
 
-        String sql = "SELECT V.MaVe, V.GiaVe, V.TrangThai, V.MaKhachHang, V.MaChuyenTau, V.MaChoDat, " +
-                "KH.HoTen AS TenKhachHang, KH.SoDienThoai, " +
-                "CT.NgayKhoiHanh, CT.GioKhoiHanh, CT.GaDi, CT.GaDen, " +
-                "CD.SoCho, T.MaToa " +
-                "FROM Ve V " +
-                "LEFT JOIN KhachHang KH ON V.MaKhachHang = KH.MaKhachHang " +
-                "LEFT JOIN ChuyenTau CT ON V.MaChuyenTau = CT.MaChuyenTau " +
-                "LEFT JOIN ChoDat CD ON V.MaChoDat = CD.MaCho " +
-                "LEFT JOIN Toa T ON CD.MaToa = T.MaToa " +
-                "WHERE (V.MaVe = ? OR KH.SoDienThoai = ?)";
-
-        try (Connection con = ConnectDB.getConnection();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
-
-            if (maVe != null && !maVe.isEmpty())
-                pstmt.setString(1, maVe);
-            else
-                pstmt.setNull(1, Types.VARCHAR);
-
-            if (sdt != null && !sdt.isEmpty())
-                pstmt.setString(2, sdt);
-            else
-                pstmt.setNull(2, Types.VARCHAR);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    ve = new Ve();
-                    ve.setId(rs.getString("MaVe"));
-                    ve.setGia(rs.getDouble("GiaVe"));
-
-                    String maKHDb = rs.getString("MaKhachHang");
-                    String maCTDb = rs.getString("MaChuyenTau");
-                    String maChoDatDb = rs.getString("MaChoDat");
-
-                    KhachHang kh = KhachHangDAO.getKhachHangById(maKHDb);
-                    ChuyenTau ct = ChuyenTauDao.layChuyenTauBangMa(maCTDb);
-                    ChoDat cd = ChoDatDAO.getChoDatById(maChoDatDb);
-
-                    ve.setKhachHangChiTiet(kh);
-                    ve.setChuyenTauChiTiet(ct);
-                    ve.setChoDatChiTiet(cd);
-
-                    if (kh != null) ve.setKhachHang(kh.getHoTen());
-                    if (cd != null && cd.getSoCho() != null) {
-                        try {
-                            ve.setSoGhe(Integer.parseInt(cd.getSoCho().replaceAll("[^\\d]", "")));
-                        } catch (NumberFormatException e) {
-                            ve.setSoGhe(0);
-                        }
-                    }
-                }
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi tìm chi tiết vé từ CSDL: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return ve;
-    }
 
     /**
      * Triển khai: Cập nhật trạng thái vé thành "Đã hủy" (Trả vé).
