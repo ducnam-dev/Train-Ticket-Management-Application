@@ -28,7 +28,7 @@ public class VeCuaBanVeDAO {
      */
     public String getLastSoThuTuTrongCa(String soHieuCa, LocalDate ngayTaoVe) throws SQLException {
         String lastSTT = null;
-        String ngayStr = ngayTaoVe.format(java.time.format.DateTimeFormatter.ofPattern("yyMMdd"));
+        String ngayStr = ngayTaoVe.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyy"));
         String maVePattern = "VE" + soHieuCa + ngayStr + "%";
 
         String sql = "SELECT TOP 1 MaVe FROM Ve WHERE MaVe LIKE ? ORDER BY MaVe DESC";
@@ -50,25 +50,13 @@ public class VeCuaBanVeDAO {
     }
 
     /**
-     * Tạo mã vé mới theo quy tắc: VE[CC][YYMMDD][NNNN].
+     * Tạo mã vé mới theo quy tắc: VE[CC][DDmmYY][NNNN].
      */
-    public String taoMaVeMoi() throws SQLException {
+    public String taoMaVeMoi(int nextNumber, String soHieuCa) throws SQLException {
         LocalDate homNay = LocalDate.now();
-        String soHieuCa = getSoHieuCaHienTai();
-        String ngayStr = homNay.format(java.time.format.DateTimeFormatter.ofPattern("yyMMdd"));
-        String lastSTTStr = getLastSoThuTuTrongCa(soHieuCa, homNay);
-
-        int nextNumber = 1;
-        if (lastSTTStr != null) {
-            try {
-                nextNumber = Integer.parseInt(lastSTTStr) + 1;
-            } catch (NumberFormatException e) {
-                // Xử lý lỗi nếu chuỗi không phải số
-                System.err.println("Lỗi phân tích số thứ tự cuối cùng: " + e.getMessage());
-            }
-        }
-
+        String ngayStr = homNay.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyy"));
         String soThuTuStr = String.format("%04d", nextNumber);
+
         return "VE" + soHieuCa + ngayStr + soThuTuStr;
     }
 
@@ -84,54 +72,54 @@ public class VeCuaBanVeDAO {
      * @return true nếu giao dịch thành công, false nếu thất bại.
      * @throws SQLException Nếu có lỗi CSDL không thể phục hồi.
      */
-    public boolean banVeTau(HoaDon hoaDon, List<VeCuaBanVe> danhSachVe, KhachHang khachHang) throws SQLException {
-        Connection conn = null;
-        boolean success = false;
-
-        try {
-            conn = ConnectDB.getConnection();
-            conn.setAutoCommit(false); // Bắt đầu giao dịch
-
-            // --- B1: Xử lý Khách hàng ---
-            // khachHangDao.addOrUpdateKhachHang(conn, khachHang);
-
-            // --- B2: Thêm Hóa đơn ---
-            // hoaDonDao.addHoaDon(conn, hoaDon);
-
-            // --- B3 & B4: Thêm từng Vé và Chi tiết Hóa đơn ---
-            for (VeCuaBanVe ve : danhSachVe) {
-                // Đặt MaVe tự động
-                ve.setMaVe(taoMaVeMoi());
-
-                // Thêm Vé (Giả định: Có hàm addVe)
-                // addVe(conn, ve);
-
-                // Thêm Chi tiết Hóa đơn (Giả định: Có hàm addChiTietHoaDon)
-                ChiTietHoaDon cthd = new ChiTietHoaDon(hoaDon.getMaHD(), ve.getMaVe(), 1);
-                // addChiTietHoaDon(conn, cthd);
-            }
-
-            conn.commit(); // Hoàn tất giao dịch
-            success = true;
-
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                    System.err.println("Giao dịch bán vé thất bại, đã rollback.");
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            throw e; // Ném lỗi lên để UI hiển thị thông báo thất bại
-        } finally {
-            if (conn != null) {
-                conn.setAutoCommit(true); // Trả lại chế độ mặc định
-                ConnectDB.disconnect();
-            }
-        }
-        return success;
-    }
+//    public boolean banVeTau(HoaDon hoaDon, List<VeCuaBanVe> danhSachVe, KhachHang khachHang) throws SQLException {
+//        Connection conn = null;
+//        boolean success = false;
+//
+//        try {
+//            conn = ConnectDB.getConnection();
+//            conn.setAutoCommit(false); // Bắt đầu giao dịch
+//
+//            // --- B1: Xử lý Khách hàng ---
+//            // khachHangDao.addOrUpdateKhachHang(conn, khachHang);
+//
+//            // --- B2: Thêm Hóa đơn ---
+//            // hoaDonDao.addHoaDon(conn, hoaDon);
+//
+//            // --- B3 & B4: Thêm từng Vé và Chi tiết Hóa đơn ---
+//            for (VeCuaBanVe ve : danhSachVe) {
+//                // Đặt MaVe tự động
+//                ve.setMaVe(taoMaVeMoi());
+//
+//                // Thêm Vé (Giả định: Có hàm addVe)
+//                // addVe(conn, ve);
+//
+//                // Thêm Chi tiết Hóa đơn (Giả định: Có hàm addChiTietHoaDon)
+//                ChiTietHoaDon cthd = new ChiTietHoaDon(hoaDon.getMaHD(), ve.getMaVe(), 1);
+//                // addChiTietHoaDon(conn, cthd);
+//            }
+//
+//            conn.commit(); // Hoàn tất giao dịch
+//            success = true;
+//
+//        } catch (SQLException e) {
+//            if (conn != null) {
+//                try {
+//                    conn.rollback();
+//                    System.err.println("Giao dịch bán vé thất bại, đã rollback.");
+//                } catch (SQLException ex) {
+//                    ex.printStackTrace();
+//                }
+//            }
+//            throw e; // Ném lỗi lên để UI hiển thị thông báo thất bại
+//        } finally {
+//            if (conn != null) {
+//                conn.setAutoCommit(true); // Trả lại chế độ mặc định
+//                ConnectDB.disconnect();
+//            }
+//        }
+//        return success;
+//    }
 
     // =================================================================================
     // CÁC HÀM CRUD CƠ BẢN (Cần code chi tiết các hàm này)
@@ -161,6 +149,21 @@ public class VeCuaBanVeDAO {
         Connection conn = null;
         boolean success = false;
 
+        // --- BƯỚC 1: TÍNH TOÁN MÃ VÉ CHO TẤT CẢ VÉ TRƯỚC TRANSACTION ---
+        LocalDate homNay = LocalDate.now();
+        String soHieuCa = getSoHieuCaHienTai();
+        String lastSTTStr = getLastSoThuTuTrongCa(soHieuCa, homNay);
+
+        int currentMaxNumber = 0;
+        if (lastSTTStr != null) {
+            try {
+                currentMaxNumber = Integer.parseInt(lastSTTStr);
+            } catch (NumberFormatException e) {
+                System.err.println("Lỗi phân tích số thứ tự cuối cùng: " + e.getMessage());
+            }
+        }
+
+        // --- BƯỚC 2: KHỞI TẠO TRANSACTION VÀ THỰC HIỆN INSERT ---
         try {
             conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=QuanLyVeTauTest2;trustServerCertificate=true", "sa", "sapassword");
             conn.setAutoCommit(false); // 1. Bắt đầu giao dịch
@@ -176,20 +179,22 @@ public class VeCuaBanVeDAO {
                 throw new SQLException("Thêm Hóa đơn thất bại.");
             }
 
-            // --- B3 & B4: Thêm từng Vé và Chi tiết Hóa đơn ---
-            for (VeCuaBanVe ve : danhSachVe) {
-                // a. Tạo MaVe tự động và gán lại cho entity
-                // NOTE: Cần đảm bảo hàm taoMaVeMoi() nằm trong lớp này hoặc được gọi đúng cách
-                ve.setMaVe(taoMaVeMoi());
+            // B3 & B4: Thêm từng Vé và Chi tiết Hóa đơn
+            for (int i = 0; i < danhSachVe.size(); i++) {
+                VeCuaBanVe ve = danhSachVe.get(i);
+
+                // a. TẠO MÃ VÉ MỚI DUY NHẤT TRONG GIAO DỊCH
+                int nextNumber = currentMaxNumber + i + 1;
+                ve.setMaVe(taoMaVeMoi(nextNumber, soHieuCa));
 
                 // b. Thêm Vé
-                if (!themVe(conn, ve)) { // Thêm Vé vào CSDL (Hàm này phải nằm trong lớp VeCuaBanVeDAO)
+                if (!themVe(conn, ve)) { // Thêm Vé vào CSDL
                     throw new SQLException("Thêm Vé thất bại: " + ve.getMaVe());
                 }
 
                 // c. Thêm Chi tiết Hóa đơn
                 ChiTietHoaDon cthd = new ChiTietHoaDon(hoaDon.getMaHD(), ve.getMaVe(), 1);
-                if (!cthdDAO.themChiTietHoaDon(conn, cthd)) { // CẦN TRUYỀN CONN!
+                if (!cthdDAO.themChiTietHoaDon(conn, cthd)) {
                     throw new SQLException("Thêm Chi tiết Hóa đơn thất bại.");
                 }
             }
