@@ -65,6 +65,9 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
     private JDateChooser dateChooserNgayDi;
     private JSpinner timeSpinnerGioDi;
 
+    private JTable tableChuyenTau; // Biến JTable
+    private DefaultTableModel modelChuyenTau; // Biến Model của bảng
+
 
     public ManhinhQuanLyChuyenTau() {
         setSize(1600, 900);
@@ -79,7 +82,11 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
         // [MỚI] Tải dữ liệu từ CSDL lên các ComboBox
         loadDuLieuMaTau();
         loadDuLieuGa();
+
+        loadDuLieuChuyenTauLenBang();
     }
+
+
 
     // =================================================================================
     // KHU VỰC MENU BÊN TRÁI (Giữ nguyên)
@@ -247,19 +254,25 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
         // --- Tạo Bảng ---
         // Sửa "Tên tàu" -> "Mã tàu"
         String[] columnNames = {"Mã chuyến tàu", "Mã tàu", "Ga đi", "Ga đến", "Giờ đi", "Ngày đi"};
-        Object[][] data = {}; // Dữ liệu trống
 
-        DefaultTableModel model = new DefaultTableModel(data, columnNames);
-        JTable table = new JTable(model);
+        // [CẬP NHẬT] Gán modelChuyenTau đã khai báo
+        modelChuyenTau = new DefaultTableModel(columnNames, 0); // Khởi tạo với 0 hàng
 
-        table.setFillsViewportHeight(true);
-        table.setRowHeight(28);
-        table.setFont(FONT_PLAIN_14); // Sử dụng FONT_PLAIN_14
+        // [CẬP NHẬT] Gán tableChuyenTau đã khai báo
+        tableChuyenTau = new JTable(modelChuyenTau);
 
-        table.getTableHeader().setFont(FONT_BOLD_14); // Sử dụng FONT_BOLD_14
-        table.getTableHeader().setBackground(new Color(230, 230, 230));
+        // Thêm MouseListener để nhấp vào hàng hiển thị lên form (tham khảo)
+        tableChuyenTau.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // ... Logic xử lý khi click vào hàng ...
+            }
+        });
 
-        JScrollPane scrollPane = new JScrollPane(table);
+        tableChuyenTau.setFillsViewportHeight(true);
+
+
+        JScrollPane scrollPane = new JScrollPane(tableChuyenTau);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
@@ -331,6 +344,55 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
         }
     }
 
+    private void loadDuLieuChuyenTauLenBang() {
+        // Xóa tất cả các hàng hiện có trong bảng trước khi tải mới
+        modelChuyenTau.setRowCount(0);
+
+        // Chuỗi SQL truy vấn (Điều chỉnh tên cột/bảng nếu cần)
+        String sql = "SELECT MaChuyenTau, MaTau, GaDi, GaDen, GioKhoiHanh, NgayKhoiHanh FROM ChuyenTau";
+
+        try (Connection con = ConnectDB.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+
+            SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
+            SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy");
+
+            // Duyệt qua từng hàng kết quả trả về từ CSDL
+            while (rs.next()) {
+                String maChuyenTau = rs.getString("MaChuyenTau");
+                String maTau = rs.getString("MaTau");
+                String gaDi = rs.getString("GaDi");
+                String gaDen = rs.getString("GaDen");
+
+                // Giả sử GioDi là TIME/String và NgayDi là DATE/String trong CSDL
+                Date gioDi = rs.getTime("GioKhoiHanh");
+                Date ngayDi = rs.getDate("NgayKhoiHanh");
+
+                // Định dạng lại giờ và ngày để hiển thị đẹp hơn
+                String gioDiStr = (gioDi != null) ? sdfTime.format(gioDi) : "";
+                String ngayDiStr = (ngayDi != null) ? sdfDate.format(ngayDi) : "";
+
+                // Tạo một mảng đối tượng cho một hàng
+                Object[] rowData = {
+                        maChuyenTau,
+                        maTau,
+                        gaDi,
+                        gaDen,
+                        gioDiStr,
+                        ngayDiStr
+                };
+
+                // Thêm hàng vào Model của bảng
+                modelChuyenTau.addRow(rowData);
+            }
+
+        } catch (SQLException e) {
+            hienThiThongBaoLoi("Lỗi tải dữ liệu chuyến tàu: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     // Phương thức giả định để hiển thị lỗi
     private void hienThiThongBaoLoi(String message) {
         System.err.println(message);
@@ -341,29 +403,6 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
      * Phương thức main để chạy ứng dụng.
      */
     public static void main(String[] args) {
-        // [MỚI] Kết nối CSDL ngay khi ứng dụng khởi động
-//        try {
-//            ConnectDB.getInstance().connect();
-//            System.out.println("Kết nối CSDL thành công!");
-//        } catch (Exception e) {
-//            System.err.println("Lỗi kết nối CSDL!");
-//            e.printStackTrace();
-//            JOptionPane.showMessageDialog(null, "Không thể kết nối đến CSDL. Vui lòng kiểm tra lại.", "Lỗi kết nối", JOptionPane.ERROR_MESSAGE);
-//            return; // Dừng ứng dụng nếu không kết nối được
-//        }
-//
-//
-//        try {
-//            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-//                if ("Nimbus".equals(info.getName())) {
-//                    UIManager.setLookAndFeel(info.getClassName());
-//                    break;
-//                }
-//            }
-//        } catch (Exception e) {
-//            // Dùng giao diện mặc định
-//        }
-
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Panel Mở ca (Kiểm tra)");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -12,6 +12,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -48,6 +49,10 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private JLabel lblMaHoaDon; // FIX: Biến mới để hiển thị Mã HD
     private JLabel lblNguoiLapHD; // FIX: Biến mới để hiển thị Người lập
     private JLabel lblDienThoaiNV; // FIX: Biến mới để hiển thị SĐT NV
+    private JLabel lblTenNguoiDat; // FIX: Tên người đặt
+    private JLabel lblSdtNguoiDat; // FIX: SĐT người đặt
+    private JLabel lblPhuongThucTT; // FIX: Phương thức thanh toán (trong phần UI Tổng tiền)
+
 
     // Khuyen mai dang ap dung
     private KhuyenMai khuyenMaiApDung = null;
@@ -62,6 +67,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
     // Thêm dòng này để khai báo biến mock
     private static  String MA_NV_LAP_HD_MOCK = "NVBV0001";
+    private DefaultTableModel model;
 
     public ManHinhXacNhanBanVe() {
         this(null, null, null, null, null);
@@ -181,7 +187,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         panelDanhSach.setBorder(BorderFactory.createTitledBorder("Danh sách khách hàng"));
 
         String[] cot = {"Ghế", "Họ và tên", "Tuổi", "Số điện thoại", "CCCD"};
-        DefaultTableModel model = new DefaultTableModel(cot, 0) {
+        model = new DefaultTableModel(cot, 0) {
             public boolean isCellEditable(int row, int column) { return false; }
         };
 
@@ -322,6 +328,13 @@ public class ManHinhXacNhanBanVe extends JPanel {
         btnHuy.addActionListener(e -> huyBoThanhToan());
         panelNut.add(btnHuy);
 
+        JButton btnQuayLai = new JButton("Quay lại");
+        btnQuayLai.setBackground(new Color(150, 150, 150));
+        btnQuayLai.setForeground(Color.WHITE);
+        btnQuayLai.setPreferredSize(new Dimension(140, 36));
+        btnQuayLai.addActionListener(e -> quayLai());
+        panelNut.add(btnQuayLai);
+
         JButton btnXacNhan = new JButton("Xác nhận thanh toán");
         btnXacNhan.setForeground(Color.WHITE);
         btnXacNhan.setBackground(MAU_XANH_BTN);
@@ -354,18 +367,45 @@ public class ManHinhXacNhanBanVe extends JPanel {
         JPanel thongTinHD = new JPanel();
         thongTinHD.setOpaque(false);
         thongTinHD.setLayout(new GridLayout(0, 2));
+
+        // FIX: Hiển thị giá trị giữ chỗ ban đầu
+        lblMaHoaDon = new JLabel("Chưa tạo");
+        lblNguoiLapHD = new JLabel("Đang tải...");
+        lblDienThoaiNV = new JLabel("Đang tải...");
+
+        // Gán giá trị ban đầu cho các component
         thongTinHD.add(new JLabel("Mã hóa đơn: "));
-        thongTinHD.add(new JLabel(taoMaHoaDon()));
+        thongTinHD.add(lblMaHoaDon);
         thongTinHD.add(new JLabel("Người lập hóa đơn: "));
-        thongTinHD.add(new JLabel("Nguyễn Bảo Duy"));
+        thongTinHD.add(lblNguoiLapHD);
         thongTinHD.add(new JLabel("Điện thoại: "));
-        thongTinHD.add(new JLabel("0332534500"));
+        thongTinHD.add(lblDienThoaiNV);
         dau.add(thongTinHD, BorderLayout.CENTER);
 
-        panelHoaDon.add(dau, BorderLayout.NORTH);
+        JPanel panelNguoiDat = new JPanel();
+        panelNguoiDat.setLayout(new BoxLayout(panelNguoiDat, BoxLayout.Y_AXIS));
+        panelNguoiDat.setBorder(BorderFactory.createTitledBorder("Người đặt vé / Thanh toán"));
+        panelNguoiDat.setOpaque(false);
 
-        String[] cotHd = {"STT", "Mã vé", "Số lượng", "Đơn giá", "Thuế VAT", "Thành tiền có thuế"};
+        lblTenNguoiDat = new JLabel("Họ tên: [Tên khách đầu tiên]");
+        lblSdtNguoiDat = new JLabel("Số điện thoại: [SĐT khách đầu tiên]");
+        lblPhuongThucTT = new JLabel("Phương thức: [Hình thức TT]");
+
+        panelNguoiDat.add(lblTenNguoiDat);
+        panelNguoiDat.add(lblSdtNguoiDat);
+        panelNguoiDat.add(lblPhuongThucTT);
+
+        // Gộp tất cả vào phần NORTH
+        JPanel headerWrapper = new JPanel(new BorderLayout(0, 5));
+        headerWrapper.setOpaque(false);
+        headerWrapper.add(dau, BorderLayout.NORTH);
+        headerWrapper.add(panelNguoiDat, BorderLayout.CENTER);
+
+        panelHoaDon.add(headerWrapper, BorderLayout.NORTH); // Thay thế dau bằng headerWrapper
+
+        String[] cotHd = {"STT", "Loại vé", "Số lượng", "Đơn giá", "Thuế VAT", "Thành tiền có thuế"};
         DefaultTableModel modelHd = new DefaultTableModel(cotHd, 0) {
+            @Override
             public boolean isCellEditable(int r, int c) { return false; }
         };
 
@@ -373,18 +413,18 @@ public class ManHinhXacNhanBanVe extends JPanel {
             // Nhóm các ghế có cùng loại vé và đơn giá
             Map<String, MapGroup> groups = new LinkedHashMap<>();
 
-            // SỬA: Lặp qua danhSachKhach (kiểu Object)
+            // Lặp qua danhSachKhach để nhóm
             for (Map.Entry<String, Object> entry : danhSachKhach.entrySet()) {
-                String maCho = entry.getKey();
-                Object khach = entry.getValue(); // Đối tượng ChiTietKhach/Record
+                Object khach = entry.getValue();
 
                 // SỬA: Sử dụng helper để lấy các trường cần thiết
                 String maLoaiVe = getKhachField(khach, "maLoaiVe", String.class);
-                Long giaDonVi = danhSachGiaVe.get(maCho); // Giá đã được tính
+                Long giaDonVi = danhSachGiaVe.get(entry.getKey()); // Giá đã được tính
 
                 if (giaDonVi != null && maLoaiVe != null) {
+                    // Nhóm theo MaLoaiVe để nhóm các vé có cùng loại và giá
                     if (!groups.containsKey(maLoaiVe)) {
-                        // SỬA: Sử dụng helper để lấy tên hiển thị
+                        // Sử dụng MaLoaiVe làm key nhóm
                         groups.put(maLoaiVe, new MapGroup(getTenLoaiVeHienThi(khach), giaDonVi));
                     }
                     groups.get(maLoaiVe).soLuong++;
@@ -396,13 +436,14 @@ public class ManHinhXacNhanBanVe extends JPanel {
             for (Map.Entry<String, MapGroup> entry : groups.entrySet()) {
                 MapGroup group = entry.getValue();
 
-                // Tính toán giá trước VAT và VAT
+                // Tính toán: group.giaDonVi đã bao gồm VAT.
+                // Giá trước thuế = Giá/1.1
                 double giaTruocVAT = group.giaDonVi / 1.1;
                 double thanhTienCoVAT = group.giaDonVi * group.soLuong;
 
                 modelHd.addRow(new Object[]{
                         stt++,
-                        group.tenLoaiVe,
+                        group.tenLoaiVe, // GÁN TÊN LOẠI VÉ VÀO CỘT "Loại vé"
                         group.soLuong,
                         nf.format(Math.round(giaTruocVAT)),
                         "10%",
@@ -434,18 +475,54 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
         JPanel panelKetThuc = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panelKetThuc.setOpaque(false);
+
         JButton btnKetThuc = new JButton("Kết thúc >");
         btnKetThuc.setBackground(MAU_CAM_BTN);
         btnKetThuc.setForeground(Color.WHITE);
         btnKetThuc.setPreferredSize(new Dimension(140, 36));
         btnKetThuc.addActionListener(e -> ketThuc());
         panelKetThuc.add(btnKetThuc);
+
         chan.add(panelKetThuc, BorderLayout.SOUTH);
 
         panelHoaDon.add(chan, BorderLayout.SOUTH);
 
+        // FIX: Cập nhật thông tin người lập HD ban đầu (Mock)
+        lblNguoiLapHD.setText("Nguyễn Bảo Duy (" + MA_NV_LAP_HD_MOCK + ")");
+        lblDienThoaiNV.setText("0332534500");
+
+        capNhatThongTinNguoiDat();
         return panelHoaDon;
     }
+
+    /**
+     * Cập nhật thông tin Người đặt vé (khách hàng đại diện) và Phương thức TT.
+     */
+    private void capNhatThongTinNguoiDat() {
+        // Chỉ lấy Khách hàng đầu tiên làm đại diện (Khách vãng lai nếu danh sách rỗng)
+        String tenKhach = "Khách Vãng Lai";
+        String sdtKhach = "";
+        String hinhThuc = (String) cbHinhThuc.getSelectedItem();
+
+        if (danhSachKhach != null && !danhSachKhach.isEmpty()) {
+            Object khachDauTien = danhSachKhach.values().iterator().next();
+            String hoTen = getKhachField(khachDauTien, "hoTen", String.class);
+            String sdt = getKhachField(khachDauTien, "sdt", String.class);
+
+            if (hoTen != null && !hoTen.isEmpty()) tenKhach = hoTen;
+            if (sdt != null && !sdt.isEmpty()) sdtKhach = sdt;
+        }
+
+        lblTenNguoiDat.setText("Họ tên: " + tenKhach);
+        lblSdtNguoiDat.setText("Số điện thoại: " + sdtKhach);
+        lblPhuongThucTT.setText("Phương thức: " + hinhThuc);
+    }
+
+//// FIX: Cần gán sự kiện cho cbHinhThuc trong taoPanelThanhToan()
+//// ...
+//cbHinhThuc.addActionListener(e -> capNhatThongTinNguoiDat());
+//// ...
+
     // Thêm class MapGroup để hỗ trợ nhóm hóa đơn
     private static class MapGroup {
         String tenLoaiVe;
@@ -458,6 +535,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
             this.soLuong = 0;
         }
     }
+
+
 
     // Tai khuyen mai tu DB vao combobox
     private void taiKhuyenMaiTuDB() {
@@ -604,59 +683,34 @@ public class ManHinhXacNhanBanVe extends JPanel {
         }
     }
 
+
     /**
-     * Xác nhận thanh toán: Tạo Hóa đơn và Vé, gọi DAO để lưu vào DB trong Transaction.
-     * Giao diện và logic đã được chuẩn bị sẵn.
-     * FIX: Cần sửa lại phần lấy mã khách hàng và nhân viên lập hóa đơn theo thực tế.
-     *
-     */
-    /**
-     * Truy vấn số thứ tự cuối cùng của Hóa đơn trong ngày/ca/NV hiện tại.
-     * @param soHieuCa Số hiệu Ca (2 ký tự, e.g., "01").
-     * @param maNV Mã Nhân viên lập.
-     * @return Số thứ tự (NNNN) của Hóa đơn lớn nhất, hoặc null nếu chưa có.
-     * @throws SQLException Nếu có lỗi CSDL.
+     * Lấy Mã số thứ tự cuối cùng của Hóa đơn trong ngày/ca/NV hiện tại.
+     * (Hàm Helper, gọi HoaDonDAO)
      */
     private String getLastSoThuTuHoaDon(String soHieuCa, String maNV) throws SQLException {
-        // Format ngày hiện tại thành YYMMDD
+        String maNVRutGon;
+        if (maNV != null && maNV.length() >= 4) {
+            // Lấy 4 ký tự cuối (ví dụ: "0001" từ "NVBV0001")
+            maNVRutGon = maNV.substring(maNV.length() - 4);
+        } else {
+            maNVRutGon = "0000";
+        }
+
         String ngayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
 
-        // Pattern MaHD: HD[CC][YYMMDD][MaNV][STT]
-        // Vì MaNV có thể dài, ta chỉ dùng prefix HD[CC][YYMMDD]
-        String maHdPatternPrefix = "HD" + soHieuCa + ngayStr + maNV + "%";
+        // Tiền tố truy vấn: HD[CC][YYMMDD][NNNN]%
+        String maHdPatternPrefix = "HD" + soHieuCa + ngayStr + maNVRutGon + "%";
 
         String lastSTT = null;
-        //Dùng hóa đơn DAO
         String lastMaHD = HoaDonDAO.getLastMaHoaDonByPrefix(maHdPatternPrefix);
 
         if (lastMaHD != null) {
-            // Lấy 4 ký tự cuối (số thứ tự)
             lastSTT = lastMaHD.substring(lastMaHD.length() - 4);
         }
         return lastSTT;
     }
 
-    /**
-     * Kiểm tra dữ liệu khách hàng trong danhSachKhach (dành cho mục đích debug).
-     */
-    private void kiemTraDuLieuKhach() {
-        System.out.println("--- DANH SÁCH KHÁCH HÀNG KIỂM TRA ---");
-
-        if (danhSachKhach == null) {
-            System.out.println("danhSachKhach là NULL.");
-            return;
-        }
-
-        // In toàn bộ Map, bao gồm key (Mã ghế) và value (Đối tượng Khách hàng)
-        danhSachKhach.forEach((key, value) -> {
-            System.out.println("Ghế [" + key + "]: " + value);
-
-            // Kiểm tra cụ thể trường 'maKhachHang'
-            String maKhach = getKhachField(value, "maKhachHang", String.class);
-            System.out.println("  -> MaKhachHang trích xuất: " + maKhach);
-        });
-        System.out.println("-------------------------------------");
-    }
 
 
     // =====================================================================================
@@ -672,11 +726,20 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private Map<String, KhachHang> xuLyVaTaoKhachHangEntities(String[] maKhachHangDaiDienOut) throws SQLException {
         Map<String, KhachHang> danhSachKhachHangEntity = new HashMap<>();
 
+        // Khởi tạo danh sách khách hàng MỚI cần được INSERT vào DB trong transaction
+        List<KhachHang> danhSachKhachHangMoiCanLuu = new ArrayList<>();
+
         // Nếu không có khách nào, trả về Map rỗng
         if (danhSachKhach == null || danhSachKhach.isEmpty()) {
             maKhachHangDaiDienOut[0] = "KHVL001"; // Gán mặc định
             return danhSachKhachHangEntity;
         }
+        // [FIX START] TÌM STT LỚN NHẤT MỘT LẦN VÀ DÙNG BIẾN ĐẾM TẠM
+        LocalDate homNay = LocalDate.now();
+        // Lấy giá trị số nguyên lớn nhất (VD: 10)
+        int currentSTT = khachHangDAO.getLastKhachHangSTTValue(homNay);
+        String ngayStr = homNay.format(DateTimeFormatter.ofPattern("ddMMyy"));
+        // [FIX END]
 
         // Lặp qua danh sách khách hàng từ UI để tạo/tìm Entity KhachHang
         for (Map.Entry<String, Object> entry : danhSachKhach.entrySet()) {
@@ -698,20 +761,30 @@ public class ManHinhXacNhanBanVe extends JPanel {
             KhachHang khachHangCanLuu;
 
             if (khachHangDaTonTai == null) {
-                // TẠO MÃ KH MỚI VÀ ENTITY MỚI
-                String maKHNew = khachHangDAO.taoMaKhachHangMoi();
+                // [FIX] TĂNG BIẾN ĐẾM VÀ TẠO MÃ BẰNG BIẾN ĐẾM TẠM
+                currentSTT++; // 10 -> 11
+                String soThuTuStr = String.format("%04d", currentSTT);
+                String maKHNew = "KH" + ngayStr + soThuTuStr;
 
-                // TẠO THỰC THỂ KHÁCH HÀNG (Giả định constructor 5 tham số)
+                System.out.println("Tạo mã mới: " + maKHNew); // Kiểm tra
+
                 khachHangCanLuu = new KhachHang(
                         maKHNew,
                         hoTen,
                         cccd,
                         tuoi != null ? tuoi : 0,
                         sdt
-                        // BỔ SUNG: Nếu có trường GioiTinh, bạn cần thêm tham số này vào constructor/setter
                 );
+
+                // THÊM VÀO DANH SÁCH CẦN LƯU
+                danhSachKhachHangMoiCanLuu.add(khachHangCanLuu);
             } else {
                 khachHangCanLuu = khachHangDaTonTai;
+
+                // BỔ SUNG: Cập nhật các thuộc tính mới nhận từ form vào Entity cũ
+                khachHangCanLuu.setHoTen(hoTen);
+                khachHangCanLuu.setTuoi(tuoi != null ? tuoi : 0);
+                khachHangCanLuu.setSdt(sdt);
             }
 
             danhSachKhachHangEntity.put(entry.getKey(), khachHangCanLuu);
@@ -726,8 +799,29 @@ public class ManHinhXacNhanBanVe extends JPanel {
         if (maKhachHangDaiDienOut[0] == null) {
             maKhachHangDaiDienOut[0] = "KHVL001";
         }
+        // In danh sách KhachHang Entity để kiểm tra
+        inDanhSachKhachHangEntity(danhSachKhachHangEntity);
 
         return danhSachKhachHangEntity;
+    }
+
+    private void inDanhSachKhachHangEntity(Map<String, KhachHang> danhSachKhachHangEntity) {
+
+        System.out.println("--- Bắt đầu in Danh sách Khách hàng Entity ---");
+
+        // Lặp qua toàn bộ Map
+        danhSachKhachHangEntity.forEach((maGhe, khachHangEntity) -> {
+
+            // In toàn bộ Map: key (Mã ghế) và value (Đối tượng Khách hàng)
+            System.out.println("Danh sách khách hàng thực thể Ghế [" + maGhe + "]: " + khachHangEntity.toString());
+
+            // Kiểm tra cụ thể trường 'maKhachHang' (Sử dụng getMaKH() thay vì getKhachField)
+            String maKhach = khachHangEntity.getMaKH(); // Giả định phương thức getter là getMaKH()
+
+            System.out.println("  -> MaKhachHang trích xuất: " + maKhach);
+        });
+
+        System.out.println("--- Kết thúc in Danh sách Khách hàng Entity ---");
     }
 
     // =====================================================================================
@@ -795,7 +889,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
             Object khachTho = danhSachKhach.get(cho.getMaCho());
             String maLoaiVe = (khachTho != null) ? getKhachField(khachTho, "maLoaiVe", String.class) : "VT01";
 
-            kiemTraDuLieuKhach();
 
             // Tạo đối tượng VeCuaBanVe
             VeCuaBanVe ve = new VeCuaBanVe(
@@ -818,6 +911,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
 
             if (success) {
+                hienThiThongTinHoaDon(hoaDon);
                 System.out.println("Số lượng vé được thêm " + danhSachVeMoi.size());
                 for (VeCuaBanVe ve : danhSachVeMoi){
                     System.out.println("Mã vé được tạo: " + ve.getMaVe());
@@ -828,6 +922,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 sb.append("Mã Hóa đơn: ").append(maHD).append("\n");
                 sb.append("--- Danh sách Mã Vé đã tạo ---\n");
 
+
+
                 // Lặp qua danh sách Entity đã được cập nhật MaVe từ DAO
                 for (VeCuaBanVe ve : danhSachVeMoi) {
                     sb.append(ve.getMaVe()).append(" (Ghế: ").append(ve.getMaChoDat()).append(")\n");
@@ -837,7 +933,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
                         sb.toString(), // Hiển thị thông tin chi tiết
                         "Thành công",
                         JOptionPane.INFORMATION_MESSAGE);
-
+                
 
             } else {
                 JOptionPane.showMessageDialog(this, "Giao dịch không hoàn tất. Vui lòng kiểm tra lại.", "Lỗi thanh toán", JOptionPane.ERROR_MESSAGE);
@@ -848,10 +944,24 @@ public class ManHinhXacNhanBanVe extends JPanel {
         }
     }
 
+    /**
+     * Cập nhật các JLabel hiển thị thông tin hóa đơn sau khi transaction thành công.
+     * @param hd Đối tượng HoaDon đã được lưu vào CSDL.
+     */
+    public void hienThiThongTinHoaDon(HoaDon hd) {
+        if (hd != null) {
+            lblMaHoaDon.setText(hd.getMaHD());
+            lblMaHoaDon.setForeground(MAU_XANH_BTN);
+
+            // NOTE: Thông tin người lập HD và SĐT đã được gán giá trị mock ban đầu.
+            // Nếu bạn muốn hiển thị tên thật, cần truy vấn thêm từ NhanVienDAO.
+        }
+    }
+
 
     // =====================================================================================
 // PHƯƠNG THỨC GỐC ĐƯỢC CẬP NHẬT
-// =====================================================================================
+// ====================================================================================
 
     private void xacNhanThanhToan() {
         String[] maKhachHangDaiDienArr = new String[1]; // Biến hứng Mã KH đại diện
@@ -896,8 +1006,29 @@ public class ManHinhXacNhanBanVe extends JPanel {
         }
     }
 
+    /**
+     * Hành động cho nút "Kết thúc >" (Chuyển về trang chủ sau khi thanh toán xong).
+     */
     private void ketThuc() {
-        JOptionPane.showMessageDialog(this, "Kết thúc (chưa nối backend).");
+        // NOTE: Hàm này chỉ nên được gọi sau khi transaction thành công!
+
+        // 1. Reset dữ liệu của màn hình hiện tại
+        resetAllData();
+
+        // 2. Chuyển Panel
+        chuyenManHinh("trangChu");
+    }
+
+    /**
+     * Hành động cho nút "Quay lại" (Về màn hình bán vé chính).
+     */
+    private void quayLai() {
+        // NOTE: Giả định Panel bán vé chính là ManHinhBanVe (hoặc ManHinhBanVeChinh)
+
+        // KHÔNG reset dữ liệu ở đây, dữ liệu phải được giữ lại cho màn hình trước.
+        resetAllData();
+
+        chuyenManHinh("manHinhBanVe");
     }
 
     /**
@@ -911,48 +1042,50 @@ public class ManHinhXacNhanBanVe extends JPanel {
     }
 
     /**
-     * Tạo mã Hóa đơn mới theo quy tắc: HD[CC][YYMMDD][MaNV][STT].
-     * @return Mã Hóa đơn mới, ví dụ: HD01251027NVBV0010001
+     * Tạo mã Hóa đơn mới theo quy tắc: HD[CC][DDMMYY][MaNV][STT].
+     * @return Mã Hóa đơn mới, ví dụ: HD0127102500010001
      */
     private String taoMaHoaDon() {
         try {
-            // Lấy các thành phần
             String soHieuCa = getSoHieuCaHienTai();
             String maNVDayDu = MA_NV_LAP_HD_MOCK;
 
-            // 1. TRÍCH XUẤT 4 KÝ TỰ CUỐI CỦA MÃ NV
+            // Trích xuất 4 ký tự cuối của Mã NV (V001)
             String maNVRutGon;
             if (maNVDayDu != null && maNVDayDu.length() >= 4) {
-                // Lấy 4 ký tự cuối (ví dụ: "V001")
                 maNVRutGon = maNVDayDu.substring(maNVDayDu.length() - 4);
             } else {
-                // Trường hợp MaNV quá ngắn hoặc null, dùng mã an toàn (chỉ nên xảy ra khi debug)
                 maNVRutGon = "0000";
             }
 
-            String ngayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
+            String ngayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyy"));
 
-            // Lấy số thứ tự cuối cùng và tính số tiếp theo
-            String lastSTTStr = getLastSoThuTuHoaDon(soHieuCa, maNVRutGon);
+            // Tiền tố đầy đủ (HD01251027V001)
+            String maHdPatternPrefixDayDu = "HD" + soHieuCa + ngayStr + maNVRutGon;
+
+            // 1. GỌI DAO ĐỂ TÌM MÃ ĐẦY ĐỦ LỚN NHẤT
+            String lastMaHD = HoaDonDAO.getLastMaHoaDonByPrefix(maHdPatternPrefixDayDu);
             int nextNumber = 1;
 
-            if (lastSTTStr != null) {
+            if (lastMaHD != null) {
+                // 2. TRÍCH XUẤT STT TỪ MÃ ĐẦY ĐỦ (lấy 4 ký tự cuối)
                 try {
-                    nextNumber = Integer.parseInt(lastSTTStr) + 1;
-                } catch (NumberFormatException e) {
-                    System.err.println("Lỗi phân tích số thứ tự cuối cùng: " + e.getMessage());
+                    String lastSTTStr = lastMaHD.substring(lastMaHD.length() - 4);
+                    nextNumber = Integer.parseInt(lastSTTStr) + 1; // 0004 -> 5
+                } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                    System.err.println("Lỗi trích xuất STT từ Mã HD: " + lastMaHD + ". Bắt đầu lại từ 1.");
+                    nextNumber = 1;
                 }
             }
 
-            // Định dạng số thứ tự (0001)
+            // Định dạng số thứ tự (0005)
             String soThuTuStr = String.format("%04d", nextNumber);
 
-            // Gộp và trả về mã mới
-            return "HD" + soHieuCa + ngayStr + maNVRutGon + soThuTuStr;
+            // Gộp và trả về mã mới (Ví dụ: HD0128102500010005)
+            return maHdPatternPrefixDayDu + soThuTuStr;
 
         } catch (SQLException e) {
             System.err.println("Lỗi CSDL khi tạo Mã Hóa Đơn: " + e.getMessage());
-            // Trả về mã dự phòng để tránh crash (Nên có logic quản lý lỗi tốt hơn)
             return "HDERR" + System.currentTimeMillis();
         }
     }
@@ -970,21 +1103,53 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 "Xác nhận", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (confirm != JOptionPane.YES_OPTION) return;
 
+        // 1. Reset dữ liệu của màn hình hiện tại
+        resetAllData();
+        // 2. Chuyển Panel
+        chuyenManHinh("trangChu");
+    }
+
+    /**
+     * Helper chung để chuyển đổi giữa các Panel trong Dashboard.
+     */
+    private void chuyenManHinh(String cardName) {
         Window w = SwingUtilities.getWindowAncestor(this);
 
         if (w instanceof BanVeDashboard) {
             BanVeDashboard dashboard = (BanVeDashboard) w;
 
-            ManHinhTrangChuNVBanVe confirmPanel = new ManHinhTrangChuNVBanVe();
+            if ("trangChu".equals(cardName)) {
+                // Cần tạo lại Panel Trang chủ nếu nó không phải là static
+                dashboard.addOrUpdateCard(new ManHinhTrangChuNVBanVe(), "trangChu");
+            }
 
-            dashboard.addOrUpdateCard(confirmPanel, "trangChu");
-            dashboard.switchToCard("trangChu");
+            dashboard.switchToCard(cardName);
 
         } else {
             JOptionPane.showMessageDialog(this,
-                    "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
+                    "Lỗi chuyển hướng hệ thống.",
                     "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
         }
+    }
+    private void resetAllData() {
+        // 1. Dọn dẹp dữ liệu nội bộ
+        if (danhSachGhe != null) danhSachGhe.clear();
+        if (danhSachKhach != null) danhSachKhach.clear();
+        if (danhSachGiaVe != null) danhSachGiaVe.clear();
+        khuyenMaiApDung = null;
+
+        // 2. Reset UI Components (Nếu cần)
+        if (model != null) model.setRowCount(0); // Dọn dẹp bảng khách hàng
+        if (tbHoaDon != null && tbHoaDon.getModel() instanceof DefaultTableModel) {
+            ((DefaultTableModel) tbHoaDon.getModel()).setRowCount(0);
+        }
+
+        // 3. Cập nhật các JLabel về trạng thái ban đầu
+        lblMaHoaDon.setText("Chưa tạo");
+        lblMaHoaDon.setForeground(Color.BLACK);
+        lblNguoiLapHD.setText("Đang tải...");
+
+        capNhatTongVaGiaoDien(); // Tính toán lại tổng tiền (sẽ là 0)
     }
 
     // main test neu can
