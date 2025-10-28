@@ -22,7 +22,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     // =================================================================================
     private CardLayout cardLayout;
     private JPanel contentPanel;
-    private final Color PRIMARY_COLOR = new Color(34, 137, 203); // Màu xanh đậm hơn cho NV Bán vé
+    private final Color PRIMARY_COLOR = new Color(34, 137, 203); // Màu xanh nhạt hơn cho NV Quản Lý
     private final Color SELECTED_COLOR = new Color(74, 184, 237); // Màu xanh sáng hơn
     private final Color HOVER_COLOR = new Color(45, 150, 215);
     private final Map<String, JButton> menuButtons = new HashMap<>();
@@ -43,11 +43,10 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 
         // 2. Panel nội dung (CardLayout)
         initContentPanel();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         switchToCard("trangChuNV");
-
         initEventHandlers();
-
         setVisible(true);
     }
 
@@ -62,7 +61,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(PRIMARY_COLOR);
-        panel.setPreferredSize(new Dimension(220, 0)); // Chiều rộng hẹp hơn
+        panel.setPreferredSize(new Dimension(200, 0)); // Chiều rộng hẹp hơn
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // --- Phần Header (Logo và ID) ---

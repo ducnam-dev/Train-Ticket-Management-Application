@@ -31,6 +31,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
 
     // Các nút menu cần quản lý
     private JButton btnTrangChu, btnQLChuyenTau, btnQLNV, btnQLKhuyenMai, btnDangXuat;
+    private JButton btnQLGiaVe;
 
     public QuanLyDashboard() {
         setTitle("Hệ thống Quản lý Vé Tàu");
@@ -116,7 +117,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         panel.add(btnQLNV);
 
         // [5. Quản lý giá vé] - Giả định đây là một Panel
-        JButton btnQLGiaVe = createNavItem("Quản lý giá vé", "\uD83D\uDCB2"); // 💲
+        btnQLGiaVe = createNavItem("Quản lý giá vé", "\uD83D\uDCB2"); // 💲
         menuButtons.put("qlGiaVe", btnQLGiaVe);
         panel.add(btnQLGiaVe);
 
@@ -200,7 +201,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         contentPanel.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
         contentPanel.add(new ManHinhQuanLyKhuyenMai(), "qlKhuyenMai");
         contentPanel.add(new JPanel(), "traCuuHD"); // Placeholder
-        contentPanel.add(new JPanel(), "qlGiaVe"); // Placeholder
+        contentPanel.add(new ManHinhQuanLyGiaVe(), "qlGiaVe"); // Placeholder
         contentPanel.add(new JPanel(), "thongKe"); // Placeholder
 
 

@@ -123,7 +123,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private static final String MA_VE_TE = "VT02";
     private static final String MA_VE_NCT = "VT03";
     private static final String MA_VE_SV = "VT04";
-    private JButton cancelButton, nextButton;
+    private JButton btbHuy, btnTiepTheo;
     private JButton btnTimChuyen;
 
     // Map lưu giá mỗi ghế (maCho -> giaVe đã làm tròn VNĐ)
@@ -517,23 +517,23 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         buttonPanel.setOpaque(false);
 
-        cancelButton = new JButton("< Hủy");
-        cancelButton.setPreferredSize(new Dimension(80, 40));
-        cancelButton.setFont(cancelButton.getFont().deriveFont(Font.BOLD, 14f));
-        cancelButton.setBackground(new Color(220, 53, 69));
-        cancelButton.setForeground(Color.WHITE);
+        btbHuy = new JButton("< Hủy");
+        btbHuy.setPreferredSize(new Dimension(80, 40));
+        btbHuy.setFont(btbHuy.getFont().deriveFont(Font.BOLD, 14f));
+        btbHuy.setBackground(new Color(220, 53, 69));
+        btbHuy.setForeground(Color.WHITE);
 
-        nextButton = new JButton("Tiếp theo >");
-        nextButton.setPreferredSize(new Dimension(120, 40));
-        nextButton.setFont(nextButton.getFont().deriveFont(Font.BOLD, 14f));
-        nextButton.setBackground(new Color(0, 123, 255));
-        nextButton.setForeground(Color.WHITE);
+        btnTiepTheo = new JButton("Tiếp theo >");
+        btnTiepTheo.setPreferredSize(new Dimension(120, 40));
+        btnTiepTheo.setFont(btnTiepTheo.getFont().deriveFont(Font.BOLD, 14f));
+        btnTiepTheo.setBackground(new Color(0, 123, 255));
+        btnTiepTheo.setForeground(Color.WHITE);
 
-        buttonPanel.add(cancelButton);
-        buttonPanel.add(nextButton);
+        buttonPanel.add(btbHuy);
+        buttonPanel.add(btnTiepTheo);
         //Đăng ký sự kiện
-        cancelButton.addActionListener(this);
-        nextButton.addActionListener(this);
+        btbHuy.addActionListener(this);
+        btnTiepTheo.addActionListener(this);
 
         JPanel fullSummary = new JPanel(new BorderLayout());
         fullSummary.setBackground(Color.white);
@@ -1181,14 +1181,58 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                 maChuyenTauHienTai
         );
 
+        String loaiToa = "";
+        try {
+            loaiToa = layLoaiToa(maToa);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi tra cứu loại toa: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            pnlSoDoGhe.removeAll();
+            pnlSoDoGhe.add(new JLabel("Không xác định được loại toa."));
+            pnlSoDoGhe.revalidate();
+            pnlSoDoGhe.repaint();
+            return;
+        }
+
         if (danhSachChoDat.isEmpty()) {
             pnlSoDoGhe.removeAll();
             pnlSoDoGhe.add(new JLabel("Toa này chưa có dữ liệu chỗ đặt."));
             pnlSoDoGhe.revalidate();
             pnlSoDoGhe.repaint();
         } else {
-            veSoDoGhe(danhSachChoDat);
+            if (loaiToa.toLowerCase().contains("giường")) {
+                veSoDoGiuongNam(danhSachChoDat);
+            } else {
+                veSoDoGhe(danhSachChoDat);
+            }
         }
+    }
+
+    private String layLoaiToa(String maToa) throws Exception {
+        if (maToa == null || maChuyenTauHienTai == null) {
+            throw new Exception("Thiếu Mã toa hoặc Mã chuyến tàu.");
+        }
+
+        // Lấy mã tàu từ mã chuyến tàu hiện tại (cần tìm lại)
+        String maTau = null;
+        for (ChuyenTau ct : ketQua) {
+            if (maChuyenTauHienTai.equals(ct.getMaChuyenTau())) {
+                maTau = ct.getMaTau();
+                break;
+            }
+        }
+        if (maTau == null) throw new Exception("Không tìm thấy mã tàu cho chuyến tàu hiện tại.");
+
+        // Lấy danh sách toa của tàu và tìm loại toa
+        ToaDAO tdao = new ToaDAO();
+        List<Toa> toas = tdao.layToaTheoMaTau(maTau);
+        if (toas != null) {
+            for (Toa t : toas) {
+                if (t.getMaToa().equals(maToa)) {
+                    return t.getLoaiToa();
+                }
+            }
+        }
+        throw new Exception("Không tìm thấy Loại toa cho mã toa: " + maToa);
     }
 
     private String laySoThuTuToa(String maToa) {
@@ -1251,6 +1295,102 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         }
 
         pnlSoDoGhe.add(gridContainer);
+        pnlSoDoGhe.revalidate();
+        pnlSoDoGhe.repaint();
+    }
+
+    private static final Dimension BERTH_SEAT_SIZE = new Dimension(70, 45);
+
+    private void veSoDoGiuongNam(List<ChoDat> danhSachChoDat){
+        pnlSoDoGhe.removeAll();
+        seatButtonsMap.clear();
+        tatCaChoDatToaHienTai.clear();
+
+        pnlSoDoGhe.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        pnlSoDoGhe.setOpaque(true);
+        pnlSoDoGhe.setBackground(Color.WHITE);
+        pnlSoDoGhe.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        // Gom nhóm chỗ đặt theo số buồng (ví dụ: "01", "02", ...)
+        Map<String, List<ChoDat>> buongData = new LinkedHashMap<>();
+        for (ChoDat cho : danhSachChoDat) {
+            // Giả sử số buồng là phần số của số ghế (ví dụ: '01A', '01B' -> buồng '01')
+            String soGhe = cho.getSoCho();
+            String soBuong = soGhe.substring(0, soGhe.length() - 1);
+
+            buongData.computeIfAbsent(soBuong, k -> new ArrayList<>()).add(cho);
+        }
+
+        // Số giường tối đa trong một buồng (để xác định layout)
+        int maxGiuongPerBuong = 0;
+        for(List<ChoDat> list : buongData.values()) {
+            if(list.size() > maxGiuongPerBuong) maxGiuongPerBuong = list.size();
+        }
+
+        // Nếu maxGiuongPerBuong = 4, ta có 2 tầng, 2 bên (2 hàng, 2 cột/bên)
+        int rowsPerBuong = maxGiuongPerBuong / 2; // Ví dụ: 4/2 = 2 hàng (trên, dưới)
+
+        // Container chính để chứa tất cả các buồng
+        JPanel container = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
+        container.setOpaque(false);
+
+        for (Map.Entry<String, List<ChoDat>> entry : buongData.entrySet()) {
+            String soBuong = entry.getKey();
+            List<ChoDat> choDats = entry.getValue();
+
+            // 1. Panel cho từng Buồng (có tiêu đề)
+            JPanel pnlBuong = new JPanel(new BorderLayout());
+            pnlBuong.setBorder(new TitledBorder(BorderFactory.createLineBorder(Color.GRAY),
+                    "Buồng " + soBuong));
+            pnlBuong.setOpaque(false);
+
+            // 2. Grid cho các giường trong buồng
+            // Giả định 2 hàng (trên/dưới) và 2 cột (A/C và B/D hoặc 1-2 và 3-4)
+            JPanel buongGrid = new JPanel(new GridLayout(rowsPerBuong, 2, 5, 5));
+            buongGrid.setOpaque(false);
+            buongGrid.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+            // Sắp xếp lại danh sách chỗ ngồi theo thứ tự trực quan (ví dụ: A, C, B, D)
+            choDats.sort(Comparator.comparing(c -> c.getSoCho()));
+
+            for (ChoDat cho : choDats) {
+                JButton btnCho = new JButton(cho.getSoCho());
+                btnCho.setPreferredSize(BERTH_SEAT_SIZE);
+                btnCho.setFont(btnCho.getFont().deriveFont(Font.BOLD, 12f));
+
+                boolean isSelected = danhSachGheDaChon.containsKey(cho.getMaCho());
+                boolean isBooked = cho.isDaDat();
+                tatCaChoDatToaHienTai.put(cho.getMaCho(), cho);
+
+                if (isSelected) {
+                    btnCho.setBackground(new Color(0, 123, 255));
+                    btnCho.setForeground(Color.WHITE);
+                    btnCho.setEnabled(true);
+                    btnCho.setToolTipText("Ghế đang được chọn");
+                } else if (isBooked) {
+                    btnCho.setBackground(Color.BLACK);
+                    btnCho.setForeground(Color.WHITE);
+                    btnCho.setEnabled(false);
+                    btnCho.setToolTipText("Ghế đã được bán");
+                } else {
+                    btnCho.setBackground(Color.LIGHT_GRAY);
+                    btnCho.setForeground(Color.BLACK);
+                    btnCho.setEnabled(true);
+                }
+
+                if (btnCho.isEnabled()) {
+                    btnCho.addActionListener(e -> xuLyChonGhe(btnCho, cho));
+                }
+
+                seatButtonsMap.put(cho.getMaCho(), btnCho);
+                buongGrid.add(btnCho);
+            }
+
+            pnlBuong.add(buongGrid, BorderLayout.CENTER);
+            container.add(pnlBuong);
+        }
+
+        pnlSoDoGhe.add(container);
         pnlSoDoGhe.revalidate();
         pnlSoDoGhe.repaint();
     }
@@ -1409,9 +1549,9 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             timKiemChuyenTau();
         }
 
-        else if (src == cancelButton) {
+        else if (src == btbHuy) {
             huyBoDatVe();
-        } else if (src == nextButton) {
+        } else if (src == btnTiepTheo) {
             xuLyNutTiepTheo();
         }
     }
