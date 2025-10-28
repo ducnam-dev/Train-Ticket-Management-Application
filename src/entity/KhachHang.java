@@ -68,4 +68,16 @@ public class KhachHang {
     public void setGioiTinh(String gioiTinh) {
         this.gioiTinh = gioiTinh;
     }
+
+    @Override
+    public String toString() {
+        return "KhachHang{" +
+                "maKH='" + maKH + '\'' +
+                ", hoTen='" + hoTen + '\'' +
+                ", soCCCD='" + soCCCD + '\'' +
+                ", tuoi=" + tuoi +
+                ", sdt='" + sdt + '\'' +
+                ", gioiTinh='" + gioiTinh + '\'' +
+                '}';
+    }
 }

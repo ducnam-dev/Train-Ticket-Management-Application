@@ -20,9 +20,9 @@ public class ToaDAO {
         List<Toa> danhSachToa = new ArrayList<>();
 
         // Truy vấn lấy các toa thuộc một tàu
-        String sql = "SELECT MaToa, MaTau, LoaiToa "
+        String sql = "SELECT MaToa, SoHieuTau, LoaiToa "
                 + "FROM Toa "
-                + "WHERE MaTau = ?";
+                + "WHERE SoHieuTau = ?";
 
         try {Connection con = ConnectDB.getConnection();
 
@@ -34,7 +34,7 @@ public class ToaDAO {
                 while (rs.next()) {
                     // 1. Lấy dữ liệu thô
                     String maToa = rs.getString("MaToa");
-                    String maTauDB = rs.getString("MaTau");
+                    String maTauDB = rs.getString("SoHieuTau");
                     String loaiToaStr = rs.getString("LoaiToa");
 
                     // 2. Tra cứu (Lookup) đối tượng Tau
@@ -58,7 +58,7 @@ public class ToaDAO {
     // Lấy thông tin một toa tàu theo Mã Toa
     public Toa getToaById(String maToa) {
         Toa toa = null;
-        String sql = "SELECT MaToa, MaTau, LoaiToa FROM Toa WHERE MaToa = ?";
+        String sql = "SELECT MaToa, SoHieuTau, LoaiToa FROM Toa WHERE MaToa = ?";
 
         try (
                 Connection con = ConnectDB.getConnection();
@@ -67,7 +67,7 @@ public class ToaDAO {
             pstmt.setString(1, maToa);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    String maTauDB = rs.getString("MaTau");
+                    String maTauDB = rs.getString("SoHieuTau");
                     String loaiToaStr = rs.getString("LoaiToa");
 
                     Tau tau = TauDAO.getTauById(maTauDB);
@@ -83,7 +83,7 @@ public class ToaDAO {
 
     // Phương thức thêm Toa tàu mới (tham khảo)
     public boolean themToa(Toa toa) {
-        String sql = "INSERT INTO Toa (MaToa, MaTau, LoaiToa) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Toa (MaToa, SoHieuTau, LoaiToa) VALUES (?, ?, ?)";
         try (
                 Connection con = ConnectDB.getInstance().getConnection();
                 PreparedStatement stmt = con.prepareStatement(sql);

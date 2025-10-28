@@ -895,8 +895,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             return;
         }
 
-        String maGaDi = gaDiSelected.getMaGa();
-        String maGaDen = gaDenSelected.getMaGa();
+        String tenGaDi = gaDiSelected.getTenGa(); //Sửa tối 26/10
+        String tenGaDen = gaDenSelected.getTenGa();//Sửa tôí 26/10
         String ngayDiString = dateField.getText();
         String ngayDiSQL;
         try {
@@ -908,7 +908,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         }
 
         ChuyenTauDao dao = new ChuyenTauDao();
-        ketQua = dao.timChuyenTau(maGaDi, maGaDen, ngayDiSQL);
+        ketQua = dao.timChuyenTau(tenGaDi, tenGaDen, ngayDiSQL); //Sửa tối 26/10
 
         if (ketQua == null || ketQua.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Không tìm thấy chuyến tàu nào phù hợp.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);

@@ -4,6 +4,10 @@ public class Ga {
 	public String maGa;
 	public String tenGa;
 	public String diaChi;
+
+    public Ga(){
+
+    }
 	
 	public Ga(String maGa, String tenGa, String diaChi) {
 		super();

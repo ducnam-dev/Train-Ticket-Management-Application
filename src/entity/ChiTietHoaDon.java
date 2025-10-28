@@ -1,50 +1,64 @@
 package entity;
 
 public class ChiTietHoaDon {
-    private String hoTen;
-    private String soCCCD;
-    private String loaiVe;
-    private int giaVe;
-    private double khuyenMai;
-    private double thanhTien;
+    private String maHD;
+    private String maVe;
+    private int soLuong;
+    private double donGia;
 
+    // Constructor mặc định
     public ChiTietHoaDon() {
     }
 
-    public ChiTietHoaDon(String hoTen, String soCCCD, String loaiVe, int giaVe, double khuyenMai, double thanhTien) {
-        setGiaVe(giaVe);
-        setHoTen(hoTen);
-        setSoCCCD(soCCCD);
-        setLoaiVe(loaiVe);
-        setKhuyenMai(khuyenMai);
-        setThanhTien(thanhTien);
+    // Constructor đầy đủ tham số
+    public ChiTietHoaDon(String maHD, String maVe, int soLuong, double donGia) {
+        this.maHD = maHD;
+        this.maVe = maVe;
+        this.soLuong = soLuong;
+        this.donGia = donGia;
     }
 
-    public String getHoTen() { return hoTen; }
-    public void setHoTen(String hoTen) { this.hoTen = hoTen; }
+    // Getter và Setter
+    public String getMaHD() {
+        return maHD;
+    }
 
-    public String getSoCCCD() { return soCCCD; }
-    public void setSoCCCD(String soCCCD) { this.soCCCD = soCCCD; }
+    public void setMaHD(String maHD) {
+        this.maHD = maHD;
+    }
 
-    public String getLoaiVe() { return loaiVe; }
-    public void setLoaiVe(String loaiVe) { this.loaiVe = loaiVe; }
+    public String getMaVe() {
+        return maVe;
+    }
 
-    public int getGiaVe() { return giaVe; }
-    public void setGiaVe(int giaVe) { this.giaVe = giaVe; }
+    public void setMaVe(String maVe) {
+        this.maVe = maVe;
+    }
 
-    public double getKhuyenMai() { return khuyenMai; }
-    public void setKhuyenMai(double khuyenMai) { this.khuyenMai = khuyenMai; }
+    public int getSoLuong() {
+        return soLuong;
+    }
 
-    public double getThanhTien() { return thanhTien; }
-    public void setThanhTien(double thanhTien) { this.thanhTien = thanhTien; }
+    public void setSoLuong(int soLuong) {
+        this.soLuong = soLuong;
+    }
 
+    public double getDonGia() {
+        return donGia;
+    }
+
+    public void setDonGia(double donGia) {
+        this.donGia = donGia;
+    }
+
+    // toString (tùy chọn, để debug hoặc hiển thị)
     @Override
     public String toString() {
-        return "HoTen: " + hoTen +
-                ", SoCCCD: " + soCCCD +
-                ", LoaiVe: " + loaiVe +
-                ", GiaVe: " + giaVe +
-                ", KhuyenMai: " + khuyenMai +
-                ", ThanhTien: " + thanhTien;
+        return "ChiTietHoaDon{" +
+                "maHD='" + maHD + '\'' +
+                ", maVe='" + maVe + '\'' +
+                ", soLuong=" + soLuong +
+                ", donGia=" + donGia +
+                '}';
     }
 }

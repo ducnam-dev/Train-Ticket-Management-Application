@@ -25,7 +25,6 @@ public class GaDao {
         return instance;
     }
 
-
     // Trong GaDao.java
     public Vector<Ga> layDanhSachGa() {
         Vector<Ga> danhSachGa = new Vector<>();
