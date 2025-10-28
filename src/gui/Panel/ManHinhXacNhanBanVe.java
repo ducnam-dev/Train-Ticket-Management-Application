@@ -12,6 +12,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -481,7 +482,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         lblDienThoaiNV.setText("0332534500");
 
         capNhatThongTinNguoiDat();
-
         return panelHoaDon;
     }
 
@@ -699,27 +699,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         return lastSTT;
     }
 
-    /**
-     * Kiểm tra dữ liệu khách hàng trong danhSachKhach (dành cho mục đích debug).
-     */
-    private void kiemTraDuLieuKhach() {
-        System.out.println("--- DANH SÁCH KHÁCH HÀNG KIỂM TRA ---");
-
-        if (danhSachKhach == null) {
-            System.out.println("danhSachKhach là NULL.");
-            return;
-        }
-
-        // In toàn bộ Map, bao gồm key (Mã ghế) và value (Đối tượng Khách hàng)
-        danhSachKhach.forEach((key, value) -> {
-            System.out.println("Ghế [" + key + "]: " + value);
-
-            // Kiểm tra cụ thể trường 'maKhachHang'
-            String maKhach = getKhachField(value, "maKhachHang", String.class);
-            System.out.println("  -> MaKhachHang trích xuất: " + maKhach);
-        });
-        System.out.println("-------------------------------------");
-    }
 
 
     // =====================================================================================
@@ -763,6 +742,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
             if (khachHangDaTonTai == null) {
                 // TẠO MÃ KH MỚI VÀ ENTITY MỚI
                 String maKHNew = khachHangDAO.taoMaKhachHangMoi();
+                System.out.println(maKHNew);
 
                 // TẠO THỰC THỂ KHÁCH HÀNG (Giả định constructor 5 tham số)
                 khachHangCanLuu = new KhachHang(
@@ -789,8 +769,29 @@ public class ManHinhXacNhanBanVe extends JPanel {
         if (maKhachHangDaiDienOut[0] == null) {
             maKhachHangDaiDienOut[0] = "KHVL001";
         }
+        // In danh sách KhachHang Entity để kiểm tra
+        inDanhSachKhachHangEntity(danhSachKhachHangEntity);
 
         return danhSachKhachHangEntity;
+    }
+
+    private void inDanhSachKhachHangEntity(Map<String, KhachHang> danhSachKhachHangEntity) {
+
+        System.out.println("--- Bắt đầu in Danh sách Khách hàng Entity ---");
+
+        // Lặp qua toàn bộ Map
+        danhSachKhachHangEntity.forEach((maGhe, khachHangEntity) -> {
+
+            // In toàn bộ Map: key (Mã ghế) và value (Đối tượng Khách hàng)
+            System.out.println("Danh sách khách hàng thực thể Ghế [" + maGhe + "]: " + khachHangEntity.toString());
+
+            // Kiểm tra cụ thể trường 'maKhachHang' (Sử dụng getMaKH() thay vì getKhachField)
+            String maKhach = khachHangEntity.getMaKH(); // Giả định phương thức getter là getMaKH()
+
+            System.out.println("  -> MaKhachHang trích xuất: " + maKhach);
+        });
+
+        System.out.println("--- Kết thúc in Danh sách Khách hàng Entity ---");
     }
 
     // =====================================================================================
@@ -858,7 +859,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
             Object khachTho = danhSachKhach.get(cho.getMaCho());
             String maLoaiVe = (khachTho != null) ? getKhachField(khachTho, "maLoaiVe", String.class) : "VT01";
 
-            kiemTraDuLieuKhach();
 
             // Tạo đối tượng VeCuaBanVe
             VeCuaBanVe ve = new VeCuaBanVe(
@@ -881,9 +881,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
 
             if (success) {
-
                 hienThiThongTinHoaDon(hoaDon);
-                
                 System.out.println("Số lượng vé được thêm " + danhSachVeMoi.size());
                 for (VeCuaBanVe ve : danhSachVeMoi){
                     System.out.println("Mã vé được tạo: " + ve.getMaVe());
@@ -893,6 +891,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 StringBuilder sb = new StringBuilder("Thanh toán thành công!\n");
                 sb.append("Mã Hóa đơn: ").append(maHD).append("\n");
                 sb.append("--- Danh sách Mã Vé đã tạo ---\n");
+
+
 
                 // Lặp qua danh sách Entity đã được cập nhật MaVe từ DAO
                 for (VeCuaBanVe ve : danhSachVeMoi) {
@@ -991,8 +991,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
     }
 
     /**
-     * Tạo mã Hóa đơn mới theo quy tắc: HD[CC][YYMMDD][MaNV][STT].
-     * @return Mã Hóa đơn mới, ví dụ: HD01251027NVBV0010001
+     * Tạo mã Hóa đơn mới theo quy tắc: HD[CC][DDMMYY][MaNV][STT].
+     * @return Mã Hóa đơn mới, ví dụ: HD0127102500010001
      */
     private String taoMaHoaDon() {
         try {

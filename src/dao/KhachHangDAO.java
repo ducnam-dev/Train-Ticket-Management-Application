@@ -55,16 +55,43 @@ public class KhachHangDAO {
     // Trong KhachHangDAO.java
     public String taoMaKhachHangMoi() throws SQLException {
         LocalDate homNay = LocalDate.now();
+        // Định dạng ngày: DDMMYY (Ví dụ: 281025)
         String ngayStr = homNay.format(DateTimeFormatter.ofPattern("ddMMyy"));
+
         String maKhachHangPattern = "KH" + ngayStr + "%"; // Ví dụ: KH271025%
 
         String sql = "SELECT TOP 1 MaKhachHang FROM KhachHang WHERE MaKhachHang LIKE ? ORDER BY MaKhachHang DESC";
 
-        // ... (Thực hiện truy vấn để lấy MaKH lớn nhất, tương tự như taoMaVeMoi) ...
+        String lastMaKH = null;
 
-        String lastMaKH = "..."; // Kết quả truy vấn
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, maKhachHangPattern);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    lastMaKH = rs.getString("MaKhachHang");
+                }
+            }
+        } catch (SQLException e) {
+            // In lỗi và ném lại để tầng trên (UI) xử lý
+            System.err.println("Lỗi CSDL khi tạo Mã Khách hàng mới: " + e.getMessage());
+            throw e;
+        }
+
         int nextNumber = 1;
-        // ... (Logic tính nextNumber) ...
+        if (lastMaKH != null) {
+            // Trích xuất 4 ký tự cuối (số thứ tự) từ mã lớn nhất
+            try {
+                String soThuTuStr = lastMaKH.substring(lastMaKH.length() - 4);
+                nextNumber = Integer.parseInt(soThuTuStr) + 1;
+            } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                System.err.println("Không thể phân tích số thứ tự từ mã cuối: " + lastMaKH + ". Bắt đầu lại từ 1.");
+                nextNumber = 1;
+            }
+        }
+        String soThuTuStr = String.format("%04d", nextNumber);
 
         return "KH" + ngayStr + String.format("%04d", nextNumber);
     }

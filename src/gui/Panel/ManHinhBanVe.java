@@ -19,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -1293,6 +1294,17 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                     new HashMap<>(danhSachGiaVe) // pass a defensive copy of prices
             );
 
+            // In thông tin danhSachKhachHang ra console để kiểm tra
+            danhSachKhachHang.forEach((key, value) -> {
+                System.out.println("Ghế [" + key + "]: " + value);
+
+                // Kiểm tra cụ thể trường 'maKhachHang'
+                String maKhach = getKhachField(value, "maKhachHang", String.class);
+                System.out.println("  -> MaKhachHang trích xuất: " + maKhach);
+            });
+            System.out.println("-------------------------------------");
+            // Kết thúc in thông tin
+
             dashboard.addOrUpdateCard(confirmPanel, "xacNhanBanVe");
             dashboard.switchToCard("xacNhanBanVe");
 
@@ -1302,7 +1314,18 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                     "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    private <T> T getKhachField(Object khach, String fieldName, Class<T> type) {
+        if (khach == null) return null;
+        try {
+            // Thử truy cập accessor method (cho Record)
+            Method method = khach.getClass().getMethod(fieldName);
+            Object result = method.invoke(khach);
+            return type.cast(result);
+        } catch (Exception e) {
+            // Thất bại, trả về null hoặc giá trị mặc định
+            return null;
+        }
+    }
     // ====================
     // MODULE: Main (để chạy độc lập)
     // ====================
