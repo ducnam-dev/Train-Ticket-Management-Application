@@ -43,11 +43,10 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 
         // 2. Panel nội dung (CardLayout)
         initContentPanel();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         switchToCard("trangChuNV");
-
         initEventHandlers();
-
         setVisible(true);
     }
 

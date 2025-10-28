@@ -126,7 +126,7 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
 
         panel.add(Box.createVerticalStrut(5));
 
-        txtTaiKhoan = new JTextField("NVBV001"); // Đặt giá trị mặc định để dễ test
+        txtTaiKhoan = new JTextField(); // Đặt giá trị mặc định để dễ test
         customizeTextField(txtTaiKhoan);
         panel.add(txtTaiKhoan);
 
@@ -139,7 +139,7 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
 
         panel.add(Box.createVerticalStrut(5));
 
-        pssMatKhau = new JPasswordField("pass456"); // Đặt giá trị mặc định để dễ test
+        pssMatKhau = new JPasswordField(); // Đặt giá trị mặc định để dễ test
         customizeTextField(pssMatKhau);
         panel.add(pssMatKhau);
 
