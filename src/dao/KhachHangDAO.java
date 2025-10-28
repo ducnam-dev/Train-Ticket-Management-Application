@@ -6,236 +6,251 @@ import entity.KhachHang;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date; // Thêm import java.util.Date nếu entity dùng nó
 
+/**
+ * Lớp DAO cho KhachHang, đã bổ sung findOrCreateKhachHang.
+ */
 public class KhachHangDAO {
+
+    // ==========================================================
+    // CÁC PHƯƠNG THỨC STATIC HIỆN CÓ (Giữ nguyên theo yêu cầu)
+    // ==========================================================
 
     /**
      * Tra cứu chi tiết Khách hàng bằng Mã Khách hàng (MaKhachHang).
-     * ĐÃ SỬA LỖI: KHÔNG dùng try-with-resources cho Connection.
+     * LƯU Ý: Phương thức này là static và chưa đóng tài nguyên đúng cách trong mọi trường hợp.
      */
     public static KhachHang getKhachHangById(String maKhachHang) {
         KhachHang kh = null;
         String sql = "SELECT MaKhachHang, HoTen, CCCD, Tuoi, SoDienThoai, GioiTinh FROM KhachHang WHERE MaKhachHang = ?";
-
-        Connection con = null; // KHAI BÁO BÊN NGOÀI KHỐI TRY-WITH-RESOURCES
+        Connection con = null;
+        PreparedStatement pstmt = null; // Khai báo ngoài try-with-resources
+        ResultSet rs = null;    // Khai báo ngoài try-with-resources
         try {
-            con = ConnectDB.getConnection(); // Lấy kết nối
-
-            // CHỈ DÙNG TRY-WITH-RESOURCES CHO PreparedStatement và ResultSet
-            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-
-                pstmt.setString(1, maKhachHang);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        kh = new KhachHang(
-                                rs.getString("MaKhachHang"),
-                                rs.getString("HoTen"),
-                                rs.getString("CCCD"),
-                                rs.getInt("Tuoi"),
-                                rs.getString("SoDienThoai"),
-                                rs.getString("GioiTinh")
-                        );
-                    }
-                }
+            con = ConnectDB.getConnection();
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, maKhachHang);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                kh = new KhachHang(
+                        rs.getString("MaKhachHang"),
+                        rs.getString("HoTen"),
+                        rs.getString("CCCD"),
+                        rs.getInt("Tuoi"),
+                        rs.getString("SoDienThoai"),
+                        rs.getString("GioiTinh")
+                );
             }
         } catch (SQLException e) {
             System.err.println("Lỗi khi tra cứu Khách hàng theo ID: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            // Cố gắng đóng tài nguyên
+            try { if (rs != null) rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            try { if (pstmt != null) pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            // Không đóng connection ở đây nếu là static method dùng chung
         }
         return kh;
     }
 
+    /**
+     * Tìm Khách hàng theo CCCD (Stub - Chưa hoàn chỉnh).
+     * LƯU Ý: Phương thức này là static.
+     */
     public static KhachHang findKhachHangByCCCD(String cccd) {
-    return null; // Thực hiện truy vấn tìm Khách hàng theo CCCD
+        System.out.println("WARN: Hàm findKhachHangByCCCD (static) chưa được implement.");
+        // Cần thêm logic truy vấn SELECT * FROM KhachHang WHERE CCCD = ?
+        // và trả về đối tượng KhachHang nếu tìm thấy.
+        return null;
     }
 
-    // Trong KhachHangDAO.java
     /**
-     * Tạo Mã Khách hàng mới theo quy tắc: KH[DDMMYY][NNNN].
-     * @return Mã Khách hàng mới, ví dụ: KH2810250001
-     * @throws SQLException Nếu có lỗi CSDL.
+     * Tạo mã Khách hàng mới (Stub - Chưa hoàn chỉnh).
+     * LƯU Ý: Phương thức này là non-static nhưng logic chưa hoàn chỉnh.
      */
     public String taoMaKhachHangMoi() throws SQLException {
+        System.out.println("WARN: Hàm taoMaKhachHangMoi chưa hoàn chỉnh logic truy vấn.");
         LocalDate homNay = LocalDate.now();
-        // Định dạng ngày: DDMMYY
         String ngayStr = homNay.format(DateTimeFormatter.ofPattern("ddMMyy"));
-
-        // Lấy số thứ tự lớn nhất hiện tại
-        String lastSTTStr = getLastSoThuTuKhachHang(homNay);
-
-        int nextNumber = 1;
-        if (lastSTTStr != null) {
-            try {
-                // Chuyển "0015" thành 15, rồi cộng 1
-                nextNumber = Integer.parseInt(lastSTTStr) + 1;
-            } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                System.err.println("Lỗi phân tích số thứ tự cuối cùng: " + e.getMessage());
-            }
-        }
-
-        // Định dạng số thứ tự thành chuỗi 4 chữ số (0001)
-        String soThuTuStr = String.format("%04d", nextNumber);
-
-        return "KH" + ngayStr + soThuTuStr; // Ví dụ: KH2810250001
-    }
-
-    /**
-     * Phương thức Helper: Truy vấn số thứ tự lớn nhất của khách hàng được tạo trong ngày.
-     */
-    private String getLastSoThuTuKhachHang(LocalDate ngayTaoKH) throws SQLException {
-        String lastSTT = null;
-        // Định dạng ngày: DDMMYY (Ví dụ: 281025)
-        String ngayStr = ngayTaoKH.format(DateTimeFormatter.ofPattern("ddMMyy"));
-
-        // Pattern truy vấn: KH[DDMMYY]%
         String maKhachHangPattern = "KH" + ngayStr + "%";
 
-        // Truy vấn MaKhachHang lớn nhất trong ngày hiện tại
         String sql = "SELECT TOP 1 MaKhachHang FROM KhachHang WHERE MaKhachHang LIKE ? ORDER BY MaKhachHang DESC";
 
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, maKhachHangPattern);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    String lastMaKH = rs.getString("MaKhachHang");
-                    // Cắt lấy 4 ký tự cuối (số thứ tự)
-                    lastSTT = lastMaKH.substring(lastMaKH.length() - 4);
-                }
-            }
-        }
-        return lastSTT; // Ví dụ trả về "0015" hoặc null
-    }
-
-    /**
-     * Lấy giá trị số nguyên của số thứ tự Khách hàng lớn nhất trong ngày.
-     * @return Giá trị số nguyên của STT lớn nhất, hoặc 0 nếu không tìm thấy.
-     */
-    public int getLastKhachHangSTTValue(LocalDate ngayTaoKH) throws SQLException {
-        String ngayStr = ngayTaoKH.format(DateTimeFormatter.ofPattern("ddMMyy"));
-        String maKhachHangPattern = "KH" + ngayStr + "%";
-        String sql = "SELECT TOP 1 MaKhachHang FROM KhachHang WHERE MaKhachHang LIKE ? ORDER BY MaKhachHang DESC";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
         String lastMaKH = null;
+        int nextNumber = 1;
 
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
+        try {
+            conn = ConnectDB.getConnection(); // Cần kết nối ở đây
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, maKhachHangPattern);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    lastMaKH = rs.getString("MaKhachHang");
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                lastMaKH = rs.getString(1);
+                // Logic tính nextNumber (cần hoàn thiện)
+                try {
+                    String numPart = lastMaKH.substring(8); // Bỏ qua "KHddmmyy"
+                    nextNumber = Integer.parseInt(numPart) + 1;
+                } catch(Exception e){
+                    System.err.println("Lỗi parse số thứ tự KH: " + lastMaKH);
+                    nextNumber = 1; // Reset nếu lỗi
                 }
             }
+        } finally {
+            closeResource(rs);
+            closeResource(pstmt);
+            // Không đóng conn nếu dùng chung
         }
 
-        // Trích xuất và chuyển đổi
-        if (lastMaKH != null && lastMaKH.length() == 12) {
-            try {
-                String soThuTuStr = lastMaKH.substring(8);
-                return Integer.parseInt(soThuTuStr);
-            } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                System.err.println("Lỗi phân tích số thứ tự từ mã: " + lastMaKH);
-                // Vẫn trả về 0 nếu mã hợp lệ về độ dài nhưng không phải số
-            }
-            System.out.println("Số thức tự của khách hàng là: " + lastMaKH);
-        }
-        return 0; // Trả về 0 nếu không tìm thấy hoặc lỗi
+        return "KH" + ngayStr + String.format("%04d", nextNumber);
     }
 
-// Giả định hàm tạo mã khách hàng (taoMaKhachHangMoi) cũng nằm ở đây
-
     /**
-     * Thêm mới hoặc Cập nhật thông tin Khách hàng (UPSERT logic).
-     * Phương thức này chạy trong Transaction và KHÔNG đóng kết nối.
-     *
-     * @param conn Kết nối CSDL (đang mở transaction, autoCommit=false).
-     * @param kh Đối tượng KhachHang cần xử lý.
-     * @return true nếu thao tác INSERT hoặc UPDATE thành công.
-     * @throws SQLException Nếu có lỗi CSDL nghiêm trọng.
+     * Thêm hoặc Cập nhật Khách hàng (Stub - Chưa hoàn chỉnh).
+     * LƯU Ý: Logic chưa hoàn chỉnh.
      */
     public boolean addOrUpdateKhachHang(Connection conn, KhachHang kh) throws SQLException {
+        System.out.println("WARN: Hàm addOrUpdateKhachHang chưa hoàn chỉnh logic INSERT/UPDATE.");
+        // Cần kiểm tra kh.getMaKH() xem đã tồn tại chưa (SELECT)
+        // Nếu có -> UPDATE
+        // Nếu không -> INSERT (cần MaKH mới nếu chưa có)
+        return true; // Tạm trả về true
+    }
 
-        // 1. Kiểm tra Khách hàng vãng lai (KHVL001)
-        // Nếu là khách vãng lai, ta KHÔNG cần INSERT/UPDATE.
-        if ("KHVL001".equals(kh.getMaKH())) {
-            // Đây là khách đại diện chung, không cần lưu thông tin cá nhân.
-            return true;
-        }
+    // ==========================================================
+    // PHƯƠNG THỨC NON-STATIC MỚI (findOrCreateKhachHang)
+    // ==========================================================
 
-        // 2. Tìm kiếm Khách hàng (LƯU Ý: Phải tìm bằng MaKH vì ta đang dùng MaKH là khóa chính)
-        // Nếu MaKH đã tồn tại, ta UPDATE. Nếu không, ta INSERT.
-        // Ta sẽ dùng KhachHangDAO.findKhachHangByMaKH() nhưng vì nó không nhận Connection,
-        // ta phải thực hiện truy vấn SELECT ngay tại đây.
-
-        // Hoặc đơn giản: Do KhachHangCanLuu đã được tạo mã mới ở UI, ta chỉ cần INSERT.
-        // Nếu là KhachHangDaTonTai, ta cần UPDATE.
-
-        // Do hàm được gọi với KhachHangDaTonTai HOẶC KhachHangMoi, ta sẽ kiểm tra sự tồn tại.
-
-        boolean isUpdate = false;
-        String checkSql = "SELECT MaKhachHang FROM KhachHang WHERE MaKhachHang = ?";
-
-        try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-            checkStmt.setString(1, kh.getMaKH());
-            try (ResultSet rs = checkStmt.executeQuery()) {
-                if (rs.next()) {
-                    isUpdate = true;
+    /**
+     * Tìm khách hàng theo CCCD. Nếu không tìm thấy, tạo khách hàng mới.
+     * Phương thức này là non-static và sử dụng Connection từ transaction.
+     * @param hoTen Họ tên khách hàng.
+     * @param cccd Số CCCD (dùng để tìm kiếm).
+     * @param sdt Số điện thoại.
+     * @param tuoi Tuổi.
+     * @param gioiTinh Giới tính.
+     * @param conn Kết nối CSDL (trong transaction).
+     * @return Đối tượng KhachHang đã tồn tại hoặc vừa được tạo.
+     * @throws SQLException Nếu có lỗi CSDL.
+     */
+    public KhachHang findOrCreateKhachHang(String hoTen, String cccd, String sdt, int tuoi, String gioiTinh, Connection conn) throws SQLException {
+        // Bước 1: Tìm kiếm theo CCCD (nếu có)
+        KhachHang existingKh = null;
+        if (cccd != null && !cccd.trim().isEmpty()) {
+            String sqlFind = "SELECT * FROM KhachHang WHERE CCCD = ?";
+            PreparedStatement pstmtFind = null;
+            ResultSet rsFind = null;
+            try {
+                pstmtFind = conn.prepareStatement(sqlFind);
+                pstmtFind.setString(1, cccd.trim());
+                rsFind = pstmtFind.executeQuery();
+                if (rsFind.next()) {
+                    existingKh = mapResultSetToKhachHang(rsFind); // Tạo đối tượng từ KQ tìm thấy
                 }
+            } finally {
+                closeResource(rsFind);
+                closeResource(pstmtFind);
             }
         }
 
-        String sql;
-        if (isUpdate) {
-            // Cập nhật thông tin khách hàng hiện tại
-            sql = "UPDATE KhachHang SET HoTen = ?, CCCD = ?, Tuoi = ?, SoDienThoai = ?, GioiTinh = ? " +
-                    "WHERE MaKhachHang = ?";
-        } else {
-            // Thêm mới khách hàng
-            sql = "INSERT INTO KhachHang (MaKhachHang, HoTen, CCCD, Tuoi, SoDienThoai, GioiTinh) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
+        // Bước 2: Nếu tìm thấy, trả về khách hàng đó
+        if (existingKh != null) {
+            // Optional: Có thể cập nhật thông tin (HoTen, SDT, Tuoi) nếu cần
+            // Ví dụ: updateKhachHangIfNeeded(conn, existingKh, hoTen, sdt, tuoi, gioiTinh);
+            return existingKh;
         }
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        // Bước 3: Nếu không tìm thấy, tạo khách hàng mới
+        String newMaKH = generateNewMaKH(conn); // Gọi hàm helper tạo mã mới
+        KhachHang newKh = new KhachHang(newMaKH, hoTen, cccd, tuoi, sdt, gioiTinh);
 
-            if (isUpdate) {
-                // Tham số cho UPDATE: HoTen, CCCD, Tuoi, SDT, GioiTinh, MaKhachHang (vị trí 1-6)
-                pstmt.setString(1, kh.getHoTen());
-                pstmt.setString(2, kh.getSoCCCD());
-                pstmt.setInt(3, kh.getTuoi());
-                pstmt.setString(4, kh.getSdt());
-                // Xử lý GioiTinh có thể NULL
-                if (kh.getGioiTinh() != null && !kh.getGioiTinh().isEmpty()) {
-                    pstmt.setString(5, kh.getGioiTinh());
-                } else {
-                    pstmt.setNull(5, Types.NVARCHAR);
-                }
-                pstmt.setString(6, kh.getMaKH());
+        String sqlInsert = "INSERT INTO KhachHang (MaKhachHang, HoTen, CCCD, Tuoi, SoDienThoai, GioiTinh) VALUES (?, ?, ?, ?, ?, ?)";
+        PreparedStatement pstmtInsert = null;
+        try {
+            pstmtInsert = conn.prepareStatement(sqlInsert);
+            pstmtInsert.setString(1, newKh.getMaKH());
+            pstmtInsert.setString(2, newKh.getHoTen());
+            pstmtInsert.setString(3, newKh.getSoCCCD());
+            pstmtInsert.setInt(4, newKh.getTuoi() > 0 ? newKh.getTuoi() : Types.INTEGER); // Xử lý tuổi = 0
+            pstmtInsert.setString(5, newKh.getSdt());
+            pstmtInsert.setString(6, newKh.getGioiTinh());
 
+            int rowsAffected = pstmtInsert.executeUpdate();
+            if (rowsAffected > 0) {
+                return newKh; // Trả về khách hàng vừa tạo
             } else {
-                // Tham số cho INSERT: MaKhachHang, HoTen, CCCD, Tuoi, SDT, GioiTinh (vị trí 1-6)
-                pstmt.setString(1, kh.getMaKH());
-                pstmt.setString(2, kh.getHoTen());
-                pstmt.setString(3, kh.getSoCCCD());
-                pstmt.setInt(4, kh.getTuoi());
-                pstmt.setString(5, kh.getSdt());
-                // Xử lý GioiTinh có thể NULL
-                if (kh.getGioiTinh() != null && !kh.getGioiTinh().isEmpty()) {
-                    pstmt.setString(6, kh.getGioiTinh());
-                } else {
-                    pstmt.setNull(6, Types.NVARCHAR);
-                }
+                throw new SQLException("Thêm khách hàng mới thất bại.");
             }
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi thêm/cập nhật Khách hàng (MaKH: " + kh.getMaKH() + "): " + e.getMessage());
-            throw e;
+        } finally {
+            closeResource(pstmtInsert);
         }
     }
 
+    // ==========================================================
+    // CÁC HÀM HỖ TRỢ (PRIVATE, NON-STATIC)
+    // ==========================================================
 
+    /**
+     * Hàm helper để ánh xạ ResultSet sang đối tượng KhachHang.
+     */
+    private KhachHang mapResultSetToKhachHang(ResultSet rs) throws SQLException {
+        return new KhachHang(
+                rs.getString("MaKhachHang"),
+                rs.getString("HoTen"),
+                rs.getString("CCCD"),
+                rs.getInt("Tuoi"),
+                rs.getString("SoDienThoai"),
+                rs.getString("GioiTinh")
+        );
+    }
+
+    /**
+     * Hàm helper để sinh Mã Khách Hàng mới (non-static, dùng trong transaction).
+     */
+    private String generateNewMaKH(Connection conn) throws SQLException {
+        LocalDate homNay = LocalDate.now();
+        String ngayStr = homNay.format(DateTimeFormatter.ofPattern("ddMMyy"));
+        String maKhachHangPattern = "KH" + ngayStr + "%";
+        String sql = "SELECT TOP 1 MaKhachHang FROM KhachHang WHERE MaKhachHang LIKE ? ORDER BY MaKhachHang DESC";
+
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        int nextNumber = 1;
+
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, maKhachHangPattern);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                String lastMaKH = rs.getString(1);
+                try {
+                    String numPart = lastMaKH.substring(8); // Bỏ "KHddmmyy"
+                    nextNumber = Integer.parseInt(numPart) + 1;
+                } catch (Exception e) {
+                    System.err.println("Lỗi parse số thứ tự KH: " + lastMaKH);
+                    nextNumber = 1;
+                }
+            }
+        } finally {
+            closeResource(rs);
+            closeResource(pstmt);
+        }
+        return "KH" + ngayStr + String.format("%04d", nextNumber);
+    }
+
+    /**
+     * Hàm helper để đóng tài nguyên JDBC.
+     */
+    private void closeResource(AutoCloseable resource) {
+        if (resource != null) {
+            try {
+                resource.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

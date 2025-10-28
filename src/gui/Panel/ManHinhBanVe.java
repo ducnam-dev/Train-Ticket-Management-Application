@@ -15,11 +15,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.lang.reflect.Method;
+import java.awt.event.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -31,7 +27,7 @@ import java.util.List;
  * hệ số LoaiChoDat và hệ số LoaiVe). Hiện các DAO mới là stub/mock để bạn triển khai DB.
  */
 public class ManHinhBanVe extends JPanel implements MouseListener, ActionListener {
-
+    private static final Color COLOR_BLUE_LIGHT = new Color(52, 152, 219);
     // ====================
     // MODULE: Trạng thái & dữ liệu (State)
     // ====================
@@ -562,148 +558,335 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         return panel;
     }
+    // ====================
+    // MODULE: Validation Helpers (ĐÃ SỬA)
+    // ====================
 
-    private JPanel createKhachPanel(ChiTietKhach khach) { // SỬA: Nhận ChiTietKhach
+    // ... (Các lớp InputVerifier: NotEmptyVerifier, AgeVerifier, PhoneVerifier, CccdVerifier giữ nguyên) ...
+
+    /**
+     * [ĐÃ SỬA] Hiển thị lỗi: Đổi border VÀ đặt text cho label lỗi.
+     * @param input Component nhập liệu (JTextField).
+     * @param errorLabel JLabel để hiển thị lỗi bên dưới.
+     * @param message Thông báo lỗi.
+     */
+    private void showValidationError(JComponent input, JLabel errorLabel, String message) {
+        input.setBorder(BorderFactory.createLineBorder(Color.RED, 1));
+        errorLabel.setText(message); // Hiển thị lỗi trên label
+        input.setToolTipText(message); // Vẫn giữ tooltip nếu muốn
+    }
+
+    /**
+     * [ĐÃ SỬA] Xóa hiển thị lỗi: Reset border VÀ xóa text khỏi label lỗi.
+     * @param input Component nhập liệu (JTextField).
+     * @param errorLabel JLabel hiển thị lỗi.
+     */
+    private void clearValidationError(JComponent input, JLabel errorLabel) {
+        input.setBorder(UIManager.getBorder("TextField.border")); // Trả về border mặc định
+        errorLabel.setText(" "); // Đặt là khoảng trắng để giữ layout ổn định
+        input.setToolTipText(null);
+    }
+
+    // --- Cần sửa lại các lớp InputVerifier để chúng nhận thêm JLabel lỗi ---
+
+    /**
+     * [ĐÃ SỬA] InputVerifier để kiểm tra trường không được rỗng.
+     */
+    private class NotEmptyVerifier extends InputVerifier {
+        private String fieldName;
+        private JLabel errorLabel; // Thêm label lỗi
+
+        public NotEmptyVerifier(String fieldName, JLabel errorLabel) {
+            this.fieldName = fieldName;
+            this.errorLabel = errorLabel;
+        }
+
+        @Override
+        public boolean verify(JComponent input) {
+            JTextField textField = (JTextField) input;
+            String text = textField.getText().trim();
+            if (text.isEmpty()) {
+                showValidationError(input, errorLabel, fieldName + " không được để trống.");
+                return false;
+            }
+            clearValidationError(input, errorLabel);
+            return true;
+        }
+    }
+
+    /**
+     * [ĐÃ SỬA] InputVerifier để kiểm tra Tuổi (số nguyên dương).
+     */
+    /**
+     * [ĐÃ SỬA] InputVerifier để kiểm tra Tuổi (số nguyên dương, bắt buộc).
+     */
+    private class AgeVerifier extends InputVerifier {
+        private JLabel errorLabel;
+
+        public AgeVerifier(JLabel errorLabel) { this.errorLabel = errorLabel; }
+
+        @Override
+        public boolean verify(JComponent input) {
+            JTextField textField = (JTextField) input;
+            String text = textField.getText().trim();
+
+            // [THAY ĐỔI] Kiểm tra trống trước tiên
+            if (text.isEmpty()) {
+                showValidationError(input, errorLabel, "Tuổi không được để trống.");
+                return false; // Không hợp lệ nếu trống
+            }
+
+            try {
+                int age = Integer.parseInt(text);
+                if (age <= 0) {
+                    showValidationError(input, errorLabel, "Tuổi phải là số dương.");
+                    return false;
+                }
+                clearValidationError(input, errorLabel);
+                return true;
+            } catch (NumberFormatException e) {
+                showValidationError(input, errorLabel, "Tuổi phải là một số nguyên.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * [ĐÃ SỬA] InputVerifier để kiểm tra Số điện thoại (10 số, bắt đầu bằng 0).
+     */
+    /**
+     * [ĐÃ SỬA] InputVerifier để kiểm tra Số điện thoại (10 số, bắt đầu bằng 0, bắt buộc).
+     */
+    private class PhoneVerifier extends InputVerifier {
+        private JLabel errorLabel;
+        public PhoneVerifier(JLabel errorLabel) { this.errorLabel = errorLabel; }
+
+        @Override
+        public boolean verify(JComponent input) {
+            JTextField textField = (JTextField) input;
+            String text = textField.getText().trim();
+
+            // [THAY ĐỔI] Kiểm tra trống trước tiên
+            if (text.isEmpty()) {
+                showValidationError(input, errorLabel, "Số điện thoại không được để trống.");
+                return false; // Không hợp lệ nếu trống
+            }
+
+            if (!text.matches("^0\\d{9}$")) {
+                showValidationError(input, errorLabel, "SĐT gồm 10 số, bắt đầu 0.");
+                return false;
+            }
+            clearValidationError(input, errorLabel);
+            return true;
+        }
+    }
+
+    /**
+     * [ĐÃ SỬA] InputVerifier để kiểm tra CCCD (12 số).
+     */
+    private class CccdVerifier extends InputVerifier {
+        private JLabel errorLabel; // Thêm label lỗi
+        public CccdVerifier(JLabel errorLabel) { this.errorLabel = errorLabel; }
+
+        @Override
+        public boolean verify(JComponent input) {
+            JTextField textField = (JTextField) input;
+            String text = textField.getText().trim();
+            if (text.isEmpty()) { // Bắt buộc
+                showValidationError(input, errorLabel, "CCCD không được để trống.");
+                return false;
+            }
+            if (!text.matches("^\\d{12}$")) {
+                showValidationError(input, errorLabel, "CCCD phải có đúng 12 chữ số.");
+                return false;
+            }
+            clearValidationError(input, errorLabel);
+            return true;
+        }
+    }
+    /**
+     * [ĐÃ SỬA] Tạo panel thông tin cho một khách hàng, bao gồm label lỗi.
+     */
+    /**
+     * [ĐÃ SỬA LAYOUT] Tạo panel thông tin cho một khách hàng, bao gồm label lỗi.
+     * Sử dụng GridBagLayout hiệu quả hơn.
+     */
+    /**
+     * [ĐÃ SỬA LAYOUT] Tạo panel thông tin cho một khách hàng, cải thiện căn lề.
+     */
+    private JPanel createKhachPanel(ChiTietKhach khach) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
-        // Vẫn giữ border mờ để phân tách các form khách hàng
         panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        String soCho = khach.choDat().getSoCho(); // SỬA: Truy cập qua accessor
-        String soThuTuToa = laySoThuTuToa(khach.choDat().getMaToa()); // SỬA: Truy cập qua accessor
-        String loaiKhachHienThi = getTenLoaiVeHienThi(khach.maLoaiVe()); // SỬA: Truy cập qua accessor
+        // --- Lấy thông tin ---
+        String maCho = khach.choDat().getMaCho();
+        String soCho = khach.choDat().getSoCho();
+        String soThuTuToa = laySoThuTuToa(khach.choDat().getMaToa());
+        String loaiKhachHienThi = getTenLoaiVeHienThi(khach.maLoaiVe());
 
-        // --- Cố định kích thước cho các Field và ComboBox ---
+        // --- Hằng số định dạng ---
         final int FIELD_HEIGHT = 28;
-        final int W_TEXT = 120;
-        final int W_COMBO = 120;
-        final Dimension FIXED_FIELD_SIZE = new Dimension(W_TEXT, FIELD_HEIGHT);
+        final int W_COMBO = 150;
         final Dimension FIXED_COMBO_SIZE = new Dimension(W_COMBO, FIELD_HEIGHT);
-        final Dimension FIXED_TUOI_SIZE = new Dimension(50, FIELD_HEIGHT);
+        final Font ERROR_FONT = new Font("Segoe UI", Font.ITALIC, 11);
+        final Color ERROR_COLOR = Color.RED;
+        final Insets LABEL_INSETS = new Insets(2, 0, 2, 5); // Padding phải cho Label
+        final Insets FIELD_INSETS = new Insets(2, 0, 1, 15); // Padding phải Field
+        final Insets ERROR_INSETS = new Insets(0, 0, 5, 15); // Padding dưới Error
 
-        // --- 1. Header Row (Ghế, Loại khách, Giá) ---
-        JPanel headerRow = new JPanel(new BorderLayout());
+        // --- 1. Header Row (Giữ nguyên) ---
+        JPanel headerRow = new JPanel(new BorderLayout(10, 0));
         headerRow.setOpaque(false);
-        headerRow.setBorder(new EmptyBorder(5, 0, 5, 0));
-        headerRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, FIELD_HEIGHT + 10)); // Cố định chiều cao
-
-        JPanel leftHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        leftHeader.setOpaque(false);
-        JLabel maGheLabel = new JLabel("Ghế: " + soCho + " / Toa: " + soThuTuToa);
-        maGheLabel.setFont(maGheLabel.getFont().deriveFont(Font.BOLD));
-        leftHeader.add(maGheLabel);
-
-        JComboBox<String> cbLoaiKhach = new JComboBox<>(getLoaiVeOptions());
-        cbLoaiKhach.setSelectedItem(loaiKhachHienThi);
-
-        // Cố định kích thước ComboBox
-        cbLoaiKhach.setPreferredSize(FIXED_COMBO_SIZE);
-        cbLoaiKhach.setMaximumSize(FIXED_COMBO_SIZE);
-
-        cbLoaiKhach.addActionListener(e -> {
-            String maMoi = getMaLoaiVeFromHienThi((String) cbLoaiKhach.getSelectedItem());
-
-            // SỬA: Tạo bản sao mới của Record với maLoaiVe được cập nhật và thay thế nó trong Map
-            ChiTietKhach updatedKhach = new ChiTietKhach(
-                    khach.choDat(), khach.maLoaiVe(), khach.hoTen(), khach.cccd(), khach.sdt(), khach.tuoi()
-            ).withMaLoaiVe(maMoi); // SỬ DỤNG PHƯƠNG THỨC WITH HỖ TRỢ BÊN DƯỚI
-
-            danhSachKhachHang.put(khach.choDat().getMaCho(), updatedKhach); // Cập nhật Map
-
-            // Recompute price for this seat and update UI
-            try {
-                long gia = computeTicketPrice(updatedKhach.choDat(), updatedKhach.maLoaiVe());
-                danhSachGiaVe.put(updatedKhach.choDat().getMaCho(), gia);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Không thể tính lại giá: " + ex.getMessage(), "Lỗi tính giá", JOptionPane.ERROR_MESSAGE);
-                danhSachGiaVe.remove(updatedKhach.choDat().getMaCho());
-            }
-            capNhatThongTinKhachUI();
-            capNhatTongTienUI();
-        });
-        leftHeader.add(cbLoaiKhach);
-        headerRow.add(leftHeader, BorderLayout.WEST);
-
-        JLabel giaLabel = new JLabel("Giá vé sẽ được tính");
-        giaLabel.setForeground(Color.BLUE);
-        headerRow.add(giaLabel, BorderLayout.EAST);
-
+        headerRow.setBorder(new EmptyBorder(5, 5, 5, 5));
         headerRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        headerRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, FIELD_HEIGHT + 15));
+        JPanel leftHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0)); leftHeader.setOpaque(false);
+        JLabel maGheLabel = new JLabel("Ghế: " + soCho + " / Toa: " + soThuTuToa); maGheLabel.setFont(maGheLabel.getFont().deriveFont(Font.BOLD)); leftHeader.add(maGheLabel);
+        JComboBox<String> cbLoaiKhach = new JComboBox<>(getLoaiVeOptions()); cbLoaiKhach.setSelectedItem(loaiKhachHienThi); cbLoaiKhach.setPreferredSize(FIXED_COMBO_SIZE); cbLoaiKhach.setMaximumSize(FIXED_COMBO_SIZE);
+        cbLoaiKhach.addActionListener(e -> { /* ... Logic xử lý loại vé giữ nguyên ... */ String maMoi = getMaLoaiVeFromHienThi((String) cbLoaiKhach.getSelectedItem()); ChiTietKhach updatedKhach = khach.withMaLoaiVe(maMoi); danhSachKhachHang.put(maCho, updatedKhach); try { long gia = computeTicketPrice(updatedKhach.choDat(), updatedKhach.maLoaiVe()); danhSachGiaVe.put(maCho, gia); } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Không thể tính lại giá: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); danhSachGiaVe.remove(maCho); } capNhatThongTinKhachUI(); capNhatTongTienUI(); });
+        leftHeader.add(cbLoaiKhach); headerRow.add(leftHeader, BorderLayout.CENTER);
+        JLabel giaLabel = new JLabel("..."); giaLabel.setFont(giaLabel.getFont().deriveFont(Font.BOLD, 14f)); giaLabel.setForeground(COLOR_BLUE_LIGHT); giaLabel.setHorizontalAlignment(SwingConstants.RIGHT); headerRow.add(giaLabel, BorderLayout.EAST);
         panel.add(headerRow);
 
-        // --- 2. Detail Grid (Họ tên, Tuổi, SDT, CCCD) ---
-        JPanel detailGrid = new JPanel(new GridLayout(2, 4, 10, 5));
+        // --- 2. Detail Grid (Thông tin chi tiết - Sửa GridBagConstraints) ---
+        JPanel detailGrid = new JPanel(new GridBagLayout());
         detailGrid.setOpaque(false);
-        detailGrid.setBorder(new EmptyBorder(5, 0, 5, 0));
+        detailGrid.setBorder(new EmptyBorder(0, 5, 0, 5));
         detailGrid.setAlignmentX(Component.LEFT_ALIGNMENT);
+        GridBagConstraints gbc = new GridBagConstraints();
 
-        // Đặt chiều cao ưu tiên cho Grid
-        int gridHeight = 2 * FIELD_HEIGHT + 10;
-        detailGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, gridHeight));
+        // --- Hàng 0 + 1 + 2: Họ tên* ---
+        gbc.gridy = 0; gbc.gridx = 0; gbc.anchor = GridBagConstraints.EAST; gbc.insets = LABEL_INSETS; // Căn phải label
+        detailGrid.add(new JLabel("Họ và tên*:"), gbc);
+
+        gbc.gridy = 1; gbc.gridx = 0; gbc.anchor = GridBagConstraints.WEST; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.6; gbc.insets = FIELD_INSETS; gbc.gridwidth = 2; // Chiếm 2 cột field + label của cột kế
+        JTextField hoTenField = new JTextField(khach.hoTen());
+        hoTenField.setPreferredSize(new Dimension(100, FIELD_HEIGHT)); // Chiều rộng sẽ tự co giãn
+        detailGrid.add(hoTenField, gbc);
+
+        gbc.gridy = 2; gbc.anchor = GridBagConstraints.NORTHWEST; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.insets = ERROR_INSETS; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        JLabel hoTenErrorLabel = new JLabel(" "); hoTenErrorLabel.setFont(ERROR_FONT); hoTenErrorLabel.setForeground(ERROR_COLOR);
+        detailGrid.add(hoTenErrorLabel, gbc);
 
 
-        detailGrid.add(new JLabel("Họ và tên*"));
-        JTextField hoTenField = new JTextField(khach.hoTen(), 10); // SỬA: Truy cập qua accessor
-        detailGrid.add(hoTenField);
-        detailGrid.add(new JLabel("Tuổi"));
-        JTextField tuoiField = new JTextField(String.valueOf(khach.tuoi() > 0 ? khach.tuoi() : ""), 3); // SỬA: Truy cập qua accessor
-        detailGrid.add(tuoiField);
+        // --- Hàng 0 + 1 + 2: Tuổi ---
+        gbc.gridy = 0; gbc.gridx = 2; gbc.anchor = GridBagConstraints.EAST; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0; gbc.insets = new Insets(2, 10, 2, 5); gbc.gridwidth = 1; // Reset gridwidth và thêm padding trái
+        detailGrid.add(new JLabel("Tuổi:"), gbc);
 
-        detailGrid.add(new JLabel("Số điện thoại"));
-        JTextField sdtField = new JTextField(khach.sdt(), 10); // SỬA: Truy cập qua accessor
-        detailGrid.add(sdtField);
-        detailGrid.add(new JLabel("CCCD*"));
-        JTextField cccdField = new JTextField(khach.cccd(), 10); // SỬA: Truy cập qua accessor
-        detailGrid.add(cccdField);
+        gbc.gridy = 1; gbc.gridx = 3; gbc.anchor = GridBagConstraints.WEST; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.1; gbc.insets = new Insets(2, 0, 1, 5); // Giảm padding phải
+        JTextField tuoiField = new JTextField(String.valueOf(khach.tuoi() > 0 ? khach.tuoi() : ""), 4);
+        tuoiField.setPreferredSize(new Dimension(50, FIELD_HEIGHT));
+        detailGrid.add(tuoiField, gbc);
+
+        gbc.gridy = 2; gbc.gridx = 3; gbc.anchor = GridBagConstraints.NORTHWEST; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.insets = new Insets(0, 0, 5, 5);
+        JLabel tuoiErrorLabel = new JLabel(" "); tuoiErrorLabel.setFont(ERROR_FONT); tuoiErrorLabel.setForeground(ERROR_COLOR);
+        detailGrid.add(tuoiErrorLabel, gbc);
+
+
+        // --- Hàng 3 + 4 + 5: Số điện thoại ---
+        gbc.gridy = 3; gbc.gridx = 0; gbc.anchor = GridBagConstraints.EAST; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0; gbc.insets = LABEL_INSETS;
+        detailGrid.add(new JLabel("Số điện thoại:"), gbc);
+
+        gbc.gridy = 4; gbc.gridx = 0; gbc.anchor = GridBagConstraints.WEST; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5; gbc.insets = FIELD_INSETS; gbc.gridwidth = 2; // Chiếm 2 cột
+        JTextField sdtField = new JTextField(khach.sdt());
+        sdtField.setPreferredSize(new Dimension(100, FIELD_HEIGHT));
+        detailGrid.add(sdtField, gbc);
+
+        gbc.gridy = 5; gbc.anchor = GridBagConstraints.NORTHWEST; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.insets = ERROR_INSETS; gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        JLabel sdtErrorLabel = new JLabel(" "); sdtErrorLabel.setFont(ERROR_FONT); sdtErrorLabel.setForeground(ERROR_COLOR);
+        detailGrid.add(sdtErrorLabel, gbc);
+
+
+        // --- Hàng 3 + 4 + 5: CCCD* ---
+        gbc.gridy = 3; gbc.gridx = 2; gbc.anchor = GridBagConstraints.EAST; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0; gbc.insets = new Insets(2, 10, 2, 5); gbc.gridwidth = 1; // Reset gridwidth
+        detailGrid.add(new JLabel("CCCD*:"), gbc);
+
+        gbc.gridy = 4; gbc.gridx = 3; gbc.anchor = GridBagConstraints.WEST; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 0.5; gbc.insets = new Insets(2, 0, 1, 5);
+        JTextField cccdField = new JTextField(khach.cccd());
+        cccdField.setPreferredSize(new Dimension(100, FIELD_HEIGHT));
+        detailGrid.add(cccdField, gbc);
+
+        gbc.gridy = 5; gbc.gridx = 3; gbc.anchor = GridBagConstraints.NORTHWEST; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.insets = new Insets(0, 0, 5, 5);
+        JLabel cccdErrorLabel = new JLabel(" "); cccdErrorLabel.setFont(ERROR_FONT); cccdErrorLabel.setForeground(ERROR_COLOR);
+        detailGrid.add(cccdErrorLabel, gbc);
+
 
         panel.add(detailGrid);
 
-        // ... (Code cố định kích thước giữ nguyên)
+        // --- Gắn Verifiers (Giữ nguyên) ---
+        hoTenField.setInputVerifier(new NotEmptyVerifier("Họ và tên", hoTenErrorLabel));
+        tuoiField.setInputVerifier(new AgeVerifier(tuoiErrorLabel));
+        sdtField.setInputVerifier(new PhoneVerifier(sdtErrorLabel));
+        cccdField.setInputVerifier(new CccdVerifier(cccdErrorLabel));
 
-        // --- 4. Focus Listeners (Giữ nguyên - CẦN SỬA ĐỂ CẬP NHẬT RECORD) ---
-        hoTenField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) {
-            updateKhachRecord(khach.choDat().getMaCho(), hoTenField.getText(), "hoTen");
-        }});
-        cccdField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) {
-            updateKhachRecord(khach.choDat().getMaCho(), cccdField.getText(), "cccd");
-        }});
-        sdtField.addFocusListener(new java.awt.event.FocusAdapter() { public void focusLost(java.awt.event.FocusEvent evt) {
-            updateKhachRecord(khach.choDat().getMaCho(), sdtField.getText(), "sdt");
-        }});
-        tuoiField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                try {
-                    int tuoiMoi = Integer.parseInt(tuoiField.getText().trim());
-                    updateKhachRecord(khach.choDat().getMaCho(), String.valueOf(tuoiMoi), "tuoi");
-                } catch (Exception e) {
-                    updateKhachRecord(khach.choDat().getMaCho(), "0", "tuoi");
+        // --- Focus Listeners (Giữ nguyên) ---
+        // --- Focus Listeners (gọi verify trước khi cập nhật Record) ---
+        hoTenField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent evt) {
+                // Chỉ cập nhật Record nếu dữ liệu hợp lệ (verify() trả về true)
+                if (hoTenField.getInputVerifier().verify(hoTenField)) {
+                    updateKhachRecord(maCho, hoTenField.getText(), "hoTen");
                 }
             }
         });
 
-
-        // --- 5. Cập nhật label giá (Giữ nguyên) ---
-        Long giaTinh = danhSachGiaVe.get(khach.choDat().getMaCho()); // SỬA: Truy cập qua accessor
-        if (giaTinh != null) {
-            giaLabel.setText(formatVnd(giaTinh));
-        } else {
-            // thử tính giá nếu chưa có (ví dụ khi UI gọi)
-            try {
-                long gia = computeTicketPrice(khach.choDat(), khach.maLoaiVe()); // SỬA: Truy cập qua accessor
-                danhSachGiaVe.put(khach.choDat().getMaCho(), gia);
-                giaLabel.setText(formatVnd(gia));
-            } catch (Exception ex) {
-                giaLabel.setText("Chưa có giá");
+        cccdField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent evt) {
+                if (cccdField.getInputVerifier().verify(cccdField)) {
+                    updateKhachRecord(maCho, cccdField.getText(), "cccd");
+                }
             }
-        }
+        });
 
-        // --- 6. Cố định chiều cao tổng thể của panel khách hàng ---
-        int totalPanelHeight = FIELD_HEIGHT + 10 + gridHeight + 10;
-        panel.setPreferredSize(new Dimension(400, totalPanelHeight));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, totalPanelHeight));
+        sdtField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent evt) {
+                if (sdtField.getInputVerifier().verify(sdtField)) {
+                    updateKhachRecord(maCho, sdtField.getText(), "sdt");
+                }
+            }
+        });
 
+        tuoiField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent evt) {
+                // Gọi verify() để kiểm tra và hiển thị lỗi nếu có trước
+                if (tuoiField.getInputVerifier().verify(tuoiField)) {
+                    try {
+                        // Lấy giá trị tuổi sau khi đã verify thành công
+                        String tuoiText = tuoiField.getText().trim();
+                        // Nếu trường trống (verify() cho phép trống), cập nhật Record là 0
+                        if (tuoiText.isEmpty()) {
+                            updateKhachRecord(maCho, "0", "tuoi");
+                        } else {
+                            int tuoiMoi = Integer.parseInt(tuoiText);
+                            // InputVerifier đã kiểm tra tuổi > 0, nên chỉ cần cập nhật
+                            updateKhachRecord(maCho, String.valueOf(tuoiMoi), "tuoi");
+                        }
+                    } catch (NumberFormatException e) {
+                        // Trường hợp này ít xảy ra nếu verify() hoạt động đúng
+                        // Cập nhật là 0 nếu có lỗi parse bất ngờ
+                        updateKhachRecord(maCho, "0", "tuoi");
+                        System.err.println("Lỗi parse tuổi không mong muốn sau khi verify: " + e.getMessage());
+                    }
+                }
+                // Nếu verify() trả về false, không làm gì cả (lỗi đã hiển thị)
+            }
+        });
+
+        // --- Cập nhật giá (Giữ nguyên) ---
+        Long giaTinh = danhSachGiaVe.get(maCho);
+        if (giaTinh != null) { giaLabel.setText(formatVnd(giaTinh)); }
+        else { try { long gia = computeTicketPrice(khach.choDat(), khach.maLoaiVe()); danhSachGiaVe.put(maCho, gia); giaLabel.setText(formatVnd(gia)); } catch (Exception ex) { giaLabel.setText("Lỗi giá"); giaLabel.setForeground(Color.RED); } }
+
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));
         return panel;
     }
 
@@ -1294,17 +1477,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                     new HashMap<>(danhSachGiaVe) // pass a defensive copy of prices
             );
 
-            // In thông tin danhSachKhachHang ra console để kiểm tra
-            danhSachKhachHang.forEach((key, value) -> {
-                System.out.println("Ghế [" + key + "]: " + value);
-
-                // Kiểm tra cụ thể trường 'maKhachHang'
-                String maKhach = getKhachField(value, "maKhachHang", String.class);
-                System.out.println("  -> MaKhachHang trích xuất: " + maKhach);
-            });
-            System.out.println("-------------------------------------");
-            // Kết thúc in thông tin
-
             dashboard.addOrUpdateCard(confirmPanel, "xacNhanBanVe");
             dashboard.switchToCard("xacNhanBanVe");
 
@@ -1314,18 +1486,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                     "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
         }
     }
-    private <T> T getKhachField(Object khach, String fieldName, Class<T> type) {
-        if (khach == null) return null;
-        try {
-            // Thử truy cập accessor method (cho Record)
-            Method method = khach.getClass().getMethod(fieldName);
-            Object result = method.invoke(khach);
-            return type.cast(result);
-        } catch (Exception e) {
-            // Thất bại, trả về null hoặc giá trị mặc định
-            return null;
-        }
-    }
+
     // ====================
     // MODULE: Main (để chạy độc lập)
     // ====================
@@ -1404,4 +1565,5 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             return amount + " VNĐ";
         }
     }
+
 }
