@@ -714,11 +714,20 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private Map<String, KhachHang> xuLyVaTaoKhachHangEntities(String[] maKhachHangDaiDienOut) throws SQLException {
         Map<String, KhachHang> danhSachKhachHangEntity = new HashMap<>();
 
+        // Khởi tạo danh sách khách hàng MỚI cần được INSERT vào DB trong transaction
+        List<KhachHang> danhSachKhachHangMoiCanLuu = new ArrayList<>();
+
         // Nếu không có khách nào, trả về Map rỗng
         if (danhSachKhach == null || danhSachKhach.isEmpty()) {
             maKhachHangDaiDienOut[0] = "KHVL001"; // Gán mặc định
             return danhSachKhachHangEntity;
         }
+        // [FIX START] TÌM STT LỚN NHẤT MỘT LẦN VÀ DÙNG BIẾN ĐẾM TẠM
+        LocalDate homNay = LocalDate.now();
+        // Lấy giá trị số nguyên lớn nhất (VD: 10)
+        int currentSTT = khachHangDAO.getLastKhachHangSTTValue(homNay);
+        String ngayStr = homNay.format(DateTimeFormatter.ofPattern("ddMMyy"));
+        // [FIX END]
 
         // Lặp qua danh sách khách hàng từ UI để tạo/tìm Entity KhachHang
         for (Map.Entry<String, Object> entry : danhSachKhach.entrySet()) {
@@ -740,19 +749,23 @@ public class ManHinhXacNhanBanVe extends JPanel {
             KhachHang khachHangCanLuu;
 
             if (khachHangDaTonTai == null) {
-                // TẠO MÃ KH MỚI VÀ ENTITY MỚI
-                String maKHNew = khachHangDAO.taoMaKhachHangMoi();
-                System.out.println(maKHNew);
+                // [FIX] TĂNG BIẾN ĐẾM VÀ TẠO MÃ BẰNG BIẾN ĐẾM TẠM
+                currentSTT++; // 10 -> 11
+                String soThuTuStr = String.format("%04d", currentSTT);
+                String maKHNew = "KH" + ngayStr + soThuTuStr;
 
-                // TẠO THỰC THỂ KHÁCH HÀNG (Giả định constructor 5 tham số)
+                System.out.println("Tạo mã mới: " + maKHNew); // Kiểm tra
+
                 khachHangCanLuu = new KhachHang(
                         maKHNew,
                         hoTen,
                         cccd,
                         tuoi != null ? tuoi : 0,
                         sdt
-                        // BỔ SUNG: Nếu có trường GioiTinh, bạn cần thêm tham số này vào constructor/setter
                 );
+
+                // THÊM VÀO DANH SÁCH CẦN LƯU
+                danhSachKhachHangMoiCanLuu.add(khachHangCanLuu);
             } else {
                 khachHangCanLuu = khachHangDaTonTai;
             }
