@@ -12,7 +12,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -60,7 +59,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
     // DAO
     private KhuyenMaiDAO khuyenMaiDAO = new KhuyenMaiDAO();
     private final KhachHangDAO khachHangDAO = new KhachHangDAO();
-    private final VeCuaBanVeDAO veDao = new VeCuaBanVeDAO();
+    private final VeCuaBanVeDAO veBVDao = new VeCuaBanVeDAO();
 
     private static final Color MAU_XANH_BTN = new Color(0, 180, 110);
     private static final Color MAU_CAM_BTN = new Color(255, 140, 0);
@@ -68,6 +67,11 @@ public class ManHinhXacNhanBanVe extends JPanel {
     // Thêm dòng này để khai báo biến mock
     private static  String MA_NV_LAP_HD_MOCK = "NVBV0001";
     private DefaultTableModel model;
+    private JButton btnXacNhan;
+    private JLabel lblTienBangChu;
+    private JButton btnHuy;
+    private JButton btnKetThuc;
+    private JButton btnQuayLai;
 
     public ManHinhXacNhanBanVe() {
         this(null, null, null, null, null);
@@ -318,7 +322,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         panelNut.setOpaque(false);
 
         // NÚT HỦY (MỚI)
-        JButton btnHuy = new JButton("Hủy");
+        btnHuy = new JButton("Hủy");
         btnHuy.setForeground(Color.BLACK); // Màu chữ đen
         btnHuy.setBackground(new Color(220, 220, 220)); // Màu nền xám nhạt
         btnHuy.setFocusPainted(false);
@@ -326,14 +330,14 @@ public class ManHinhXacNhanBanVe extends JPanel {
         btnHuy.addActionListener(e -> huyBoThanhToan());
         panelNut.add(btnHuy);
 
-        JButton btnQuayLai = new JButton("Quay lại");
+        btnQuayLai = new JButton("Quay lại");
         btnQuayLai.setBackground(new Color(150, 150, 150));
         btnQuayLai.setForeground(Color.WHITE);
         btnQuayLai.setPreferredSize(new Dimension(140, 36));
         btnQuayLai.addActionListener(e -> quayLai());
         panelNut.add(btnQuayLai);
 
-        JButton btnXacNhan = new JButton("Xác nhận thanh toán");
+        btnXacNhan = new JButton("Xác nhận thanh toán");
         btnXacNhan.setForeground(Color.WHITE);
         btnXacNhan.setBackground(MAU_XANH_BTN);
         btnXacNhan.setFocusPainted(false);
@@ -366,7 +370,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         thongTinHD.setOpaque(false);
         thongTinHD.setLayout(new GridLayout(0, 2));
 
-        // FIX: Hiển thị giá trị giữ chỗ ban đầu
+        // Khởi tạo các JLabel hiển thị thông tin Hóa đơn (trước khi tạo)
         lblMaHoaDon = new JLabel("Chưa tạo");
         lblNguoiLapHD = new JLabel("Đang tải...");
         lblDienThoaiNV = new JLabel("Đang tải...");
@@ -401,62 +405,22 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
         panelHoaDon.add(headerWrapper, BorderLayout.NORTH); // Thay thế dau bằng headerWrapper
 
-        String[] cotHd = {"STT", "Loại vé", "Số lượng", "Đơn giá", "Thuế VAT", "Thành tiền có thuế"};
-        DefaultTableModel modelHd = new DefaultTableModel(cotHd, 0) {
-            @Override
-            public boolean isCellEditable(int r, int c) { return false; }
-        };
+        String[] cotHd = {"STT", "Mã vé", "Số lượng", "Đơn giá", "Thuế VAT", "Thành tiền có thuế"};
+        DefaultTableModel modelHd = new DefaultTableModel(cotHd, 0);
 
-        if (danhSachKhach != null && !danhSachKhach.isEmpty()) {
-            // Nhóm các ghế có cùng loại vé và đơn giá
-            Map<String, MapGroup> groups = new LinkedHashMap<>();
+        modelHd.addRow(new Object[]{"", "Chưa có ghế", "", "", "", ""});
 
-            // Lặp qua danhSachKhach để nhóm
-            for (Map.Entry<String, Object> entry : danhSachKhach.entrySet()) {
-                Object khach = entry.getValue();
+// --- KẾT THÚC LOGIC ĐIỀN DỮ LIỆU ---
 
-                // SỬA: Sử dụng helper để lấy các trường cần thiết
-                String maLoaiVe = getKhachField(khach, "maLoaiVe", String.class);
-                Long giaDonVi = danhSachGiaVe.get(entry.getKey()); // Giá đã được tính
-
-                if (giaDonVi != null && maLoaiVe != null) {
-                    // Nhóm theo MaLoaiVe để nhóm các vé có cùng loại và giá
-                    if (!groups.containsKey(maLoaiVe)) {
-                        // Sử dụng MaLoaiVe làm key nhóm
-                        groups.put(maLoaiVe, new MapGroup(getTenLoaiVeHienThi(khach), giaDonVi));
-                    }
-                    groups.get(maLoaiVe).soLuong++;
-                }
-            }
-
-            NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
-            int stt = 1;
-            for (Map.Entry<String, MapGroup> entry : groups.entrySet()) {
-                MapGroup group = entry.getValue();
-
-                // Tính toán: group.giaDonVi đã bao gồm VAT.
-                // Giá trước thuế = Giá/1.1
-                double giaTruocVAT = group.giaDonVi / 1.1;
-                double thanhTienCoVAT = group.giaDonVi * group.soLuong;
-
-                modelHd.addRow(new Object[]{
-                        stt++,
-                        group.tenLoaiVe, // GÁN TÊN LOẠI VÉ VÀO CỘT "Loại vé"
-                        group.soLuong,
-                        nf.format(Math.round(giaTruocVAT)),
-                        "10%",
-                        nf.format(Math.round(thanhTienCoVAT))
-                });
-            }
-        } else {
-            modelHd.addRow(new Object[]{"", "Chưa có ghế", "", "", "", ""});
-        }
-// --- KẾT THÚC SỬA ĐOẠN TÍNH TOÁN VÀ HIỂN THỊ BẢNG ---
         tbHoaDon = new JTable(modelHd);
         tbHoaDon.setFillsViewportHeight(true);
         JScrollPane sp = new JScrollPane(tbHoaDon);
         sp.setPreferredSize(new Dimension(480, 300));
         panelHoaDon.add(sp, BorderLayout.CENTER);
+
+        // =================================================================
+        // FIX: TẠO FOOTER CHI TIẾT VÀ GÁN LABEL TỔNG CỘNG
+        // =================================================================
 
         JPanel chan = new JPanel(new BorderLayout());
         chan.setOpaque(false);
@@ -466,18 +430,34 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
         double tongVoiKM = tinhTongHoaDon(tinhGiaVe(), khuyenMaiApDung).total;
-        JLabel lbl = new JLabel("Tổng cộng: " + nf.format(Math.round(tongVoiKM)));lbl.setFont(lbl.getFont().deriveFont(Font.BOLD, 14f));
 
-        panelTongCong.add(lbl);
-        chan.add(panelTongCong, BorderLayout.NORTH);
+        // LABEL HIỂN THỊ TỔNG CỘNG LỚN (Đã có sẵn)
+        JLabel lblTongCongLon = new JLabel("Tổng cộng: " + nf.format(Math.round(tongVoiKM)));
+        lblTongCongLon.setFont(lblTongCongLon.getFont().deriveFont(Font.BOLD, 14f));
+
+        panelTongCong.add(lblTongCongLon);
+        chan.add(panelTongCong, BorderLayout.NORTH); // Thêm tổng cộng (phần trên của footer)
+
+        // --- PHẦN TIỀN VIẾT BẰNG CHỮ (Giữ chỗ) ---
+        JPanel panelTienChu = new JPanel(new GridLayout(1, 1));
+        panelTienChu.setOpaque(false);
+
+        // FIX: Khởi tạo và thêm JLabel cho Tiền bằng chữ
+        lblTienBangChu = new JLabel("Số tiền viết bằng chữ: ");
+        lblTienBangChu.setFont(lblTienBangChu.getFont().deriveFont(Font.ITALIC));
+        panelTienChu.add(lblTienBangChu);
+
+        chan.add(panelTienChu, BorderLayout.CENTER); // Thêm dòng tiền chữ (phần giữa của footer)
 
         JPanel panelKetThuc = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panelKetThuc.setOpaque(false);
 
-        JButton btnKetThuc = new JButton("Kết thúc >");
+        btnKetThuc = new JButton("Kết thúc >");
         btnKetThuc.setBackground(MAU_CAM_BTN);
         btnKetThuc.setForeground(Color.WHITE);
         btnKetThuc.setPreferredSize(new Dimension(140, 36));
+        btnKetThuc.setEnabled(false);
+
         btnKetThuc.addActionListener(e -> ketThuc());
         panelKetThuc.add(btnKetThuc);
 
@@ -680,6 +660,169 @@ public class ManHinhXacNhanBanVe extends JPanel {
             txtTienThoiLai.setText("0");
         }
     }
+
+    // Trong capNhatChiTietHoaDonUI
+
+    /**
+     * Cập nhật Bảng Chi tiết Hóa đơn và Footer sau khi giao dịch thành công.
+     * @param hoaDon Đối tượng HoaDon đã được lưu.
+     * @param danhSachVe Danh sách VeCuaBanVe đã có mã vé và giá cuối cùng.
+     */
+    private void capNhatChiTietHoaDonUI(HoaDon hoaDon, List<VeCuaBanVe> danhSachVe) {
+        if (tbHoaDon == null || !(tbHoaDon.getModel() instanceof DefaultTableModel)) return;
+
+        DefaultTableModel modelHd = (DefaultTableModel) tbHoaDon.getModel();
+        modelHd.setRowCount(0); // Xóa dữ liệu cũ
+
+        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+        double tongTien = 0;
+        int stt = 1;
+
+        // 1. Lặp qua danh sách vé và điền vào bảng
+        for (VeCuaBanVe ve : danhSachVe) {
+            double thanhTienCoVAT = ve.getGiaVe()*1.1;
+            double giaTruocVAT = ve.getGiaVe() ;
+            tongTien += thanhTienCoVAT;
+
+            modelHd.addRow(new Object[]{
+                    stt++,
+                    ve.getMaVe(),
+                    1,
+                    nf.format(Math.round(giaTruocVAT)),
+                    "10%",
+                    nf.format(Math.round(thanhTienCoVAT))
+            });
+        }
+
+        // --- 2. Cập nhật Footer ---
+        long tongTienFinal = Math.round(tongTien);
+        // GỌI HÀM CHUYỂN SỐ THÀNH CHỮ
+        String tienBangChu = docSo(tongTienFinal);
+
+        // Cập nhật nhãn tổng tiền chính
+        if (lblTongTien != null) {
+            lblTongTien.setText("Tổng số tiền phải thanh toán: " + nf.format(tongTienFinal) + " VND");
+        }
+
+        // FIX: Cập nhật Tiền viết bằng chữ
+        if (lblTienBangChu != null) {
+            lblTienBangChu.setText("Số tiền viết bằng chữ: " + tienBangChu);
+        }
+
+        // 3. Vô hiệu hóa nút Thanh toán và Khuyến mãi
+        if (btnHuy != null) btnHuy.setEnabled(false);
+        if (btnXacNhan != null) btnXacNhan.setEnabled(false);
+        if (btnQuayLai != null) btnQuayLai.setEnabled(false);
+        if (btnApDungKhuyenMai != null) btnApDungKhuyenMai.setEnabled(false);
+        if (btnXoaKhuyenMai != null) btnXoaKhuyenMai.setEnabled(false);
+        if (cbHinhThuc != null) cbHinhThuc.setEnabled(false);
+        if (btnKetThuc != null) btnKetThuc.setEnabled(true);
+    }
+
+    // Mảng chữ số từ 0 đến 9
+    private static final String[] chuSo = {"không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"};
+
+    // Mảng hàng đơn vị lớn
+    private static final String[] donVi = {"", "nghìn", "triệu", "tỷ", "nghìn tỷ"};
+
+    /**
+     * Phương thức Helper: Đọc một nhóm 3 chữ số (000-999) thành chữ.
+     * @param soBaChuSo Số (0-999) cần đọc.
+     * @return Chuỗi chữ tiếng Việt.
+     */
+    private  String docBaSo(int soBaChuSo) {
+        if (soBaChuSo == 0) return chuSo[0];
+
+        int tram = soBaChuSo / 100;
+        int chuc = (soBaChuSo % 100) / 10;
+        int donViLe = soBaChuSo % 10;
+
+        String ketQua = "";
+
+        // Đọc hàng trăm
+        if (tram > 0) {
+            ketQua += chuSo[tram] + " trăm";
+        }
+
+        // Đọc hàng chục và đơn vị
+        if (chuc > 1) {
+            ketQua += (tram > 0 || ketQua.isEmpty() ? " " : "") + chuSo[chuc] + " mươi";
+            if (donViLe > 0) {
+                if (donViLe == 5) {
+                    ketQua += " lăm"; // ví dụ: hai mươi lăm
+                } else if (donViLe == 1) {
+                    ketQua += " mốt"; // ví dụ: hai mươi mốt
+                } else {
+                    ketQua += " " + chuSo[donViLe];
+                }
+            }
+        } else if (chuc == 1) {
+            ketQua += (tram > 0 || ketQua.isEmpty() ? " " : "") + "mười";
+            if (donViLe > 0) {
+                if (donViLe == 5) {
+                    ketQua += " lăm"; // ví dụ: mười lăm
+                } else {
+                    ketQua += " " + chuSo[donViLe];
+                }
+            }
+        } else { // chuc == 0
+            if (tram > 0 && (donViLe > 0)) {
+                ketQua += " lẻ"; // ví dụ: một trăm lẻ năm
+            }
+            if (donViLe > 0) {
+                ketQua += (ketQua.isEmpty() ? "" : " ") + chuSo[donViLe];
+            }
+        }
+
+        return ketQua.trim();
+    }
+
+
+    /**
+     * Phương thức chính: Đọc một số nguyên lớn (long) thành chuỗi tiếng Việt.
+     * @param number Số tiền (long) cần đọc (ví dụ: 2420000).
+     * @return Chuỗi tiền tệ tiếng Việt (ví dụ: "hai triệu bốn trăm hai mươi nghìn đồng").
+     */
+    public  String docSo(long number) {
+        if (number == 0) return "Không đồng";
+        if (number < 0) return "Âm " + docSo(-number); // Xử lý số âm
+
+        String s = String.valueOf(number);
+        int length = s.length();
+        int soNhom = (length + 2) / 3;
+
+        // Chia số thành các nhóm 3 chữ số (từ phải sang trái)
+        List<String> nhomSo = new ArrayList<>();
+        for (int i = 0; i < soNhom; i++) {
+            int start = Math.max(0, length - (i + 1) * 3);
+            int end = length - i * 3;
+            nhomSo.add(s.substring(start, end));
+        }
+
+        String ketQua = "";
+        boolean isPreviousGroupZero = false;
+
+        // Đọc từng nhóm 3 số
+        for (int i = 0; i < soNhom; i++) {
+            int val = Integer.parseInt(nhomSo.get(i));
+
+            // Xử lý nhóm 3 số
+            String chu = docBaSo(val);
+
+            // Nếu không phải nhóm cuối cùng (đơn vị lớn hơn 0)
+            if (!chu.isEmpty() && i < donVi.length) {
+                ketQua = chu + " " + donVi[i] + (ketQua.isEmpty() ? "" : " ") + ketQua;
+                isPreviousGroupZero = false;
+            } else if (val == 0) {
+                isPreviousGroupZero = true; // Nhóm 000
+            }
+        }
+
+        // Loại bỏ các khoảng trắng thừa và thêm "đồng"
+        return (ketQua.trim().substring(0, 1).toUpperCase() + ketQua.trim().substring(1) + " đồng").replaceAll("\\s+", " ");
+    }
+
+
 
 
     /**
@@ -899,17 +1042,27 @@ public class ManHinhXacNhanBanVe extends JPanel {
                     Math.round(giaSauKhuyenMai),
                     "DA_BAN"
             );
+            System.out.println("Thông tin của vé trước giao dịch: "+ ve.toString());
             danhSachVeMoi.add(ve);
         }
 
         // --- B4: Gọi DAO để thực hiện Transaction ---
         try {
             // FIX: Truyền KhachHang entity đại diện (đã có MaKH hợp lệ)
-            boolean success = veDao.banVeTrongTransaction(hoaDon, danhSachVeMoi, khachHangDaiDienObj);
-
+            boolean success = veBVDao.banVeTrongTransaction(hoaDon, danhSachVeMoi, khachHangDaiDienObj);
+            System.out.println("Kết quả của hóa đơn " + hoaDon.toString());
 
             if (success) {
+                // 1. Cập nhật header (Mã HD, người lập)
                 hienThiThongTinHoaDon(hoaDon);
+
+                // 2. Cập nhật bảng chi tiết và footer
+                capNhatChiTietHoaDonUI(hoaDon, danhSachVeMoi);
+                
+                // 3. Vô hiệu hóa form bên trái (nút xác nhận, tiền khách đưa, v.v.)
+                btnXacNhan.setEnabled(false);
+                txtTienKhachDua.setEditable(false);
+                
                 System.out.println("Số lượng vé được thêm " + danhSachVeMoi.size());
                 for (VeCuaBanVe ve : danhSachVeMoi){
                     System.out.println("Mã vé được tạo: " + ve.getMaVe());
@@ -928,7 +1081,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 }
 
                 JOptionPane.showMessageDialog(this,
-                        sb.toString(), // Hiển thị thông tin chi tiết
+                        sb.toString(),
                         "Thành công",
                         JOptionPane.INFORMATION_MESSAGE);
                 
@@ -1013,11 +1166,36 @@ public class ManHinhXacNhanBanVe extends JPanel {
         // 1. Reset dữ liệu của màn hình hiện tại
         resetAllData();
 
+        resetManHinhBanVeChinh();
+
         // 2. Chuyển Panel
         chuyenManHinh("trangChu");
     }
 
+    /**
+     * Helper: Truy cập BanVeDashboard và gọi resetAllData() của ManHinhBanVe.
+     * Phương thức này giả định ManHinhBanVe có phương thức public resetAllData().
+     */
+    private void resetManHinhBanVeChinh() {
+        Window w = SwingUtilities.getWindowAncestor(this);
+        if (w instanceof BanVeDashboard) {
+            BanVeDashboard dashboard = (BanVeDashboard) w;
 
+            // 1. Lấy Panel ManHinhBanVe (Giả sử tên card là "manHinhBanVe")
+            Component componentBanVe = dashboard.getCardByName("banVeMoi");
+
+            // 2. Ép kiểu và gọi resetAllData()
+            // FIX: Rút gọn điều kiện kiểm tra (Lỗi thường là do componentBanVe là null hoặc sai type)
+            if (componentBanVe != null && componentBanVe instanceof ManHinhBanVe) {
+                ManHinhBanVe manHinhBanVe = (ManHinhBanVe) componentBanVe;
+                manHinhBanVe.resetAllData(); // <--- This should now execute
+                System.out.println("Đã gọi resetAllData() cho banVeMoi.");
+            } else {
+                // Debugging the failure point
+                System.err.println("LỖI: Component 'banVeMoi' không tìm thấy hoặc không phải là ManHinhBanVe.");
+            }
+        }
+    }
 
     /**
      * Lấy số hiệu ca làm việc hiện tại (Mặc định là "01").
@@ -1101,7 +1279,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
      * Hành động cho nút "Quay lại" (Về màn hình bán vé chính).
      */
     private void quayLai() {
-        // NOTE: Giả định Panel bán vé chính là ManHinhBanVe (hoặc ManHinhBanVeChinh)
+        // NOTE: Giả định Panel bán vé chính là ManHinhBanVe
 
         // KHÔNG reset dữ liệu ở đây, dữ liệu phải được giữ lại cho màn hình trước.
         resetAllData();
@@ -1121,10 +1299,11 @@ public class ManHinhXacNhanBanVe extends JPanel {
             if ("trangChu".equals(cardName)) {
                 // Cần tạo lại Panel Trang chủ nếu nó không phải là static
                 dashboard.addOrUpdateCard(new ManHinhTrangChuNVBanVe(), "trangChu");
-            }else if("manHinhBanVe".equals(cardName)) {
-                // Cần tạo lại Panel Trang chủ nếu nó không phải là static
-                dashboard.addOrUpdateCard(new ManHinhBanVe(), "banVeMoi");
 
+                cardName = "trangChuNV";
+            }else if ("manHinhBanVe".equals(cardName)) {
+                // Chỉ cần đảm bảo card được thêm vào nếu chưa có
+                cardName = "banVeMoi";
             }
 
             dashboard.switchToCard(cardName);

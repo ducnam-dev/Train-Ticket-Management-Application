@@ -208,7 +208,13 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         contentPanel.add(new ManHinhTrangChuNVBanVe(), "trangChuNV");
         contentPanel.add(new ManHinhMoCa(), "moCa");
         contentPanel.add(new ManHinhKetCa(), "ketCa");
-        contentPanel.add(new ManHinhBanVe(), "banVeMoi");
+
+
+        ManHinhBanVe banVePanel = new ManHinhBanVe();
+        banVePanel.setName("banVeMoi"); // <-- Đặt tên nội bộ (Component.name)
+        contentPanel.add(banVePanel, "banVeMoi");
+
+
         contentPanel.add(new JPanel(), "doiVe");
         contentPanel.add(new ManHinhTraVe(), "traVe");
         contentPanel.add(new JPanel(), "traCuuVe");
@@ -330,5 +336,14 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         SwingUtilities.invokeLater(() -> {
             new BanVeDashboard();
         });
+    }
+
+    public Component getCardByName(String cardName) {
+        for (Component comp : contentPanel.getComponents()) {
+            if (comp.getName() != null && comp.getName().equals(cardName)) {
+                return comp;
+            }
+        }
+        return null;
     }
 }

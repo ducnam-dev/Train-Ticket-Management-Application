@@ -894,7 +894,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         return panel;
     }
 
-    private void resetAllData() {
+    public void resetAllData() {
         // 1. Dọn dẹp dữ liệu nội bộ (Ghế ngồi/Khách hàng)
         danhSachGheDaChon.clear();
         danhSachKhachHang.clear();
