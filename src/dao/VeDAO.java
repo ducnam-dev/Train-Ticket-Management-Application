@@ -3,10 +3,7 @@ package dao;
 import database.ConnectDB;
 import entity.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -71,6 +68,68 @@ public class VeDAO {
                     }
                 }
             }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm chi tiết vé từ CSDL: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return ve;
+    }
+    public Ve getChiTietVeChoTraCuuVe(String maVe, String sdt) {
+        Ve ve = null;
+
+        String sql = "SELECT V.MaVe, V.GiaVe, V.TrangThai, V.MaKhachHang, V.MaChuyenTau, V.MaChoDat, " +
+                "KH.HoTen AS TenKhachHang, KH.SoDienThoai, " +
+                "CT.NgayKhoiHanh, CT.GioKhoiHanh, CT.GaDi, CT.GaDen, " +
+                "CD.SoCho, T.MaToa " +
+                "FROM Ve V " +
+                "LEFT JOIN KhachHang KH ON V.MaKhachHang = KH.MaKhachHang " +
+                "LEFT JOIN ChuyenTau CT ON V.MaChuyenTau = CT.MaChuyenTau " +
+                "LEFT JOIN ChoDat CD ON V.MaChoDat = CD.MaCho " +
+                "LEFT JOIN Toa T ON CD.MaToa = T.MaToa " +
+                "WHERE (V.MaVe = ? OR KH.SoDienThoai = ?)";
+
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            if (maVe != null && !maVe.isEmpty())
+                pstmt.setString(1, maVe);
+            else
+                pstmt.setNull(1, Types.VARCHAR);
+
+            if (sdt != null && !sdt.isEmpty())
+                pstmt.setString(2, sdt);
+            else
+                pstmt.setNull(2, Types.VARCHAR);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    ve = new Ve();
+                    ve.setId(rs.getString("MaVe"));
+                    ve.setGia(rs.getDouble("GiaVe"));
+
+                    String maKHDb = rs.getString("MaKhachHang");
+                    String maCTDb = rs.getString("MaChuyenTau");
+                    String maChoDatDb = rs.getString("MaChoDat");
+
+                    KhachHang kh = KhachHangDAO.getKhachHangById(maKHDb);
+                    ChuyenTau ct = ChuyenTauDao.layChuyenTauBangMa(maCTDb);
+                    ChoDat cd = ChoDatDAO.getChoDatById(maChoDatDb);
+
+                    ve.setKhachHangChiTiet(kh);
+                    ve.setChuyenTauChiTiet(ct);
+                    ve.setChoDatChiTiet(cd);
+
+                    if (kh != null) ve.setKhachHang(kh.getHoTen());
+                    if (cd != null && cd.getSoCho() != null) {
+                        try {
+                            ve.setSoGhe(Integer.parseInt(cd.getSoCho().replaceAll("[^\\d]", "")));
+                        } catch (NumberFormatException e) {
+                            ve.setSoGhe(0);
+                        }
+                    }
+                }
+            }
+
         } catch (SQLException e) {
             System.err.println("Lỗi khi tìm chi tiết vé từ CSDL: " + e.getMessage());
             e.printStackTrace();
@@ -176,7 +235,85 @@ public class VeDAO {
         return "VE" + soHieuCa + ngayStr + soThuTuStr;
     }
 
+    public List<Ve> timVeTheoKhachHang(String hoTen, String sdt, String cccd, String maVe) {
+        List<Ve> danhSachVe = new ArrayList<>();
 
+        // Xây dựng câu SQL động dựa trên tham số
+        StringBuilder sql = new StringBuilder(
+                "SELECT V.MaVe, V.GiaVe, V.TrangThai, V.MaKhachHang, V.MaChuyenTau, V.MaChoDat " +
+                        "FROM Ve V " +
+                        "JOIN KhachHang KH ON V.MaKhachHang = KH.MaKhachHang " +
+                        "WHERE 1=1"
+        );
+
+        if (maVe != null && !maVe.isEmpty()) {
+            sql.append(" AND V.MaVe = ?");
+        }
+        if (hoTen != null && !hoTen.isEmpty()) {
+            sql.append(" AND KH.HoTen LIKE ?");
+        }
+        if (sdt != null && !sdt.isEmpty()) {
+            sql.append(" AND KH.SoDienThoai LIKE ?");
+        }
+        if (cccd != null && !cccd.isEmpty()) {
+            sql.append(" AND KH.CCCD LIKE ?");
+        }
+
+        Connection con = null;
+        try {
+            con = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement(sql.toString())) {
+
+                int paramIndex = 1;
+                if (maVe != null && !maVe.isEmpty()) {
+                    pstmt.setString(paramIndex++, maVe);
+                }
+                if (hoTen != null && !hoTen.isEmpty()) {
+                    pstmt.setString(paramIndex++, "%" + hoTen + "%");
+                }
+                if (sdt != null && !sdt.isEmpty()) {
+                    pstmt.setString(paramIndex++, "%" + sdt + "%");
+                }
+                if (cccd != null && !cccd.isEmpty()) {
+                    pstmt.setString(paramIndex++, "%" + cccd + "%");
+                }
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        Ve ve = new Ve();
+
+                        String maKHDb = rs.getString("MaKhachHang");
+                        String maCTDb = rs.getString("MaChuyenTau");
+                        String maChoDatDb = rs.getString("MaChoDat");
+
+                        ve.setId(rs.getString("MaVe"));
+                        ve.setGia(rs.getDouble("GiaVe"));
+                        ve.setTrangThai(rs.getString("TrangThai")); // Lấy trạng thái thực tế
+
+                        // GỌI DAO PHỤ TRỢ (Đã sửa lỗi đóng kết nối)
+                        KhachHang kh = (maKHDb != null) ? KhachHangDAO.getKhachHangById(maKHDb) : null;
+                        ChuyenTau ct = (maCTDb != null) ? ChuyenTauDao.getChuyenTauById(maCTDb) : null;
+                        ChoDat cd = (maChoDatDb != null) ? ChoDatDAO.getChoDatById(maChoDatDb) : null;
+
+                        // Gán Entity chi tiết vào Ve
+                        ve.setKhachHangChiTiet(kh);
+                        ve.setChuyenTauChiTiet(ct);
+                        ve.setChoDatChiTiet(cd);
+
+                        if (kh != null) {
+                            ve.setKhachHang(kh.getHoTen());
+                        }
+
+                        danhSachVe.add(ve);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm vé theo Khách hàng: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return danhSachVe;
+    }
 
     // =================================================================================
     // NGHIỆP VỤ BÁN VÉ (TRANSACTION)
@@ -272,7 +409,6 @@ public class VeDAO {
         }
     }
 
-    // ... (Giữ nguyên các hàm khác: getChiTietVeChoTraVe, huyVe, taoVe, layTheoTau)
-    // Cần bổ sung các lớp DAO: HoaDonDAO và ChiTietHoaDonDAO với các phương thức them...
+
 
 }
