@@ -73,6 +73,10 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private static final SimpleDateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private JScrollPane thongTinKhachScrollPane;
 
+
+    // Record tạm thời lưu thông tin khách hàng cho mỗi ghế đã chọn
+
+
     private static record ChiTietKhach(
             ChoDat choDat,
             String maLoaiVe,
@@ -890,17 +894,26 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         return panel;
     }
 
-    // --- Helper: reset state/UI ---
     private void resetAllData() {
+        // 1. Dọn dẹp dữ liệu nội bộ (Ghế ngồi/Khách hàng)
         danhSachGheDaChon.clear();
         danhSachKhachHang.clear();
         tatCaChoDatToaHienTai.clear();
         seatButtonsMap.clear();
         danhSachGiaVe.clear();
 
+        // 2. Dọn dẹp các biến trạng thái chuyến tàu
         maChuyenTauHienTai = null;
         maToaHienTai = null;
         lastSelectedToaButton = null;
+
+        // =======================================================
+        // FIX: DỌN DẸP DANH SÁCH CHUYẾN TÀU
+        // =======================================================
+        if (tableModel != null) {
+            tableModel.setRowCount(0); // Xóa tất cả các dòng khỏi model
+        }
+        // =======================================================
 
         SwingUtilities.invokeLater(() -> {
             capNhatDanhSachGheDaChonUI();

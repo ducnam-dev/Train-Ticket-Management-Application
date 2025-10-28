@@ -93,8 +93,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         capNhatTongVaGiaoDien();
     }
 
-
-
     private void khoiTaoGiaoDien() {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
@@ -1019,17 +1017,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         chuyenManHinh("trangChu");
     }
 
-    /**
-     * Hành động cho nút "Quay lại" (Về màn hình bán vé chính).
-     */
-    private void quayLai() {
-        // NOTE: Giả định Panel bán vé chính là ManHinhBanVe (hoặc ManHinhBanVeChinh)
 
-        // KHÔNG reset dữ liệu ở đây, dữ liệu phải được giữ lại cho màn hình trước.
-        resetAllData();
-
-        chuyenManHinh("manHinhBanVe");
-    }
 
     /**
      * Lấy số hiệu ca làm việc hiện tại (Mặc định là "01").
@@ -1110,6 +1098,18 @@ public class ManHinhXacNhanBanVe extends JPanel {
     }
 
     /**
+     * Hành động cho nút "Quay lại" (Về màn hình bán vé chính).
+     */
+    private void quayLai() {
+        // NOTE: Giả định Panel bán vé chính là ManHinhBanVe (hoặc ManHinhBanVeChinh)
+
+        // KHÔNG reset dữ liệu ở đây, dữ liệu phải được giữ lại cho màn hình trước.
+        resetAllData();
+
+        chuyenManHinh("manHinhBanVe");
+    }
+
+    /**
      * Helper chung để chuyển đổi giữa các Panel trong Dashboard.
      */
     private void chuyenManHinh(String cardName) {
@@ -1121,6 +1121,10 @@ public class ManHinhXacNhanBanVe extends JPanel {
             if ("trangChu".equals(cardName)) {
                 // Cần tạo lại Panel Trang chủ nếu nó không phải là static
                 dashboard.addOrUpdateCard(new ManHinhTrangChuNVBanVe(), "trangChu");
+            }else if("manHinhBanVe".equals(cardName)) {
+                // Cần tạo lại Panel Trang chủ nếu nó không phải là static
+                dashboard.addOrUpdateCard(new ManHinhBanVe(), "banVeMoi");
+
             }
 
             dashboard.switchToCard(cardName);
