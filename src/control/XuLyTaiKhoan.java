@@ -21,9 +21,7 @@ public class XuLyTaiKhoan {
 
         // **LƯU Ý VỀ BẢO MẬT:**
         // Trong ứng dụng thực tế, nên áp dụng mã hóa mật khẩu
-        // (ví dụ: BCrypt, Argon2) trong quá trình đăng nhập và lưu trữ.
         // Tuy nhiên, để khớp với TaiKhoanDAO cơ bản đã viết, ta dùng mật khẩu thô.
-
         // Gọi phương thức DAO để thực hiện xác thực CSDL
         TaiKhoan taiKhoan = taiKhoanDAO.dangNhap(tenDangNhap, matKhau);
 

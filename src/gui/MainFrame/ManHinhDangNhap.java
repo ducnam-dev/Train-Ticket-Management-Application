@@ -18,9 +18,8 @@ import java.io.File;
  */
 public class ManHinhDangNhap extends JFrame implements ActionListener {
 
-    // Đường dẫn tương đối đến file ảnh (Cần thay đổi nếu file ảnh ở vị trí khác)
     private static final String LOGO_PATH = "src/images/logo-train.png";
-    // Đường dẫn cho ảnh đoàn tàu (Cần thay đổi nếu file ảnh ở vị trí khác)
+
     private static final String TRAIN_IMAGE_PATH = "src/images/anh tau.jpg";
 
     // Kích thước mong muốn của ảnh logo và ảnh tàu
@@ -244,10 +243,10 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
 
                 // Phân quyền dựa trên MaNV chuẩn hóa:
                 if (maNV.startsWith("NVQL")) {
-                    // Mở màn hình quản lý (Ví dụ: NVQL001, NVQL002)
+                    // Mở màn hình quản lý (Ví dụ: NVQL0001, NVQL0002)
                     new QuanLyDashboard().setVisible(true);
                 } else if (maNV.startsWith("NVBV")) {
-                    // Mở màn hình bán vé (Ví dụ: NVBV001)
+                    // Mở màn hình bán vé (Ví dụ: NVBV0001)
                     new BanVeDashboard().setVisible(true);
                 } else {
                     // Mặc định hoặc lỗi phân quyền

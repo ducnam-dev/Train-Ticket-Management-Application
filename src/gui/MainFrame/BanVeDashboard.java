@@ -1,8 +1,6 @@
 package gui.MainFrame;
 
-// Import các Panel cần hiển thị (Giả định các lớp này kế thừa từ JPanel)
 import gui.Panel.*;
-//import gui.Panel.ManHinhTraCuuVe;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -17,15 +15,13 @@ import java.util.Map;
  */
 public class BanVeDashboard extends JFrame implements ActionListener {
 
-    // =================================================================================
     // HẰNG SỐ VÀ KHAI BÁO
-    // =================================================================================
     private CardLayout cardLayout;
     private JPanel contentPanel;
     private final Color PRIMARY_COLOR = new Color(34, 137, 203); // Màu xanh nhạt hơn cho NV Quản Lý
     private final Color SELECTED_COLOR = new Color(74, 184, 237); // Màu xanh sáng hơn
     private final Color HOVER_COLOR = new Color(45, 150, 215);
-    private final Map<String, JButton> menuButtons = new HashMap<>();
+    private final Map<String, JButton> btnMenu = new HashMap<>();
 
     // Các nút menu cần quản lý
     private JButton btnTrangChu, btnMoCa, btnKetCa, btnBanVe, btnDoiVe, btnTraCuuVe, btnTraCuuHD, btnDangXuat, btnTraVe;
@@ -46,13 +42,9 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         switchToCard("trangChuNV");
-        initEventHandlers();
+        dangKiSuKien();
         setVisible(true);
     }
-
-    // =================================================================================
-    // KHU VỰC MENU (NHÂN VIÊN BÁN VÉ)
-    // =================================================================================
 
     /**
      * Tạo panel điều hướng bên trái cho Nhân viên Bán Vé.
@@ -100,8 +92,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         btnKetCa = createNavItem("Kết ca", "\u23F0", "ketCa"); // ⏱️
         panel.add(btnKetCa);
 
-        // --- Separator ---
-        panel.add(createSeparator());
+        //  Gạch chân
+        panel.add(taoGachChan());
 
         // [4. Bán vé mới]
         btnBanVe = createNavItem("Bán vé mới", "\uD83C", "banVeMoi"); // 🎫
@@ -110,13 +102,12 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         // [5. Đổi vé]
         btnDoiVe = createNavItem("Đổi vé", "\u21C4", "doiVe"); // ⇄
         panel.add(btnDoiVe);
-        panel.add(createSeparator());
+        panel.add(taoGachChan());
 
         // [5 1. Trả vé]
         btnTraVe = createNavItem("Trả vé", "\u21C4", "traVe"); // ⇄
         panel.add(btnTraVe);
-        panel.add(createSeparator());
-        // --- Separator ---
+        panel.add(taoGachChan());
 
 
         // [6. Tra cứu vé]
@@ -130,7 +121,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 
         panel.add(Box.createVerticalGlue());
 
-        // --- Nút Đăng xuất ---
+        //  Nút Đăng xuất
         btnDangXuat = createNavItem("Đăng xuất", "\uD83D\uDEAA", "dangXuat"); // 🚪
         panel.add(btnDangXuat);
 
@@ -162,7 +153,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         button.setMaximumSize(itemSize);
 
         // Đăng ký nút vào Map và Listener
-        menuButtons.put(cardName, button);
+        btnMenu.put(cardName, button);
 
         // Xử lý hiệu ứng hover/màu sắc
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -181,21 +172,19 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     }
 
     /**
-     * Tạo Separator giữa các nhóm chức năng
+     * Tạo gạch chân giữa các nhóm chức năng
      */
-    private JSeparator createSeparator() {
-        JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
-        separator.setForeground(new Color(255, 255, 255, 70));
-        separator.setBackground(PRIMARY_COLOR);
-        separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-        return separator;
+    private JSeparator taoGachChan() {
+        JSeparator duongKe = new JSeparator(SwingConstants.HORIZONTAL);
+        duongKe.setForeground(new Color(255, 255, 255, 70));
+        duongKe.setBackground(PRIMARY_COLOR);
+        duongKe.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        return duongKe;
     }
 
 
-    // =================================================================================
-    // KHU VỰC CONTENT PANEL & CARDLAYOUT
-    // =================================================================================
 
+    // KHU VỰC CONTENT PANEL & CARDLAYOUT
     /**
      * Khởi tạo Panel chứa CardLayout và thêm các màn hình
      */
@@ -203,22 +192,19 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
 
-        // Thêm các màn hình (Giả định tất cả đều là JPanel)
+        // Thêm các màn hình
         contentPanel.add(new ManHinhTrangChuNVBanVe(), "trangChuNV");
         contentPanel.add(new ManHinhMoCa(), "moCa");
         contentPanel.add(new ManHinhKetCa(), "ketCa");
 
-
         ManHinhBanVe banVePanel = new ManHinhBanVe();
-        banVePanel.setName("banVeMoi"); // <-- Đặt tên nội bộ (Component.name)
+        banVePanel.setName("banVeMoi");
         contentPanel.add(banVePanel, "banVeMoi");
-
 
         contentPanel.add(new JPanel(), "doiVe");
         contentPanel.add(new ManHinhTraVe(), "traVe");
         contentPanel.add(new ManHinhTraCuuVe(), "traCuuVe");
         contentPanel.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
-
 
         add(contentPanel, BorderLayout.CENTER);
     }
@@ -226,8 +212,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     /**
      * Thiết lập Action Listener cho tất cả các nút menu
      */
-    private void initEventHandlers() {
-        for (JButton button : menuButtons.values()) {
+    private void dangKiSuKien() {
+        for (JButton button : btnMenu.values()) {
             button.addActionListener(this);
         }
     }
@@ -237,20 +223,18 @@ public class BanVeDashboard extends JFrame implements ActionListener {
      */
     public void switchToCard(String cardName) {
         cardLayout.show(contentPanel, cardName);
-        highlightActiveButton(menuButtons.get(cardName));
+        hightlightNutDangChon(btnMenu.get(cardName));
     }
 
     /**
      * Đổi màu nền của nút menu đang được chọn
      */
-    private void highlightActiveButton(JButton active) {
-        // Đặt tất cả các nút về màu ban đầu
-        for (JButton button : menuButtons.values()) {
+    private void hightlightNutDangChon(JButton active) {
+        for (JButton button : btnMenu.values()) {
             if (button != null) {
                 button.setBackground(PRIMARY_COLOR);
             }
         }
-        // Highlight nút đang hoạt động
         if (active != null) {
             active.setBackground(SELECTED_COLOR);
         }
@@ -263,11 +247,6 @@ public class BanVeDashboard extends JFrame implements ActionListener {
      * @param cardName Tên card (String) tương ứng.
      */
     public void addOrUpdateCard(JPanel newPanel, String cardName) {
-        // 1. Tìm và xóa panel cũ dựa trên tên card
-        // Note: Vì CardLayout không có getConstraints() công khai,
-        // ta phải xóa panel cũ bằng cách duyệt qua tất cả và sử dụng remove().
-
-        // Tạo một Component để giữ tham chiếu đến panel cũ cần xóa
         Component oldComponent = null;
 
         // Duyệt qua tất cả các Component trong contentPanel
@@ -277,12 +256,10 @@ public class BanVeDashboard extends JFrame implements ActionListener {
                 break;
             }
         }
-
         // Nếu tìm thấy component cũ, hãy xóa nó
         if (oldComponent != null) {
             contentPanel.remove(oldComponent);
         }
-
         // 2. Thêm panel mới
         // Đặt tên cho component mới, giúp việc tìm kiếm/xóa sau này dễ dàng hơn
         newPanel.setName(cardName);
@@ -295,15 +272,14 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 
 
 
-    // =================================================================================
+
     // XỬ LÝ SỰ KIỆN CHUNG
-    // =================================================================================
     @Override
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
 
         // Tìm tên card tương ứng với nút được click
-        String cardName = menuButtons.entrySet().stream()
+        String cardName = btnMenu.entrySet().stream()
                 .filter(entry -> entry.getValue() == src)
                 .map(Map.Entry::getKey)
                 .findFirst()
@@ -324,7 +300,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 
     // =================================================================================
     // MAIN
-    // =================================================================================
+
     public static void main(String[] args) {
         try {
             // Thiết lập Look and Feel để làm đẹp hơn chương trình

@@ -22,27 +22,14 @@ public class TaiKhoanDAO {
         TaiKhoan taiKhoan = null;
         Connection connection = null; // Khai báo Connection ở đây để đóng trong khối finally
 
-        // LƯU Ý: Truy vấn của bạn đang tìm kiếm theo MaNV và MatKhau.
-        // Cần đảm bảo cột đầu tiên trong SELECT là "TenDangNhap" để tạo đối tượng.
-        // Nếu bạn muốn tìm kiếm theo Tên đăng nhập (TenDangNhap) và MatKhau (phổ biến hơn),
-        // bạn nên sử dụng cột TenDangNhap trong WHERE clause.
-
-        // GIẢ ĐỊNH THEO YÊU CẦU: tìm kiếm theo MaNV (giả định rằng MaNV = TenDangNhap)
+        //Truy vấn của bạn đang tìm kiếm theo MaNV và MatKhau.
         String sql = "SELECT MaNV, TenDangNhap, NgayTao, TrangThai FROM TaiKhoan WHERE MaNV = ? AND MatKhau = ?";
-
         try {
-            // 1. Lấy kết nối CSDL (Sẽ ném SQLException)
             connection = database.ConnectDB.getConnection();
-
-            // 2. Sử dụng try-with-resources cho PreparedStatement và ResultSet
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-                // Đặt tham số. Giả định rằng giá trị đầu tiên nhập vào là MaNV
                 preparedStatement.setString(1, maNVOrTenDangNhap);
                 preparedStatement.setString(2, matKhau);
-
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
                     if (resultSet.next()) {
                         // Đọc dữ liệu từ ResultSet
                         String maNV = resultSet.getString("MaNV");
@@ -62,18 +49,6 @@ public class TaiKhoanDAO {
             e.printStackTrace();
             System.err.println("Lỗi CSDL khi thực hiện đăng nhập: " + e.getMessage());
         }
-        /** * Không tự động đóng kết nối
-         */
-//        finally {
-//            // 3. Đảm bảo đóng kết nối trong khối finally
-//            try {
-//                if (connection != null) database.ConnectDB.closeConnection(connection);
-//                // Sử dụng phương thức closeConnection() từ lớp ConnectDB của bạn
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
-//        }
-
         return taiKhoan;
     }
 }
