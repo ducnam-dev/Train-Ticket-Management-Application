@@ -20,7 +20,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/jfreechart-1.5.4.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/jcommon-1.0.24.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -29,11 +29,22 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/jcommon-1.0.24.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/jfreechart-1.5.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jfreechart-1.5.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" exported="" name="mssql-jdbc-13.2.1.jre11" level="project" />
+    <orderEntry type="library" exported="" name="jcommon-1.0.24" level="project" />
   </component>
 </module>

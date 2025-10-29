@@ -17,7 +17,7 @@ public class KhachHangDAO {
         KhachHang kh = null;
         String sql = "SELECT MaKhachHang, HoTen, CCCD, Tuoi, SoDienThoai, GioiTinh FROM KhachHang WHERE MaKhachHang = ?";
 
-        Connection con = null; // KHAI BÁO BÊN NGOÀI KHỐI TRY-WITH-RESOURCES
+        Connection con = null; // KHAI BÁO BÊN NGOÀI KHỐI TRY
         try {
             con = ConnectDB.getConnection(); // Lấy kết nối
 
@@ -45,42 +45,46 @@ public class KhachHangDAO {
         return kh;
     }
 
+    // LƯU Ý: TẤT CẢ CÁC PHƯƠNG THỨC TRUY VẤN KHÁC CŨNG PHẢI SỬA TƯƠNG TỰ
+
+    public static KhachHang findKhachHangByCCCD(String cccd) {
+        KhachHang kh = null;
+        String sql = "SELECT MaKhachHang, HoTen, CCCD, Tuoi, SoDienThoai, GioiTinh FROM KhachHang WHERE CCCD = ?";
+
+        Connection conn = null; // KHAI BÁO BÊN NGOÀI
+        try {
+            conn = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setString(1, cccd);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        kh = mapResultSetToKhachHang(rs);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi CSDL khi tìm khách hàng bằng CCCD: " + e.getMessage());
+        }
+        return kh;
+    }
+
     // Giả định hàm ánh xạ này tồn tại trong KhachHangDAO
     private static KhachHang mapResultSetToKhachHang(ResultSet rs) throws SQLException {
-        // NOTE: Cần đảm bảo lớp KhachHang có getter/setter cho tất cả các cột
         return new KhachHang(
                 rs.getString("MaKhachHang"),
                 rs.getString("HoTen"),
                 rs.getString("CCCD"),
                 rs.getInt("Tuoi"),
                 rs.getString("SoDienThoai"),
-                rs.getString("GioiTinh") // Giả định KhachHang có 6 tham số
+                rs.getString("GioiTinh")
         );
     }
 
-    public static KhachHang findKhachHangByCCCD(String cccd) {
-        KhachHang kh = null;
-        String sql = "SELECT MaKhachHang, HoTen, CCCD, Tuoi, SoDienThoai, GioiTinh FROM KhachHang WHERE CCCD = ?";
+    // Giả định hàm ánh xạ này tồn tại trong KhachHangDAO
 
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, cccd);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    // FIX: ÁNH XẠ DỮ LIỆU ĐẦY ĐỦ
-                    kh = mapResultSetToKhachHang(rs);
-                }
-            }
-        } catch (SQLException e) {
-            // Ném lỗi SQL, KHÔNG che giấu bằng RuntimeException
-            System.err.println("Lỗi CSDL khi tìm khách hàng bằng CCCD: " + e.getMessage());
-            // Giả định có thể throw SQLException nếu bạn muốn xử lý lỗi kết nối/CSDL nghiêm trọng
-            // throw e;
-        }
-        return kh; // Trả về đối tượng nếu tìm thấy, nếu không là null
-    }
 
     // Trong KhachHangDAO.java
     /**
