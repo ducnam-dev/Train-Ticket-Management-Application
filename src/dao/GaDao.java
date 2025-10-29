@@ -33,30 +33,28 @@ public class GaDao {
 
     public static Ga layGaBangTen(String tenGa) {
         Ga ga = null;
-
-        // SỬA SQL: Tìm kiếm theo cột TenGa thay vì MaGa
         String sql = "SELECT MaGa, TenGa, DiaChi FROM Ga WHERE TenGa = ?";
 
-        // Sử dụng try-with-resources để đảm bảo Connection và PreparedStatement được đóng
-        try (Connection con = ConnectDB.getInstance().getConnection();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
+        Connection con = null; // KHAI BÁO BÊN NGOÀI
+        try {
+            con = ConnectDB.getInstance().getConnection();
 
-            // ĐẶT THAM SỐ: Gán biến 'tenGa' vào vị trí số 1 của câu truy vấn
-            pstmt.setString(1, tenGa);
+            // CHỈ DÙNG TRY-WITH-RESOURCES CHO PreparedStatement
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    // Ánh xạ kết quả sang đối tượng Ga
-                    ga = new Ga(
-                            rs.getString("MaGa"),
-                            rs.getString("TenGa"),
-                            rs.getString("DiaChi")
-                    );
+                pstmt.setString(1, tenGa);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        ga = new Ga(
+                                rs.getString("MaGa"),
+                                rs.getString("TenGa"),
+                                rs.getString("DiaChi")
+                        );
+                    }
                 }
             }
-
         } catch (SQLException e) {
-            // Thêm thông tin về tham số tìm kiếm vào thông báo lỗi để dễ debug
             System.err.println("Lỗi khi tải Ga theo TenGa: " + tenGa + " - Chi tiết: " + e.getMessage());
             e.printStackTrace();
         }
@@ -80,26 +78,28 @@ public class GaDao {
 
 
     // Trong GaDao.java
-    public static Vector<Ga> layDanhSachGa ()  {
+    public Vector<Ga> layDanhSachGa() {
         Vector<Ga> danhSachGa = new Vector<>();
         String sql = "SELECT MaGa, TenGa, DiaChi FROM Ga";
 
-        try (Connection con = ConnectDB.getInstance().getConnection(); // Khai báo trong try-with-resources
-             PreparedStatement pstmt = con.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) { // Khai báo ResultSet trong try-with-resources
+        Connection con = null; // KHAI BÁO BÊN NGOÀI
+        try {
+            con = ConnectDB.getInstance().getConnection();
 
-            while (rs.next()) {
-                Ga ga = new Ga(rs.getString("MaGa"), rs.getString("TenGa"), rs.getString("DiaChi"));
-                danhSachGa.add(ga);
+            try (PreparedStatement pstmt = con.prepareStatement(sql);
+                 ResultSet rs = pstmt.executeQuery()) {
+
+                while (rs.next()) {
+                    Ga ga = new Ga(rs.getString("MaGa"), rs.getString("TenGa"), rs.getString("DiaChi"));
+                    danhSachGa.add(ga);
+                }
             }
-
         } catch (SQLException e) {
             System.err.println("Lỗi khi tải danh sách Ga: " + e.getMessage());
             e.printStackTrace();
         }
         return danhSachGa;
     }
-
     //---
 
     /**
