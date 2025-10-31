@@ -1,0 +1,289 @@
+<changelist name="Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]" date="1761305597101" recycled="false" toDelete="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Update at 24/10/25, 18:33 [Changes]" />
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/lopEnum/TrangThaiChoDat.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/lopEnum/TrangThaiChoDat.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/TrangThaiChoDat.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/NhanVien.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/NhanVien.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/NhanVien.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/ManHinhDangNhap.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/ManHinhDangNhap.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhDangNhap.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/KhachHang.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/KhachHang.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/KhachHang.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhQuanLyNhanVien.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/TempKhachHang.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/TempKhachHang.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/TempKhachHang.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/ManHinhDashboardQuanLy.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/ManHinhDashboardQuanLy.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhDashboardQuanLy.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnRenderer.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnRenderer.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhQuanLyNhanVien$ButtonColumnRenderer.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnEditor$2.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnEditor$2.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhQuanLyNhanVien$ButtonColumnEditor$2.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManhinhQuanLyChuyenTau$1.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManhinhQuanLyChuyenTau$1.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManhinhQuanLyChuyenTau$1.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhMoCa.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhMoCa.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhMoCa.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnEditor.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnEditor.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhQuanLyNhanVien$ButtonColumnEditor.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/ChuyenTauDao.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/ChuyenTauDao.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ChuyenTauDao.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$3.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$3.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhBanVe$3.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTrangChuNVBanVe.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTrangChuNVBanVe.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhTrangChuNVBanVe.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$4.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$4.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhBanVe$4.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/ManHinhDashboardQuanLy$2.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/ManHinhDashboardQuanLy$2.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhDashboardQuanLy$2.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$5.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$5.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhBanVe$5.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhXacNhanBanVe$1.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhXacNhanBanVe$1.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhXacNhanBanVe$1.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/ManHinhDashboardQuanLy$1.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/ManHinhDashboardQuanLy$1.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhDashboardQuanLy$1.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhMoCa$1.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhMoCa$1.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhMoCa$1.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/BanVeDashboard.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/BanVeDashboard.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/BanVeDashboard.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhKetCa.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhKetCa.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhKetCa.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/module-info.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/module-info.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/module-info.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/TauDAO.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/TauDAO.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/TauDAO.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/Ga.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/Ga.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/Ga.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTrangChuNVBanVe$1.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTrangChuNVBanVe$1.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhTrangChuNVBanVe$1.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/ToaDAO.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/ToaDAO.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ToaDAO.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$1.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$1.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhQuanLyNhanVien$1.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/GaDao.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/GaDao.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/GaDao.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/Ve.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/Ve.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/Ve.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$2.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$2.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhQuanLyNhanVien$2.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/VeDAO.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/VeDAO.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/VeDAO.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/database/ConnectDB.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/database/ConnectDB.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ConnectDB.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/NhanVienDao.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/NhanVienDao.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/NhanVienDao.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManhinhQuanLyChuyenTau.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManhinhQuanLyChuyenTau.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManhinhQuanLyChuyenTau.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/impl/VeDAOImpl.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/impl/VeDAOImpl.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/VeDAOImpl.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhKetCa$1.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhKetCa$1.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhKetCa$1.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/ChoDatDAO.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/dao/ChoDatDAO.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ChoDatDAO.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnEditor$1.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnEditor$1.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhQuanLyNhanVien$ButtonColumnEditor$1.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/KhuyenMai.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/KhuyenMai.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/KhuyenMai.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhBanVe.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhDoiVe.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhDoiVe.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhDoiVe.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$2.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$2.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhBanVe$2.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/ChiTietHoaDon.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/ChiTietHoaDon.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ChiTietHoaDon.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$1.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$1.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhBanVe$1.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhXacNhanBanVe.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhXacNhanBanVe.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ManHinhXacNhanBanVe.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/TraCuuPanel.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Panel/TraCuuPanel.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/TraCuuPanel.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/ChoDat.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/ChoDat.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ChoDat.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/TaiKhoan.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/TaiKhoan.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/TaiKhoan.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/Toa.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/Toa.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/Toa.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/ChuyenTau.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/ChuyenTau.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/ChuyenTau.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/view/Main.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/view/Main.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/Main.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/QuanLyDashBoard.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/QuanLyDashBoard.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/QuanLyDashBoard.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/HoaDon.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/HoaDon.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/HoaDon.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/lopEnum/TrangThaiChuyenTau.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/lopEnum/TrangThaiChuyenTau.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/TrangThaiChuyenTau.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/Tau.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/entity/Tau.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_10_25,_18_33_[Changes]/Tau.class" />
+  </binary>
+</changelist>

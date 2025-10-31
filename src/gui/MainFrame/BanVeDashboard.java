@@ -209,7 +209,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         contentPanel.add(new ManHinhMoCa(), "moCa");
         contentPanel.add(new ManHinhKetCa(), "ketCa");
         contentPanel.add(new ManHinhBanVe(), "banVeMoi");
-        contentPanel.add(new JPanel(), "doiVe");
+        contentPanel.add(new ManHinhDoiVe(), "doiVe");
         contentPanel.add(new ManHinhTraVe(), "traVe");
         contentPanel.add(new JPanel(), "traCuuVe");
         contentPanel.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
@@ -321,12 +321,12 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     // MAIN
     // =================================================================================
     public static void main(String[] args) {
-        try {
-            // Thiết lập Look and Feel để làm đẹp hơn chương trình
-            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            // Thiết lập Look and Feel để làm đẹp hơn chương trình
+//            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         SwingUtilities.invokeLater(() -> {
             new BanVeDashboard();
         });

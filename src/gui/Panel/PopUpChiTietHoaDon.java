@@ -1,6 +1,6 @@
-package gui.Panel; // <-- Giữ nguyên package
+package gui.Panel;
 
-// AWT Imports
+
 import dao.ChiTietHoaDonDAO;
 import entity.*;
 
@@ -18,16 +18,13 @@ import java.awt.event.ActionEvent; // Cho ActionListener
 import java.awt.event.ActionListener; // Cho ActionListener
 import java.util.List;
 
-// Swing Imports
 import javax.swing.*;
 
-// Swing Table Imports
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-// Ghi chú: Đã xóa "import javax.swing.*;"
 
 /**
  *
@@ -38,6 +35,19 @@ public class PopUpChiTietHoaDon extends JPanel {
     /**
      * Creates new form PopUpChiTietHoaDon
      */
+    // Variables declaration - do not modify
+    private JTable BangChiTietHanhKhach;
+    private JButton btnDongChiTietHoaDon, btnInHoaDon, btnSoLuongVe;
+    private JLabel jLabel10, jLabel12, jLabel15, jLabel18, jLabel19, jLabel20, jLabel21, jLabel22, jLabel25, jLabel26, jLabel27, jLabel29, jLabel3, jLabel30, jLabel31, jLabel32, jLabel33, jLabel34, jLabel35, jLabel4, jLabel5, lblEmail, lblGaDen, lblGaDi, lblGioDuKien, lblGioKhoiHanh, lblKMchoHoaDon, lblMaChuyen, lblNgayDuKien, lblNgayKhoiHanh, lblNgayLapHD, lblNguoiThanhToan, lblNoiDungKhuyenMai, lblPhuongThucThanhToan, lblSoDienThoai, lblSoHieuTau, lblSoTienPhaiThanhToan, lblTenHanhKhach, lblTenNguoiLap, lblTieuDeHanhKhach, lblTieuDeMaHoaDon, lblTongTien;
+    private JPanel jPanel1, jPanel2, jPanel3, jPanel4;
+    private JScrollPane jScrollPane1;
+    // End of variables declaration
+
+    private String imagePath_Male;
+    private String imagePath_Female;
+    private ImageIcon resizedMaleIcon;
+    private ImageIcon resizedFemaleIcon;
+
     public PopUpChiTietHoaDon(String maHoaDon) {
         initComponents();
         lblTieuDeMaHoaDon.setText(maHoaDon);
@@ -50,31 +60,36 @@ public class PopUpChiTietHoaDon extends JPanel {
         String imagePath_Train = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/train.png";
         String imagePath_Passenger = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/hanhkhach.png";
         String imagePath_Telephone = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/telephone.png";
-        String imagePath_Email = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/email.png";
         String imagePath_Passengers = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/nhieuhanhkhach.png";
         String imagePath_Transaction = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/payment-success.png";
         String imagePath_PaymentMethod = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/payment-method.png";
         String imagePath_Calendar = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/schedule.png";
+         imagePath_Male = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/male-gender.png";
+         imagePath_Female = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/female-gender.png";
+         String imagePath_Gender = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/gender.png";
 
         // 3. Gọi hàm resize
         ImageIcon resizedTrainIcon = resizeIcon(imagePath_Train, 28, 28);
         ImageIcon resizedPassengerIcon = resizeIcon(imagePath_Passenger,20, 20 );
         ImageIcon resizedTelephoneIcon = resizeIcon(imagePath_Telephone,20, 20 );
-        ImageIcon resizedEmailIcon = resizeIcon(imagePath_Email,20, 20 );
         ImageIcon resizedPassengersIcon = resizeIcon(imagePath_Passengers,25, 25 );
         ImageIcon resizedTransactionIcon = resizeIcon(imagePath_Transaction,30, 30 );
         ImageIcon resizedPaymentMethodIcon = resizeIcon(imagePath_PaymentMethod,20, 20 );
         ImageIcon resizedCalendarIcon = resizeIcon(imagePath_Calendar, 20, 20);
+        ImageIcon resizedGenderIcon = resizeIcon(imagePath_Gender,20, 20 );
+        resizedMaleIcon = resizeIcon(imagePath_Male, 20, 20);
+        resizedFemaleIcon = resizeIcon(imagePath_Female, 20, 20);
+
 
         // 4. Đặt lại icon
         lblTieuDeMaHoaDon.setIcon(resizedTrainIcon);
         jLabel25.setIcon(resizedPassengerIcon);
         lblSoDienThoai.setIcon(resizedTelephoneIcon);
-        lblEmail.setIcon(resizedEmailIcon);
         jLabel18.setIcon(resizedPassengersIcon);
         lblSoTienPhaiThanhToan.setIcon(resizedTransactionIcon); // Đã sửa từ lblTongTien
         jLabel27.setIcon(resizedPaymentMethodIcon);
         lblNgayLapHD.setIcon(resizedCalendarIcon); // Đã sửa từ lblNgayThanhToan
+        lblEmail.setIcon(resizedGenderIcon);
 
         // Custom nút
         btnInHoaDon.setOpaque(true);
@@ -102,11 +117,11 @@ public class PopUpChiTietHoaDon extends JPanel {
         columnModel.getColumn(6).setCellRenderer(centerDataRenderer); // Số lượng
 
         columnModel.getColumn(1).setPreferredWidth(155); // Họ và tên
-        columnModel.getColumn(3).setPreferredWidth(150); // Mã định danh/CCCD
+        columnModel.getColumn(3).setPreferredWidth(140); // Mã định danh/CCCD
         columnModel.getColumn(0).setPreferredWidth(40);  // STT
         columnModel.getColumn(0).setMaxWidth(50);
-        columnModel.getColumn(4).setPreferredWidth(80); // Loại vé
-        columnModel.getColumn(5).setPreferredWidth(70); // Số lượng
+        columnModel.getColumn(4).setPreferredWidth(110); // Loại vé
+        columnModel.getColumn(5).setPreferredWidth(60); // Số lượng
         columnModel.getColumn(6).setPreferredWidth(110); // Đơn giá
         // columnModel.getColumn(6).setPreferredWidth(70); // Thành tiền (đã có ở trên, dòng này dư)
 
@@ -727,15 +742,6 @@ public class PopUpChiTietHoaDon extends JPanel {
         // TODO add your handling code here:
     }
 
-    // Variables declaration - do not modify
-    // Đã sửa javax.swing.* -> Simple names và gom nhóm
-    private JTable BangChiTietHanhKhach;
-    private JButton btnDongChiTietHoaDon, btnInHoaDon, btnSoLuongVe;
-    private JLabel jLabel10, jLabel12, jLabel15, jLabel18, jLabel19, jLabel20, jLabel21, jLabel22, jLabel25, jLabel26, jLabel27, jLabel29, jLabel3, jLabel30, jLabel31, jLabel32, jLabel33, jLabel34, jLabel35, jLabel4, jLabel5, lblEmail, lblGaDen, lblGaDi, lblGioDuKien, lblGioKhoiHanh, lblKMchoHoaDon, lblMaChuyen, lblNgayDuKien, lblNgayKhoiHanh, lblNgayLapHD, lblNguoiThanhToan, lblNoiDungKhuyenMai, lblPhuongThucThanhToan, lblSoDienThoai, lblSoHieuTau, lblSoTienPhaiThanhToan, lblTenHanhKhach, lblTenNguoiLap, lblTieuDeHanhKhach, lblTieuDeMaHoaDon, lblTongTien;
-    private JPanel jPanel1, jPanel2, jPanel3, jPanel4;
-    private JScrollPane jScrollPane1;
-    // End of variables declaration
-
 
 
     public void truyenDuLieuChiTietHoaDon(String maHD) {
@@ -855,6 +861,13 @@ public class PopUpChiTietHoaDon extends JPanel {
         lblTenHanhKhach.setText(khachHangDat.getHoTen());
         lblSoDienThoai.setText(khachHangDat.getSdt());
         lblEmail.setText(khachHangDat.getGioiTinh());
+
+
+        if (khachHangDat.getGioiTinh().equals("Nam")){
+            lblEmail.setIcon(resizedMaleIcon);
+        }
+        else {lblEmail.setIcon(resizedFemaleIcon);}
+        lblEmail.repaint();
 
         //4 Thông tin giao dịch
         lblNgayLapHD.setText(hoaDon.getNgayLap().format(DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm")));
