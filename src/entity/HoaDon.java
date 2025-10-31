@@ -12,6 +12,8 @@ public class HoaDon {
     private LocalDateTime ngayLap; // datetime trong SQL
     private String phuongThuc;
     private String loaiHoaDon;
+    private double tongCong;
+    private String maHoaDon_Goc;
 
     // Constructor đầy đủ
     public HoaDon(String maHD, String maKhachHang, String maNVLap, String maKM,
@@ -25,6 +27,19 @@ public class HoaDon {
         this.ngayLap = ngayLap;
         this.phuongThuc = phuongThuc;
         this.loaiHoaDon = loaiHoaDon;
+    }
+
+    public HoaDon(String maHoaDon, LocalDateTime ngayLap, String maKhachHang, String nhanVienLap, String maKM, double tongCong, double tongTien, String phuongThucThanhToan, String maHoaDon_Goc, String loaiHoaDon) {
+        this.setMaHD(maHoaDon);
+        this.setNgayLap(ngayLap);
+        this.setMaKhachHang(maKhachHang);
+        this.setMaNVLap(nhanVienLap);
+        this.setMaKM(maKM);
+        this.setTongCong(tongCong);
+        this.setTongTien(tongTien);
+        this.setPhuongThuc(phuongThucThanhToan);
+        this.setMaHoaDon_Goc(maHoaDon_Goc); // Đã thêm
+        this.setLoaiHoaDon(loaiHoaDon);     // Đã thêm
     }
 
     // Constructor mặc định
@@ -48,6 +63,11 @@ public class HoaDon {
     public void setPhuongThuc(String phuongThuc) { this.phuongThuc = phuongThuc; }
     public String getLoaiHoaDon() { return loaiHoaDon; }
     public void setLoaiHoaDon(String loaiHoaDon) { this.loaiHoaDon = loaiHoaDon; }
+    public double getTongCong() { return tongCong; }
+    public void setTongCong(double tongCong) { this.tongCong = tongCong; }
+    public String getMaHoaDon_Goc() { return maHoaDon_Goc; }
+    public void setMaHoaDon_Goc(String maHoaDon_Goc) { this.maHoaDon_Goc = maHoaDon_Goc; }
+
 
     @Override
     public boolean equals(Object o) {
