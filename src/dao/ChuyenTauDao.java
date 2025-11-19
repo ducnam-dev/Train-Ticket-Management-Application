@@ -22,7 +22,60 @@ public class ChuyenTauDao {
         danhSachChuyenTau = new ArrayList<ChuyenTau>();
     }
 
-    public List<ChuyenTau> getAllChuyenTau() throws SQLException {
+//    Ga bằng mã GA (gaXP, gaKT), ngày đi
+//     Sửa lỗi: Đảm bảo Connection được quản lý trong try-with-resources
+
+//    public List<ChuyenTau> timChuyenTau(String gaXP, String gaKT, String ngayDi) {
+//        List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
+//
+//        // Lưu ý: Đảm bảo format ngàyDi là yyyy-MM-dd nếu CSDL yêu cầu
+//        String sql = "SELECT * FROM ChuyenTau WHERE GaDi = ? AND GaDen = ? AND NgayKhoiHanh = ?";
+//
+//        // SỬ DỤNG TRY-WITH-RESOURCES CHO CONNECTION
+//        try (Connection con = ConnectDB.getConnection();
+//             PreparedStatement pstmt = con.prepareStatement(sql)) {
+//
+//            // 1. Set tham số
+//            pstmt.setString(1, gaXP);
+//            pstmt.setString(2, gaKT);
+//            pstmt.setString(3, ngayDi);
+//
+//            // 2. Thực thi truy vấn và xử lý ResultSet
+//            try (ResultSet rs = pstmt.executeQuery()) {
+//                while (rs.next()) {
+//                    // ... (Các bước ánh xạ dữ liệu)
+//                    String maChuyenTau = rs.getString("MaChuyenTau");
+//                    String maTau = rs.getString("MaTau");
+//                    String maNV = rs.getString("MaNV");
+//                    String maGaDiDb = rs.getString("GaDi");
+//                    String maGaDenDb = rs.getString("GaDen");
+//                    LocalDate ngayKH = rs.getDate("NgayKhoiHanh").toLocalDate();
+//                    LocalTime gioKH = rs.getTime("GioKhoiHanh").toLocalTime();
+//                    LocalDate ngayDen = rs.getDate("NgayDenDuKien").toLocalDate();
+//                    LocalTime gioDen = rs.getTime("GioDenDuKien").toLocalTime();
+//                    String trangThai = rs.getString("TrangThai");
+//
+//                    TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
+//
+//                    // GỌI DAO PHỤ TRỢ MỞ KẾT NỐI MỚI!
+//                    Ga gaDi = GaDao.layGaBangMa(maGaDiDb);
+//                    Ga gaDen = GaDao.layGaBangMa(maGaDenDb);
+//                    Tau tau = TauDAO.getTauById(maTau);
+//                    NhanVien nv = NhanVienDao.getNhanVienById(maNV);
+//
+//                    ChuyenTau ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
+//                    System.out.println("Chuyến tàu tìm thấy:" + ct.toString());
+//                    danhSachChuyenTau.add(ct);
+//                }
+//            }
+//
+//        } catch (SQLException e) {
+//            System.err.println("Lỗi khi tìm chuyến tàu: ");
+//            e.printStackTrace();
+//        }
+//        return danhSachChuyenTau;
+//    }
+public List<ChuyenTau> getAllChuyenTau() throws SQLException {
     List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
     Connection conn = null;
     PreparedStatement pstmt = null;
@@ -327,7 +380,57 @@ public class ChuyenTauDao {
         }
         return danhSachChuyenTau;
     }
+    public static ChuyenTau getChuyenTauById(String maChuyenTau) {
+        ChuyenTau ct = null;
+        String sql = "SELECT * FROM ChuyenTau WHERE MaChuyenTau = ?";
 
+        Connection con = null; // KHAI BÁO BÊN NGOÀI
+        try {
+            con = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+                pstmt.setString(1, maChuyenTau);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        // 1. Lấy các mã khóa ngoại
+                        String maTau = rs.getString("MaTau");
+                        String maNV = rs.getString("MaNV").trim();
+                        String maGaDiDb = rs.getString("GaDi");
+                        String maGaDenDb = rs.getString("GaDen");
+                        String trangThai = rs.getString("TrangThai");
+
+                        TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
+
+                        // 2. Tra cứu Entity phụ thuộc (Đã sửa lỗi đóng kết nối)
+                        Ga gaDi = GaDao.layGaBangMa(maGaDiDb);
+                        Ga gaDen = GaDao.layGaBangMa(maGaDenDb);
+                        Tau tau = TauDAO.getTauById(maTau);
+                        NhanVien nv = NhanVienDao.getNhanVienById(maNV);
+
+                        // 3. Khởi tạo đối tượng ChuyenTau
+                        ct = new ChuyenTau(
+                                maChuyenTau,
+                                maTau,
+                                rs.getDate("NgayKhoiHanh").toLocalDate(),
+                                rs.getTime("GioKhoiHanh").toLocalTime(),
+                                gaDi,
+                                gaDen,
+                                tau,
+                                rs.getDate("NgayDenDuKien").toLocalDate(),
+                                rs.getTime("GioDenDuKien").toLocalTime(),
+                                nv,
+                                tt
+                        );
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tra cứu Chuyến tàu theo ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return ct;
+    }
     public boolean chuyenTrangThaiChuyenTau(String maChuyenTau, String trangThai) {
         String sql = "UPDATE ChuyenTau SET TrangThai = ? WHERE MaChuyenTau = ?";
         try (Connection con = ConnectDB.getInstance().getConnection();
@@ -354,6 +457,7 @@ public class ChuyenTauDao {
         }
         return false;
     }
+
 //    layChuyenTauBangMa
     public static ChuyenTau layChuyenTauBangMa(String maChuyenTau) {
         ChuyenTau ct = null;
@@ -395,5 +499,160 @@ public class ChuyenTauDao {
         }
         return ct;
     }
+
+    public static ChuyenTau timKiemChuyenTauTheoMaHoaDon(String maHoaDon) {
+        String sql = """
+                SELECT DISTINCT J.GaDi, J.GaDen, J.NgayKhoiHanh, J.GioKhoiHanh
+                FROM HoaDon HD 
+                JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
+                JOIN Ve V ON V.MaVe = CT.MaVe
+                JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
+                WHERE HD.MaHD = ?
+                """;
+
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, maHoaDon);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                ChuyenTau ct = new ChuyenTau();
+                ct.gaDi = new Ga(null, rs.getString("GaDi"), null);
+                ct.gaDen = new Ga(null, rs.getString("GaDen"), null);
+                ct.ngayKhoiHanh = rs.getObject("NgayKhoiHanh", LocalDate.class);
+                ct.gioKhoiHanh = rs.getObject("GioKhoiHanh", LocalTime.class);
+                return ct;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // TIMKIEM THEO SODIENTHOAI
+    public static ArrayList<ChuyenTau> timKiemChuyenTauTheoSoDienThoai(String giaTriTimKiem) {
+        ArrayList<ChuyenTau> danhSach = new ArrayList<>();
+        String sql = """
+                
+                                        
+                                        SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen, J.GaDi, J.GaDen , J.NgayKhoiHanh, J.GioKhoiHanh
+                                        FROM HoaDon HD JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
+                                        JOIN Ve V ON V.MaVe = CT.MaVe
+                                        JOIN KhachHang KH ON KH.MaKhachHang = HD.MaKhachHang
+                                        JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
+                                        WHERE SoDienThoai = ?
+                """;
+
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, giaTriTimKiem);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                ChuyenTau ct = new ChuyenTau();
+                ct.gaDi = new Ga(null, rs.getString("GaDi"), null);
+                ct.gaDen = new Ga(null, rs.getString("GaDen"), null);
+                ct.ngayKhoiHanh = rs.getObject("NgayKhoiHanh", LocalDate.class);
+                ct.gioKhoiHanh = rs.getObject("GioKhoiHanh", LocalTime.class);
+                danhSach.add(ct);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return danhSach;
+    }
+
+    public static ArrayList<ChuyenTau> timChuyenTauTheoCCCD(String giaTriTimKiem) {
+        ArrayList<ChuyenTau> danhSach = new ArrayList<>();
+        String sql = """
+                                SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen,KH.CCCD, J.GaDi, J.GaDen , J.NgayKhoiHanh, J.GioKhoiHanh
+                                 FROM HoaDon HD JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
+                                 JOIN Ve V ON V.MaVe = CT.MaVe
+                                 JOIN KhachHang KH ON KH.MaKhachHang = HD.MaKhachHang
+                                 JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
+                                 WHERE KH.CCCD = ?
+        """;
+
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, giaTriTimKiem);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                ChuyenTau ct = new ChuyenTau();
+                ct.gaDi = new Ga(null, rs.getString("GaDi"), null);
+                ct.gaDen = new Ga(null, rs.getString("GaDen"), null);
+                ct.ngayKhoiHanh = rs.getObject("NgayKhoiHanh", LocalDate.class);
+                ct.gioKhoiHanh = rs.getObject("GioKhoiHanh", LocalTime.class);
+                danhSach.add(ct);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return danhSach;
+    }
+
+    // Lọc Chuyến Tàu theo SĐT Khách Hàng + Tháng/Năm hóa đơn
+    public static ArrayList<ChuyenTau> timChuyenTauTheoSDTLocThangNam(String sdt, int thang, int nam) {
+        ArrayList<ChuyenTau> danhSach = new ArrayList<>();
+        String sql = """
+            SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen, J.GaDi, J.GaDen , J.NgayKhoiHanh, J.GioKhoiHanh
+                                        FROM HoaDon HD JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
+                                        JOIN Ve V ON V.MaVe = CT.MaVe
+                                        JOIN KhachHang KH ON KH.MaKhachHang = HD.MaKhachHang
+                                        JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
+                                        WHERE KH.SoDienThoai = ? AND MONTH(HD.NgayLap) = ? AND YEAR(HD.NgayLap) = ?
+            """;
+        try (Connection conn = ConnectDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, sdt);
+            pstmt.setInt(2, thang);
+            pstmt.setInt(3, nam);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                ChuyenTau ct = new ChuyenTau(); // Giả sử có setters hoặc constructor phù hợp
+                ct.gaDi = new Ga(null, rs.getString("GaDi"), null);
+                ct.gaDen = new Ga(null, rs.getString("GaDen"), null);
+                ct.ngayKhoiHanh = rs.getObject("NgayKhoiHanh", LocalDate.class);
+                ct.gioKhoiHanh = rs.getObject("GioKhoiHanh", LocalTime.class);
+                // Set các thuộc tính khác nếu cần
+                danhSach.add(ct);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return danhSach;
+    }
+
+    // Lọc Chuyến Tàu theo CCCD Khách Hàng + Tháng/Năm hóa đơn
+    public static ArrayList<ChuyenTau> timChuyenTauTheoCCCDLocThangNam(String cccd, int thang, int nam) {
+        ArrayList<ChuyenTau> danhSach = new ArrayList<>();
+        String sql = """
+             SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen, J.GaDi, J.GaDen , J.NgayKhoiHanh, J.GioKhoiHanh
+                                        FROM HoaDon HD JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
+                                        JOIN Ve V ON V.MaVe = CT.MaVe
+                                        JOIN KhachHang KH ON KH.MaKhachHang = HD.MaKhachHang
+                                        JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
+                                        WHERE KH.CCCD = ? AND MONTH(HD.NgayLap) = ? AND YEAR(HD.NgayLap) = ?
+             """;
+        try (Connection conn = ConnectDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, cccd);
+            pstmt.setInt(2, thang);
+            pstmt.setInt(3, nam);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                ChuyenTau ct = new ChuyenTau();
+                ct.gaDi = new Ga(null, rs.getString("GaDi"), null);
+                ct.gaDen = new Ga(null, rs.getString("GaDen"), null);
+                ct.ngayKhoiHanh = rs.getObject("NgayKhoiHanh", LocalDate.class);
+                ct.gioKhoiHanh = rs.getObject("GioKhoiHanh", LocalTime.class);
+                danhSach.add(ct);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return danhSach;
+    }
+
+
 
 }

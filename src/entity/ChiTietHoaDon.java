@@ -5,7 +5,8 @@ import java.util.Objects;
 // Lớp này ánh xạ bảng ChiTietHoaDon (MaHD, MaVe là khóa chính tổ hợp)
 public class ChiTietHoaDon {
     private String maHD; // Mã hóa đơn (Khóa chính tổ hợp)
-    private String maVe; // Mã vé (Khóa chính tổ hợp)
+    private String maVe;
+    private double donGia;// Mã vé (Khóa chính tổ hợp)
     private int soLuong;
 
     public ChiTietHoaDon(String maHD, String maVe, int soLuong) {
@@ -13,6 +14,14 @@ public class ChiTietHoaDon {
         this.maVe = maVe;
         this.soLuong = soLuong;
     }
+
+    public ChiTietHoaDon(String maHD, String maVe, int soLuong, double donGia) {
+        this.maHD = maHD;
+        this.maVe = maVe;
+        this.soLuong = soLuong;
+        this.donGia = donGia;
+    }
+
 
     public ChiTietHoaDon() {
     }
@@ -41,6 +50,10 @@ public class ChiTietHoaDon {
     public void setSoLuong(int soLuong) {
         this.soLuong = soLuong;
     }
+
+    public double getDonGia() {return this.donGia;}
+
+    public void setDonGia(double donGia) {this.donGia = donGia;}
 
     // Quan trọng khi sử dụng khóa tổ hợp
     @Override
