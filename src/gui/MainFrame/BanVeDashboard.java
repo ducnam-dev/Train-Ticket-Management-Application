@@ -81,7 +81,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         // --- Phần các mục menu ---
 
         // [1. Trang chủ]
-        btnTrangChu = createNavItem("Trang chủ", "\uD83C\uDFE0", "trangChuNV"); // 🏠
+        btnTrangChu = createNavItem("Dashboard", "\uD83C\uDFE0", "trangChuNV"); // 🏠
         panel.add(btnTrangChu);
 
         // [2. Mở ca]

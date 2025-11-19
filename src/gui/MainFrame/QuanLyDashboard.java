@@ -96,7 +96,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         // --- Phần các mục menu ---
 
         // [1. Trang chủ]
-        btnTrangChu = createNavItem("Trang chủ", "\uD83C\uDFE0"); // 🏠
+        btnTrangChu = createNavItem("Dashboard", "\uD83C\uDFE0"); // 🏠
         menuButtons.put("trangChu", btnTrangChu);
         panel.add(btnTrangChu);
 

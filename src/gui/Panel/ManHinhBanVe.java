@@ -215,7 +215,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         leftContainer.add(leftScrollPane, BorderLayout.CENTER);
 
         JPanel rightPanel = createKhuVucThongTinKhach();
-//        rightPanel.add(createKhuVucTongTien(), BorderLayout.SOUTH);
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftContainer, rightPanel);
         split.setResizeWeight(0.75);
         split.setOneTouchExpandable(true);
