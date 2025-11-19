@@ -75,6 +75,85 @@ public class VeDAO {
         return ve;
     }
 
+    public List<Ve> timVeTheoKhachHang(String hoTen, String sdt, String cccd, String maVe) {
+        List<Ve> danhSachVe = new ArrayList<>();
+
+        // Xây dựng câu SQL động dựa trên tham số
+        StringBuilder sql = new StringBuilder(
+                "SELECT V.MaVe, V.GiaVe, V.TrangThai, V.MaKhachHang, V.MaChuyenTau, V.MaChoDat " +
+                        "FROM Ve V " +
+                        "JOIN KhachHang KH ON V.MaKhachHang = KH.MaKhachHang " +
+                        "WHERE 1=1"
+        );
+
+        if (maVe != null && !maVe.isEmpty()) {
+            sql.append(" AND V.MaVe = ?");
+        }
+        if (hoTen != null && !hoTen.isEmpty()) {
+            sql.append(" AND KH.HoTen LIKE ?");
+        }
+        if (sdt != null && !sdt.isEmpty()) {
+            sql.append(" AND KH.SoDienThoai LIKE ?");
+        }
+        if (cccd != null && !cccd.isEmpty()) {
+            sql.append(" AND KH.CCCD LIKE ?");
+        }
+
+        Connection con = null;
+        try {
+            con = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement(sql.toString())) {
+
+                int paramIndex = 1;
+                if (maVe != null && !maVe.isEmpty()) {
+                    pstmt.setString(paramIndex++, maVe);
+                }
+                if (hoTen != null && !hoTen.isEmpty()) {
+                    pstmt.setString(paramIndex++, "%" + hoTen + "%");
+                }
+                if (sdt != null && !sdt.isEmpty()) {
+                    pstmt.setString(paramIndex++, "%" + sdt + "%");
+                }
+                if (cccd != null && !cccd.isEmpty()) {
+                    pstmt.setString(paramIndex++, "%" + cccd + "%");
+                }
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        Ve ve = new Ve();
+
+                        String maKHDb = rs.getString("MaKhachHang");
+                        String maCTDb = rs.getString("MaChuyenTau");
+                        String maChoDatDb = rs.getString("MaChoDat");
+
+                        ve.setId(rs.getString("MaVe"));
+                        ve.setGia(rs.getDouble("GiaVe"));
+                        ve.setTrangThai(rs.getString("TrangThai")); // Lấy trạng thái thực tế
+
+                        // GỌI DAO PHỤ TRỢ (Đã sửa lỗi đóng kết nối)
+                        KhachHang kh = (maKHDb != null) ? KhachHangDAO.getKhachHangById(maKHDb) : null;
+                        ChuyenTau ct = (maCTDb != null) ? ChuyenTauDao.layChuyenTauBangMa(maCTDb) : null;
+                        ChoDat cd = (maChoDatDb != null) ? ChoDatDAO.getChoDatById(maChoDatDb) : null;
+
+                        // Gán Entity chi tiết vào Ve
+                        ve.setKhachHangChiTiet(kh);
+                        ve.setChuyenTauChiTiet(ct);
+                        ve.setChoDatChiTiet(cd);
+
+                        if (kh != null) {
+                            ve.setKhachHang(kh.getHoTen());
+                        }
+
+                        danhSachVe.add(ve);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm vé theo Khách hàng: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return danhSachVe;
+    }
 
     /**
      * Triển khai: Cập nhật trạng thái vé thành "Đã hủy" (Trả vé).
@@ -95,17 +174,11 @@ public class VeDAO {
         }
     }
 
-    //Tren là của Nam
+    //  Tren là của Nam
 
     //  PHẦN CỦA DUY BÊN DƯỚI
 
-    private static final String MA_NV_LAP_MOCK = "NVBV001";
     private static final String DEFAULT_SO_HIEU_CA = "01";
-
-    // =================================================================================
-    // CÁC HÀM TẠO MÃ TỰ ĐỘNG
-    // =================================================================================
-
 
     /**
      * Lấy số hiệu ca làm việc hiện tại (Mặc định là "01").
@@ -174,96 +247,6 @@ public class VeDAO {
         return "VE" + soHieuCa + ngayStr + soThuTuStr;
     }
 
-    public List<Ve> timVeTheoKhachHang(String hoTen, String sdt, String cccd, String maVe) {
-        List<Ve> danhSachVe = new ArrayList<>();
-
-        // Xây dựng câu SQL động dựa trên tham số
-        StringBuilder sql = new StringBuilder(
-                "SELECT V.MaVe, V.GiaVe, V.TrangThai, V.MaKhachHang, V.MaChuyenTau, V.MaChoDat " +
-                        "FROM Ve V " +
-                        "JOIN KhachHang KH ON V.MaKhachHang = KH.MaKhachHang " +
-                        "WHERE 1=1"
-        );
-
-        if (maVe != null && !maVe.isEmpty()) {
-            sql.append(" AND V.MaVe = ?");
-        }
-        if (hoTen != null && !hoTen.isEmpty()) {
-            sql.append(" AND KH.HoTen LIKE ?");
-        }
-        if (sdt != null && !sdt.isEmpty()) {
-            sql.append(" AND KH.SoDienThoai LIKE ?");
-        }
-        if (cccd != null && !cccd.isEmpty()) {
-            sql.append(" AND KH.CCCD LIKE ?");
-        }
-
-        Connection con = null;
-        try {
-            con = ConnectDB.getConnection();
-            try (PreparedStatement pstmt = con.prepareStatement(sql.toString())) {
-
-                int paramIndex = 1;
-                if (maVe != null && !maVe.isEmpty()) {
-                    pstmt.setString(paramIndex++, maVe);
-                }
-                if (hoTen != null && !hoTen.isEmpty()) {
-                    pstmt.setString(paramIndex++, "%" + hoTen + "%");
-                }
-                if (sdt != null && !sdt.isEmpty()) {
-                    pstmt.setString(paramIndex++, "%" + sdt + "%");
-                }
-                if (cccd != null && !cccd.isEmpty()) {
-                    pstmt.setString(paramIndex++, "%" + cccd + "%");
-                }
-
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    while (rs.next()) {
-                        Ve ve = new Ve();
-
-                        String maKHDb = rs.getString("MaKhachHang");
-                        String maCTDb = rs.getString("MaChuyenTau");
-                        String maChoDatDb = rs.getString("MaChoDat");
-
-                        ve.setId(rs.getString("MaVe"));
-                        ve.setGia(rs.getDouble("GiaVe"));
-                        ve.setTrangThai(rs.getString("TrangThai")); // Lấy trạng thái thực tế
-
-                        // GỌI DAO PHỤ TRỢ (Đã sửa lỗi đóng kết nối)
-                        KhachHang kh = (maKHDb != null) ? KhachHangDAO.getKhachHangById(maKHDb) : null;
-                        ChuyenTau ct = (maCTDb != null) ? ChuyenTauDao.getChuyenTauById(maCTDb) : null;
-                        ChoDat cd = (maChoDatDb != null) ? ChoDatDAO.getChoDatById(maChoDatDb) : null;
-
-                        // Gán Entity chi tiết vào Ve
-                        ve.setKhachHangChiTiet(kh);
-                        ve.setChuyenTauChiTiet(ct);
-                        ve.setChoDatChiTiet(cd);
-
-                        if (kh != null) {
-                            ve.setKhachHang(kh.getHoTen());
-                        }
-
-                        danhSachVe.add(ve);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi tìm vé theo Khách hàng: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return danhSachVe;
-    }
-
-    // =================================================================================
-    // NGHIỆP VỤ BÁN VÉ (TRANSACTION)
-    // =================================================================================
-
-
-
-
-    // =================================================================================
-    // CHỨC NĂNG BÁN VÉ (TRANSACTION)
-    // =================================================================================
 
     /**
      * Thực hiện toàn bộ quy trình bán vé.
