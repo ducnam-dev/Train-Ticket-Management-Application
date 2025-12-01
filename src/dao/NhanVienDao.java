@@ -21,6 +21,32 @@ public class NhanVienDao {
     // 1. GET NHÂN VIÊN BY ID
     // =================================================================================
 
+    /**
+     * Truy vấn CSDL để lấy thông tin NhanVien bằng Mã NV.
+     * @param maNV Mã nhân viên cần truy vấn.
+     * @return Đối tượng NhanVien nếu tìm thấy, ngược lại trả về null.
+     */
+    public static NhanVien getNhanVienByMaNV(String maNV) {
+        NhanVien nv = null;
+        String sql = "SELECT * FROM NhanVien WHERE MaNV = ?";
+
+        try (
+                Connection connection = ConnectDB.getConnection(); // Giả định ConnectDB có phương thức getConnection()
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        ) {
+            preparedStatement.setString(1, maNV);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    String tenNV = rs.getString("HoTen");
+                    nv = new NhanVien(maNV, tenNV);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi truy vấn thông tin nhân viên (MaNV: " + maNV + "): " + e.getMessage());
+        }
+        return nv;
+    }
+
     public static NhanVien getNhanVienById(String maNV) throws SQLException {
         NhanVien nv = null;
         String sql = "SELECT * FROM NhanVien WHERE MaNV = ?";

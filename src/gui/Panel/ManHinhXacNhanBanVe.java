@@ -1182,7 +1182,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
             BanVeDashboard dashboard = (BanVeDashboard) w;
 
             // 1. Lấy Panel ManHinhBanVe (Giả sử tên card là "manHinhBanVe")
-            Component componentBanVe = dashboard.getCardByName("banVeMoi");
+            Component componentBanVe = dashboard.layCardTheoTen("banVeMoi");
 
             // 2. Ép kiểu và gọi resetAllData()
             // FIX: Rút gọn điều kiện kiểm tra (Lỗi thường là do componentBanVe là null hoặc sai type)
@@ -1298,7 +1298,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
             if ("trangChu".equals(cardName)) {
                 // Cần tạo lại Panel Trang chủ nếu nó không phải là static
-                dashboard.addOrUpdateCard(new ManHinhTrangChuNVBanVe(), "trangChu");
+                dashboard.themHoacCapNhatCard(new ManHinhTrangChuNVBanVe(), "trangChu");
 
                 cardName = "trangChuNV";
             }else if ("manHinhBanVe".equals(cardName)) {
@@ -1306,7 +1306,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 cardName = "banVeMoi";
             }
 
-            dashboard.switchToCard(cardName);
+            dashboard.chuyenManHinh(cardName);
 
         } else {
             JOptionPane.showMessageDialog(this,
@@ -1335,17 +1335,119 @@ public class ManHinhXacNhanBanVe extends JPanel {
         capNhatTongVaGiaoDien(); // Tính toán lại tổng tiền (sẽ là 0)
     }
 
+    // BỔ SUNG TRONG ManHinhXacNhanBanVe.java (Ngoại trừ phương thức, ví dụ: ở dưới cùng)
+
+    // Định nghĩa Class/Record giả lập (phải khớp với cấu trúc bạn đang dùng)
+    private static final class ChiTietKhachMock { // Dùng Class/final Class nếu Record bị giới hạn
+        private final ChoDat choDat;
+        private final String maLoaiVe;
+        private final String hoTen;
+        private final String cccd;
+        private final String sdt;
+        private final int tuoi;
+
+        // Constructor đầy đủ
+        public ChiTietKhachMock(ChoDat choDat, String maLoaiVe, String hoTen, String cccd, String sdt, int tuoi) {
+            this.choDat = choDat;
+            this.maLoaiVe = maLoaiVe;
+            this.hoTen = hoTen;
+            this.cccd = cccd;
+            this.sdt = sdt;
+            this.tuoi = tuoi;
+        }
+        // Cần thêm getters nếu logic UI dùng chúng (choDat(), maLoaiVe(), ...)
+        public ChoDat choDat() { return choDat; }
+        public String maLoaiVe() { return maLoaiVe; }
+        public String hoTen() { return hoTen; }
+        public String cccd() { return cccd; }
+        public String sdt() { return sdt; }
+        public int tuoi() { return tuoi; }
+    }
+
+// ...
+// BỔ SUNG TRONG ManHinhXacNhanBanVe.java
+private static Object createMockChiTietKhach(
+        ChoDat choDat,
+        String maLoaiVe,
+        String hoTen,
+        String cccd,
+        String sdt,
+        int tuoi) {
+
+    // SỬ DỤNG CLASS GIẢ LẬP ĐÃ TẠO Ở TRÊN (ChiTietKhachMock)
+    return new ChiTietKhachMock(choDat, maLoaiVe, hoTen, cccd, sdt, tuoi);
+}
+
     // main test neu can
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Panel Xác nhận Bán vé (Kiểm tra)");
+            // --- 1. Tạo dữ liệu giả cho ChoDat (Ghế đã chọn) ---
+            Map<String, ChoDat> mockGheDaChon = new LinkedHashMap<>();
+
+            ChoDat cho1 = new ChoDat("CD001", "T01-1", "A1", "GL", 1);
+            ChoDat cho2 = new ChoDat("CD002", "T01-1", "A2", "GL", 1);
+
+            mockGheDaChon.put("CD001", cho1);
+            mockGheDaChon.put("CD002", cho2);
+
+            // --- 2. Tạo dữ liệu giả cho ChiTietKhach ---
+            // ChiTietKhach cần phải là một Record được định nghĩa bên ngoài
+            // Tạm sử dụng Class tương đương nếu Record không truy cập được
+            // NOTE: Giả sử ChiTietKhach là Class hoặc Record được định nghĩa như sau:
+        /* class ChiTietKhach {
+            ChoDat choDat, String maLoaiVe, String hoTen, String cccd, String sdt, int tuoi
+        }
+        */
+
+            // Dùng Reflection hoặc tạo lớp giả nếu ChiTietKhach là private Record
+            // Trong trường hợp này, tôi giả định bạn có thể truy cập được Record
+
+            // Dùng lại định nghĩa Record từ ManHinhBanVe để tạo dữ liệu giả:
+            // (Chú ý: Nếu ChiTietKhach là private record trong ManHinhBanVe, bạn sẽ phải
+            // tạo một bản sao định nghĩa tạm thời trong ManHinhXacNhanBanVe để chạy test)
+            // **KHÔNG THỂ COPY ĐỊNH NGHĨA RECORD TỪ LỚP KHÁC NÊN TÔI SẼ DÙNG NULL CHO CÁC FIELD CÒN LẠI**
+
+            Map<String, Object> mockKhachHang = new LinkedHashMap<>();
+
+            // Giả lập ChiTietKhach cho CD001 (Nếu bạn không có định nghĩa Record, hãy truyền null/0)
+            Object khach1 = createMockChiTietKhach(cho1, "VT01", "Nguyen Van A", "012345678901", "0901234567", 30);
+            Object khach2 = createMockChiTietKhach(cho2, "VT02", "Tran Thi B", "012345678902", "0907654321", 8);
+
+            mockKhachHang.put("CD001", khach1);
+            mockKhachHang.put("CD002", khach2);
+
+            // --- 3. Dữ liệu chuyến tàu và ngày đi ---
+            String maChuyenTau = "CT001";
+            Date ngayDi = new Date(); // Ngày hiện tại
+
+            // --- 4. Dữ liệu giá vé ---
+            Map<String, Long> mockGiaVe = new HashMap<>();
+            mockGiaVe.put("CD001", 500000L); // 500,000 VNĐ
+            mockGiaVe.put("CD002", 250000L); // 250,000 VNĐ
+
+            // --- 5. Khởi tạo màn hình XacNhanBanVe ---
+            JFrame frame = new JFrame("Màn hình Xác nhận Bán vé (Test)");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setLayout(new BorderLayout());
-            frame.add(new ManHinhXacNhanBanVe(), BorderLayout.CENTER);
-            frame.pack();
-            frame.setSize(1200, 850);
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
+
+            try {
+                // CAST VÀO MAP CHUNG VÀ TRUYỀN DỮ LIỆU GIẢ
+                ManHinhXacNhanBanVe confirmPanel = new ManHinhXacNhanBanVe(
+                        mockGheDaChon,
+                        (Map)mockKhachHang, // Ép kiểu giả định
+                        maChuyenTau,
+                        ngayDi,
+                        mockGiaVe
+                );
+
+                frame.add(confirmPanel);
+                frame.pack();
+                frame.setSize(800, 600);
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Lỗi khi khởi tạo ManHinhXacNhanBanVe: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 }

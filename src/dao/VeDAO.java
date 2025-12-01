@@ -332,5 +332,102 @@ public class VeDAO {
     }
 
 
+    public Ve getVeById(String maVe) {
+        Ve ve = null;
+
+        // Truy vấn SQL cơ bản chỉ lấy các khóa ngoại và thông tin trực tiếp của bảng Ve
+        String sql = "SELECT MaVe, GiaVe, TrangThai, MaKhachHang, MaChuyenTau, MaChoDat, MaLoaiVe " +
+                "FROM Ve " +
+                "WHERE MaVe = ?";
+
+        Connection con = null;
+        try {
+            con = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+                // Đảm bảo không truyền giá trị rỗng hoặc null, chỉ ID hợp lệ
+                if (maVe == null || maVe.isEmpty()) {
+                    return null;
+                }
+
+                pstmt.setString(1, maVe);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        ve = new Ve();
+                        ve.setId(rs.getString("MaVe"));
+                        ve.setGia(rs.getDouble("GiaVe"));
+                        ve.setTrangThai(rs.getString("TrangThai"));
+
+//                        ve.setMaLoaiVe(rs.getString("MaLoaiVe"));
+
+                        String maKHDb = rs.getString("MaKhachHang");
+                        String maCTDb = rs.getString("MaChuyenTau");
+                        String maChoDatDb = rs.getString("MaChoDat");
+
+                        // GỌI DAO KHÁC ĐỂ NẠP ĐẦY ĐỦ CÁC THỰC THỂ PHỤ THUỘC
+                        // (Giả định các DAO này đã được viết và trả về Entity đầy đủ)
+                        KhachHang kh = (maKHDb != null) ? KhachHangDAO.getKhachHangById(maKHDb) : null;
+                        ChuyenTau ct = (maCTDb != null) ? ChuyenTauDao.layChuyenTauBangMa(maCTDb) : null;
+                        ChoDat cd = (maChoDatDb != null) ? ChoDatDAO.getChoDatById(maChoDatDb) : null;
+
+                        // Gán Entity chi tiết
+                        ve.setKhachHangChiTiet(kh);
+                        ve.setChuyenTauChiTiet(ct);
+                        ve.setChoDatChiTiet(cd);
+
+                        // Gán các trường tiện ích (Tên khách, số ghế)
+                        if (kh != null) {
+                            ve.setKhachHang(kh.getHoTen()); // Dùng trường HoTen đã nạp từ KhachHangDAO
+                        }
+                        if (cd != null && cd.getSoCho() != null) {
+                            try {
+                                // Logic chuyển đổi số ghế (tương tự như code gốc)
+                                ve.setSoGhe(Integer.parseInt(cd.getSoCho().replaceAll("[^\\d]", "")));
+                            } catch (NumberFormatException e) {
+                                ve.setSoGhe(0);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm chi tiết vé theo ID từ CSDL: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (con != null) {
+                ConnectDB.disconnect(); // Đảm bảo đóng kết nối
+            }
+        }
+        return ve;
+    }
+
+    // Phương thức helper để tạo Ve giả lập, giúp test giao diện ngay lập tức
+    public Ve createMockVe() {
+        // Tạo các đối tượng Entity lồng nhau
+        Ga gaDi = new Ga("SG", "Sài Gòn", "Địa chỉ SG");
+        Ga gaDen = new Ga("BH", "Biên Hòa", "Địa chỉ BH");
+
+        ChuyenTau ct = new ChuyenTau("CT001", "SE8", "12/10/2026", "06:45", "SG", "BH", null, null, null);
+        ct.setGaDi(gaDi); // Thiết lập các đối tượng Ga đã nạp
+        ct.setGaDen(gaDen);
+
+        KhachHang kh = new KhachHang("KH001", "Nguyễn Văn A", "012345678901",12 , "0901234567");
+
+        // Giả sử mã toa là T01-1, ghế là 11
+        ChoDat cd = new ChoDat("CD001", "T01-1", "11", "NM", 1); // Mã loại chỗ đặt NM = Ngồi Mềm
+        cd.setMaCho("Ghế mềm điều hòa"); // Thiết lập thêm mô tả nếu cần
+
+        // Tạo đối tượng Ve chính
+        Ve ve = new Ve("1213", "KH001", "CD001", 1, 300000.0);
+        ve.setTrangThai("DA-BAN");
+        ve.setKhachHangChiTiet(kh);
+        ve.setChuyenTauChiTiet(ct);
+        ve.setChoDatChiTiet(cd);
+
+        return ve;
+    }
+
+
 
 }

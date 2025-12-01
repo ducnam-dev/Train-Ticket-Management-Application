@@ -35,7 +35,52 @@ public class ChuyenTau {
         this.gioDenDuKien = gioDenDuKien;
         this.nhanVien = nhanVien;
         this.thct = thct;
+    }//11 tham số
+    // Dựa trên lỗi, 6 tham số đầu là String, 3 tham số cuối là Object (null)
+    public ChuyenTau(
+            String maChuyenTau,
+            String maTau,
+            String ngayKHString,
+            String gioKHString,
+            String maGaDi,
+            String maGaDen,
+            Object thamSo7, // Giả định là Tau (hoặc null)
+            Object thamSo8, // Giả định là NhanVien (hoặc null)
+            Object thamSo9  // Giả định là TrangThaiChuyenTau (hoặc null)
+    ) {
+        this.maChuyenTau = maChuyenTau;
+        this.maTau = maTau;
+
+        // **PHẢI CHUYỂN ĐỔI CHUỖI SANG LOCALDATE/LOCALTIME**
+        try {
+            // Giả định định dạng ngày là "yyyy-MM-dd" và giờ là "HH:mm" hoặc tương tự
+            // (Đây là logic cần phải khớp với cách dữ liệu được lưu/truyền từ DAO)
+            this.ngayKhoiHanh = LocalDate.parse(ngayKHString);
+            this.gioKhoiHanh = LocalTime.parse(gioKHString);
+        } catch (Exception e) {
+            System.err.println("Lỗi parse ngày/giờ trong constructor ChuyenTau: " + e.getMessage());
+            this.ngayKhoiHanh = null;
+            this.gioKhoiHanh = null;
+        }
+
+        // **GÁN CÁC ĐỐI TƯỢNG PHỤ THUỘC (GA, TAU, NV) BẰNG CÁCH KHỞI TẠO GIẢ HOẶC GÁN NULL**
+        // Thường thì bạn sẽ dùng DAO để nạp đầy đủ (load full) sau khi đối tượng được tạo.
+        this.gaDi = new Ga(maGaDi, null, null); // Tạo Ga giả chỉ với mã
+        this.gaDen = new Ga(maGaDen, null, null);
+
+        // Gán 3 tham số cuối
+        this.tau = (Tau) thamSo7;
+        this.nhanVien = (NhanVien) thamSo8;
+        this.thct = (TrangThaiChuyenTau) thamSo9;
+
+        // Gán null cho các trường chưa được cung cấp
+        this.ngayDenDuKien = null;
+        this.gioDenDuKien = null;
+    } {
+        // ... Logic gán các giá trị cho các thuộc tính tương ứng ...
     }
+
+
 
     public String getMaChuyenTau() {
         return maChuyenTau;
