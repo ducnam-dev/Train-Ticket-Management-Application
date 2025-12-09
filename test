@@ -14,3 +14,14 @@ VE0117102500001
 VE0125102500003
 
 tk: NVBV001
+
+
+Tôi sẽ sử dụng 4 package chính:
+
+controller: Chứa logic xử lý sự kiện và điều phối.
+
+state: Chứa dữ liệu trạng thái và các đối tượng dữ liệu phụ trợ.
+
+view: Chứa code tạo UI và quản lý bố cục.
+
+service: Chứa logic nghiệp vụ thuần túy (tính toán, format, v.v.).

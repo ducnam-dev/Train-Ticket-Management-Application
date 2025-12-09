@@ -1182,17 +1182,14 @@ public class ManHinhXacNhanBanVe extends JPanel {
             BanVeDashboard dashboard = (BanVeDashboard) w;
 
             // 1. Lấy Panel ManHinhBanVe (Giả sử tên card là "manHinhBanVe")
-            Component componentBanVe = dashboard.layCardTheoTen("banVeMoi");
 
             // 2. Ép kiểu và gọi resetAllData()
             // FIX: Rút gọn điều kiện kiểm tra (Lỗi thường là do componentBanVe là null hoặc sai type)
-            if (componentBanVe != null && componentBanVe instanceof ManHinhBanVe) {
-                ManHinhBanVe manHinhBanVe = (ManHinhBanVe) componentBanVe;
-                manHinhBanVe.resetAllData(); // <--- This should now execute
-                System.out.println("Đã gọi resetAllData() cho banVeMoi.");
+            if (dashboard.manHinhBanVeInstance != null) {
+                dashboard.manHinhBanVeInstance.resetAllData();
+                System.out.println("Đã gọi resetAllData() thành công qua tham chiếu trực tiếp.");
             } else {
-                // Debugging the failure point
-                System.err.println("LỖI: Component 'banVeMoi' không tìm thấy hoặc không phải là ManHinhBanVe.");
+                System.err.println("LỖI: manHinhBanVeInstance trong Dashboard là NULL.");
             }
         }
     }

@@ -21,11 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
-/**
- * ManHinhBanVe - Phiên bản đã sắp xếp thành module để quan sát.
- * Bổ sung tính năng tính giá vé per-seat (dựa trên bảng GiaVeCoBanTheoGa,
- * hệ số LoaiChoDat và hệ số LoaiVe). Hiện các DAO mới là stub/mock để bạn triển khai DB.
- */
+
 public class ManHinhBanVe extends JPanel implements MouseListener, ActionListener {
     private static final Color COLOR_BLUE_LIGHT = new Color(52, 152, 219);
     // ====================
@@ -222,19 +218,12 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         split.setResizeWeight(0.70); // Đặt 0.70 để phù hợp với tỷ lệ 7/3
 
-        // [2] SỬA ĐỔI QUAN TRỌNG: Đặt vị trí chia cố định (Ví dụ: 840 pixels cho 70% của 1200px)
-        // Dùng invokeLater để đảm bảo JSplitPane đã được thêm vào container.
         SwingUtilities.invokeLater(() -> {
-            // Sử dụng giá trị tuyệt đối (pixel)
-            // Nếu frame chính là 1200px, 70% là 840px.
-            // Tùy chỉnh 840px nếu bạn muốn màn hình chính của bạn có kích thước khác 1200px.
             final int PIXEL_LOCATION = 840;
 
-            // Chỉ đặt nếu JSplitPane đã được hiển thị (đã có chiều rộng)
             if (split.getWidth() > 0) {
                 split.setDividerLocation(PIXEL_LOCATION);
             } else {
-                // Đặt lại, đôi khi cần 2 lần gọi trong một số môi trường
                 split.setDividerLocation(PIXEL_LOCATION);
             }
         });

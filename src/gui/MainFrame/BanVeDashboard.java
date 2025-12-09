@@ -1,8 +1,8 @@
 package gui.MainFrame;
 
-import control.CaLamViec; // Import CaLamViec
-import entity.NhanVien; // Import NhanVien
-import gui.Panel.*; // Đảm bảo đã import các Panel cần thiết
+import control.CaLamViec;
+import entity.NhanVien;
+import gui.Panel.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.net.URL; // Cần thiết cho việc tải tài nguyên
 
 /**
  * Lớp này tạo ManFrame cho quyền Nhân viên Bán Vé, chứa Menu cố định và CardLayout.
@@ -32,6 +33,13 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     private String maNVHienThi = "N/A";
     private String tenNVHienThi = "Đang tải...";
 
+    // Hằng số cho chiều rộng menu
+    private static final int CHIEU_RONG_MENU = 180;
+    // Hằng số cho kích thước icon
+    private static final int ICON_SIZE = 20;
+
+    public ManHinhBanVe manHinhBanVeInstance;
+
 
     public BanVeDashboard() {
         setTitle("Hệ thống Bán Vé Tàu - Nhân viên Bán Vé");
@@ -40,14 +48,11 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Lấy thông tin NV ngay khi khởi tạo
         layThongTinNhanVien();
 
-        // 1. Panel Menu bên trái
         JPanel panelDieuHuong = taoPanelDieuHuong();
         add(panelDieuHuong, BorderLayout.WEST);
 
-        // 2. Panel nội dung (CardLayout)
         khoiTaoPanelNoiDung();
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
@@ -56,30 +61,47 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         setVisible(true);
     }
 
-    /**
-     * Lấy thông tin NV từ CaLamViec và cập nhật các biến instance.
-     */
     private void layThongTinNhanVien() {
         NhanVien nv = CaLamViec.getInstance().getNhanVienDangNhap();
         if (nv != null) {
             this.maNVHienThi = nv.getMaNV();
             this.tenNVHienThi = nv.getHoTen();
         } else {
-            // Trường hợp lỗi/chưa đăng nhập
             this.maNVHienThi = "Lỗi Phiên";
             this.tenNVHienThi = "Không tìm thấy";
         }
     }
 
     /**
-     * Tạo panel điều hướng bên trái cho Nhân viên Bán Vé.
+     * Helper: Tải, điều chỉnh kích thước và trả về ImageIcon.
+     * @param path Đường dẫn tương đối từ gốc classpath (VD: "/images/home.png")
+     * @return ImageIcon đã resize, hoặc null nếu lỗi.
      */
+    private ImageIcon TaoIcon(String path) {
+        URL imageUrl = getClass().getResource(path);
+        if (imageUrl == null) {
+            System.err.println("Không tìm thấy tài nguyên icon: " + path);
+            return null;
+        }
+        try {
+            ImageIcon originalIcon = new ImageIcon(imageUrl);
+            Image image = originalIcon.getImage();
+            // Điều chỉnh kích thước
+            Image scaledImage = image.getScaledInstance(ICON_SIZE, ICON_SIZE, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaledImage);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi tải hoặc điều chỉnh icon: " + path + " - " + e.getMessage());
+            return null;
+        }
+    }
+
+
     private JPanel taoPanelDieuHuong() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(MAU_CHINH);
-        panel.setPreferredSize(new Dimension(220, 0)); // Tăng chiều rộng
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.setPreferredSize(new Dimension(CHIEU_RONG_MENU, 0));
+        panel.setBorder(new EmptyBorder(10, 5, 0, 5)); // Padding bên trong panel
 
         // --- Phần Header (Logo và ID) ---
         JPanel panelTieuDe = new JPanel();
@@ -93,88 +115,79 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         nhanLogo.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         panelTieuDe.add(nhanLogo);
-
-        panelTieuDe.setMaximumSize(new Dimension(Integer.MAX_VALUE, panelTieuDe.getPreferredSize().height));
         panel.add(panelTieuDe);
 
         // --- Phần các mục menu ---
 
         panel.add(taoDuongKe());
         // [1. Trang chủ]
-        nutTrangChu = taoMucMenu("Dashboard", "\uD83C\uDFE0", "trangChuNV");
+        nutTrangChu = taoMucMenu("Dashboard", "/images/iconMenu/home.png", "trangChuNV");
         panel.add(nutTrangChu);
         panel.add(taoDuongKe());
 
         // [2. Mở ca]
-        nutMoCa = taoMucMenu("Mở ca", "\u23F3", "moCa");
+        // Sử dụng đường dẫn của bạn: Train-Ticket-Management-Application\src\images\moca.png
+        nutMoCa = taoMucMenu("Mở ca", "/images/iconMenu/moca.png", "moCa");
         panel.add(nutMoCa);
         panel.add(taoDuongKe());
 
         // [3. Kết ca]
-        nutKetCa = taoMucMenu("Kết ca", "\u23F0", "ketCa");
+        nutKetCa = taoMucMenu("Kết ca", "/images/iconMenu/ketca.png", "ketCa");
         panel.add(nutKetCa);
-
-        // Gạch chân
         panel.add(taoDuongKe());
 
         // [4. Bán vé mới]
-        nutBanVe = taoMucMenu("Bán vé mới", "\uD83C\uDFAB", "banVeMoi"); // 🎫 (Sử dụng code emoji chuẩn)
+        nutBanVe = taoMucMenu("Bán vé", "/images/iconMenu/banve.png", "banVeMoi");
         panel.add(nutBanVe);
         panel.add(taoDuongKe());
 
         // [5. Đổi vé]
-        nutDoiVe = taoMucMenu("Đổi vé", "\u21C4", "doiVe");
+        nutDoiVe = taoMucMenu("Đổi vé", "/images/iconMenu/doive.png", "doiVe");
         panel.add(nutDoiVe);
         panel.add(taoDuongKe());
 
         // [5.1. Trả vé]
-        nutTraVe = taoMucMenu("Trả vé", "\uD83D\uDD19", "traVe"); // 🔙
+        nutTraVe = taoMucMenu("Trả vé", "/images/iconMenu/trave.png", "traVe");
         panel.add(nutTraVe);
         panel.add(taoDuongKe());
 
-
         // [6. Tra cứu vé]
-        nutTraCuuVe = taoMucMenu("Tra cứu vé", "\uD83D\uDD0D", "traCuuVe");
+        nutTraCuuVe = taoMucMenu("Tra cứu vé", "/images/iconMenu/tracuu.png", "traCuuVe");
         panel.add(nutTraCuuVe);
         panel.add(taoDuongKe());
 
         // [7. Tra cứu hóa đơn]
-        nutTraCuuHD = taoMucMenu("Tra cứu Hóa đơn", "\uD83D\uDCCB", "traCuuHD");
+        nutTraCuuHD = taoMucMenu("Tra cứu hóa đơn", "/images/iconMenu/tracuuhoadon.png", "traCuuHD");
         panel.add(nutTraCuuHD);
         panel.add(taoDuongKe());
 
 
         panel.add(Box.createVerticalGlue());
 
-        // --- THÔNG TIN NV (Lấy từ CaLamViec) ---
+        // --- THÔNG TIN NV ---
         panel.add(taoPanelThongTinNV());
 
         // Nút Đăng xuất
-        nutDangXuat = taoMucMenu("Đăng xuất", "\uD83D\uDEAA", "dangXuat");
+        nutDangXuat = taoMucMenu("Đăng xuất", "/images/iconMenu/logout.png", "dangXuat");
         panel.add(nutDangXuat);
 
         return panel;
     }
 
-    /**
-     * Tạo panel hiển thị thông tin nhân viên đang đăng nhập.
-     */
     private JPanel taoPanelThongTinNV() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(MAU_CHINH);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.setBorder(new EmptyBorder(10, 15, 10, 15));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 15)); // Padding bên trong panel
 
-        // Tên nhân viên
-        JLabel nhanTenNV = new JLabel("<html><b>" + tenNVHienThi + "</b></html>");
+        JLabel nhanTenNV = new JLabel("**" + tenNVHienThi + "**");
         nhanTenNV.setFont(new Font("Segoe UI", Font.BOLD, 14));
         nhanTenNV.setForeground(Color.WHITE);
         nhanTenNV.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Mã nhân viên
         JLabel nhanMaNV = new JLabel("ID: " + maNVHienThi);
-        nhanMaNV.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        nhanMaNV.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         nhanMaNV.setForeground(Color.decode("#E0E0E0"));
         nhanMaNV.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -188,42 +201,40 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 
 
     /**
-     * Phương thức tạo nút menu
+     * Phương thức tạo nút menu sử dụng ImageIcon.
+     * @param vanBan Văn bản của nút (VD: "Dashboard")
+     * @param iconPath Đường dẫn tương đối đến icon (VD: "/images/home.png")
+     * @param tenCard Tên card trong CardLayout
      */
-    private JButton taoMucMenu(String vanBan, String kyHieu, String tenCard) {
+    private JButton taoMucMenu(String vanBan, String iconPath, String tenCard) {
         JButton nut = new JButton(vanBan);
 
-        String htmlText = "<html>" +
-                "<span style='white-space: nowrap;'>" + // Áp dụng nowrap cho toàn bộ nội dung
-                "<span style='font-family:\"Segoe UI Emoji\"; font-size:15pt;'>" + kyHieu + "</span>" +
-                "&nbsp;&nbsp;&nbsp;" +
-                "<span style='font-family:\"Segoe UI\", Arial; font-size: 12pt; font-weight: bold;'>" + vanBan + "</span>" +
-                "</span>" +
-                "</html>";
-        nut.setText(htmlText);
+        // Tải icon bằng phương thức helper
+        ImageIcon icon = TaoIcon(iconPath);
+        if (icon != null) {
+            nut.setIcon(icon);
+            // Đặt vị trí của icon so với văn bản
+            nut.setHorizontalTextPosition(SwingConstants.RIGHT);
+            nut.setIconTextGap(10); // Khoảng cách giữa icon và text
+        }
 
+        // Thiết lập font
+        nut.setFont(new Font("Segoe UI", Font.BOLD, 14));
         nut.setForeground(Color.WHITE);
         nut.setBackground(MAU_CHINH);
         nut.setFocusPainted(false);
         nut.setHorizontalAlignment(SwingConstants.LEFT);
 
-        nut.setBorder(new EmptyBorder(10, 15, 10, 15));
+        nut.setBorder(new EmptyBorder(10, 10, 10, 15)); // Padding bên trong nút
         nut.setOpaque(true);
 
         int chieuCaoCoDinh = 45;
-        final int CHIEU_RONG_MENU = 240;
-
-        // 1. Buộc nút phải có kích thước Ưu tiên và Tối thiểu bằng chiều rộng menu
         Dimension kichThuocBuoc = new Dimension(CHIEU_RONG_MENU, chieuCaoCoDinh);
 
-        // Thiết lập kích thước Ưu tiên (rất quan trọng cho BoxLayout)
         nut.setPreferredSize(kichThuocBuoc);
-
-        // Thiết lập kích thước Tối thiểu
         nut.setMinimumSize(kichThuocBuoc);
-
         nut.setMaximumSize(new Dimension(Integer.MAX_VALUE, chieuCaoCoDinh));
-        // Đăng ký nút vào Map và Listener
+
         nutMenu.put(tenCard, nut);
 
         // Xử lý hiệu ứng hover/màu sắc
@@ -242,9 +253,6 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         return nut;
     }
 
-    /**
-     * Tạo gạch chân giữa các nhóm chức năng
-     */
     private JSeparator taoDuongKe() {
         JSeparator duongKe = new JSeparator(SwingConstants.HORIZONTAL);
         duongKe.setForeground(new Color(255, 255, 255, 70));
@@ -254,23 +262,17 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     }
 
 
-    // KHU VỰC CONTENT PANEL & CARDLAYOUT
-    /**
-     * Khởi tạo Panel chứa CardLayout và thêm các màn hình
-     */
+    // KHU VỰC CONTENT PANEL & CARDLAYOUT (Giữ nguyên)
     private void khoiTaoPanelNoiDung() {
         boCucCard = new CardLayout();
         panelNoiDung = new JPanel(boCucCard);
 
-        // Thêm các màn hình (Cần đảm bảo các lớp Panel này tồn tại)
         panelNoiDung.add(new ManHinhTrangChuNVBanVe(), "trangChuNV");
-        // Giả định các Panel sau tồn tại
         panelNoiDung.add(new ManHinhMoCa(), "moCa");
         panelNoiDung.add(new ManHinhKetCa(), "ketCa");
 
-//        ManHinhBanVe panelBanVe = new ManHinhBanVe();
-//        panelBanVe.setName("banVeMoi");
-        panelNoiDung.add(new ManHinhBanVe(), "banVeMoi");
+        manHinhBanVeInstance = new ManHinhBanVe();
+        panelNoiDung.add(manHinhBanVeInstance, "banVeMoi");
 
         panelNoiDung.add(new ManHinhDoiVe(), "doiVe");
         panelNoiDung.add(new ManHinhTraVe(), "traVe");
@@ -280,26 +282,17 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         add(panelNoiDung, BorderLayout.CENTER);
     }
 
-    /**
-     * Thiết lập Action Listener cho tất cả các nút menu
-     */
     private void dangKiSuKien() {
         for (JButton button : nutMenu.values()) {
             button.addActionListener(this);
         }
     }
 
-    /**
-     * Chuyển đổi màn hình trong CardLayout và highlight nút menu tương ứng
-     */
     public void chuyenManHinh(String tenCard) {
         boCucCard.show(panelNoiDung, tenCard);
         danhDauNutDangChon(nutMenu.get(tenCard));
     }
 
-    /**
-     * Đổi màu nền của nút menu đang được chọn
-     */
     private void danhDauNutDangChon(JButton nutHoatDong) {
         for (JButton nut : nutMenu.values()) {
             if (nut != null) {
@@ -311,9 +304,6 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         }
     }
 
-    /**
-     * Thêm hoặc cập nhật một JPanel vào CardLayout.
-     */
     public void themHoacCapNhatCard(JPanel panelMoi, String tenCard) {
         Component thanhPhanCu = null;
 
@@ -339,7 +329,6 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Object nguon = e.getSource();
 
-        // Tìm tên card tương ứng với nút được click
         String tenCard = nutMenu.entrySet().stream()
                 .filter(entry -> entry.getValue() == nguon)
                 .map(Map.Entry::getKey)
@@ -349,11 +338,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         if ("dangXuat".equals(tenCard)) {
             int xacNhan = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn đăng xuất?", "Xác nhận đăng xuất", JOptionPane.YES_NO_OPTION);
             if (xacNhan == JOptionPane.YES_OPTION) {
-                // Xóa phiên làm việc trước khi đóng (rất quan trọng)
                 CaLamViec.getInstance().ketThucCa();
                 this.dispose();
-                // Mở lại màn hình đăng nhập nếu cần
-                // new ManHinhDangNhap().setVisible(true);
             }
             return;
         }
@@ -363,20 +349,20 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         }
     }
 
-    // =================================================================================
     // MAIN
-
     public static void main(String[] args) {
-        // --- CHUẨN BỊ MOCKUP TRƯỚC KHI CHẠY ---
-        // Giả lập việc đăng nhập để CaLamViec có dữ liệu
         try {
-            // Giả lập đối tượng NhanVien đã đăng nhập
             NhanVien nvMock = new NhanVien("NVBV0001", "Trần Đức Nam");
             CaLamViec.getInstance().batDauCa(nvMock);
         } catch (Exception e) {
             System.err.println("Lỗi MOCKUP NhanVien/CaLamViec: " + e.getMessage());
-            // Bỏ qua lỗi nếu lớp NhanVien/CaLamViec chưa được định nghĩa
         }
+
+//        try{
+//            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+//        } catch (Exception e){
+//            // Dùng giao diện mặc định
+//        }
 
         SwingUtilities.invokeLater(() -> {
             new BanVeDashboard();
