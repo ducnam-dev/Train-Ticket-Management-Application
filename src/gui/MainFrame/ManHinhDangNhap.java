@@ -1,8 +1,10 @@
 package gui.MainFrame;
 
+import control.XuLyNhanVien;
 import control.XuLyTaiKhoan;
+import entity.NhanVien;
 import entity.TaiKhoan;
-import gui.MainFrame.BanVeDashboard; // Giả định lớp này tồn tại
+import control.CaLamViec;
 //import gui.MainFrame.ManHinhDashboardQuanLy; // Giả định lớp này tồn tại
 
 import javax.swing.*;
@@ -44,15 +46,24 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
         add(trainImagePanel, BorderLayout.WEST);
 
         // 2. Thêm Panel Form Đăng nhập (Trung tâm - CENTER)
-        JPanel loginCenterPanel = createLoginCenterPanel();
+        JPanel loginCenterPanel = createLoginCenterPanel(); // btnDangNhap được khởi tạo trong createLoginFormPanel()
         add(loginCenterPanel, BorderLayout.CENTER);
 
         loginCenterPanel.setBackground(Color.WHITE);
 
+        // ==========================================================
+        // THÊM CHỨC NĂNG NHẤN ENTER ĐỂ ĐĂNG NHẬP
+        // ==========================================================
+        JRootPane rootPane = SwingUtilities.getRootPane(this);
+        if (rootPane != null) {
+            rootPane.setDefaultButton(btnDangNhap); // Chỉ định nút mặc định
+        }
+
         setVisible(true);
     }
 
-    // --- Panel Bên Trái: Ảnh Đoàn Tàu ---
+    // ... (Các phương thức createTrainImagePanel, createLoginCenterPanel, customizeTextField, createScaledImageLabel giữ nguyên)
+
     private JPanel createTrainImagePanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setPreferredSize(new Dimension(TRAIN_IMAGE_WIDTH, this.getHeight()));
@@ -237,9 +248,30 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
             // Bước 2: Gọi hàm xác thực từ lớp Control
             TaiKhoan taiKhoan = XuLyTaiKhoan.authenticate(tenDangNhap, matKhau);
 
+
             if (taiKhoan != null) {
                 // Xác thực thành công:
                 String maNV = taiKhoan.getMaNV();
+
+                // --- BƯỚC 2: LẤY VÀ LƯU THÔNG TIN NHÂN VIÊN ---
+                NhanVien nhanVien = null;
+                try {
+                    // Gọi lớp xử lý để lấy thông tin NhanVien dựa trên MaNV
+                    // (Giả định: XuLyNhanVien.getNhanVienByMaNV(maNV) trả về đối tượng NhanVien)
+                    nhanVien = XuLyNhanVien.layThongTinNhanVienChoCaLamViec(maNV);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Lỗi khi lấy thông tin nhân viên: " + ex.getMessage(), "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
+                    return; // Ngừng nếu không lấy được thông tin NV
+                }
+
+                if (nhanVien == null) {
+                    JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin nhân viên cho tài khoản này.", "Lỗi dữ liệu", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // BƯỚC 3: BẮT ĐẦU CA LÀM VIỆC VÀ LƯU SESSION => sẽ lấy để dùng sau
+                CaLamViec.getInstance().batDauCa(nhanVien);
+
 
                 // Phân quyền dựa trên MaNV chuẩn hóa:
                 if (maNV.startsWith("NVQL")) {

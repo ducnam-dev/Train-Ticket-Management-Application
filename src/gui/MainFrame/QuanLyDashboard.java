@@ -1,9 +1,9 @@
 package gui.MainFrame;
 
 // Import các Panel cần hiển thị
+import control.CaLamViec;
+import entity.NhanVien;
 import gui.Panel.*;
-import gui.Panel.ManHinhDashboardQuanLy;
-// import gui.Panel.ManHinhDashboardQuanLy; // Giả sử đây là Trang Chủ
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.net.URL;
 
 /**
  * Lớp này tạo MainFrame cho quyền Quản Lý, chứa Menu cố định và CardLayout để chuyển màn hình.
@@ -24,14 +25,24 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
     private CardLayout cardLayout;
     private JPanel contentPanel;
     private JPanel navPanel;
-    private final Color PRIMARY_COLOR = new Color(0, 120, 215);
-    private final Color SELECTED_COLOR = new Color(0, 51, 102);
-    private final Color HOVER_COLOR = new Color(0, 130, 235);
+
+    // Màu sắc theo phong cách BanVeDashboard
+    private final Color MAU_CHINH = new Color(34, 137, 203);
+    private final Color MAU_DUOC_CHON = new Color(74, 184, 237);
+    private final Color MAU_HOVER = new Color(45, 150, 215);
+
     private final Map<String, JButton> menuButtons = new HashMap<>();
+    private static final int CHIEU_RONG_MENU = 180;
+    private static final int ICON_SIZE = 20; // Kích thước icon
 
     // Các nút menu cần quản lý
     private JButton btnTrangChu, btnQLChuyenTau, btnQLNV, btnQLKhuyenMai, btnDangXuat;
-    private JButton btnQLGiaVe;
+    private JButton btnQLGiaVe, btnTraCuuHD, btnThongKe;
+
+    // Dữ liệu Nhân viên
+    private String maNVHienThi = "N/A";
+    private String tenNVHienThi = "Đang tải...";
+
 
     public QuanLyDashboard() {
         setTitle("Hệ thống Quản lý Vé Tàu");
@@ -39,6 +50,9 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
+        //3. Lấy thông tin nhân viên đang đăng nhập
+        layThongTinNhanVien();
 
         // 1. Panel Menu bên trái
         navPanel = createNavPanel();
@@ -49,137 +63,217 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
 
-        // Mặc định hiển thị màn hình Trang Chủ (Hoặc Quản lý chuyến tàu)
+
+        // Mặc định hiển thị màn hình Trang Chủ
         switchToCard("trangChu");
 
         // Thiết lập sự kiện cho các nút menu
         initEventHandlers();
+        setVisible(true);
     }
 
+    /**
+     * Helper: Tải, điều chỉnh kích thước và trả về ImageIcon.
+     * @param path Đường dẫn tương đối từ gốc classpath (VD: "/images/home.png")
+     * @return ImageIcon đã resize, hoặc null nếu lỗi.
+     */
+    private ImageIcon createIcon(String path) {
+        URL imageUrl = getClass().getResource(path);
+        if (imageUrl == null) {
+            System.err.println("Không tìm thấy tài nguyên icon: " + path);
+            return null;
+        }
+        try {
+            ImageIcon originalIcon = new ImageIcon(imageUrl);
+            Image image = originalIcon.getImage();
+            // Điều chỉnh kích thước
+            Image scaledImage = image.getScaledInstance(ICON_SIZE, ICON_SIZE, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaledImage);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi tải hoặc điều chỉnh icon: " + path + " - " + e.getMessage());
+            return null;
+        }
+    }
+
+
     // =================================================================================
-    // KHU VỰC MENU (Sử dụng code của bạn)
+    // KHU VỰC MENU
     // =================================================================================
 
     /**
-     * Tạo panel điều hướng bên trái. (Code đã sửa để điều hướng qua CardLayout)
+     * Tạo panel điều hướng bên trái.
      */
     private JPanel createNavPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(PRIMARY_COLOR);
-        panel.setPreferredSize(new Dimension(200, 0));
+        panel.setBackground(MAU_CHINH);
+        panel.setPreferredSize(new Dimension(CHIEU_RONG_MENU, 0));
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // --- Phần Header (Logo và ID) ---
         JPanel headerPanel = new JPanel();
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-        headerPanel.setBackground(PRIMARY_COLOR);
+        headerPanel.setBackground(MAU_CHINH);
         headerPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // ... (Logo và ID Label) ...
         JLabel logoLabel = new JLabel("GA XE");
         logoLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
         logoLabel.setForeground(Color.WHITE);
         logoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel idLabel = new JLabel("ID: NV200001");
-        idLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        idLabel.setForeground(Color.WHITE);
-        idLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        idLabel.setBorder(new EmptyBorder(5, 5, 20, 0));
-
         headerPanel.add(logoLabel);
-        headerPanel.add(idLabel);
-        headerPanel.setMaximumSize(headerPanel.getPreferredSize());
+
+
+        headerPanel.add(Box.createVerticalStrut(10));
         panel.add(headerPanel);
 
         // --- Phần các mục menu ---
 
+        panel.add(taoDuongKe());
         // [1. Trang chủ]
-        btnTrangChu = createNavItem("Trang chủ", "\uD83C\uDFE0"); // 🏠
-        menuButtons.put("trangChu", btnTrangChu);
+        btnTrangChu = createNavItem("Dashboard", "/images/home.png", "trangChu");
         panel.add(btnTrangChu);
+        panel.add(taoDuongKe());
 
-        // [2. Tra cứu hóa đơn] - Giả định đây là một Panel
-        JButton btnTraCuu = createNavItem("Tra cứu hóa đơn", "\uD83D\uDD0D"); // 🔍
-        menuButtons.put("traCuuHD", btnTraCuu);
-        panel.add(btnTraCuu);
-
-        // [3. Quản lý chuyến tàu] - Màn hình hiện tại
-        btnQLChuyenTau = createNavItem("Quản lý chuyến tàu", "\uD83D\uDE86"); // 🚆
-        btnQLChuyenTau.setBackground(SELECTED_COLOR); // Mặc định chọn màn hình này
-        menuButtons.put("qlChuyenTau", btnQLChuyenTau);
+        // [2. Quản lý chuyến tàu]
+        btnQLChuyenTau = createNavItem("QL chuyến tàu", "/images/chuyentau.png", "qlChuyenTau");
         panel.add(btnQLChuyenTau);
+        panel.add(taoDuongKe());
 
-        // [4. Quản lý tài khoản NV]
-        btnQLNV = createNavItem("Quản lý tài khoản NV", "\uD83D\uDC64"); // 👤
-        menuButtons.put("qlNhanVien", btnQLNV);
+        // [3. Quản lý tài khoản NV]
+        btnQLNV = createNavItem("QL tài khoản NV", "/images/nhanvien.png", "qlNhanVien");
         panel.add(btnQLNV);
+        panel.add(taoDuongKe());
 
-        // [5. Quản lý giá vé] - Giả định đây là một Panel
-        btnQLGiaVe = createNavItem("Quản lý giá vé", "\uD83D\uDCB2"); // 💲
-        menuButtons.put("qlGiaVe", btnQLGiaVe);
+        // [4. Quản lý giá vé]
+        btnQLGiaVe = createNavItem("QL giá vé", "/images/giave.png", "qlGiaVe");
         panel.add(btnQLGiaVe);
+        panel.add(taoDuongKe());
 
-        // [6. Quản lý khuyến mãi]
-        btnQLKhuyenMai = createNavItem("Quản lý khuyến mãi", "\uD83C\uDFF7"); // 🏷️
-        menuButtons.put("qlKhuyenMai", btnQLKhuyenMai);
+        // [5. Quản lý khuyến mãi]
+        btnQLKhuyenMai = createNavItem("QL khuyến mãi", "/images/khuyenmai.png", "qlKhuyenMai");
         panel.add(btnQLKhuyenMai);
+        panel.add(taoDuongKe());
+
+        // [6. Tra cứu hóa đơn]
+        btnTraCuuHD = createNavItem("Tra cứu hóa đơn", "/images/tracuuhoadon.png", "traCuuHD");
+        panel.add(btnTraCuuHD);
+        panel.add(taoDuongKe());
 
         // [7. Thống kê báo cáo]
-        JButton btnThongKe = createNavItem("Thống kê báo cáo", "\uD83D\uDCCA"); // 📊
-        menuButtons.put("thongKe", btnThongKe);
+        btnThongKe = createNavItem("Thống kê báo cáo", "/images/thongke.png", "thongKe");
         panel.add(btnThongKe);
+        panel.add(taoDuongKe());
 
         panel.add(Box.createVerticalGlue());
 
+        // --- THÔNG TIN NV ---
+        panel.add(taoPanelThongTinNV());
+
         // --- Nút Đăng xuất ---
-        btnDangXuat = createNavItem("Đăng xuất", "\uD83D\uDEAA"); // 🚪
-        menuButtons.put("dangXuat", btnDangXuat);
+        btnDangXuat = createNavItem("Đăng xuất", "/images/logout.png", "dangXuat");
         panel.add(btnDangXuat);
 
         return panel;
     }
 
+    private void layThongTinNhanVien() {
+        NhanVien nv = CaLamViec.getInstance().getNhanVienDangNhap();
+        if (nv != null) {
+            this.maNVHienThi = nv.getMaNV();
+            this.tenNVHienThi = nv.getHoTen();
+        } else {
+            this.maNVHienThi = "Lỗi Phiên";
+            this.tenNVHienThi = "Không tìm thấy";
+        }
+    }
+
+
+    private JPanel taoPanelThongTinNV() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(MAU_CHINH);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10)); // Padding bên trong panel
+
+        JLabel nhanTenNV = new JLabel("NV: " + tenNVHienThi);
+        nhanTenNV.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        nhanTenNV.setForeground(Color.WHITE);
+        nhanTenNV.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel nhanMaNV = new JLabel("ID: " + maNVHienThi);
+        nhanMaNV.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        nhanMaNV.setForeground(Color.decode("#E0E0E0"));
+        nhanMaNV.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        panel.add(nhanTenNV);
+        panel.add(nhanMaNV);
+        panel.add(taoDuongKe());
+
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));
+        return panel;
+    }
+
     /**
-     * Phương thức tạo nút menu (được đơn giản hóa)
+     * Phương thức tạo nút menu sử dụng ImageIcon (Không dùng HTML)
      */
-    private JButton createNavItem(String text, String iconText) {
+    private JButton createNavItem(String text, String iconPath, String cardName) {
         JButton button = new JButton(text);
 
-        // Sử dụng HTML cho icon và text
-        String htmlText = "<html>" +
-                "<span style='font-family:\"Segoe UI Emoji\"; font-size:15pt;'>" + iconText + "</span>" +
-                "&nbsp;&nbsp;&nbsp;" +
-                "<span style='font-family:\"Segoe UI\", Arial; font-size: 12pt; font-weight: bold;'>" + text + "</span>" +
-                "</html>";
-        button.setText(htmlText);
+        // Tải icon
+        ImageIcon icon = createIcon(iconPath);
+        if (icon != null) {
+            button.setIcon(icon);
+            // Đặt vị trí của icon (Icon ở trái, Text ở phải)
+            button.setHorizontalTextPosition(SwingConstants.RIGHT);
+            button.setIconTextGap(10); // Khoảng cách giữa icon và text
+        }
 
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
         button.setForeground(Color.WHITE);
-        button.setBackground(PRIMARY_COLOR);
+        button.setBackground(MAU_CHINH);
         button.setFocusPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setBorder(new EmptyBorder(10, 25, 10, 25)); // Đảm bảo căn lề trái
+        button.setHorizontalAlignment(SwingConstants.LEFT); // Căn lề trái
+
+        // Thêm padding cho nội dung
+        button.setBorder(new EmptyBorder(10, 15, 10, 15));
         button.setOpaque(true);
 
-        int fixedHeight = 50;
-        Dimension itemSize = new Dimension(Integer.MAX_VALUE, fixedHeight);
-        button.setMaximumSize(itemSize);
+        int fixedHeight = 45;
+        Dimension itemSize = new Dimension(CHIEU_RONG_MENU, fixedHeight);
+
+        // Thiết lập kích thước
+        button.setPreferredSize(itemSize);
+        button.setMinimumSize(itemSize);
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, fixedHeight));
+
+        menuButtons.put(cardName, button);
 
         // Xử lý hiệu ứng hover/màu sắc
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (button.getBackground().equals(PRIMARY_COLOR)) {
-                    button.setBackground(HOVER_COLOR);
+                if (button.getBackground().equals(MAU_CHINH)) {
+                    button.setBackground(MAU_HOVER);
                 }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (button.getBackground().equals(HOVER_COLOR)) {
-                    button.setBackground(PRIMARY_COLOR);
+                // Chỉ quay lại màu chính nếu không phải là nút đang được chọn
+                if (button.getBackground().equals(MAU_HOVER) && !menuButtons.get(cardName).getBackground().equals(MAU_DUOC_CHON)) {
+                    button.setBackground(MAU_CHINH);
                 }
             }
         });
         return button;
+    }
+
+    /**
+     * Tạo gạch chân giữa các nhóm chức năng
+     */
+    private JSeparator taoDuongKe() {
+        JSeparator duongKe = new JSeparator(SwingConstants.HORIZONTAL);
+        duongKe.setForeground(new Color(255, 255, 255, 70));
+        duongKe.setBackground(MAU_CHINH);
+        duongKe.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        return duongKe;
     }
 
 
@@ -195,14 +289,13 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         contentPanel = new JPanel(cardLayout);
 
         // Thêm các màn hình quản lý vào CardLayout
-        // Giả định ManHinhDashboardQuanLy là một JPanel
-        contentPanel.add(new ManHinhDashboardQuanLy(), "trangChu"); // Placeholder cho Trang Chủ
+        contentPanel.add(new ManHinhDashboardQuanLy(), "trangChu");
         contentPanel.add(new ManhinhQuanLyChuyenTau(), "qlChuyenTau");
         contentPanel.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
-        contentPanel.add(new ManHinhQuanLyKhuyenMai(), "qlKhuyenMai");
-        contentPanel.add(new JPanel(), "traCuuHD"); // Placeholder
-        contentPanel.add(new ManHinhQuanLyGiaVe(), "qlGiaVe"); // Placeholder
-        contentPanel.add(new JPanel(), "thongKe"); // Placeholder
+        contentPanel.add(new ManHinhQuanLyKhuyenMai2(), "qlKhuyenMai");
+        contentPanel.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
+        contentPanel.add(new ManHinhQuanLyGiaVe(), "qlGiaVe");
+        contentPanel.add(new JPanel(), "thongKe");
 
 
         add(contentPanel, BorderLayout.CENTER);
@@ -232,12 +325,12 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         // Đặt tất cả các nút về màu ban đầu
         for (JButton button : menuButtons.values()) {
             if (button != null) {
-                button.setBackground(PRIMARY_COLOR);
+                button.setBackground(MAU_CHINH);
             }
         }
         // Highlight nút đang hoạt động
         if (active != null) {
-            active.setBackground(SELECTED_COLOR);
+            active.setBackground(MAU_DUOC_CHON);
         }
     }
 
@@ -249,29 +342,20 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         Object src = e.getSource();
         String cardName = null;
 
-        if (src == btnTrangChu) {
-            cardName = "trangChu";
-        } else if (src == btnQLChuyenTau) {
-            cardName = "qlChuyenTau";
-        } else if (src == btnQLNV) {
-            cardName = "qlNhanVien";
-        } else if (src == btnQLKhuyenMai) {
-            cardName = "qlKhuyenMai";
-        } else if (src == btnDangXuat) {
+        // Tìm tên card dựa trên nút được click
+        for (Map.Entry<String, JButton> entry : menuButtons.entrySet()) {
+            if (entry.getValue() == src) {
+                cardName = entry.getKey();
+                break;
+            }
+        }
+
+        if ("dangXuat".equals(cardName)) {
             int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn đăng xuất?", "Xác nhận đăng xuất", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                // new ManHinhDangNhap().setVisible(true); // Nếu có màn hình đăng nhập
                 this.dispose();
             }
             return;
-        } else {
-            // Xử lý các nút placeholder (Tra cứu HD, QL Giá vé, Thống kê)
-            for (Map.Entry<String, JButton> entry : menuButtons.entrySet()) {
-                if (entry.getValue() == src) {
-                    cardName = entry.getKey();
-                    break;
-                }
-            }
         }
 
         if (cardName != null) {
@@ -288,8 +372,16 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         } catch (Exception e){
             // Dùng giao diện mặc định
         }
+
+        try {
+            NhanVien nvMock = new NhanVien("NVQL0001", "Trần Đức Nam");
+            CaLamViec.getInstance().batDauCa(nvMock);
+        } catch (Exception e) {
+            System.err.println("Lỗi MOCKUP NhanVien/CaLamViec: " + e.getMessage());
+        }
+
         SwingUtilities.invokeLater(() -> {
-            new QuanLyDashboard().setVisible(true);
+            new QuanLyDashboard();
         });
     }
 }

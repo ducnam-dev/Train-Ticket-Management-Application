@@ -21,11 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
-/**
- * ManHinhBanVe - Phiên bản đã sắp xếp thành module để quan sát.
- * Bổ sung tính năng tính giá vé per-seat (dựa trên bảng GiaVeCoBanTheoGa,
- * hệ số LoaiChoDat và hệ số LoaiVe). Hiện các DAO mới là stub/mock để bạn triển khai DB.
- */
+
 public class ManHinhBanVe extends JPanel implements MouseListener, ActionListener {
     private static final Color COLOR_BLUE_LIGHT = new Color(52, 152, 219);
     // ====================
@@ -215,11 +211,22 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         leftContainer.add(leftScrollPane, BorderLayout.CENTER);
 
         JPanel rightPanel = createKhuVucThongTinKhach();
-//        rightPanel.add(createKhuVucTongTien(), BorderLayout.SOUTH);
+
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftContainer, rightPanel);
-        split.setResizeWeight(0.75);
         split.setOneTouchExpandable(true);
         split.setDividerSize(6);
+
+        split.setResizeWeight(0.70); // Đặt 0.70 để phù hợp với tỷ lệ 7/3
+
+        SwingUtilities.invokeLater(() -> {
+            final int PIXEL_LOCATION = 840;
+
+            if (split.getWidth() > 0) {
+                split.setDividerLocation(PIXEL_LOCATION);
+            } else {
+                split.setDividerLocation(PIXEL_LOCATION);
+            }
+        });
 
         mainPanel.add(split, BorderLayout.CENTER);
         return mainPanel;
@@ -342,6 +349,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         JLabel mainLabel = new JLabel(labelText);
         mainLabel.setFont(mainLabel.getFont().deriveFont(Font.BOLD, 14f));
         labelDiscountPanel.add(mainLabel);
+
+        panel.add(labelDiscountPanel, BorderLayout.CENTER);
 
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         controlPanel.setOpaque(false);
@@ -1004,7 +1013,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private void styleNutChinh(JButton btn) {
         btn.setBackground(new Color(0, 123, 255));
         btn.setForeground(Color.WHITE);
-        btn.setPreferredSize(new Dimension(100, 25));
+        btn.setPreferredSize(new Dimension(110, 25));
     }
 
     private JButton taoNutToa(String text, Color bgColor, Color fgColor) {
@@ -1242,7 +1251,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         return maToa;
     }
 
-    private static final Dimension SQUARE_SEAT_SIZE = new Dimension(60, 30);
+    private static final Dimension SQUARE_SEAT_SIZE = new Dimension(47, 25);
 
     private void veSoDoGhe(List<ChoDat> danhSachChoDat) {
         pnlSoDoGhe.removeAll();
@@ -1311,24 +1320,27 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         pnlSoDoGhe.setBackground(Color.WHITE);
         pnlSoDoGhe.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Gom nhóm chỗ đặt theo số buồng (ví dụ: "01", "02", ...)
+        // Gom nhóm chỗ đặt theo số buồng (ví dụ: "K1", "K2", ...)
         Map<String, List<ChoDat>> buongData = new LinkedHashMap<>();
         for (ChoDat cho : danhSachChoDat) {
-            // Giả sử số buồng là phần số của số ghế (ví dụ: '01A', '01B' -> buồng '01')
+            // SỬA ĐỔI LOGIC GOM NHÓM: Dùng trường 'Khoang' hoặc trích xuất số Khoang từ 'SoCho'
             String soGhe = cho.getSoCho();
-            String soBuong = soGhe.substring(0, soGhe.length() - 1);
+            // Trích xuất số buồng/khoang (ví dụ: 'K1T1A' -> 'K1')
+            String soBuong = soGhe.substring(0, soGhe.indexOf('T'));
 
             buongData.computeIfAbsent(soBuong, k -> new ArrayList<>()).add(cho);
         }
 
-        // Số giường tối đa trong một buồng (để xác định layout)
+        // Số giường tối đa trong một buồng. Nếu cấu trúc là 3 tầng * 2 vị trí = 6 chỗ.
         int maxGiuongPerBuong = 0;
         for(List<ChoDat> list : buongData.values()) {
             if(list.size() > maxGiuongPerBuong) maxGiuongPerBuong = list.size();
         }
 
-        // Nếu maxGiuongPerBuong = 4, ta có 2 tầng, 2 bên (2 hàng, 2 cột/bên)
-        int rowsPerBuong = maxGiuongPerBuong / 2; // Ví dụ: 4/2 = 2 hàng (trên, dưới)
+        // SỬA ĐỔI: Nếu 6 chỗ/buồng, ta có 3 tầng.
+        // Tầng là hàng (Rows = 3), Vị trí A/B là cột (Columns = 2).
+        final int ROWS_PER_BUONG = 3;
+        final int COLUMNS_PER_BUONG = 2;
 
         // Container chính để chứa tất cả các buồng
         JPanel container = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
@@ -1341,17 +1353,20 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             // 1. Panel cho từng Buồng (có tiêu đề)
             JPanel pnlBuong = new JPanel(new BorderLayout());
             pnlBuong.setBorder(new TitledBorder(BorderFactory.createLineBorder(Color.GRAY),
-                    "Buồng " + soBuong));
+                    "Khoang " + soBuong.substring(1))); // Hiển thị chỉ số (ví dụ: Khoang 1)
             pnlBuong.setOpaque(false);
 
-            // 2. Grid cho các giường trong buồng
-            // Giả định 2 hàng (trên/dưới) và 2 cột (A/C và B/D hoặc 1-2 và 3-4)
-            JPanel buongGrid = new JPanel(new GridLayout(rowsPerBuong, 2, 5, 5));
+            // 2. Grid cho các giường trong buồng: 3 Hàng (Tầng), 2 Cột (Vị trí)
+            JPanel buongGrid = new JPanel(new GridLayout(ROWS_PER_BUONG, COLUMNS_PER_BUONG, 5, 5));
             buongGrid.setOpaque(false);
             buongGrid.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-            // Sắp xếp lại danh sách chỗ ngồi theo thứ tự trực quan (ví dụ: A, C, B, D)
-            choDats.sort(Comparator.comparing(c -> c.getSoCho()));
+            // SẮP XẾP LẠI: Sắp xếp theo Tầng (Tang) và sau đó theo Vị trí (SoCho)
+            // Ví dụ: K1T1A, K1T1B, K1T2A, K1T2B, K1T3A, K1T3B
+            choDats.sort(Comparator
+                    .comparing(ChoDat::getTang, Comparator.nullsLast(Comparator.naturalOrder()))
+                    .thenComparing(ChoDat::getSoCho)
+            );
 
             for (ChoDat cho : choDats) {
                 JButton btnCho = new JButton(cho.getSoCho());
@@ -1379,6 +1394,9 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                 }
 
                 if (btnCho.isEnabled()) {
+                    // Cần đảm bảo rằng xuLyChonGhe có sẵn trong context này.
+                    // Nếu bạn đang làm việc với lớp Controller, nó sẽ tự động có.
+                    // Nếu bạn đang làm việc với lớp View/Panel, bạn sẽ cần truyền Listener từ Controller.
                     btnCho.addActionListener(e -> xuLyChonGhe(btnCho, cho));
                 }
 
@@ -1393,9 +1411,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         pnlSoDoGhe.add(container);
         pnlSoDoGhe.revalidate();
         pnlSoDoGhe.repaint();
-    }
-
-    // ====================
+    }    // ====================
     // MODULE: Chọn/Hủy ghế, cập nhật UI danh sách & form khách
     // ====================
     // ====================
@@ -1571,8 +1587,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
             ManHinhTrangChuNVBanVe confirmPanel = new ManHinhTrangChuNVBanVe();
 
-            dashboard.addOrUpdateCard(confirmPanel, "trangChu");
-            dashboard.switchToCard("trangChu");
+            dashboard.themHoacCapNhatCard(confirmPanel, "trangChu");
+            dashboard.chuyenManHinh("trangChu");
 
         } else {
             JOptionPane.showMessageDialog(this,
@@ -1630,8 +1646,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                     new HashMap<>(danhSachGiaVe) // pass a defensive copy of prices
             );
 
-            dashboard.addOrUpdateCard(confirmPanel, "xacNhanBanVe");
-            dashboard.switchToCard("xacNhanBanVe");
+            dashboard.themHoacCapNhatCard(confirmPanel, "xacNhanBanVe");
+            dashboard.chuyenManHinh("xacNhanBanVe");
 
         } else {
             JOptionPane.showMessageDialog(this,

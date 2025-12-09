@@ -19,6 +19,11 @@ public class NhanVien {
     public NhanVien() {
     }
 
+    public NhanVien(String maNV, String hoTen) {
+        this.maNV = maNV;
+        this.hoTen = hoTen;
+    }
+
     // 2. CONSTRUCTOR 10 THAM SỐ (Đã cập nhật kiểu tham số)
     public NhanVien(String maNV, String hoTen, String soCCCD, LocalDate ngaySinh, String email, String sdt,
                     String gioiTinh, String diaChi, LocalDate ngayVaoLam, String chucVu) {
@@ -146,4 +151,6 @@ public class NhanVien {
     public void setChucVu(String chucVu) {
         this.chucVu = chucVu;
     }
+
+    //Method XuLy
 }

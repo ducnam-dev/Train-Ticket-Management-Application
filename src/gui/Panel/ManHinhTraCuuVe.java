@@ -10,10 +10,13 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.Clock;
 import java.util.List;
 import java.util.Vector;
 import java.time.format.DateTimeFormatter; // Import nếu cần
 
+
+import java.awt.Dialog;
 /**
  * ManHinhTraCuuVe: Màn hình Tra cứu vé theo mẫu.
  * ĐÃ SỬA LỖI: Logic gán biến instance cho JTextField.
@@ -84,7 +87,58 @@ public class ManHinhTraCuuVe extends JPanel implements ActionListener {
         btnTimKiem.addActionListener(this);
         btnXoaBoLoc.addActionListener(this);
 
+
+        // BỔ SUNG: Thêm Mouse Listener cho bảng
+        tableKetQua.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableMouseClicked(evt);
+            }
+        });
+
+
         xoaBoLoc();
+    }
+
+
+    // Trong lớp ManHinhTraCuuVe
+    private void tableMouseClicked(java.awt.event.MouseEvent evt) {
+        int row = tableKetQua.rowAtPoint(evt.getPoint());
+        int col = tableKetQua.columnAtPoint(evt.getPoint());
+
+        // Kiểm tra xem có click vào cột "Chi tiết" (cột cuối cùng) hay không
+        if (col == tableKetQua.getColumnCount() - 1) { // Lấy index của cột cuối cùng
+
+            // Lấy Mã vé từ cột thứ 2 (index 1)
+            String maVe = tableModel.getValueAt(row, 1).toString();
+            System.out.println("Đã chọn mã vé: " + maVe);
+
+            // Tra cứu lại vé dựa trên Mã vé
+            Ve ve = veDAO.getVeById(maVe);
+//            Ve ve = veDAO.createMockVe();
+            // Hiển thị chi tiết vé trong dialog
+
+            if (ve != null) {
+                hienThiChiTietVe(ve);
+            } else {
+                JOptionPane.showMessageDialog(this, "Không thể lấy chi tiết vé.", "Lỗi dữ liệu", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void hienThiChiTietVe(Ve ve) {
+        JDialog dialog = new JDialog(
+                SwingUtilities.getWindowAncestor(this),
+                "Chi tiết vé: " + ve.getId(),
+                Dialog.ModalityType.APPLICATION_MODAL // Sử dụng Constructor JDialog(Window, String, ModalityType)
+        );        TicketPanel ticketPanel = new TicketPanel(ve);
+
+        dialog.getContentPane().add(ticketPanel, BorderLayout.CENTER);
+
+        dialog.pack();
+        dialog.setResizable(false);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     // ==============================================================

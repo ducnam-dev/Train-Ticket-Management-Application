@@ -908,7 +908,7 @@ public class PopUpChiTietHoaDon extends JPanel {
         JFrame frame = new JFrame("Test Màn Hình Tra Cứu");
 
         // 2. Tạo một bản sao của JPanel (chính là class này)
-        PopUpChiTietHoaDon panel = new PopUpChiTietHoaDon("HD0225102500010002");
+        PopUpChiTietHoaDon panel = new PopUpChiTietHoaDon("HD0117102500020001");
 
         // 3. Thêm panel vào làm nội dung cho cửa sổ
         frame.setContentPane(panel);

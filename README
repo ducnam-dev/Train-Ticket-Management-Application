@@ -5,7 +5,7 @@ NVBV0001 222
 NVQL0001 111
 
 csdl chính là DataVer3 có khóa ngoại
-CSDL dùng là test2.3
+CSDL dùng là CSDL backup
 
 Hướng dẫn sử dụng phần mềm bán vé tàu
 1. Đăng nhập
@@ -25,3 +25,5 @@ Những chức năng đã làm được có thể demo
 - Bán vé tàu
 - Trả vé
 - In vé tàu
+- Tra cứu hóa đơn: Tìm kiếm hóa đơn theo mã vé hoặc theo ngày tháng
+
