@@ -272,7 +272,7 @@ public class ManHinhQuanLyKhuyenMai extends JPanel implements ActionListener { /
     /**
      * [Giả định] Đổ dữ liệu mẫu lên bảng
      */
-    private void loadDataToTable() {
+    public void loadDataToTable() {
         // Đây là logic giả định, trong thực tế cần truy vấn CSDL (Ví dụ: KhuyenMaiDAO.getAll())
         tableModel.setRowCount(0); // Xóa dữ liệu cũ
 

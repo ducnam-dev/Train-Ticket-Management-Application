@@ -46,5 +46,6 @@
     </orderEntry>
     <orderEntry type="library" exported="" name="mssql-jdbc-13.2.1.jre11" level="project" />
     <orderEntry type="library" exported="" name="jcommon-1.0.24" level="project" />
+    <orderEntry type="library" name="gson-2.8.6" level="project" />
   </component>
 </module>

@@ -275,7 +275,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         panelNoiDung.add(new ManHinhDoiVe(), "doiVe");
         panelNoiDung.add(new ManHinhTraVe(), "traVe");
         panelNoiDung.add(new ManHinhTraCuuVe(), "traCuuVe");
-        panelNoiDung.add(new ManHinhTraVe(), "traCuuHD");
+        panelNoiDung.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
 
         add(panelNoiDung, BorderLayout.CENTER);
     }

@@ -1262,7 +1262,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         return maToa;
     }
 
-    private static final Dimension SQUARE_SEAT_SIZE = new Dimension(60, 30);
+    private static final Dimension SQUARE_SEAT_SIZE = new Dimension(47, 25);
 
     private void veSoDoGhe(List<ChoDat> danhSachChoDat) {
         pnlSoDoGhe.removeAll();
