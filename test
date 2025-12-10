@@ -12,16 +12,18 @@ tra cứu vé
 VE011011250001
 VE0117102500001
 VE0125102500003
+họ tên + cccd :
+Đỗ Thị Mai
+079299000002
+0912333444
 
 tk: NVBV001
 
 
-Tôi sẽ sử dụng 4 package chính:
-
-controller: Chứa logic xử lý sự kiện và điều phối.
-
-state: Chứa dữ liệu trạng thái và các đối tượng dữ liệu phụ trợ.
-
-view: Chứa code tạo UI và quản lý bố cục.
-
-service: Chứa logic nghiệp vụ thuần túy (tính toán, format, v.v.).
+=
+client ID
+4a691012-79b5-4e08-9757-22ddecc63544
+API key
+939af168-1140-4a4a-8b7a-454e81c28b37
+check sum
+8ab2b80b974016ef61e2d887f50f4e95c3cc7ce898fed3285d5ff9acf27f2903

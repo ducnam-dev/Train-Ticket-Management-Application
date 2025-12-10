@@ -2,18 +2,16 @@ package gui.Panel;
 
 import dao.VeDAO;
 import entity.*;
+import gui.Popup.TicketPanel;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.Clock;
 import java.util.List;
 import java.util.Vector;
-import java.time.format.DateTimeFormatter; // Import nếu cần
 
 
 import java.awt.Dialog;
@@ -99,6 +97,8 @@ public class ManHinhTraCuuVe extends JPanel implements ActionListener {
 
         xoaBoLoc();
     }
+
+
 
 
     // Trong lớp ManHinhTraCuuVe
@@ -380,7 +380,7 @@ public class ManHinhTraCuuVe extends JPanel implements ActionListener {
                     ghe,
                     ngayKH,
                     String.format("%,.0f", ve.getGia()),
-                    "👁️"
+                    "Xem chi tiết"
             });
         }
     }

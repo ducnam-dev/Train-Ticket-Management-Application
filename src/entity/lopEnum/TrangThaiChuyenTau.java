@@ -1,13 +1,11 @@
 package entity.lopEnum;
 
 public enum TrangThaiChuyenTau {
-    // Nếu giá trị CSDL là "Đã Khởi Hành"
-    // CÁCH NÀY KHÔNG CHUẨN
-    // Đã Khởi Hành, // Không hợp lệ
 
-    // CÁCH TỐT NHẤT: Thêm một field để lưu giá trị tiếng Việt
-    ĐÃ_KHỞI_HÀNH("Đã Khởi Hành"),
-    ĐANG_CHỜ("Chờ khởi hành");
+    DANG_CHO("Chờ khởi hành"), // <--- Đã sửa tên
+    DA_HUY("Đã hủy"),
+    DA_KHOI_HANH("Đã khởi hành"),
+    DA_DEN("Đã đến");
 
     private final String tenHienThi;
 

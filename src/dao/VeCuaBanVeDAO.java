@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import java.sql.DriverManager;
+import java.util.Map;
 
 public class VeCuaBanVeDAO {
     // Khởi tạo các DAO phụ thuộc (Cần đảm bảo chúng có constructor mặc định)
@@ -72,11 +73,11 @@ public class VeCuaBanVeDAO {
      *
      * @param hoaDon Đối tượng hóa đơn đã chuẩn bị.
      * @param danhSachVe Danh sách vé đã được tạo (MaVe=null).
-     * @param khachHang Khách hàng liên quan (đã có MaKH/CCCD).
+     *
      * @return true nếu toàn bộ giao dịch thành công.
      * @throws SQLException Nếu có lỗi CSDL (Transaction đã bị ROLLBACK).
      */
-    public boolean banVeTrongTransaction(HoaDon hoaDon, List<VeCuaBanVe> danhSachVe, KhachHang khachHang) throws SQLException {
+    public boolean banVeTrongTransaction(HoaDon hoaDon, List<VeCuaBanVe> danhSachVe, Map<String, KhachHang> danhSachKhachHangEntities) throws SQLException {
         Connection conn = null;
         boolean success = false;
 
@@ -101,10 +102,12 @@ public class VeCuaBanVeDAO {
 
             // --- B1: Xử lý Khách hàng (Thêm mới hoặc Cập nhật) ---
             // Gọi KhachHangDAO để đảm bảo khách hàng tồn tại trong CSDL
-            if (!khachHangDAO.addOrUpdateKhachHang(conn, khachHang)) {
-                throw new SQLException("Lỗi khi thêm/cập nhật thông tin Khách hàng.");
+            for (KhachHang kh : danhSachKhachHangEntities.values()) {
+                if (!khachHangDAO.addOrUpdateKhachHang(conn, kh)) {
+                    // Nếu addOrUpdate thất bại (ví dụ: lỗi CSDL), rollback.
+                    throw new SQLException("Lỗi khi thêm/cập nhật thông tin Khách hàng: " + kh.getMaKH());
+                }
             }
-
             // --- B2: Thêm Hóa đơn ---
             if (!hoaDonDAO.themHoaDon(conn, hoaDon)) {
                 throw new SQLException("Thêm Hóa đơn thất bại.");

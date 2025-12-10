@@ -981,7 +981,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         String maNVLap = MA_NV_LAP_HD_MOCK;
 
         // Kiểm tra tiền khách đưa
-        // ... (logic kiểm tra tiền khách đưa, giữ nguyên) ...
         try {
             String raw = txtTienKhachDua.getText().replaceAll("[^0-9]", "");
             long tienKhachDua = Long.parseLong(raw);
@@ -1049,7 +1048,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         // --- B4: Gọi DAO để thực hiện Transaction ---
         try {
             // FIX: Truyền KhachHang entity đại diện (đã có MaKH hợp lệ)
-            boolean success = veBVDao.banVeTrongTransaction(hoaDon, danhSachVeMoi, khachHangDaiDienObj);
+            boolean success = veBVDao.banVeTrongTransaction(hoaDon, danhSachVeMoi, danhSachKhachHangEntity);
             System.out.println("Kết quả của hóa đơn " + hoaDon.toString());
 
             if (success) {
@@ -1118,6 +1117,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
         String[] maKhachHangDaiDienArr = new String[1]; // Biến hứng Mã KH đại diện
         Map<String, KhachHang> danhSachKhachHangEntity;
 
+
+
         try {
             // BƯỚC 1: Xử lý và tạo Entity Khách hàng
             danhSachKhachHangEntity = xuLyVaTaoKhachHangEntities(maKhachHangDaiDienArr);
@@ -1161,9 +1162,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
      * Hành động cho nút "Kết thúc >" (Chuyển về trang chủ sau khi thanh toán xong).
      */
     private void ketThuc() {
-        // NOTE: Hàm này chỉ nên được gọi sau khi transaction thành công!
-
-        // 1. Reset dữ liệu của màn hình hiện tại
         resetAllData();
 
         resetManHinhBanVeChinh();
@@ -1387,22 +1385,6 @@ private static Object createMockChiTietKhach(
             mockGheDaChon.put("CD001", cho1);
             mockGheDaChon.put("CD002", cho2);
 
-            // --- 2. Tạo dữ liệu giả cho ChiTietKhach ---
-            // ChiTietKhach cần phải là một Record được định nghĩa bên ngoài
-            // Tạm sử dụng Class tương đương nếu Record không truy cập được
-            // NOTE: Giả sử ChiTietKhach là Class hoặc Record được định nghĩa như sau:
-        /* class ChiTietKhach {
-            ChoDat choDat, String maLoaiVe, String hoTen, String cccd, String sdt, int tuoi
-        }
-        */
-
-            // Dùng Reflection hoặc tạo lớp giả nếu ChiTietKhach là private Record
-            // Trong trường hợp này, tôi giả định bạn có thể truy cập được Record
-
-            // Dùng lại định nghĩa Record từ ManHinhBanVe để tạo dữ liệu giả:
-            // (Chú ý: Nếu ChiTietKhach là private record trong ManHinhBanVe, bạn sẽ phải
-            // tạo một bản sao định nghĩa tạm thời trong ManHinhXacNhanBanVe để chạy test)
-            // **KHÔNG THỂ COPY ĐỊNH NGHĨA RECORD TỪ LỚP KHÁC NÊN TÔI SẼ DÙNG NULL CHO CÁC FIELD CÒN LẠI**
 
             Map<String, Object> mockKhachHang = new LinkedHashMap<>();
 

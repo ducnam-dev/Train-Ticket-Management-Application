@@ -1,4 +1,4 @@
-package gui.Panel;
+package gui.Popup;
 
 
 import dao.ChiTietHoaDonDAO;
@@ -863,10 +863,20 @@ public class PopUpChiTietHoaDon extends JPanel {
         lblEmail.setText(khachHangDat.getGioiTinh());
 
 
-        if (khachHangDat.getGioiTinh().equals("Nam")){
-            lblEmail.setIcon(resizedMaleIcon);
+        // Kiểm tra null trước khi gọi bất kỳ phương thức nào
+        if (khachHangDat.getGioiTinh() != null) {
+            if (khachHangDat.getGioiTinh().equals("Nam")){
+                lblEmail.setIcon(resizedMaleIcon);
+            }
+            else {
+                lblEmail.setIcon(resizedFemaleIcon);
+            }
+        } else {
+            // Xử lý khi Giới Tính là NULL (ví dụ: gán icon mặc định)
+            // lblEmail.setIcon(resizedGenderIcon);
+            lblEmail.setIcon(null); // Không gán icon
+            lblEmail.setText("N/A");
         }
-        else {lblEmail.setIcon(resizedFemaleIcon);}
         lblEmail.repaint();
 
         //4 Thông tin giao dịch

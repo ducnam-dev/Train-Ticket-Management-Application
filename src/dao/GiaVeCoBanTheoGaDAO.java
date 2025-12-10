@@ -16,11 +16,16 @@ public class GiaVeCoBanTheoGaDAO {
 
     public GiaVeCoBanTheoGaDAO() {
         // Mock data: key = maGaDi + "-" + maGaDen
-        mock.put("GASA-GAHN", 100000L);
-        mock.put("GAHN-GASA", 100000L);
-        mock.put("GASA-GADN", 100000L);
-        mock.put("GADN-GASA", 100000L);
+        mock.put("GASG-GAHN", 100000L);
+        mock.put("GAHN-GASG", 100000L);
+        mock.put("GASG-GADN", 100000L);
+        mock.put("GADN-GASG", 100000L);
+        mock.put("GASG-GAPT", 10000L);
         // Thêm vài dữ liệu mẫu nếu cần
+        // Kết nối CSDL (chưa sử dụng trong mock)
+        /*hiện tại chưa nghĩ ra cách lấy dữ liệu từ csdl để tính toán giá vé cơ bản theo ga nên
+        tạm thời để connect db ở đây và dùng mock data thôi
+        */
         ConnectDB connectDB = new ConnectDB();
 
     }
