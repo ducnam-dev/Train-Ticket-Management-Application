@@ -57,16 +57,16 @@ public class PopUpChiTietHoaDon extends JPanel {
         // --- BẮT ĐẦU CODE CUSTOM CỦA BẠN ---
 
         // 1. Đường dẫn ảnh (giữ nguyên)
-        String imagePath_Train = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/train.png";
-        String imagePath_Passenger = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/hanhkhach.png";
-        String imagePath_Telephone = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/telephone.png";
-        String imagePath_Passengers = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/nhieuhanhkhach.png";
-        String imagePath_Transaction = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/payment-success.png";
-        String imagePath_PaymentMethod = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/payment-method.png";
-        String imagePath_Calendar = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/schedule.png";
-        imagePath_Male = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/male-gender.png";
-        imagePath_Female = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/female-gender.png";
-        String imagePath_Gender = "/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/gender.png";
+        String imagePath_Train = "/images/train.png";
+        String imagePath_Passenger = "/images/hanhkhach.png";
+        String imagePath_Telephone = "/images/telephone.png";
+        String imagePath_Passengers = "/images/nhieuhanhkhach.png";
+        String imagePath_Transaction = "/images/payment-success.png";
+        String imagePath_PaymentMethod = "/images/payment-method.png";
+        String imagePath_Calendar = "/images/schedule.png";
+        imagePath_Male = "/images/male-gender.png";
+        imagePath_Female = "/images/female-gender.png";
+        String imagePath_Gender = "/images/gender.png";
 
         // 3. Gọi hàm resize
         ImageIcon resizedTrainIcon = resizeIcon(imagePath_Train, 28, 28);
@@ -90,6 +90,10 @@ public class PopUpChiTietHoaDon extends JPanel {
         jLabel27.setIcon(resizedPaymentMethodIcon);
         lblNgayLapHD.setIcon(resizedCalendarIcon); // Đã sửa từ lblNgayThanhToan
         lblEmail.setIcon(resizedGenderIcon);
+
+        if (lblEmail.getText().equals("Nam"))
+            lblEmail.setIcon(resizedMaleIcon);
+        else lblEmail.setIcon(resizedFemaleIcon);
 
         // Custom nút
         btnInHoaDon.setOpaque(true);
@@ -132,7 +136,13 @@ public class PopUpChiTietHoaDon extends JPanel {
 
     // Đã sửa javax.swing.ImageIcon -> ImageIcon, java.awt.Image -> Image
     private ImageIcon resizeIcon(String path, int width, int height) {
-        ImageIcon originalIcon = new ImageIcon(path);
+        java.net.URL imgURL = getClass().getResource(path);
+
+        if (imgURL == null) {
+            System.err.println("Không tìm thấy ảnh tại đường dẫn: " + path);
+            return null;
+        }
+        ImageIcon originalIcon = new ImageIcon(getClass().getResource(path));
         Image originalImage = originalIcon.getImage();
         Image resizedImage = originalImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(resizedImage);
@@ -229,7 +239,7 @@ public class PopUpChiTietHoaDon extends JPanel {
 
         lblTieuDeMaHoaDon.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 24)); // Đã sửa java.awt.Font -> Font
         lblTieuDeMaHoaDon.setHorizontalAlignment(SwingConstants.CENTER); // Đã sửa javax.swing.SwingConstants -> SwingConstants
-        lblTieuDeMaHoaDon.setIcon(new ImageIcon("/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/train.png")); // Đã sửa javax.swing.ImageIcon -> ImageIcon
+        lblTieuDeMaHoaDon.setIcon(new ImageIcon("/images/train.png")); // Đã sửa javax.swing.ImageIcon -> ImageIcon
 
         jPanel2.setBackground(new Color(255, 255, 255)); // Đã sửa
 
@@ -364,7 +374,7 @@ public class PopUpChiTietHoaDon extends JPanel {
         jLabel18.setFont(new Font("Oriya Sangam MN", Font.PLAIN, 16)); // Đã sửa
         jLabel18.setForeground(new Color(255, 255, 255)); // Đã sửa
         jLabel18.setHorizontalAlignment(SwingConstants.CENTER); // Đã sửa
-        jLabel18.setIcon(new ImageIcon("/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/nhieuhanhkhach.png")); // Đã sửa
+        jLabel18.setIcon(new ImageIcon("/images/nhieuhanhkhach.png")); // Đã sửa
         jLabel18.setText("Hành khách ");
         jLabel18.setSize(new Dimension(17, 60)); // Đã sửa
 
@@ -384,18 +394,18 @@ public class PopUpChiTietHoaDon extends JPanel {
         lblTenHanhKhach.setText("Nguyễn Văn Nam");
 
         lblEmail.setFont(new Font("Kailasa", Font.PLAIN, 17)); // Đã sửa
-        lblEmail.setIcon(new ImageIcon("/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/email.png")); // Đã sửa
-        lblEmail.setText("abcxyz@gmail.com");
+        lblEmail.setIcon(new ImageIcon("/images/gender.png")); // Đã sửa
+        lblEmail.setText("Nam");
 
         lblSoDienThoai.setFont(new Font("Kailasa", Font.PLAIN, 17)); // Đã sửa
-        lblSoDienThoai.setIcon(new ImageIcon("/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/telephone.png")); // Đã sửa
+        lblSoDienThoai.setIcon(new ImageIcon("/images/telephone.png")); // Đã sửa
         lblSoDienThoai.setText("0123456789");
 
         jLabel25.setBackground(new Color(100, 100, 100)); // Đã sửa
         jLabel25.setFont(new Font("Oriya Sangam MN", Font.PLAIN, 16)); // Đã sửa
         jLabel25.setForeground(new Color(255, 255, 255)); // Đã sửa
         jLabel25.setHorizontalAlignment(SwingConstants.CENTER); // Đã sửa
-        jLabel25.setIcon(new ImageIcon("/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/hanhkhach.png")); // Đã sửa
+        jLabel25.setIcon(new ImageIcon("/images/hanhkhach.png")); // Đã sửa
         jLabel25.setText(" Người đặt vé  ");
 
         BangChiTietHanhKhach.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1)); // Đã sửa javax.swing.BorderFactory -> BorderFactory
@@ -498,7 +508,7 @@ public class PopUpChiTietHoaDon extends JPanel {
         jPanel4.setBackground(new Color(255, 255, 255)); // Đã sửa
 
         lblNgayLapHD.setFont(new Font("Helvetica Neue", Font.PLAIN, 16)); // Đã sửa
-        lblNgayLapHD.setIcon(new ImageIcon("/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/schedule.png")); // Đã sửa
+        lblNgayLapHD.setIcon(new ImageIcon("/images/schedule.png")); // Đã sửa
         lblNgayLapHD.setText("19/08/2024");
 
         jLabel29.setFont(new Font("Helvetica Neue", Font.PLAIN, 16)); // Đã sửa
@@ -510,7 +520,7 @@ public class PopUpChiTietHoaDon extends JPanel {
         jLabel31.setText("Số tiền phải thanh toán :");
 
         lblSoTienPhaiThanhToan.setFont(new Font("Helvetica Neue", Font.PLAIN, 20)); // Đã sửa
-        lblSoTienPhaiThanhToan.setIcon(new ImageIcon("/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/payment-success.png")); // Đã sửa
+        lblSoTienPhaiThanhToan.setIcon(new ImageIcon("/images/payment-success.png")); // Đã sửa
         lblSoTienPhaiThanhToan.setText("2.240.000 ₫");
 
         jLabel33.setFont(new Font("Helvetica Neue", Font.PLAIN, 16)); // Đã sửa
@@ -529,7 +539,7 @@ public class PopUpChiTietHoaDon extends JPanel {
 
         jLabel27.setFont(new Font("Helvetica Neue", Font.PLAIN, 19)); // Đã sửa
         jLabel27.setForeground(new Color(158, 158, 158)); // Đã sửa
-        jLabel27.setIcon(new ImageIcon("/Users/laptoptt/Project_BanVeTau/Train-Ticket-Management-Application/src/images/payment-method.png")); // Đã sửa
+        jLabel27.setIcon(new ImageIcon("/images/payment-method.png")); // Đã sửa
         jLabel27.setText(":");
 
         jLabel32.setFont(new Font("Helvetica Neue", Font.PLAIN, 16)); // Đã sửa

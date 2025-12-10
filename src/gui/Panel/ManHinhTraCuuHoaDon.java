@@ -91,7 +91,8 @@ public class ManHinhTraCuuHoaDon extends JPanel {
         headerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         TableColumnModel columnModel = Table_DanhSachHoaDon.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(150); // Cột 0 - Mã hóa đơn
-        columnModel.getColumn(1).setPreferredWidth(200); // Cột 1 - Khách hàng
+        columnModel.getColumn(1).setPreferredWidth(180); // Cột 1 - Khách hàng
+        columnModel.getColumn(2).setPreferredWidth(180); // cột tuyến
 
         DefaultTableCellRenderer centerDataRenderer = new DefaultTableCellRenderer();
         centerDataRenderer.setHorizontalAlignment(SwingConstants.CENTER);
