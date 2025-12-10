@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="fix ảnh">
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/gson_2_8_6.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/control/CaLamViec.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/control/NhanVienDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/control/XuLyNhanVien.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyKhuyenMai2.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/gui/Panel/TicketPanel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/gui/Popup/PopupTaoKhuyenMai.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/images/iconMenu/ketca.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/to do list. danh sach cac phan viec can hoan thien" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Ảnh test chương trình/QR vé tàu.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Ảnh test chương trình/ghi chú làm thống kế.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Ảnh test chương trình/ảnh nếu mua vé thành công.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Ảnh test chương trình/ảnh vé tàu.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README" beforeDir="false" afterPath="$PROJECT_DIR$/README" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Train-Ticket-Management-Application2.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Train-Ticket-Management-Application2.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/test2.3.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSDL quan ly ve tau backup.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/NhanVienDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/NhanVienDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/VeCuaBanVeDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/VeCuaBanVeDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/VeDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/VeDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entity/ChuyenTau.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/ChuyenTau.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entity/NhanVien.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/NhanVien.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/ManHinhDangNhap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/ManHinhDangNhap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyKhuyenMai.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyKhuyenMai.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhTraCuuVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTraCuuVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhTrangChuNVBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTrangChuNVBanVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhXacNhanBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhXacNhanBanVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/PopUpChiTietHoaDon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/PopUpChiTietHoaDon.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/images/doive.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/images/iconMenu/doive.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/images/hoadon.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/images/iconMenu/tracuuhoadon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/images/home.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/images/iconMenu/home.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/images/logout.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/images/iconMenu/logout.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/images/moca.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/images/iconMenu/moca.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/images/ticket_icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/images/iconMenu/banve.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/images/tracuu.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/images/iconMenu/tracuu.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/images/train.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/images/iconMenu/train.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/images/trave.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/images/iconMenu/trave.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/module-info.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;TranSon-code&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/ducnam-dev/Train-Ticket-Management-Application.git&quot;,
+    &quot;accountId&quot;: &quot;9277c421-4bc3-4931-9a88-af53ddd21980&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="34qFYRkLqvIAKxFNq395BANpeTV" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.BanVeDashboard.executor": "Run",
+    "Application.Main.executor": "Run",
+    "Application.ManHinhTraCuuHoaDon.executor": "Run",
+    "Application.PopUpChiTietHoaDon.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "Merging master",
+    "kotlin-language-version-configured": "true"
+  }
+}]]></component>
+  <component name="RunManager" selected="Application.BanVeDashboard">
+    <configuration name="BanVeDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.BanVeDashboard" />
+      <module name="Train-Ticket-Management-Application2" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="gui.MainFrame.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Main" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="view.Main" />
+      <module name="Train-Ticket-Management-Application2" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ManHinhTraCuuHoaDon" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhTraCuuHoaDon" />
+      <module name="Train-Ticket-Management-Application2" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="gui.Panel.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PopUpChiTietHoaDon" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.PopUpChiTietHoaDon" />
+      <module name="Train-Ticket-Management-Application2" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="gui.Panel.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.BanVeDashboard" />
+        <item itemvalue="Application.PopUpChiTietHoaDon" />
+        <item itemvalue="Application.ManHinhTraCuuHoaDon" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="" />
+      <created>1761933243964</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1761933243964</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
+      <option name="closed" value="true" />
+      <created>1761937482127</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1761937482127</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Đã fix Tra cứu hóa đơn">
+      <option name="closed" value="true" />
+      <created>1765329986060</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1765329986061</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Update gitignore to ignore build outputs">
+      <option name="closed" value="true" />
+      <created>1765332015385</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1765332015385</updated>
+    </task>
+    <task id="LOCAL-00004" summary="fix ảnh">
+      <option name="closed" value="true" />
+      <created>1765332028194</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1765332028194</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Hoàn thiện tra cứu hóa đơn" />
+    <MESSAGE value="Đã fix Tra cứu hóa đơn" />
+    <MESSAGE value="Update gitignore to ignore build outputs" />
+    <MESSAGE value="fix ảnh" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix ảnh" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/UngDung$PopUpChiTietHoaDon.ic" NAME="PopUpChiTietHoaDon Coverage Results" MODIFIED="1765327945354" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>gui.Panel.*</FILTER>
+    </SUITE>
+  </component>
+</project>
