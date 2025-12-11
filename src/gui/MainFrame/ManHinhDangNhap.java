@@ -5,7 +5,6 @@ import control.XuLyTaiKhoan;
 import entity.NhanVien;
 import entity.TaiKhoan;
 import control.CaLamViec;
-//import gui.MainFrame.ManHinhDashboardQuanLy; // Giả định lớp này tồn tại
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,140 +19,147 @@ import java.io.File;
  */
 public class ManHinhDangNhap extends JFrame implements ActionListener {
 
-    private static final String LOGO_PATH = "src/images/logo-train.png";
-
-    private static final String TRAIN_IMAGE_PATH = "src/images/anh tau.jpg";
-
-    // Kích thước mong muốn của ảnh logo và ảnh tàu
-    private static final int LOGO_SIZE = 80;
-    private static final int TRAIN_IMAGE_WIDTH = 600;
+    // --- Thuộc tính (Properties) đã Việt hóa ---
+    private static final String DUONG_DAN_LOGO = "src/images/logo-train.png";
+    private static final String DUONG_DAN_ANH_TAU = "src/images/anh tau.jpg";
+    private static final int KICH_THUOC_LOGO = 80;
+    private static final int CHIEU_RONG_ANH_TAU = 600;
 
     private JButton btnDangNhap;
     private JTextField txtTaiKhoan;
-    private JPasswordField pssMatKhau;
+    private JPasswordField txtMatKhau;
 
+    // --- Constructor đã Việt hóa ---
     public ManHinhDangNhap() {
         setTitle("Đăng nhập Hệ thống Quản lý Bán vé Tàu");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 700);
         setLocationRelativeTo(null);
 
-        // Sử dụng BorderLayout cho JFrame chính
         setLayout(new BorderLayout());
 
         // 1. Thêm Panel Ảnh Đoàn Tàu (Bên trái - WEST)
-        JPanel trainImagePanel = createTrainImagePanel();
-        add(trainImagePanel, BorderLayout.WEST);
+        JPanel bangAnhTau = taoBangAnhTau();
+        add(bangAnhTau, BorderLayout.WEST);
 
         // 2. Thêm Panel Form Đăng nhập (Trung tâm - CENTER)
-        JPanel loginCenterPanel = createLoginCenterPanel(); // btnDangNhap được khởi tạo trong createLoginFormPanel()
-        add(loginCenterPanel, BorderLayout.CENTER);
+        JPanel bangTrungTamDangNhap = taoBangTrungTamDangNhap();
+        add(bangTrungTamDangNhap, BorderLayout.CENTER);
 
-        loginCenterPanel.setBackground(Color.WHITE);
+        bangTrungTamDangNhap.setBackground(Color.WHITE);
 
-        // ==========================================================
         // THÊM CHỨC NĂNG NHẤN ENTER ĐỂ ĐĂNG NHẬP
-        // ==========================================================
-        JRootPane rootPane = SwingUtilities.getRootPane(this);
-        if (rootPane != null) {
-            rootPane.setDefaultButton(btnDangNhap); // Chỉ định nút mặc định
-        }
+//        JRootPane rootPane = SwingUtilities.getRootPane(this);
+//        if (rootPane != null) {
+//            rootPane.setDefaultButton(btnDangNhap); // Chỉ định nút mặc định
+//        }
 
         setVisible(true);
     }
 
-    // ... (Các phương thức createTrainImagePanel, createLoginCenterPanel, customizeTextField, createScaledImageLabel giữ nguyên)
+    // --- Các Phương thức tạo Panel (Panel Creation Methods) đã Việt hóa ---
 
-    private JPanel createTrainImagePanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(new Dimension(TRAIN_IMAGE_WIDTH, this.getHeight()));
+    /**
+     * Phương thức tạo Panel chứa ảnh tàu (Bên trái)
+     */
+    private JPanel taoBangAnhTau() {
+        JPanel bang = new JPanel(new BorderLayout());
+        bang.setPreferredSize(new Dimension(CHIEU_RONG_ANH_TAU, this.getHeight()));
 
-        panel.setBackground(new Color(41, 128, 185));
+        bang.setBackground(new Color(41, 128, 185));
 
-        JLabel trainLabel = createScaledImageLabel(TRAIN_IMAGE_PATH, TRAIN_IMAGE_WIDTH, 550, "TRAIN IMAGE HERE");
+        JLabel nhanAnhTau = taoNhanAnhDaChinhKichThuoc(DUONG_DAN_ANH_TAU, CHIEU_RONG_ANH_TAU, 550, "TRAIN IMAGE HERE"); // createScaledImageLabel -> taoNhanAnhDaChinhKichThuoc
 
-        JPanel centerContainer = new JPanel();
-        centerContainer.setLayout(new BoxLayout(centerContainer, BoxLayout.Y_AXIS));
-        centerContainer.setOpaque(false);
+        JPanel containerTrungTam = new JPanel();
+        containerTrungTam.setLayout(new BoxLayout(containerTrungTam, BoxLayout.Y_AXIS));
+        containerTrungTam.setOpaque(false);
 
-        centerContainer.add(Box.createVerticalGlue());
-        trainLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        centerContainer.add(trainLabel);
-        centerContainer.add(Box.createVerticalGlue());
+        containerTrungTam.add(Box.createVerticalGlue());
+        nhanAnhTau.setAlignmentX(Component.CENTER_ALIGNMENT);
+        containerTrungTam.add(nhanAnhTau);
+        containerTrungTam.add(Box.createVerticalGlue());
 
-        panel.add(centerContainer, BorderLayout.CENTER);
+        bang.add(containerTrungTam, BorderLayout.CENTER);
 
-        return panel;
+        return bang;
     }
 
-    // --- Panel Bên Phải: Form Đăng Nhập ---
-    private JPanel createLoginCenterPanel() {
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setOpaque(false);
+    /**
+     * Phương thức tạo Panel trung tâm chứa form đăng nhập (Bên phải)
+     */
+    private JPanel taoBangTrungTamDangNhap() {
+        JPanel bangTrungTam = new JPanel();
+        bangTrungTam.setLayout(new BoxLayout(bangTrungTam, BoxLayout.Y_AXIS));
+        bangTrungTam.setOpaque(false);
 
-        JPanel loginPanel = createLoginFormPanel();
+        JPanel bangFormDangNhap = taoBangFormDangNhap();
 
-        loginPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        bangFormDangNhap.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        centerPanel.add(Box.createVerticalGlue());
-        centerPanel.add(loginPanel);
-        centerPanel.add(Box.createVerticalGlue());
+        bangTrungTam.add(Box.createVerticalGlue());
+        bangTrungTam.add(bangFormDangNhap);
+        bangTrungTam.add(Box.createVerticalGlue());
 
-        return centerPanel;
+        return bangTrungTam;
     }
 
-    private JPanel createLoginFormPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setOpaque(false);
-        panel.setBorder(new EmptyBorder(50, 50, 50, 50));
+    /**
+     * Phương thức tạo Panel chứa các trường nhập liệu (Form Đăng nhập)
+     */
+    private JPanel taoBangFormDangNhap() {
+        JPanel bang = new JPanel();
+        bang.setLayout(new BoxLayout(bang, BoxLayout.Y_AXIS));
+        bang.setOpaque(false);
+        bang.setBorder(new EmptyBorder(50, 50, 50, 50));
 
-        panel.setPreferredSize(new Dimension(400, 450));
-        panel.setMaximumSize(new Dimension(400, 450));
+        bang.setPreferredSize(new Dimension(400, 450));
+        bang.setMaximumSize(new Dimension(400, 450));
 
         // --- 1. Logo và Tiêu đề ---
-        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
-        headerPanel.setOpaque(false);
+        JPanel bangTieuDe = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        bangTieuDe.setOpaque(false);
 
-        JLabel logoLabel = createScaledImageLabel(LOGO_PATH, LOGO_SIZE, LOGO_SIZE, "LOGO HERE");
+        JLabel nhanLogo = taoNhanAnhDaChinhKichThuoc(DUONG_DAN_LOGO, KICH_THUOC_LOGO, KICH_THUOC_LOGO, "LOGO HERE"); // createScaledImageLabel -> taoNhanAnhDaChinhKichThuoc
 
-        JLabel titleLabel = new JLabel("ĐĂNG NHẬP");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 30));
+        JLabel nhanTieuDe = new JLabel("ĐĂNG NHẬP");
+        nhanTieuDe.setFont(new Font("Arial", Font.BOLD, 30));
 
-        headerPanel.add(logoLabel);
-        headerPanel.add(titleLabel);
+        bangTieuDe.add(nhanLogo);
+        bangTieuDe.add(nhanTieuDe);
 
-        headerPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(headerPanel);
+        bangTieuDe.setAlignmentX(Component.LEFT_ALIGNMENT);
+        bang.add(bangTieuDe);
 
-        panel.add(Box.createVerticalStrut(30));
+        bang.add(Box.createVerticalStrut(30));
 
         // --- 2. Tên đăng nhập ---
-        JLabel usernameLabel = new JLabel("Tên đăng nhập:");
-        usernameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(usernameLabel);
+        JLabel lblTaiKhoan = new JLabel("Tên đăng nhập:");
+        lblTaiKhoan.setAlignmentX(Component.LEFT_ALIGNMENT);
+        bang.add(lblTaiKhoan);
 
-        panel.add(Box.createVerticalStrut(5));
+        bang.add(Box.createVerticalStrut(5));
 
-        txtTaiKhoan = new JTextField(); // Đặt giá trị mặc định để dễ test
-        customizeTextField(txtTaiKhoan);
-        panel.add(txtTaiKhoan);
+        txtTaiKhoan = new JTextField();
+        tuyChinhTruongVanBan(txtTaiKhoan);
+        txtTaiKhoan.addActionListener(this);
+        bang.add(txtTaiKhoan);
 
-        panel.add(Box.createVerticalStrut(15));
+        bang.add(Box.createVerticalStrut(15));
+
 
         // --- 3. Mật khẩu ---
-        JLabel passwordLabel = new JLabel("Mật khẩu:");
-        passwordLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(passwordLabel);
+        JLabel nhanMatKhau = new JLabel("Mật khẩu:");
+        nhanMatKhau.setAlignmentX(Component.LEFT_ALIGNMENT);
+        bang.add(nhanMatKhau);
 
-        panel.add(Box.createVerticalStrut(5));
+        bang.add(Box.createVerticalStrut(5));
 
-        pssMatKhau = new JPasswordField(); // Đặt giá trị mặc định để dễ test
-        customizeTextField(pssMatKhau);
-        panel.add(pssMatKhau);
+        txtMatKhau = new JPasswordField();
+        tuyChinhTruongVanBan(txtMatKhau);
+        txtMatKhau.addActionListener(this);
+        bang.add(txtMatKhau);
 
-        panel.add(Box.createVerticalStrut(30));
+        bang.add(Box.createVerticalStrut(30));
 
         // --- 4. Nút Đăng nhập ---
         btnDangNhap = new JButton("Đăng nhập");
@@ -162,62 +168,62 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
         btnDangNhap.setForeground(Color.WHITE);
         btnDangNhap.setFont(new Font("Arial", Font.BOLD, 16));
         btnDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btnDangNhap.addActionListener(this); // Gán ActionListener
+        btnDangNhap.addActionListener(this);
 
         // --- 5. Nút Quên mật khẩu ---
-        JButton forgotPasswordButton = new JButton("Quên mật khẩu");
-        forgotPasswordButton.setContentAreaFilled(false);
-        forgotPasswordButton.setBorderPainted(false);
-        forgotPasswordButton.setForeground(new Color(0, 123, 255));
-        forgotPasswordButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        forgotPasswordButton.setFont(new Font("Arial", Font.PLAIN, 12));
-        forgotPasswordButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JButton nutQuenMatKhau = new JButton("Quên mật khẩu");
+        nutQuenMatKhau.setContentAreaFilled(false);
+        nutQuenMatKhau.setBorderPainted(false);
+        nutQuenMatKhau.setForeground(new Color(0, 123, 255));
+        nutQuenMatKhau.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        nutQuenMatKhau.setFont(new Font("Arial", Font.PLAIN, 12));
+        nutQuenMatKhau.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Thêm các thành phần vào Panel
-        panel.add(btnDangNhap);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(forgotPasswordButton);
+        bang.add(btnDangNhap);
+        bang.add(Box.createVerticalStrut(10));
+        bang.add(nutQuenMatKhau);
 
-        return panel;
+        return bang;
     }
 
     /**
      * Tùy chỉnh JTextComponent
      */
-    private void customizeTextField(JTextComponent field) {
-        field.setFont(new Font("Arial", Font.PLAIN, 16));
-        field.setBorder(BorderFactory.createCompoundBorder(
+    private void tuyChinhTruongVanBan(JTextComponent truong) {
+        truong.setFont(new Font("Arial", Font.PLAIN, 16));
+        truong.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
-        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        field.setAlignmentX(Component.LEFT_ALIGNMENT);
+        truong.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        truong.setAlignmentX(Component.LEFT_ALIGNMENT);
     }
 
     /**
      * Tải và tạo JLabel chứa ảnh, điều chỉnh kích thước
      */
-    private JLabel createScaledImageLabel(String path, int width, int height, String fallbackText) {
-        JLabel imageLabel = new JLabel();
+    private JLabel taoNhanAnhDaChinhKichThuoc(String duongDan, int chieuRong, int chieuCao, String chuThichDuPhong) { // createScaledImageLabel -> taoNhanAnhDaChinhKichThuoc
+        JLabel nhanAnh = new JLabel();
         try {
-            File file = new File(path);
+            File file = new File(duongDan);
             if (!file.exists()) {
-                System.err.println("Lỗi: Không tìm thấy file ảnh tại đường dẫn: " + path);
-                imageLabel.setText(fallbackText);
-                return imageLabel;
+                System.err.println("Lỗi: Không tìm thấy file ảnh tại đường dẫn: " + duongDan);
+                nhanAnh.setText(chuThichDuPhong);
+                return nhanAnh;
             }
 
-            ImageIcon originalIcon = new ImageIcon(path);
-            Image image = originalIcon.getImage();
-            Image scaledImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            imageLabel.setIcon(new ImageIcon(scaledImage));
+            ImageIcon iconGoc = new ImageIcon(duongDan);
+            Image anh = iconGoc.getImage();
+            Image anhDaChinhKichThuoc = anh.getScaledInstance(chieuRong, chieuCao, Image.SCALE_SMOOTH);
+            nhanAnh.setIcon(new ImageIcon(anhDaChinhKichThuoc));
 
         } catch (Exception e) {
             System.err.println("Lỗi khi tải ảnh: " + e.getMessage());
             e.printStackTrace();
-            imageLabel.setText(fallbackText);
+            nhanAnh.setText(chuThichDuPhong);
         }
-        return imageLabel;
+        return nhanAnh;
     }
 
 
@@ -225,21 +231,29 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
      * Phương thức Main để chạy màn hình đăng nhập.
      */
     public static void main(String[] args) {
-        // Cần đảm bảo rằng lớp ConnectDB đã được gọi và kết nối đã được thiết lập
-        // database.ConnectDB.getInstance().connect(); // Ví dụ gọi kết nối
         SwingUtilities.invokeLater(ManHinhDangNhap::new);
     }
 
     // ==============================================================================
-    // LOGIC XỬ LÝ SỰ KIỆN ĐĂNG NHẬP
+    // LOGIC XỬ LÝ SỰ KIỆN ĐĂNG NHẬP (Action Listener)
     // ==============================================================================
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == btnDangNhap) {
-            String tenDangNhap = txtTaiKhoan.getText().trim();
-            String matKhau = new String(pssMatKhau.getPassword()).trim();
+        Object source = e.getSource();
 
-            // Xử lý trường hợp nhập thiếu dữ liệu
+        // 1. Nếu nhấn Enter trên Tên đăng nhập
+        if (source == txtTaiKhoan) {
+            txtMatKhau.requestFocusInWindow(); // Chuyển focus sang Mật khẩu
+            return;
+        }
+
+
+
+
+        if (source == txtMatKhau || source == btnDangNhap) {
+            String tenDangNhap = txtTaiKhoan.getText().trim();
+            String matKhau = new String(txtMatKhau.getPassword()).trim();
+
             if (tenDangNhap.isEmpty() || matKhau.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập Tên đăng nhập và Mật khẩu.", "Lỗi đăng nhập", JOptionPane.WARNING_MESSAGE);
                 return;
@@ -247,7 +261,6 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
 
             // Bước 2: Gọi hàm xác thực từ lớp Control
             TaiKhoan taiKhoan = XuLyTaiKhoan.authenticate(tenDangNhap, matKhau);
-
 
             if (taiKhoan != null) {
                 // Xác thực thành công:
@@ -257,7 +270,6 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
                 NhanVien nhanVien = null;
                 try {
                     // Gọi lớp xử lý để lấy thông tin NhanVien dựa trên MaNV
-                    // (Giả định: XuLyNhanVien.getNhanVienByMaNV(maNV) trả về đối tượng NhanVien)
                     nhanVien = XuLyNhanVien.layThongTinNhanVienChoCaLamViec(maNV);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Lỗi khi lấy thông tin nhân viên: " + ex.getMessage(), "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
@@ -272,24 +284,19 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
                 // BƯỚC 3: BẮT ĐẦU CA LÀM VIỆC VÀ LƯU SESSION => sẽ lấy để dùng sau
                 CaLamViec.getInstance().batDauCa(nhanVien);
 
-
-                // Phân quyền dựa trên MaNV chuẩn hóa:
+                // --- BƯỚC 4: HIỂN THỊ MÀN HÌNH DASHBOARD PHÙ HỢP ---
                 if (maNV.startsWith("NVQL")) {
-                    // Mở màn hình quản lý (Ví dụ: NVQL0001, NVQL0002)
+//                    new JOptionPane().showMessageDialog(this, "Đăng nhập QUẢN LÝ thành công.");
                     new QuanLyDashboard().setVisible(true);
                 } else if (maNV.startsWith("NVBV")) {
-                    // Mở màn hình bán vé (Ví dụ: NVBV0001)
+//                    new JOptionPane().showMessageDialog(this, "Đăng nhập BÁN VÉ thành công.");
                     new BanVeDashboard().setVisible(true);
                 } else {
-                    // Mặc định hoặc lỗi phân quyền
                     JOptionPane.showMessageDialog(this, "Tài khoản không có quyền truy cập.", "Lỗi phân quyền", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-
-                this.dispose(); // Đóng màn hình đăng nhập
+                this.dispose();
             } else {
-                // Xác thực thất bại (Thông báo lỗi đã được xử lý trong XuLyTaiKhoan)
-                // Hoặc hiển thị thông báo chung:
                 JOptionPane.showMessageDialog(this, "Tên đăng nhập hoặc mật khẩu không đúng.", "Lỗi đăng nhập", JOptionPane.ERROR_MESSAGE);
             }
         }

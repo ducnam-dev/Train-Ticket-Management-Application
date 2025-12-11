@@ -63,7 +63,7 @@ public class TicketPanel extends JPanel {
 
         panel.add(Box.createVerticalStrut(15));
 
-        panel.add(createTitleLabel("Giá vé: " + formatVnd(ve.getGia())));
+        panel.add(createTitleLabel("Giá vé: " + formatVnd(ve.getGiaVe())));
         panel.add(createLineNote("(Giá vé trên đã có bảo hiểm, dịch vụ đi kèm và thuế GTGT)"));
 
         // Dùng Glue để đẩy tất cả lên trên
@@ -82,7 +82,7 @@ public class TicketPanel extends JPanel {
         qrLabel.setHorizontalAlignment(SwingConstants.CENTER); // Căn giữa ảnh
 
         // 1. Dữ liệu cần mã hóa (Sử dụng ID vé)
-        String maVeData = ve.getId();
+        String maVeData = ve.getMaVe();
         try {
             // 2. Tạo ảnh BufferedImage từ mã vé
             BufferedImage qrImage = QRCodeService.generateQRCodeImage(maVeData, QR_SIZE);
@@ -111,7 +111,7 @@ public class TicketPanel extends JPanel {
         footerInfo.setBorder(new EmptyBorder(10, 0, 0, 0));
 
         // Mã đặt chỗ (Lấy từ trường nào đó của Ve/Hóa đơn - giả định là ID vé)
-        footerInfo.add(createLine("Mã vé:", ve.getId()));
+        footerInfo.add(createLine("Mã vé:", ve.getMaVe()));
         footerInfo.add(createLine("Đại lý bán vé:", "VNPay App")); // Giả lập
 
         panel.add(footerInfo, BorderLayout.CENTER);

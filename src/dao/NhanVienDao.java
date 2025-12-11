@@ -38,7 +38,8 @@ public class NhanVienDao {
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 if (rs.next()) {
                     String tenNV = rs.getString("HoTen");
-                    nv = new NhanVien(maNV, tenNV);
+                    String soDTNV = rs.getString("SDT");
+                    nv = new NhanVien(maNV, tenNV, soDTNV);
                 }
             }
         } catch (SQLException e) {

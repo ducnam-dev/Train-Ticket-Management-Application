@@ -1,53 +1,142 @@
 package entity;
 
 public class Ve {
-    private String id;
-    private String idTau;
-    private String khachHang;
+    // 1. Thuộc tính chính
+    private String maVe; // Thay 'id' thành 'maVe' để nhất quán với CSDL
+    private double giaVe; // Thay 'gia' thành 'giaVe'
+    private String trangThai;
+    private String maLoaiVe;
+
+    // 2. Thuộc tính Khóa ngoại (Sử dụng cho DAO INSERT/UPDATE)
+    private String maKhachHang; // Thêm
+    private String maChuyenTau; // Thêm
+    private String maChoDat;    // Thêm
+    private String maNV;        // Thêm (MaNV/NhanVien tạo vé)
+
+    // 3. Thuộc tính tiện ích (Sử dụng cho UI/Hiển thị)
+    private String tenKhachHang; // Thay 'khachHang' thành 'tenKhachHang'
     private int soGhe;
-    private double gia;
 
-    private String maLoaiVe; // Thêm thuộc tính mã loại vé
-
+    // 4. Thuộc tính Thực thể Chi tiết (Sử dụng cho DAO GET/Hiển thị đầy đủ)
     private KhachHang khachHangChiTiet;
     private ChuyenTau chuyenTauChiTiet;
-    private ChoDat choDatChiTiet;
-    private String trangThai; // Thêm thuộc tính trạng thái vé
+    private ChoDat choDatChiTiet; // Thêm thuộc tính trạng thái vé
 
+    // Default constructor
     public Ve() {
     }
 
-    public Ve(String id, String idTau, String khachHang, int soGhe, double gia) {
-        this.id = id;
-        this.idTau = idTau;
-        this.khachHang = khachHang;
+    // Constructor with essential fields
+    public Ve(String maVe, double giaVe, String trangThai, String maLoaiVe) {
+        this.maVe = maVe;
+        this.giaVe = giaVe;
+        this.trangThai = trangThai;
+        this.maLoaiVe = maLoaiVe;
+    }
+
+    // Full constructor
+    public Ve(String maVe, double giaVe, String trangThai, String maLoaiVe,
+              String maKhachHang, String maChuyenTau, String maChoDat, String maNV,
+              String tenKhachHang, int soGhe,
+              KhachHang khachHangChiTiet, ChuyenTau chuyenTauChiTiet, ChoDat choDatChiTiet) {
+        this.maVe = maVe;
+        this.giaVe = giaVe;
+        this.trangThai = trangThai;
+        this.maLoaiVe = maLoaiVe;
+        this.maKhachHang = maKhachHang;
+        this.maChuyenTau = maChuyenTau;
+        this.maChoDat = maChoDat;
+        this.maNV = maNV;
+        this.tenKhachHang = tenKhachHang;
         this.soGhe = soGhe;
-        this.gia = gia;
+        this.khachHangChiTiet = khachHangChiTiet;
+        this.chuyenTauChiTiet = chuyenTauChiTiet;
+        this.choDatChiTiet = choDatChiTiet;
+    }
+    // Constructor đầy đủ không bao gồm thuộc tính tiện ích và chi tiết
+        public Ve(String maVe, String maChuyenTau, String maChoDat, String maNV, String maKhachHang,
+              String maLoaiVe, double giaVe, String trangThai) {
+        this.maVe = maVe;
+        this.maChuyenTau = maChuyenTau;
+        this.maChoDat = maChoDat;
+        this.maNV = maNV;
+        this.maKhachHang = maKhachHang;
+        this.maLoaiVe = maLoaiVe;
+        this.giaVe = giaVe;
+        this.trangThai = trangThai;
     }
 
-
-    public String getId() {
-        return id;
+    // Getters and Setters
+    public String getMaVe() {
+        return maVe;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setMaVe(String maVe) {
+        this.maVe = maVe;
     }
 
-    public String getIdTau() {
-        return idTau;
+    public double getGiaVe() {
+        return giaVe;
     }
 
-    public void setIdTau(String idTau) {
-        this.idTau = idTau;
+    public void setGiaVe(double giaVe) {
+        this.giaVe = giaVe;
     }
 
-    public String getKhachHang() {
-        return khachHang;
+    public String getTrangThai() {
+        return trangThai;
     }
 
-    public void setKhachHang(String khachHang) {
-        this.khachHang = khachHang;
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public String getMaLoaiVe() {
+        return maLoaiVe;
+    }
+
+    public void setMaLoaiVe(String maLoaiVe) {
+        this.maLoaiVe = maLoaiVe;
+    }
+
+    public String getMaKhachHang() {
+        return maKhachHang;
+    }
+
+    public void setMaKhachHang(String maKhachHang) {
+        this.maKhachHang = maKhachHang;
+    }
+
+    public String getMaChuyenTau() {
+        return maChuyenTau;
+    }
+
+    public void setMaChuyenTau(String maChuyenTau) {
+        this.maChuyenTau = maChuyenTau;
+    }
+
+    public String getMaChoDat() {
+        return maChoDat;
+    }
+
+    public void setMaChoDat(String maChoDat) {
+        this.maChoDat = maChoDat;
+    }
+
+    public String getMaNV() {
+        return maNV;
+    }
+
+    public void setMaNV(String maNV) {
+        this.maNV = maNV;
+    }
+
+    public String getTenKhachHang() {
+        return tenKhachHang;
+    }
+
+    public void setTenKhachHang(String tenKhachHang) {
+        this.tenKhachHang = tenKhachHang;
     }
 
     public int getSoGhe() {
@@ -56,14 +145,6 @@ public class Ve {
 
     public void setSoGhe(int soGhe) {
         this.soGhe = soGhe;
-    }
-
-    public double getGia() {
-        return gia;
-    }
-
-    public void setGia(double gia) {
-        this.gia = gia;
     }
 
     public KhachHang getKhachHangChiTiet() {
@@ -88,30 +169,5 @@ public class Ve {
 
     public void setChoDatChiTiet(ChoDat choDatChiTiet) {
         this.choDatChiTiet = choDatChiTiet;
-    }
-
-    public String getTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(String trangThai) {
-        this.trangThai = trangThai;
-
-
-    }
-
-    @Override
-    public String toString() {
-        return "Ve{" +
-                "id='" + id + '\'' +
-                ", idTau='" + idTau + '\'' +
-                ", khachHang='" + khachHang + '\'' +
-                ", soGhe=" + soGhe +
-                ", gia=" + gia +
-                ", khachHangChiTiet=" + khachHangChiTiet +
-                ", chuyenTauChiTiet=" + chuyenTauChiTiet +
-                ", choDatChiTiet=" + choDatChiTiet +
-                ", trangThai='" + trangThai + '\'' +
-                '}';
     }
 }

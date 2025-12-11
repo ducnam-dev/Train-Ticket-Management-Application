@@ -129,7 +129,7 @@ public class ManHinhTraCuuVe extends JPanel implements ActionListener {
     private void hienThiChiTietVe(Ve ve) {
         JDialog dialog = new JDialog(
                 SwingUtilities.getWindowAncestor(this),
-                "Chi tiết vé: " + ve.getId(),
+                "Chi tiết vé: " + ve.getMaVe(),
                 Dialog.ModalityType.APPLICATION_MODAL // Sử dụng Constructor JDialog(Window, String, ModalityType)
         );        TicketPanel ticketPanel = new TicketPanel(ve);
 
@@ -372,14 +372,14 @@ public class ManHinhTraCuuVe extends JPanel implements ActionListener {
 
             tableModel.addRow(new Object[]{
                     stt++,
-                    ve.getId(),
+                    ve.getMaVe(),
                     tenKhach,
                     trangThaiVe, // Hiển thị trạng thái CSDL
                     hanhTrinh,
                     loaiToa,
                     ghe,
                     ngayKH,
-                    String.format("%,.0f", ve.getGia()),
+                    String.format("%,.0f", ve.getGiaVe()),
                     "Xem chi tiết"
             });
         }
