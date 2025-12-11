@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal" created-in="IU-252.26830.84">
+    <data-source name="QuanLyBanVeTau" uuid="aa33fde8-dd38-4c55-960d-eeced9eb409b">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="MSSQL_LOCALDB" />
+      <schema-mapping />
+    </data-source>
+  </component>
+</project>
