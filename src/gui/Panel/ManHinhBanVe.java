@@ -302,17 +302,12 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         rowToa.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         panel.add(rowToa);
-//        datCanhKhuVuc(panel);
         panel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         return panel;
     }
 
-    private void datCanhKhuVuc(JPanel panel) {
-        panel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.setBackground(Color.green);
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));
-    }
+
 
     private JPanel createKhuVucChonViTriGhe() {
         JPanel panel = new JPanel();

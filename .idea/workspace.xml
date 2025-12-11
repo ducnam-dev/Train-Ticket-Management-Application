@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="xóa các class không cần thiết, pull code từ master của nam">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/images/female-gender.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/images/gender.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/images/male-gender.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/control/CaLamViec.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/control/XacNhanThongTinVe.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/control/XuLyNhanVien.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/control/XuLyTaiKhoan.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/ChiTietHoaDonDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/ChoDatDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/ChuyenTauDao.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/DieuKienKhuyenMaiDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/GaDao.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/GiaVeCoBanTheoGaDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/HoaDonDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/KhachHangDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/KhuyenMaiDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/LoaiChoDatDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/LoaiVeDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/NhanVienDao.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/TaiKhoanDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/TauDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/ToaDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/dao/VeDAO.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/database/ConnectDB.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/ChiTietHoaDon.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/ChoDat.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/ChuyenTau.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/DieuKienKhuyenMai.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/Ga.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/GiaVeCoBanTheoGa.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/HoaDon.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/KhachHang.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/KhuyenMai.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/LoaiChoDat.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/LoaiVe.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/NhanVien.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/TaiKhoan.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/Tau.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/Toa.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/Ve.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/lopEnum/TrangThaiChoDat.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/entity/lopEnum/TrangThaiChuyenTau.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/BanVeDashboard$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/BanVeDashboard.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/ManHinhDangNhap.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/QuanLyDashBoard.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/QuanLyDashBoard.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/QuanLyDashboard$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$3.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$4.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$5.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe$ChiTietKhach.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhDashboardQuanLy.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhDoiVe.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhKetCa$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhKetCa.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhMoCa$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhMoCa.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyGiaVe$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyGiaVe.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyKhuyenMai$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyKhuyenMai.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyKhuyenMai2$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyKhuyenMai2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnEditor$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnEditor$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnEditor.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien$ButtonColumnRenderer.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhQuanLyNhanVien.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$10.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$11.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$12.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$13.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$3.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$4.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$5.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$6.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$7.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$8.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon$9.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuHoaDon.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuVe$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraCuuVe.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTraVe.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTrangChuNVBanVe$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTrangChuNVBanVe$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTrangChuNVBanVe$3.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhTrangChuNVBanVe.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhXacNhanBanVe$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhXacNhanBanVe$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhXacNhanBanVe$ChiTietKhachMock.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhXacNhanBanVe$MapGroup.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhXacNhanBanVe$Tong.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhXacNhanBanVe.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManhinhQuanLyChuyenTau$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManhinhQuanLyChuyenTau$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManhinhQuanLyChuyenTau$GaRenderer.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManhinhQuanLyChuyenTau$TauRenderer.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManhinhQuanLyChuyenTau.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Popup/PopUpChiTietHoaDon$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Popup/PopUpChiTietHoaDon$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Popup/PopUpChiTietHoaDon$3.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Popup/PopUpChiTietHoaDon$4.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Popup/PopUpChiTietHoaDon$5.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Popup/PopUpChiTietHoaDon.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Popup/PopupTaoKhuyenMai.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/anh tau.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/calendar.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/email.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/hanhkhach.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/iconMenu/banve.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/iconMenu/doive.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/iconMenu/home.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/iconMenu/ketca.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/iconMenu/logout.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/iconMenu/moca.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/iconMenu/tracuu.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/iconMenu/tracuuhoadon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/iconMenu/train.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/iconMenu/trave.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/logo-train.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/nhieuhanhkhach.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/payment-method.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/payment-success.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/research.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/schedule.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/sơ đồ sơn.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/telephone.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/images/to-do-list.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/view/Main.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhTraCuuHoaDon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTraCuuHoaDon.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Popup/PopUpChiTietHoaDon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Popup/PopUpChiTietHoaDon.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;TranSon-code&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/ducnam-dev/Train-Ticket-Management-Application.git&quot;,
+    &quot;accountId&quot;: &quot;9277c421-4bc3-4931-9a88-af53ddd21980&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="34qFYRkLqvIAKxFNq395BANpeTV" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.BanVeDashboard.executor": "Run",
+    "Application.Main.executor": "Run",
+    "Application.ManHinhTraCuuHoaDon.executor": "Run",
+    "Application.PopUpChiTietHoaDon.executor": "Run",
+    "Application.QuanLyDashboard.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "#45 on Merging fix-chuc-nang-ban-ve-2.0",
+    "kotlin-language-version-configured": "true",
+    "node.js.selected.package.tslint": "(autodetect)"
+  }
+}]]></component>
+  <component name="RunManager" selected="Application.QuanLyDashboard">
+    <configuration name="BanVeDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.BanVeDashboard" />
+      <module name="Train-Ticket-Management-Application2" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="gui.MainFrame.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Main" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="view.Main" />
+      <module name="Train-Ticket-Management-Application2" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ManHinhTraCuuHoaDon" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhTraCuuHoaDon" />
+      <module name="Train-Ticket-Management-Application2" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="gui.Panel.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PopUpChiTietHoaDon" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.PopUpChiTietHoaDon" />
+      <module name="Train-Ticket-Management-Application2" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="gui.Panel.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="QuanLyDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.QuanLyDashboard" />
+      <module name="Train-Ticket-Management-Application2" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="gui.MainFrame.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.QuanLyDashboard" />
+        <item itemvalue="Application.BanVeDashboard" />
+        <item itemvalue="Application.PopUpChiTietHoaDon" />
+        <item itemvalue="Application.ManHinhTraCuuHoaDon" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="" />
+      <created>1761933243964</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1761933243964</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
+      <option name="closed" value="true" />
+      <created>1761937482127</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1761937482127</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Đã fix Tra cứu hóa đơn">
+      <option name="closed" value="true" />
+      <created>1765329986060</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1765329986061</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Update gitignore to ignore build outputs">
+      <option name="closed" value="true" />
+      <created>1765332015385</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1765332015385</updated>
+    </task>
+    <task id="LOCAL-00004" summary="fix ảnh">
+      <option name="closed" value="true" />
+      <created>1765332028194</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1765332028194</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Hoàn thiện tra cứu hóa đơn" />
+    <MESSAGE value="Đã fix Tra cứu hóa đơn" />
+    <MESSAGE value="Update gitignore to ignore build outputs" />
+    <MESSAGE value="fix ảnh" />
+    <MESSAGE value="xóa các class không cần thiết, pull code từ master của nam" />
+    <option name="LAST_COMMIT_MESSAGE" value="xóa các class không cần thiết, pull code từ master của nam" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/UngDung$PopUpChiTietHoaDon.ic" NAME="PopUpChiTietHoaDon Coverage Results" MODIFIED="1765327945354" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>gui.Panel.*</FILTER>
+    </SUITE>
+  </component>
+</project>
