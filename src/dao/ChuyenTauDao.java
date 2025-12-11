@@ -22,59 +22,7 @@ public class ChuyenTauDao {
         danhSachChuyenTau = new ArrayList<ChuyenTau>();
     }
 
-//    Ga bằng mã GA (gaXP, gaKT), ngày đi
-//     Sửa lỗi: Đảm bảo Connection được quản lý trong try-with-resources
 
-//    public List<ChuyenTau> timChuyenTau(String gaXP, String gaKT, String ngayDi) {
-//        List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
-//
-//        // Lưu ý: Đảm bảo format ngàyDi là yyyy-MM-dd nếu CSDL yêu cầu
-//        String sql = "SELECT * FROM ChuyenTau WHERE GaDi = ? AND GaDen = ? AND NgayKhoiHanh = ?";
-//
-//        // SỬ DỤNG TRY-WITH-RESOURCES CHO CONNECTION
-//        try (Connection con = ConnectDB.getConnection();
-//             PreparedStatement pstmt = con.prepareStatement(sql)) {
-//
-//            // 1. Set tham số
-//            pstmt.setString(1, gaXP);
-//            pstmt.setString(2, gaKT);
-//            pstmt.setString(3, ngayDi);
-//
-//            // 2. Thực thi truy vấn và xử lý ResultSet
-//            try (ResultSet rs = pstmt.executeQuery()) {
-//                while (rs.next()) {
-//                    // ... (Các bước ánh xạ dữ liệu)
-//                    String maChuyenTau = rs.getString("MaChuyenTau");
-//                    String maTau = rs.getString("MaTau");
-//                    String maNV = rs.getString("MaNV");
-//                    String maGaDiDb = rs.getString("GaDi");
-//                    String maGaDenDb = rs.getString("GaDen");
-//                    LocalDate ngayKH = rs.getDate("NgayKhoiHanh").toLocalDate();
-//                    LocalTime gioKH = rs.getTime("GioKhoiHanh").toLocalTime();
-//                    LocalDate ngayDen = rs.getDate("NgayDenDuKien").toLocalDate();
-//                    LocalTime gioDen = rs.getTime("GioDenDuKien").toLocalTime();
-//                    String trangThai = rs.getString("TrangThai");
-//
-//                    TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
-//
-//                    // GỌI DAO PHỤ TRỢ MỞ KẾT NỐI MỚI!
-//                    Ga gaDi = GaDao.layGaBangMa(maGaDiDb);
-//                    Ga gaDen = GaDao.layGaBangMa(maGaDenDb);
-//                    Tau tau = TauDAO.getTauById(maTau);
-//                    NhanVien nv = NhanVienDao.getNhanVienById(maNV);
-//
-//                    ChuyenTau ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
-//                    System.out.println("Chuyến tàu tìm thấy:" + ct.toString());
-//                    danhSachChuyenTau.add(ct);
-//                }
-//            }
-//
-//        } catch (SQLException e) {
-//            System.err.println("Lỗi khi tìm chuyến tàu: ");
-//            e.printStackTrace();
-//        }
-//        return danhSachChuyenTau;
-//    }
 public List<ChuyenTau> getAllChuyenTau() throws SQLException {
     List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
     Connection conn = null;
@@ -291,7 +239,7 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
             pstmt.setDate(8, java.sql.Date.valueOf(ct.getNgayDenDuKien()));
             pstmt.setTime(9, (ct.getGioDenDuKien() != null) ? java.sql.Time.valueOf(ct.getGioDenDuKien()) : null);
 
-            pstmt.setString(10, ct.getThct().toString());
+            pstmt.setString(10, ct.getThct().getTenHienThi());
 
             rowsAffected = pstmt.executeUpdate();
 
@@ -379,57 +327,6 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
             e.printStackTrace();
         }
         return danhSachChuyenTau;
-    }
-    public static ChuyenTau getChuyenTauById(String maChuyenTau) {
-        ChuyenTau ct = null;
-        String sql = "SELECT * FROM ChuyenTau WHERE MaChuyenTau = ?";
-
-        Connection con = null; // KHAI BÁO BÊN NGOÀI
-        try {
-            con = ConnectDB.getConnection();
-            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-
-                pstmt.setString(1, maChuyenTau);
-
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        // 1. Lấy các mã khóa ngoại
-                        String maTau = rs.getString("MaTau");
-                        String maNV = rs.getString("MaNV").trim();
-                        String maGaDiDb = rs.getString("GaDi");
-                        String maGaDenDb = rs.getString("GaDen");
-                        String trangThai = rs.getString("TrangThai");
-
-                        TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
-
-                        // 2. Tra cứu Entity phụ thuộc (Đã sửa lỗi đóng kết nối)
-                        Ga gaDi = GaDao.layGaBangMa(maGaDiDb);
-                        Ga gaDen = GaDao.layGaBangMa(maGaDenDb);
-                        Tau tau = TauDAO.getTauById(maTau);
-                        NhanVien nv = NhanVienDao.getNhanVienById(maNV);
-
-                        // 3. Khởi tạo đối tượng ChuyenTau
-                        ct = new ChuyenTau(
-                                maChuyenTau,
-                                maTau,
-                                rs.getDate("NgayKhoiHanh").toLocalDate(),
-                                rs.getTime("GioKhoiHanh").toLocalTime(),
-                                gaDi,
-                                gaDen,
-                                tau,
-                                rs.getDate("NgayDenDuKien").toLocalDate(),
-                                rs.getTime("GioDenDuKien").toLocalTime(),
-                                nv,
-                                tt
-                        );
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi tra cứu Chuyến tàu theo ID: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return ct;
     }
     public boolean chuyenTrangThaiChuyenTau(String maChuyenTau, String trangThai) {
         String sql = "UPDATE ChuyenTau SET TrangThai = ? WHERE MaChuyenTau = ?";

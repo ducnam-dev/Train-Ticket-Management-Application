@@ -278,7 +278,7 @@ public class ManHinhTraVe extends JPanel {
         ChoDat cd = ve.getChoDatChiTiet();
 
         // 1. THÔNG TIN KHÁCH HÀNG
-        lblTenKHValue.setText(ve.getKhachHang() != null ? ve.getKhachHang() : "N/A");
+        lblTenKHValue.setText(ve.getTenKhachHang() != null ? ve.getTenKhachHang() : "N/A");
         lblSDTValue.setText(kh != null ? kh.getSdt() : "---");
 
         // 2. THÔNG TIN CHUYẾN TÀU & GA
@@ -303,8 +303,8 @@ public class ManHinhTraVe extends JPanel {
         }
 
         // 4. GIÁ CẢ (Giữ nguyên)
-        lblGiaGocValue.setText(String.format("%,.0f VNĐ", ve.getGia()));
-        double tienHoanTra = ve.getGia() * 0.9;
+        lblGiaGocValue.setText(String.format("%,.0f VNĐ", ve.getGiaVe()));
+        double tienHoanTra = ve.getGiaVe() * 0.9;
         lblTienHoanTraValue.setText(String.format("%,.0f VNĐ", tienHoanTra));
 
         btnXacNhan.setEnabled(true);
@@ -325,12 +325,12 @@ public class ManHinhTraVe extends JPanel {
         }
 
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Xác nhận hủy vé " + veHienTai.getId() + " và hoàn trả " + lblTienHoanTraValue.getText() + "?",
+                "Xác nhận hủy vé " + veHienTai.getMaVe() + " và hoàn trả " + lblTienHoanTraValue.getText() + "?",
                 "Xác nhận Trả vé", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             // Giả sử getId() trả về Mã vé (String)
-            if (veDAO.huyVe(veHienTai.getId())) { // SỬ DỤNG veHienTai.getId() (String)
+            if (veDAO.huyVe(veHienTai.getMaVe())) { // SỬ DỤNG veHienTai.getId() (String)
                 JOptionPane.showMessageDialog(this, "Trả vé thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 xoaTrangThongTin();
             } else {

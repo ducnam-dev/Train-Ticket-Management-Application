@@ -352,7 +352,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     // MAIN
     public static void main(String[] args) {
         try {
-            NhanVien nvMock = new NhanVien("NVBV0001", "Trần Đức Nam");
+            NhanVien nvMock = new NhanVien("NVBV0001", "Trần Đức Nam", "0123456789");
             CaLamViec.getInstance().batDauCa(nvMock);
         } catch (Exception e) {
             System.err.println("Lỗi MOCKUP NhanVien/CaLamViec: " + e.getMessage());

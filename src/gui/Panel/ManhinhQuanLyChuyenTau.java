@@ -39,6 +39,7 @@ import java.util.*;
 import java.util.List;
 
 // Import DAO và Entity
+import control.CaLamViec;
 import dao.ChuyenTauDao; // Cần tạo
 import dao.GaDao;
 import dao.TauDAO;
@@ -49,6 +50,7 @@ import entity.Tau;       // Cần tạo
 
 // Import lớp kết nối
 import database.ConnectDB;
+import entity.lopEnum.TrangThaiChuyenTau;
 
 
 /**
@@ -90,6 +92,9 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
     private final SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
     private final SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy");
 
+    // Dữ liệu Nhân viên
+    private String maNVHienThi = "N/A";
+
     public ManhinhQuanLyChuyenTau() {
         // Khởi tạo DAO
         try {
@@ -107,11 +112,20 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
         // Panel nội dung
         JPanel contentPanel = createContentPanel();
         add(contentPanel, BorderLayout.CENTER);
-
+        // Lấy thông tin nhân viên
+        layThongTinNhanVien();
         // Tải dữ liệu CSDL
         loadDuLieuMaTau();
         loadDuLieuGa();
         loadDuLieuChuyenTauLenBang(); // Tải dữ liệu ban đầu
+    }
+    private void layThongTinNhanVien() {
+        NhanVien nv = CaLamViec.getInstance().getNhanVienDangNhap();
+        if (nv != null) {
+            this.maNVHienThi = nv.getMaNV();
+        } else {
+            this.maNVHienThi = "Lỗi Phiên";
+        }
     }
 
     // =================================================================================
@@ -610,7 +624,11 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
         LocalTime localTime = Instant.ofEpochMilli(gio.getTime()).atZone(ZoneId.systemDefault()).toLocalTime();
 
         // Giả sử NhanVien lấy từ context (Tạm thời là null)
-        NhanVien nv = null; // Ví dụ: new NhanVien("NVQL001");
+        NhanVien nv = CaLamViec.getInstance().getNhanVienDangNhap();
+        if (nv == null) {
+            hienThiThongBaoLoi("Lỗi phiên làm việc: Không tìm thấy thông tin Nhân viên đăng nhập.");
+            return null;
+        }
 
         // TODO: Cần logic để nhập/tính Ngày/Giờ đến. Tạm thời cộng 1 ngày.
         LocalDate ngayDenDuKien = localDate.plusDays(1);
@@ -618,7 +636,7 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
 
         // [SỬA LỖI 1] Lấy Trạng Thái Enum (Giả sử bạn có Enum này)
         // Bạn cần import entity.lopEnum.TrangThaiChuyenTau;
-        entity.lopEnum.TrangThaiChuyenTau trangThai = entity.lopEnum.TrangThaiChuyenTau.ĐANG_CHỜ;
+        entity.lopEnum.TrangThaiChuyenTau trangThai = TrangThaiChuyenTau.DANG_CHO;
 
         // [SỬA LỖI 2] Lấy maTau (String - là SoHieu) từ đối tượng Tau
         // Giả sử entity Tau của bạn có getSoHieu() khớp với CSDL
@@ -724,5 +742,43 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
         JOptionPane.showMessageDialog(this, message, "Thành công", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // [BỎ HÀM MAIN]
+    /**
+     * Hàm main để test giao diện Quản lý Chuyến Tàu.
+     * Cần đảm bảo rằng các lớp DAO, Entity, ConnectDB đã được biên dịch.
+     */
+    public static void main(String[] args) {
+        // 1. Thiết lập kết nối CSDL (Cần phải có)
+        // Thay đổi thông tin kết nối nếu cần
+        ConnectDB.getInstance().connect();
+        System.out.println("Kết nối CSDL thành công.");
+
+        // 2. Thiết lập phiên làm việc tạm thời cho Nhân viên (để layDuLieuTuForm() hoạt động)
+        // Giả lập một nhân viên đã đăng nhập
+        NhanVien nvTest = new NhanVien();
+        nvTest.setMaNV("NVQL0001"); // Mã nhân viên giả định
+        nvTest.setHoTen("Nguyễn Văn Test");
+        // ... set các thuộc tính khác nếu cần
+        CaLamViec.getInstance().batDauCa(nvTest);
+        System.out.println("Thiết lập phiên Nhân viên: " + nvTest.getMaNV());
+
+
+        // 3. Khởi tạo và hiển thị Panel trong JFrame
+        SwingUtilities.invokeLater(() -> {
+            // Thiết lập Look and Feel cho đẹp
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            JFrame frame = new JFrame("Test Giao Diện Quản Lý Chuyến Tàu");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(1000, 700); // Kích thước phù hợp
+            frame.setLocationRelativeTo(null); // Đặt ra giữa màn hình
+
+            ManhinhQuanLyChuyenTau panel = new ManhinhQuanLyChuyenTau();
+            frame.add(panel);
+            frame.setVisible(true);
+        });
+    }
 }

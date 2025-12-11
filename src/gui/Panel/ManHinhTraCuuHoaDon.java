@@ -16,6 +16,7 @@ import dao.KhachHangDAO;
 import entity.ChuyenTau;
 import entity.HoaDon;
 import entity.KhachHang;
+import gui.Popup.PopUpChiTietHoaDon;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -32,7 +33,6 @@ import java.awt.Font;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.DefaultTableModel;
 
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
@@ -47,7 +47,6 @@ import java.awt.event.FocusListener;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 // --- Kết thúc thêm import ---
 

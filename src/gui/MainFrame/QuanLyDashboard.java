@@ -374,7 +374,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         }
 
         try {
-            NhanVien nvMock = new NhanVien("NVQL0001", "Trần Đức Nam");
+            NhanVien nvMock = new NhanVien("NVQL0001", "Trần Đức Nam", "0123456789");
             CaLamViec.getInstance().batDauCa(nvMock);
         } catch (Exception e) {
             System.err.println("Lỗi MOCKUP NhanVien/CaLamViec: " + e.getMessage());

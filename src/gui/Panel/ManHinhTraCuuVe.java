@@ -2,18 +2,16 @@ package gui.Panel;
 
 import dao.VeDAO;
 import entity.*;
+import gui.Popup.TicketPanel;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.Clock;
 import java.util.List;
 import java.util.Vector;
-import java.time.format.DateTimeFormatter; // Import nếu cần
 
 
 import java.awt.Dialog;
@@ -101,6 +99,8 @@ public class ManHinhTraCuuVe extends JPanel implements ActionListener {
     }
 
 
+
+
     // Trong lớp ManHinhTraCuuVe
     private void tableMouseClicked(java.awt.event.MouseEvent evt) {
         int row = tableKetQua.rowAtPoint(evt.getPoint());
@@ -129,7 +129,7 @@ public class ManHinhTraCuuVe extends JPanel implements ActionListener {
     private void hienThiChiTietVe(Ve ve) {
         JDialog dialog = new JDialog(
                 SwingUtilities.getWindowAncestor(this),
-                "Chi tiết vé: " + ve.getId(),
+                "Chi tiết vé: " + ve.getMaVe(),
                 Dialog.ModalityType.APPLICATION_MODAL // Sử dụng Constructor JDialog(Window, String, ModalityType)
         );        TicketPanel ticketPanel = new TicketPanel(ve);
 
@@ -372,15 +372,15 @@ public class ManHinhTraCuuVe extends JPanel implements ActionListener {
 
             tableModel.addRow(new Object[]{
                     stt++,
-                    ve.getId(),
+                    ve.getMaVe(),
                     tenKhach,
                     trangThaiVe, // Hiển thị trạng thái CSDL
                     hanhTrinh,
                     loaiToa,
                     ghe,
                     ngayKH,
-                    String.format("%,.0f", ve.getGia()),
-                    "👁️"
+                    String.format("%,.0f", ve.getGiaVe()),
+                    "Xem chi tiết"
             });
         }
     }

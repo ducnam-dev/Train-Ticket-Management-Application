@@ -82,8 +82,48 @@ public class KhachHangDAO {
                 rs.getString("GioiTinh")
         );
     }
+    /**
+     * Tìm kiếm Khách hàng theo số CCCD.
+     * @param cccd Số căn cước công dân.
+     * @return Đối tượng KhachHang nếu tìm thấy, ngược lại trả về null.
+     */
+    public KhachHang getKhachHangByCccd(String cccd) {
+        KhachHang kh = null;
+        String sql = "SELECT MaKhachHang, HoTen, CCCD, SoDienThoai, NgaySinh " +
+                "FROM KhachHang WHERE CCCD = ?";
 
-    // Giả định hàm ánh xạ này tồn tại trong KhachHangDAO
+        Connection con = null;
+        try {
+            con = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+                pstmt.setString(1, cccd);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        kh = new KhachHang();
+                        kh.setMaKH(rs.getString("MaKhachHang"));
+                        kh.setHoTen(rs.getString("HoTen"));
+                        kh.setSoCCCD(rs.getString("CCCD"));
+                        kh.setSdt(rs.getString("SoDienThoai"));
+
+                        // Xử lý NgaySinh (cần chuyển từ SQL Date sang LocalDate)
+                        Date sqlDate = rs.getDate("NgaySinh");
+                        if (sqlDate != null) {
+                            kh.setNgaySinh(sqlDate.toLocalDate());
+                        }
+
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm Khách hàng theo CCCD: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            ConnectDB.disconnect();
+        }
+        return kh;
+    }
+
 
 
 

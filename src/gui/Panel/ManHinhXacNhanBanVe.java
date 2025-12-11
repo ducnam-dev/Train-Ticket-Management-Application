@@ -1,8 +1,8 @@
 // java
 package gui.Panel;
 
+import control.CaLamViec;
 import dao.*;
-//import dao.VeCuaBanVeDAO;
 import entity.*;
 import gui.MainFrame.BanVeDashboard;
 
@@ -59,23 +59,22 @@ public class ManHinhXacNhanBanVe extends JPanel {
     // DAO
     private KhuyenMaiDAO khuyenMaiDAO = new KhuyenMaiDAO();
     private final KhachHangDAO khachHangDAO = new KhachHangDAO();
-    private final VeCuaBanVeDAO veBVDao = new VeCuaBanVeDAO();
+    private final VeDAO veBVDao = new VeDAO();
 
     private static final Color MAU_XANH_BTN = new Color(0, 180, 110);
     private static final Color MAU_CAM_BTN = new Color(255, 140, 0);
 
     // Thêm dòng này để khai báo biến mock
-    private static  String MA_NV_LAP_HD_MOCK = "NVBV0001";
+    private static  String MA_NV_LAP_HD_MOCK = "--";
     private DefaultTableModel model;
     private JButton btnXacNhan;
     private JLabel lblTienBangChu;
     private JButton btnHuy;
     private JButton btnKetThuc;
     private JButton btnQuayLai;
-
-    public ManHinhXacNhanBanVe() {
-        this(null, null, null, null, null);
-    }
+    private String maNV;
+    private String tenNV;
+    private String sdtNV;
 
     public ManHinhXacNhanBanVe(Map<String, ChoDat> danhSachGheDaChon,
                                Map<String, ?> danhSachKhachHang, // Nhận Map với giá trị generic
@@ -89,6 +88,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         this.ngayDi = ngayDi;
         this.danhSachGiaVe = danhSachGiaVe != null ? new HashMap<>(danhSachGiaVe) : new HashMap<>();
 
+        layThongTinNhanVien();
 
         khoiTaoGiaoDien();
 
@@ -117,6 +117,19 @@ public class ManHinhXacNhanBanVe extends JPanel {
         chia.setRightComponent(taoPanelHoaDon());
 
         add(chia, BorderLayout.CENTER);
+    }
+
+    private void layThongTinNhanVien() {
+        NhanVien nv = CaLamViec.getInstance().getNhanVienDangNhap();
+        if (nv != null) {
+            this.maNV= nv.getMaNV();
+            this.tenNV = nv.getHoTen();
+            this.sdtNV = nv.getSdt();
+        } else {
+            this.maNV = "Lỗi Phiên";
+            this.tenNV = "Không tìm thấy";
+            this.sdtNV = "Không tìm thấy";
+        }
     }
 
     private <T> T getKhachField(Object khach, String fieldName, Class<T> type) {
@@ -159,6 +172,12 @@ public class ManHinhXacNhanBanVe extends JPanel {
         panelTrai.add(Box.createRigidArea(new Dimension(0, 12)));
         panelTrai.add(taoPanelThanhToan());
         panelTrai.add(Box.createVerticalGlue());
+
+        JScrollPane scrLeftContent = new JScrollPane(panelTrai);
+        scrLeftContent.setBorder(null);
+        scrLeftContent.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrLeftContent.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrLeftContent.getVerticalScrollBar().setUnitIncrement(16);
 
         return panelTrai;
     }
@@ -466,8 +485,11 @@ public class ManHinhXacNhanBanVe extends JPanel {
         panelHoaDon.add(chan, BorderLayout.SOUTH);
 
         // FIX: Cập nhật thông tin người lập HD ban đầu (Mock)
-        lblNguoiLapHD.setText("Nguyễn Bảo Duy (" + MA_NV_LAP_HD_MOCK + ")");
-        lblDienThoaiNV.setText("0332534500");
+        if(maNV == null) {
+            maNV = MA_NV_LAP_HD_MOCK;
+        }
+        lblNguoiLapHD.setText(tenNV + " id: " + maNV);
+        lblDienThoaiNV.setText(sdtNV);
 
         capNhatThongTinNguoiDat();
         return panelHoaDon;
@@ -668,7 +690,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
      * @param hoaDon Đối tượng HoaDon đã được lưu.
      * @param danhSachVe Danh sách VeCuaBanVe đã có mã vé và giá cuối cùng.
      */
-    private void capNhatChiTietHoaDonUI(HoaDon hoaDon, List<VeCuaBanVe> danhSachVe) {
+    private void capNhatChiTietHoaDonUI(HoaDon hoaDon, List<Ve> danhSachVe) {
         if (tbHoaDon == null || !(tbHoaDon.getModel() instanceof DefaultTableModel)) return;
 
         DefaultTableModel modelHd = (DefaultTableModel) tbHoaDon.getModel();
@@ -679,7 +701,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         int stt = 1;
 
         // 1. Lặp qua danh sách vé và điền vào bảng
-        for (VeCuaBanVe ve : danhSachVe) {
+        for (Ve ve : danhSachVe) {
             double thanhTienCoVAT = ve.getGiaVe()*1.1;
             double giaTruocVAT = ve.getGiaVe() ;
             tongTien += thanhTienCoVAT;
@@ -822,38 +844,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         return (ketQua.trim().substring(0, 1).toUpperCase() + ketQua.trim().substring(1) + " đồng").replaceAll("\\s+", " ");
     }
 
-
-
-
-    /**
-     * Lấy Mã số thứ tự cuối cùng của Hóa đơn trong ngày/ca/NV hiện tại.
-     * (Hàm Helper, gọi HoaDonDAO)
-     */
-    private String getLastSoThuTuHoaDon(String soHieuCa, String maNV) throws SQLException {
-        String maNVRutGon;
-        if (maNV != null && maNV.length() >= 4) {
-            // Lấy 4 ký tự cuối (ví dụ: "0001" từ "NVBV0001")
-            maNVRutGon = maNV.substring(maNV.length() - 4);
-        } else {
-            maNVRutGon = "0000";
-        }
-
-        String ngayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
-
-        // Tiền tố truy vấn: HD[CC][YYMMDD][NNNN]%
-        String maHdPatternPrefix = "HD" + soHieuCa + ngayStr + maNVRutGon + "%";
-
-        String lastSTT = null;
-        String lastMaHD = HoaDonDAO.getLastMaHoaDonByPrefix(maHdPatternPrefix);
-
-        if (lastMaHD != null) {
-            lastSTT = lastMaHD.substring(lastMaHD.length() - 4);
-        }
-        return lastSTT;
-    }
-
-
-
     // =====================================================================================
 // PHƯƠNG THỨC XỬ LÝ KHÁCH HÀNG (B1)
 // =====================================================================================
@@ -978,10 +968,9 @@ public class ManHinhXacNhanBanVe extends JPanel {
         double tongTienPhaiThanhToan = tongKetQua.total;
         String phuongThuc = cbHinhThuc.getSelectedItem().toString();
         String loaiHoaDon = "Bán vé trực tiếp";
-        String maNVLap = MA_NV_LAP_HD_MOCK;
+        String maNVLap = maNV;
 
         // Kiểm tra tiền khách đưa
-        // ... (logic kiểm tra tiền khách đưa, giữ nguyên) ...
         try {
             String raw = txtTienKhachDua.getText().replaceAll("[^0-9]", "");
             long tienKhachDua = Long.parseLong(raw);
@@ -1008,7 +997,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         );
 
         // --- B3: Tạo danh sách thực thể Vé (VeCuaBanVe) ---
-        List<VeCuaBanVe> danhSachVeMoi = new ArrayList<>();
+        List<Ve> danhSachVeMoi = new ArrayList<>();
 
         for (Map.Entry<String, ChoDat> entry : danhSachGhe.entrySet()) {
             ChoDat cho = entry.getValue();
@@ -1032,7 +1021,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
 
             // Tạo đối tượng VeCuaBanVe
-            VeCuaBanVe ve = new VeCuaBanVe(
+            Ve ve = new Ve(
                     null, // MaVe sẽ được tạo tự động trong DAO
                     maChuyen,
                     cho.getMaCho(),
@@ -1049,7 +1038,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         // --- B4: Gọi DAO để thực hiện Transaction ---
         try {
             // FIX: Truyền KhachHang entity đại diện (đã có MaKH hợp lệ)
-            boolean success = veBVDao.banVeTrongTransaction(hoaDon, danhSachVeMoi, khachHangDaiDienObj);
+            boolean success = veBVDao.banVeTrongTransaction(hoaDon, danhSachVeMoi, danhSachKhachHangEntity);
             System.out.println("Kết quả của hóa đơn " + hoaDon.toString());
 
             if (success) {
@@ -1064,7 +1053,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 txtTienKhachDua.setEditable(false);
                 
                 System.out.println("Số lượng vé được thêm " + danhSachVeMoi.size());
-                for (VeCuaBanVe ve : danhSachVeMoi){
+                for (Ve ve : danhSachVeMoi){
                     System.out.println("Mã vé được tạo: " + ve.getMaVe());
                 }
                 System.out.println("Đã thêm được hóa đơn: " + maHD);
@@ -1076,7 +1065,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
 
                 // Lặp qua danh sách Entity đã được cập nhật MaVe từ DAO
-                for (VeCuaBanVe ve : danhSachVeMoi) {
+                for (Ve ve : danhSachVeMoi) {
                     sb.append(ve.getMaVe()).append(" (Ghế: ").append(ve.getMaChoDat()).append(")\n");
                 }
 
@@ -1117,6 +1106,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private void xacNhanThanhToan() {
         String[] maKhachHangDaiDienArr = new String[1]; // Biến hứng Mã KH đại diện
         Map<String, KhachHang> danhSachKhachHangEntity;
+
+
 
         try {
             // BƯỚC 1: Xử lý và tạo Entity Khách hàng
@@ -1161,9 +1152,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
      * Hành động cho nút "Kết thúc >" (Chuyển về trang chủ sau khi thanh toán xong).
      */
     private void ketThuc() {
-        // NOTE: Hàm này chỉ nên được gọi sau khi transaction thành công!
-
-        // 1. Reset dữ liệu của màn hình hiện tại
         resetAllData();
 
         resetManHinhBanVeChinh();
@@ -1211,7 +1199,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private String taoMaHoaDon() {
         try {
             String soHieuCa = getSoHieuCaHienTai();
-            String maNVDayDu = MA_NV_LAP_HD_MOCK;
+            String maNVDayDu = maNV;
 
             // Trích xuất 4 ký tự cuối của Mã NV (V001)
             String maNVRutGon;
@@ -1381,28 +1369,12 @@ private static Object createMockChiTietKhach(
             // --- 1. Tạo dữ liệu giả cho ChoDat (Ghế đã chọn) ---
             Map<String, ChoDat> mockGheDaChon = new LinkedHashMap<>();
 
-            ChoDat cho1 = new ChoDat("CD001", "T01-1", "A1", "GL", 1);
-            ChoDat cho2 = new ChoDat("CD002", "T01-1", "A2", "GL", 1);
+            ChoDat cho1 = new ChoDat("C15-SPT2-1", "SPT2-1", "A1", "GL", 1);
+            ChoDat cho2 = new ChoDat("C16-SPT2-2", "SPT2-1", "A2", "GL", 1);
 
-            mockGheDaChon.put("CD001", cho1);
-            mockGheDaChon.put("CD002", cho2);
+            mockGheDaChon.put("C15-SPT2-1", cho1);
+            mockGheDaChon.put("C16-SPT2-1", cho2);
 
-            // --- 2. Tạo dữ liệu giả cho ChiTietKhach ---
-            // ChiTietKhach cần phải là một Record được định nghĩa bên ngoài
-            // Tạm sử dụng Class tương đương nếu Record không truy cập được
-            // NOTE: Giả sử ChiTietKhach là Class hoặc Record được định nghĩa như sau:
-        /* class ChiTietKhach {
-            ChoDat choDat, String maLoaiVe, String hoTen, String cccd, String sdt, int tuoi
-        }
-        */
-
-            // Dùng Reflection hoặc tạo lớp giả nếu ChiTietKhach là private Record
-            // Trong trường hợp này, tôi giả định bạn có thể truy cập được Record
-
-            // Dùng lại định nghĩa Record từ ManHinhBanVe để tạo dữ liệu giả:
-            // (Chú ý: Nếu ChiTietKhach là private record trong ManHinhBanVe, bạn sẽ phải
-            // tạo một bản sao định nghĩa tạm thời trong ManHinhXacNhanBanVe để chạy test)
-            // **KHÔNG THỂ COPY ĐỊNH NGHĨA RECORD TỪ LỚP KHÁC NÊN TÔI SẼ DÙNG NULL CHO CÁC FIELD CÒN LẠI**
 
             Map<String, Object> mockKhachHang = new LinkedHashMap<>();
 
@@ -1410,17 +1382,17 @@ private static Object createMockChiTietKhach(
             Object khach1 = createMockChiTietKhach(cho1, "VT01", "Nguyen Van A", "012345678901", "0901234567", 30);
             Object khach2 = createMockChiTietKhach(cho2, "VT02", "Tran Thi B", "012345678902", "0907654321", 8);
 
-            mockKhachHang.put("CD001", khach1);
-            mockKhachHang.put("CD002", khach2);
+            mockKhachHang.put("C15-SPT2-1", khach1);
+            mockKhachHang.put("C16-SPT2-1", khach2);
 
             // --- 3. Dữ liệu chuyến tàu và ngày đi ---
-            String maChuyenTau = "CT001";
+            String maChuyenTau = "CTSPT2SG_PT121025";
             Date ngayDi = new Date(); // Ngày hiện tại
 
             // --- 4. Dữ liệu giá vé ---
             Map<String, Long> mockGiaVe = new HashMap<>();
-            mockGiaVe.put("CD001", 500000L); // 500,000 VNĐ
-            mockGiaVe.put("CD002", 250000L); // 250,000 VNĐ
+            mockGiaVe.put("C15-SPT2-1", 500000L); // 500,000 VNĐ
+            mockGiaVe.put("C16-SPT2-1", 250000L); // 250,000 VNĐ
 
             // --- 5. Khởi tạo màn hình XacNhanBanVe ---
             JFrame frame = new JFrame("Màn hình Xác nhận Bán vé (Test)");

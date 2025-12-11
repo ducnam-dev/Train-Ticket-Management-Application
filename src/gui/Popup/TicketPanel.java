@@ -1,12 +1,13 @@
-// File: gui.Panel.TicketPanel.java
-package gui.Panel;
+package gui.Popup;
 
-import entity.*; // Cần đảm bảo các lớp entity được import đúng
+import com.google.zxing.WriterException;
+import entity.*;
+import service.QRCodeService;
+
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.net.URL;
+import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -16,6 +17,9 @@ public class TicketPanel extends JPanel {
     private static final Font FONT_MONOSPACE = new Font(Font.MONOSPACED, Font.PLAIN, 12);
     private static final Font FONT_BOLD = new Font("Segoe UI", Font.BOLD, 14);
     private static final Font FONT_NORMAL = new Font("Segoe UI", Font.PLAIN, 14);
+
+    // Kích thước cố định cho QR Code
+    private static final int QR_SIZE = 180;
 
     // Constructor nhận đối tượng Ve
     public TicketPanel(Ve ve) {
@@ -44,22 +48,22 @@ public class TicketPanel extends JPanel {
         // Helper để tạo các JLabel căn lề trái
         panel.add(createTitleLabel("Thông tin hành trình"));
         panel.add(createLine("Ga đi - Ga đến:", getHanhTrinh()));
-        panel.add(createLine("Tàu/Train:", getMaTau()));
-        panel.add(createLine("Ngày đi/Date:", getNgayKhoiHanh()));
-        panel.add(createLine("Giờ đi/Time:", getGioKhoiHanh()));
-        panel.add(createLine("Toa/Coach:", getMaToa()));
-        panel.add(createLine("Chỗ/Seat:", getSoCho() + " (" + getLoaiGhe() + ")"));
+        panel.add(createLine("Tàu:", getMaTau()));
+        panel.add(createLine("Ngày đi:", getNgayKhoiHanh()));
+        panel.add(createLine("Giờ đi:", getGioKhoiHanh()));
+        panel.add(createLine("Toa:", getMaToa()));
+        panel.add(createLine("Chỗ:", getSoCho() + " (" + getLoaiGhe() + ")"));
 
         panel.add(Box.createVerticalStrut(15));
 
         panel.add(createTitleLabel("Thông tin hành khách"));
-        panel.add(createLine("Họ tên/Full Name:", getHoTenKhachHang()));
-        panel.add(createLine("Giấy tờ/Passport:", getCCCD()));
-        panel.add(createLine("Loại vé/Ticket:", getTenLoaiVe()));
+        panel.add(createLine("Họ tên:", getHoTenKhachHang()));
+        panel.add(createLine("Giấy tờ:", getCCCD()));
+        panel.add(createLine("Loại vé:", getTenLoaiVe()));
 
         panel.add(Box.createVerticalStrut(15));
 
-        panel.add(createTitleLabel("Giá vé/Price: " + formatVnd(ve.getGia())));
+        panel.add(createTitleLabel("Giá vé: " + formatVnd(ve.getGiaVe())));
         panel.add(createLineNote("(Giá vé trên đã có bảo hiểm, dịch vụ đi kèm và thuế GTGT)"));
 
         // Dùng Glue để đẩy tất cả lên trên
@@ -77,25 +81,26 @@ public class TicketPanel extends JPanel {
         qrLabel.setPreferredSize(new Dimension(180, 180));
         qrLabel.setHorizontalAlignment(SwingConstants.CENTER); // Căn giữa ảnh
 
-        // **SỬ DỤNG LINK ẢNH QR GIẢ LẬP**
-        String qrImageUrl = "D:/06_Study/Stuby IUH/Hoc ki 5/Phat trien ung dung/DU AN/Train-Ticket-Management-Application/Ảnh test chương trình/QR vé tàu.jpg";        ;
+        // 1. Dữ liệu cần mã hóa (Sử dụng ID vé)
+        String maVeData = ve.getMaVe();
         try {
-            // Tải ảnh từ URL
-//            URL url = new URL(qrImageUrl);
-            ImageIcon icon = new ImageIcon(qrImageUrl);
+            // 2. Tạo ảnh BufferedImage từ mã vé
+            BufferedImage qrImage = QRCodeService.generateQRCodeImage(maVeData, QR_SIZE);
 
-            // Ép kích thước ảnh về 180x180 (Nếu ảnh gốc không phải 180x180)
-            Image img = icon.getImage();
-            Image scaledImg = img.getScaledInstance(180, 180, Image.SCALE_SMOOTH);
-            qrLabel.setIcon(new ImageIcon(scaledImg));
+            // 3. Gán BufferedImage cho JLabel
+            ImageIcon icon = new ImageIcon(qrImage);
+            qrLabel.setIcon(icon);
 
-        } catch (Exception e) {
-            // Trường hợp lỗi tải ảnh (mất mạng hoặc link hỏng), hiển thị placeholder text
-            qrLabel.setText("Lỗi tải QR Code");
+        } catch (WriterException e) {
+            // Lỗi mã hóa Zxing
+            qrLabel.setText("Lỗi Mã hóa QR");
             qrLabel.setForeground(Color.RED);
-            qrLabel.setBackground(Color.LIGHT_GRAY);
-            qrLabel.setOpaque(true);
-            System.err.println("Lỗi tải ảnh QR Code: " + e.getMessage());
+            System.err.println("Lỗi tạo QR Code (WriterException): " + e.getMessage());
+        } catch (Exception e) {
+            // Lỗi chung (Ví dụ: Class not found)
+            qrLabel.setText("Lỗi Thư viện QR");
+            qrLabel.setForeground(Color.RED);
+            System.err.println("Lỗi chung khi tạo QR Code: " + e.getMessage());
         }
 
 
@@ -106,7 +111,7 @@ public class TicketPanel extends JPanel {
         footerInfo.setBorder(new EmptyBorder(10, 0, 0, 0));
 
         // Mã đặt chỗ (Lấy từ trường nào đó của Ve/Hóa đơn - giả định là ID vé)
-        footerInfo.add(createLine("Mã vé:", ve.getId()));
+        footerInfo.add(createLine("Mã vé:", ve.getMaVe()));
         footerInfo.add(createLine("Đại lý bán vé:", "VNPay App")); // Giả lập
 
         panel.add(footerInfo, BorderLayout.CENTER);
@@ -173,7 +178,7 @@ public class TicketPanel extends JPanel {
     // Giả định loại ghế được lấy từ ChoDat hoặc LoaiChoDat
     private String getLoaiGhe() {
         ChoDat cd = ve.getChoDatChiTiet();
-        return (cd != null) ? cd.getMaCho() : "Ghế mềm điều hòa";
+        return (cd != null) ? cd.getMaCho() : "N/A";
     }
 
     private String getHoTenKhachHang() {
@@ -188,6 +193,7 @@ public class TicketPanel extends JPanel {
 
     // Giả định bạn có thông tin chi tiết Loại vé trong Entity Ve
     private String getTenLoaiVe() {
+
         return "Người lớn"; // Hoặc truy xuất từ ve.getMaLoaiVe()
     }
 
