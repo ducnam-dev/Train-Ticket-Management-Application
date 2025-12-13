@@ -463,7 +463,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         ChuyenTauDao dao = new ChuyenTauDao();
         System.out.println("Tìm chuyến tàu từ " + tenGaDi + " đến " + tenGaDen + " vào ngày " + ngayDiSQL);
-        ketQua = dao.timChuyenTau(tenGaDi, tenGaDen, ngayDiSQL);
+        ketQua = dao.timChuyenTauTheoGaVaNgayDi(tenGaDi, tenGaDen, ngayDiSQL);
 
         if (ketQua == null || ketQua.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Không tìm thấy chuyến tàu nào phù hợp.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);

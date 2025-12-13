@@ -170,4 +170,23 @@ public class Ve {
     public void setChoDatChiTiet(ChoDat choDatChiTiet) {
         this.choDatChiTiet = choDatChiTiet;
     }
+    //toString
+    @Override
+    public String toString() {
+        return "Ve{" +
+                "maVe='" + maVe + '\'' +
+                ", giaVe=" + giaVe +
+                ", trangThai='" + trangThai + '\'' +
+                ", maLoaiVe='" + maLoaiVe + '\'' +
+                ", maKhachHang='" + maKhachHang + '\'' +
+                ", maChuyenTau='" + maChuyenTau + '\'' +
+                ", maChoDat='" + maChoDat + '\'' +
+                ", maNV='" + maNV + '\'' +
+                ", tenKhachHang='" + tenKhachHang + '\'' +
+                ", soGhe=" + soGhe +
+                ", khachHangChiTiet=" + khachHangChiTiet +
+                ", chuyenTauChiTiet=" + chuyenTauChiTiet +
+                ", choDatChiTiet=" + choDatChiTiet +
+                '}';
+    }
 }

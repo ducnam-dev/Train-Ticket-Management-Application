@@ -263,7 +263,7 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
         }
         return rowsAffected > 0;
     }
-    public List<ChuyenTau> timChuyenTau(String gaXP, String gaKT, String ngayDi) {
+    public List<ChuyenTau> timChuyenTauTheoGaVaNgayDi(String gaXP, String gaKT, String ngayDi) {
         List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
 
         // SQL Tối ưu (JOIN tất cả các bảng phụ)

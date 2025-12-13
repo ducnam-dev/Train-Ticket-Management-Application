@@ -21,7 +21,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     // --- HẰNG SỐ VÀ KHAI BÁO VIỆT HÓA ---
     private CardLayout boCucCard;
     private JPanel panelNoiDung;
-    private final Color MAU_CHINH = new Color(34, 137, 203); // Màu xanh
+    private final Color MAU_CHINH = new Color(0, 123, 255); // Màu xanh
     private final Color MAU_DUOC_CHON = new Color(74, 184, 237); // Màu xanh sáng
     private final Color MAU_HOVER = new Color(45, 150, 215);
     private final Map<String, JButton> nutMenu = new HashMap<>();
@@ -39,6 +39,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     private static final int ICON_SIZE = 20;
 
     public ManHinhBanVe manHinhBanVeInstance;
+    public ManHinhBanVe2 manHinhBanVeInstance2;
+    public ManHinhBanVeUpdatePanelChuyenTau manHinhBanVeInstance3;
 
 
     public BanVeDashboard() {
@@ -271,8 +273,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         panelNoiDung.add(new ManHinhMoCa(), "moCa");
         panelNoiDung.add(new ManHinhKetCa(), "ketCa");
 
-        manHinhBanVeInstance = new ManHinhBanVe();
-        panelNoiDung.add(manHinhBanVeInstance, "banVeMoi");
+        manHinhBanVeInstance3 = new ManHinhBanVeUpdatePanelChuyenTau();
+        panelNoiDung.add(manHinhBanVeInstance3, "banVeMoi");
 
         panelNoiDung.add(new ManHinhDoiVe(), "doiVe");
         panelNoiDung.add(new ManHinhTraVe(), "traVe");

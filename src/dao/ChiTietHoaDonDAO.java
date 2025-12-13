@@ -26,7 +26,7 @@ public class ChiTietHoaDonDAO {
      * @throws SQLException Nếu có lỗi CSDL.
      */
     public boolean themChiTietHoaDon(Connection conn, ChiTietHoaDon cthd) throws SQLException {
-        String sql = "INSERT INTO ChiTietHoaDon (MaHD, MaVe, SoLuong) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO ChiTietHoaDon (MaHD, MaVe, SoLuong, DonGia) VALUES (?, ?, ?, ?)";
         PreparedStatement pstmt = null; // Khai báo PreparedStatement bên ngoài try
 
         try { // Chỉ sử dụng khối try/catch truyền thống
@@ -35,6 +35,7 @@ public class ChiTietHoaDonDAO {
             pstmt.setString(1, cthd.getMaHD());
             pstmt.setString(2, cthd.getMaVe());
             pstmt.setInt(3, cthd.getSoLuong());
+            pstmt.setDouble(4, cthd.getDonGia());
 
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -44,8 +45,14 @@ public class ChiTietHoaDonDAO {
             e.printStackTrace();
             throw e;
         } finally {
-            // Đóng PreparedStatement, nhưng KHÔNG đóng Connection
-            if (pstmt != null) pstmt.close();
+            // Đóng PreparedStatement, KHÔNG đóng Connection
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
     }
 

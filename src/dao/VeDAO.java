@@ -357,6 +357,7 @@ public class VeDAO {
      * @param danhSachKhachHangEntities Map chứa KhachHang (đã tồn tại hoặc mới)
      *
      * @return true nếu toàn bộ giao dịch thành công.
+     * nếu không thành công thì sẽ không lưu khách hàng, hóa đơn, vé vào CSDL.
      * @throws SQLException Nếu có lỗi CSDL (Transaction đã bị ROLLBACK).
      */
     public boolean banVeTrongTransaction(HoaDon hoaDon, List<Ve> danhSachVe, Map<String, KhachHang> danhSachKhachHangEntities) throws SQLException {
@@ -386,8 +387,7 @@ public class VeDAO {
 
             // B1: Xử lý Khách hàng (Thêm mới hoặc Cập nhật)
             for (KhachHang kh : danhSachKhachHangEntities.values()) {
-                // Sử dụng hàm addOrUpdateKhachHang đã được viết trong KhachHangDAO
-                if (!khachHangDAO.addOrUpdateKhachHang(conn, kh)) {
+                if (!khachHangDAO.themHoacCapNhatKhachHang(conn, kh)) {
                     throw new SQLException("Lỗi khi thêm/cập nhật thông tin Khách hàng: " + kh.getMaKH());
                 }
             }
@@ -409,9 +409,10 @@ public class VeDAO {
                 if (!themVe(conn, ve)) {
                     throw new SQLException("Thêm Vé thất bại: " + ve.getMaVe());
                 }
-
+                // Lấy đơn giá thực tế từ Vé
+                double donGiaThucTe = ve.getGiaVe();
                 // c. Thêm Chi tiết Hóa đơn
-                ChiTietHoaDon cthd = new ChiTietHoaDon(hoaDon.getMaHD(), ve.getMaVe(), 1);
+                ChiTietHoaDon cthd = new ChiTietHoaDon(hoaDon.getMaHD(), ve.getMaVe(), 1, donGiaThucTe);
                 if (!cthdDAO.themChiTietHoaDon(conn, cthd)) {
                     throw new SQLException("Thêm Chi tiết Hóa đơn thất bại.");
                 }
