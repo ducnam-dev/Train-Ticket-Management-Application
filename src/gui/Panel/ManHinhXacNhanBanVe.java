@@ -19,6 +19,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.time.LocalDate; // Đã có
+import java.time.format.DateTimeFormatter; // Đã có
+// ...
 
 /**
  * ManHinhXacNhanBanVe - phiên bản cập nhật: khuyến mãi đọc từ DB và hiển thị combobox.
@@ -207,7 +210,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
         panelDanhSach.setOpaque(false);
         panelDanhSach.setBorder(BorderFactory.createTitledBorder("Danh sách khách hàng"));
 
-        String[] cot = {"Ghế", "Họ và tên", "Tuổi", "Số điện thoại", "CCCD"};
+        // THAY ĐỔI: Đổi "Ngày sinh" thành "Ngày sinh" (và đảm bảo dữ liệu là ngày sinh đầy đủ)
+        String[] cot = {"Ghế", "Họ và tên", "Ngày sinh", "Số điện thoại", "CCCD"};
         model = new DefaultTableModel(cot, 0) {
             public boolean isCellEditable(int row, int column) { return false; }
         };
@@ -216,21 +220,23 @@ public class ManHinhXacNhanBanVe extends JPanel {
             List<ChoDat> choList = new ArrayList<>(danhSachGhe.values());
             choList.sort(Comparator.comparing(ChoDat::getMaToa).thenComparing(ChoDat::getSoCho));
             for (ChoDat c : choList) {
-                // SỬA: Lấy đối tượng khách hàng dưới dạng Object
                 Object khach = (danhSachKhach != null) ? danhSachKhach.get(c.getMaCho()) : null;
 
-                // SỬA: Sử dụng helper để truy cập dữ liệu
+                // Lấy các trường dữ liệu như trước
                 String ten = getKhachField(khach, "hoTen", String.class);
-                Integer tuoiObj = getKhachField(khach, "tuoi", Integer.class);
+                // SỬA: Lấy trường Ngày sinh đầy đủ (ví dụ: dd/MM/yyyy) dưới dạng String
+                String ngaySinhStr = getKhachField(khach, "ngaySinh", String.class); // Giả sử tên trường là "ngaySinh" và trả về String
                 String sdt = getKhachField(khach, "sdt", String.class);
                 String cccd = getKhachField(khach, "cccd", String.class);
 
                 String tenStr = (ten != null && !ten.isEmpty()) ? ten : "-";
-                String tuoiStr = (tuoiObj != null && tuoiObj > 0) ? String.valueOf(tuoiObj) : "-";
+                // SỬA: Sử dụng trực tiếp chuỗi ngày sinh lấy được
+                String ngaySinhHienThi = (ngaySinhStr != null && !ngaySinhStr.isEmpty()) ? ngaySinhStr : "-";
                 String sdtStr = (sdt != null && !sdt.isEmpty()) ? sdt : "-";
                 String cccdStr = (cccd != null && !cccd.isEmpty()) ? cccd : "-";
 
-                model.addRow(new Object[]{c.getMaToa() + "-" + c.getSoCho(), tenStr, tuoiStr, sdtStr, cccdStr});
+                // THAY ĐỔI: Thay thế tuổi/năm sinh bằng chuỗi ngày sinh
+                model.addRow(new Object[]{c.getMaToa() + "-" + c.getSoCho(), tenStr, ngaySinhHienThi, sdtStr, cccdStr});
             }
         } else {
             model.addRow(new Object[]{"-", "Chưa có khách", "-", "-", "-"});
@@ -880,30 +886,42 @@ public class ManHinhXacNhanBanVe extends JPanel {
             String cccd = getKhachField(khach, "cccd", String.class);
             String sdt = getKhachField(khach, "sdt", String.class);
             String hoTen = getKhachField(khach, "hoTen", String.class);
-            Integer tuoi = getKhachField(khach, "tuoi", Integer.class);
+            LocalDate ngaySinh = getKhachField(khach, "ngaySinh", LocalDate.class);
             String gioiTinh = getKhachField(khach, "gioiTinh", String.class); // Thêm nếu cần
+
+            if (ngaySinh == null) {
+                String ngaySinhStr = getKhachField(khach, "ngaySinh", String.class);
+                if (ngaySinhStr != null && !ngaySinhStr.isEmpty()) {
+                    try {
+                        // Chuyển đổi từ String (dd/MM/yyyy) sang LocalDate
+                        ngaySinh = LocalDate.parse(ngaySinhStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                    } catch (Exception e) {
+                        System.err.println("Cảnh báo: Không thể parse Ngày sinh từ chuỗi '" + ngaySinhStr + "'. Dùng null.");
+                        ngaySinh = null;
+                    }
+                }
+            }
 
             KhachHang khachHangDaTonTai = null;
             // Chỉ tìm khi có CCCD
             if (cccd != null && !cccd.isEmpty()) {
-                khachHangDaTonTai = khachHangDAO.findKhachHangByCCCD(cccd);
+                khachHangDaTonTai = khachHangDAO.getKhachHangByCccd(cccd);
             }
 
             KhachHang khachHangCanLuu;
 
             if (khachHangDaTonTai == null) {
-                // [FIX] TĂNG BIẾN ĐẾM VÀ TẠO MÃ BẰNG BIẾN ĐẾM TẠM
-                currentSTT++; // 10 -> 11
+                currentSTT++;
                 String soThuTuStr = String.format("%04d", currentSTT);
                 String maKHNew = "KH" + ngayStr + soThuTuStr;
 
-                System.out.println("Tạo mã mới: " + maKHNew); // Kiểm tra
+                System.out.println("Tạo mã mới: " + maKHNew);
 
                 khachHangCanLuu = new KhachHang(
                         maKHNew,
                         hoTen,
                         cccd,
-                        tuoi != null ? tuoi : 0,
+                        ngaySinh,
                         sdt
                 );
 
@@ -914,7 +932,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
                 // BỔ SUNG: Cập nhật các thuộc tính mới nhận từ form vào Entity cũ
                 khachHangCanLuu.setHoTen(hoTen);
-                khachHangCanLuu.setTuoi(tuoi != null ? tuoi : 0);
+                khachHangCanLuu.setNgaySinh(ngaySinh);
                 khachHangCanLuu.setSdt(sdt);
             }
 
@@ -1006,7 +1024,16 @@ public class ManHinhXacNhanBanVe extends JPanel {
             KhachHang khachHangChoVe = danhSachKhachHangEntity.get(entry.getKey());
 
             // Lấy giá cơ bản đã có chiết khấu loại vé (từ UI)
-            long giaVeBase = danhSachGiaVe.get(cho.getMaCho());
+            Long giaVeBaseLong = danhSachGiaVe.get(cho.getMaCho());
+            long giaVeBase = 0L;
+            if (giaVeBaseLong != null) {
+                giaVeBase = giaVeBaseLong.longValue();
+            }else {
+                // XỬ LÝ LỖI LOGIC: Ghế đã chọn nhưng không có giá.
+                // Tùy chọn: in ra lỗi hoặc thông báo người dùng, sau đó bỏ qua vé này.
+                System.err.println("LỖI LOGIC: Không tìm thấy giá vé cho ghế: " + cho.getMaCho());
+                continue; // Bỏ qua ghế này và chuyển sang ghế tiếp theo
+            }
 
             // Tính toán lại giá trị cuối cùng sau khi áp dụng chiết khấu KM (nếu có)
             double phanTramGiam = (khuyenMaiApDung != null) ? khuyenMaiApDung.getPhanTramGiam() : 0.0;
@@ -1067,6 +1094,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 // Lặp qua danh sách Entity đã được cập nhật MaVe từ DAO
                 for (Ve ve : danhSachVeMoi) {
                     sb.append(ve.getMaVe()).append(" (Ghế: ").append(ve.getMaChoDat()).append(")\n");
+                    System.out.println("Thông tin của vé sau giao dịch: "+ ve.toString());
                 }
 
                 JOptionPane.showMessageDialog(this,
@@ -1107,8 +1135,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         String[] maKhachHangDaiDienArr = new String[1]; // Biến hứng Mã KH đại diện
         Map<String, KhachHang> danhSachKhachHangEntity;
 
-
-
         try {
             // BƯỚC 1: Xử lý và tạo Entity Khách hàng
             danhSachKhachHangEntity = xuLyVaTaoKhachHangEntities(maKhachHangDaiDienArr);
@@ -1125,9 +1151,9 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 khachHangDaiDienObj = new KhachHang(
                         "KHVL001",
                         "Khách Vãng Lai",
-                        "000000000000", // CCCD mặc định (Nếu bảng yêu cầu NOT NULL)
-                        0,
-                        "",
+                        "000000000000", // CCCD mặc định
+                        LocalDate.of(1900, 1, 1), // Ngày sinh mặc định
+                        "00000000",// SĐT mặc định
                         null
                 );
             } else {
@@ -1329,16 +1355,16 @@ public class ManHinhXacNhanBanVe extends JPanel {
         private final String hoTen;
         private final String cccd;
         private final String sdt;
-        private final int tuoi;
+        private final LocalDate ngaySinh;
 
         // Constructor đầy đủ
-        public ChiTietKhachMock(ChoDat choDat, String maLoaiVe, String hoTen, String cccd, String sdt, int tuoi) {
+        public ChiTietKhachMock(ChoDat choDat, String maLoaiVe, String hoTen, String cccd, String sdt, LocalDate ngaySinh) {
             this.choDat = choDat;
             this.maLoaiVe = maLoaiVe;
             this.hoTen = hoTen;
             this.cccd = cccd;
             this.sdt = sdt;
-            this.tuoi = tuoi;
+            this.ngaySinh = ngaySinh;
         }
         // Cần thêm getters nếu logic UI dùng chúng (choDat(), maLoaiVe(), ...)
         public ChoDat choDat() { return choDat; }
@@ -1346,23 +1372,21 @@ public class ManHinhXacNhanBanVe extends JPanel {
         public String hoTen() { return hoTen; }
         public String cccd() { return cccd; }
         public String sdt() { return sdt; }
-        public int tuoi() { return tuoi; }
+        public LocalDate ngaySinh() { return ngaySinh; }
     }
 
 // ...
 // BỔ SUNG TRONG ManHinhXacNhanBanVe.java
-private static Object createMockChiTietKhach(
-        ChoDat choDat,
-        String maLoaiVe,
-        String hoTen,
-        String cccd,
-        String sdt,
-        int tuoi) {
-
-    // SỬ DỤNG CLASS GIẢ LẬP ĐÃ TẠO Ở TRÊN (ChiTietKhachMock)
-    return new ChiTietKhachMock(choDat, maLoaiVe, hoTen, cccd, sdt, tuoi);
-}
-
+    private static Object createMockChiTietKhach(
+            ChoDat choDat,
+            String maLoaiVe,
+            String hoTen,
+            String cccd,
+            String sdt,
+            LocalDate ngaySinh) {
+        // SỬ DỤNG CLASS GIẢ LẬP ĐÃ TẠO Ở TRÊN (ChiTietKhachMock)
+        return new ChiTietKhachMock(choDat, maLoaiVe, hoTen, cccd, sdt, ngaySinh);
+    }
     // main test neu can
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -1377,10 +1401,25 @@ private static Object createMockChiTietKhach(
 
 
             Map<String, Object> mockKhachHang = new LinkedHashMap<>();
+            LocalDate ngaySinhA = LocalDate.of(1990, 3, 15);
+            LocalDate ngaySinhB = LocalDate.of(2017, 6, 10);
 
-            // Giả lập ChiTietKhach cho CD001 (Nếu bạn không có định nghĩa Record, hãy truyền null/0)
-            Object khach1 = createMockChiTietKhach(cho1, "VT01", "Nguyen Van A", "012345678901", "0901234567", 30);
-            Object khach2 = createMockChiTietKhach(cho2, "VT02", "Tran Thi B", "012345678902", "0907654321", 8);
+            Object khach1 = createMockChiTietKhach(
+                    cho1,
+                    "VT01",
+                    "Nguyen Van A",
+                    "012345678901",
+                    "0901234567",
+                    ngaySinhA // TRUYỀN ĐỐI TƯỢNG LocalDate
+            );
+            Object khach2 = createMockChiTietKhach(
+                    cho2,
+                    "VT02",
+                    "Tran Thi B",
+                    "012345678902",
+                    "0907654321",
+                    ngaySinhB // TRUYỀN ĐỐI TƯỢNG LocalDate
+            );
 
             mockKhachHang.put("C15-SPT2-1", khach1);
             mockKhachHang.put("C16-SPT2-1", khach2);

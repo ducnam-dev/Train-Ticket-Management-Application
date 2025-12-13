@@ -6,7 +6,6 @@ public class KhachHang {
     public String maKH;
     public String hoTen;
     public String soCCCD;
-    public int tuoi;
     public String sdt;
     public String gioiTinh;
     public LocalDate ngaySinh;
@@ -14,13 +13,12 @@ public class KhachHang {
     public KhachHang() {
     }
 
-    public KhachHang(String maKH, String hoTen, String soCCCD, int tuoi, String sdt, String gioiTinh) {
+    public KhachHang(String maKH, String hoTen, String soCCCD, LocalDate ngaySinh, String sdt) {
         this.maKH = maKH;
         this.hoTen = hoTen;
         this.soCCCD = soCCCD;
-        this.tuoi = tuoi;
+        this.ngaySinh = ngaySinh;
         this.sdt = sdt;
-        this.gioiTinh = gioiTinh;
     }
     public KhachHang(String maKH, String hoTen, String soCCCD, LocalDate ngaySinh, String sdt, String gioiTinh) {
         this.maKH = maKH;
@@ -31,11 +29,10 @@ public class KhachHang {
         this.gioiTinh = gioiTinh;
     }
 //không có giới tính
-    public KhachHang(String maKH, String hoTen, String soCCCD, int tuoi, String sdt) {
+    public KhachHang(String maKH, String hoTen, String soCCCD, String sdt) {
         this.maKH = maKH;
         this.hoTen = hoTen;
         this.soCCCD = soCCCD;
-        this.tuoi = tuoi;
         this.sdt = sdt;
     }
 
@@ -112,7 +109,7 @@ public class KhachHang {
                 "maKH='" + maKH + '\'' +
                 ", hoTen='" + hoTen + '\'' +
                 ", soCCCD='" + soCCCD + '\'' +
-                ", tuoi=" + tuoi +
+                ", ngaySinh=" + ngaySinh +
                 ", sdt='" + sdt + '\'' +
                 ", gioiTinh='" + gioiTinh + '\'' +
                 '}';

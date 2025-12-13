@@ -7,6 +7,8 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.sql.*;
+import java.time.LocalDate;
 
 public class KhachHangDAO {
 
@@ -16,9 +18,10 @@ public class KhachHangDAO {
      */
     public static KhachHang getKhachHangById(String maKhachHang) {
         KhachHang kh = null;
-        String sql = "SELECT MaKhachHang, HoTen, CCCD, Tuoi, SoDienThoai, GioiTinh FROM KhachHang WHERE MaKhachHang = ?";
+        // THAY ĐỔI 1: Thay 'Tuoi' bằng 'NgaySinh' trong câu lệnh SELECT
+        String sql = "SELECT MaKhachHang, HoTen, CCCD, NgaySinh, SoDienThoai, GioiTinh FROM KhachHang WHERE MaKhachHang = ?";
 
-        Connection con = null; // KHAI BÁO BÊN NGOÀI KHỐI TRY
+        Connection con = null;
         try {
             con = ConnectDB.getConnection(); // Lấy kết nối
 
@@ -28,11 +31,19 @@ public class KhachHangDAO {
                 pstmt.setString(1, maKhachHang);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
+                        // Xử lý Ngày sinh từ SQL Date sang Java LocalDate
+                        java.sql.Date sqlDate = rs.getDate("NgaySinh");
+                        LocalDate ngaySinh = null;
+                        if (sqlDate != null) {
+                            ngaySinh = sqlDate.toLocalDate();
+                        }
+
+                        // THAY ĐỔI 2: Cập nhật constructor KhachHang: Dùng 'ngaySinh' thay cho 'Tuoi'
                         kh = new KhachHang(
                                 rs.getString("MaKhachHang"),
                                 rs.getString("HoTen"),
                                 rs.getString("CCCD"),
-                                rs.getInt("Tuoi"),
+                                ngaySinh, // TRUYỀN LocalDate
                                 rs.getString("SoDienThoai"),
                                 rs.getString("GioiTinh")
                         );
@@ -48,40 +59,26 @@ public class KhachHangDAO {
 
     // LƯU Ý: TẤT CẢ CÁC PHƯƠNG THỨC TRUY VẤN KHÁC CŨNG PHẢI SỬA TƯƠNG TỰ
 
-    public static KhachHang findKhachHangByCCCD(String cccd) {
-        KhachHang kh = null;
-        String sql = "SELECT MaKhachHang, HoTen, CCCD, Tuoi, SoDienThoai, GioiTinh FROM KhachHang WHERE CCCD = ?";
 
-        Connection conn = null; // KHAI BÁO BÊN NGOÀI
-        try {
-            conn = ConnectDB.getConnection();
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-                pstmt.setString(1, cccd);
-
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        kh = mapResultSetToKhachHang(rs);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi CSDL khi tìm khách hàng bằng CCCD: " + e.getMessage());
-        }
-        return kh;
-    }
-
-    // Giả định hàm ánh xạ này tồn tại trong KhachHangDAO
-    private static KhachHang mapResultSetToKhachHang(ResultSet rs) throws SQLException {
-        return new KhachHang(
-                rs.getString("MaKhachHang"),
-                rs.getString("HoTen"),
-                rs.getString("CCCD"),
-                rs.getInt("Tuoi"),
-                rs.getString("SoDienThoai"),
-                rs.getString("GioiTinh")
-        );
-    }
+// Phương thức helper để ánh xạ ResultSet sang KhachHang
+//    private static KhachHang mapResultSetToKhachHang(ResultSet rs) throws SQLException {
+//        // 1. Đọc java.sql.Date từ cột "NgaySinh"
+//        java.sql.Date sqlDate = rs.getDate("NgaySinh");
+//        // 2. Chuyển đổi sang java.time.LocalDate
+//        LocalDate ngaySinh = null;
+//        if (sqlDate != null) {
+//            ngaySinh = sqlDate.toLocalDate();
+//        }
+//        // 3. Sử dụng ngaySinh trong constructor thay cho Tuoi
+//        return new KhachHang(
+//                rs.getString("MaKhachHang"),
+//                rs.getString("HoTen"),
+//                rs.getString("CCCD"),
+//                ngaySinh, // Dùng LocalDate ngaySinh
+//                rs.getString("SoDienThoai"),
+//                rs.getString("GioiTinh")
+//        );
+//    }
     /**
      * Tìm kiếm Khách hàng theo số CCCD.
      * @param cccd Số căn cước công dân.
@@ -106,12 +103,14 @@ public class KhachHangDAO {
                         kh.setSoCCCD(rs.getString("CCCD"));
                         kh.setSdt(rs.getString("SoDienThoai"));
 
-                        // Xử lý NgaySinh (cần chuyển từ SQL Date sang LocalDate)
-                        Date sqlDate = rs.getDate("NgaySinh");
+                        //1. Đọc java.sql.Date từ cột "NgaySinh"
+                        java.sql.Date sqlDate = rs.getDate("NgaySinh");
+                        // 2. Chuyển đổi sang java.time.LocalDate
+                        LocalDate ngaySinh = null;
                         if (sqlDate != null) {
-                            kh.setNgaySinh(sqlDate.toLocalDate());
+                            ngaySinh = sqlDate.toLocalDate();
                         }
-
+                        kh.setNgaySinh(ngaySinh); // Gán LocalDate cho KhachHang
                     }
                 }
             }
@@ -120,6 +119,28 @@ public class KhachHangDAO {
             e.printStackTrace();
         } finally {
             ConnectDB.disconnect();
+        }
+        return kh;
+    }
+    public static KhachHang findKhachHangByCCCD(String cccd) {
+        KhachHang kh = null;
+        String sql = "SELECT MaKhachHang, HoTen, CCCD, Tuoi, SoDienThoai, GioiTinh FROM KhachHang WHERE CCCD = ?";
+
+        Connection conn = null; // KHAI BÁO BÊN NGOÀI
+        try {
+            conn = ConnectDB.getConnection();
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setString(1, cccd);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+//                        kh = mapResultSetToKhachHang(rs);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi CSDL khi tìm khách hàng bằng CCCD: " + e.getMessage());
         }
         return kh;
     }
@@ -222,7 +243,8 @@ public class KhachHangDAO {
         return 0; // Trả về 0 nếu không tìm thấy hoặc lỗi
     }
 
-// Giả định hàm tạo mã khách hàng (taoMaKhachHangMoi) cũng nằm ở đây
+
+
 
     /**
      * Thêm mới hoặc Cập nhật thông tin Khách hàng (UPSERT logic).
@@ -233,14 +255,14 @@ public class KhachHangDAO {
      * @return true nếu thao tác INSERT hoặc UPDATE thành công.
      * @throws SQLException Nếu có lỗi CSDL nghiêm trọng.
      */
-    public boolean addOrUpdateKhachHang(Connection conn, KhachHang kh) throws SQLException {
+    public boolean themHoacCapNhatKhachHang(Connection conn, KhachHang kh) throws SQLException {
 
         // 1. Kiểm tra Khách hàng vãng lai (KHVL001)
         if ("KHVL001".equals(kh.getMaKH())) {
             return true;
         }
 
-        // 2. Kiểm tra sự tồn tại bằng MaKhachHang đã được gán (FIX: Logic tương thích với MaKH mới/cũ)
+        // 2. Kiểm tra sự tồn tại bằng MaKhachHang đã được gán
         boolean isUpdate = false;
         String checkSql = "SELECT MaKhachHang FROM KhachHang WHERE MaKhachHang = ?";
 
@@ -252,49 +274,79 @@ public class KhachHangDAO {
                 }
             }
         }
-        // LƯU Ý: Lỗi trùng CCCD xảy ra do MaKH đã tồn tại nhưng bạn vẫn gọi INSERT!
-        // -> Logic tìm kiếm ở UI/Controller đã bị lỗi, nhưng chúng ta sửa nó bằng cách
-        //    chạy UPDATE nếu MaKH đã có.
 
         String sql;
         if (isUpdate) {
             // Cập nhật thông tin khách hàng hiện tại
-            sql = "UPDATE KhachHang SET HoTen = ?, CCCD = ?, Tuoi = ?, SoDienThoai = ?, GioiTinh = ? " +
+            // SỬA SQL: Loại bỏ Tuoi, thêm NgaySinh, MaKhachHang là tham số cuối (WHERE)
+            sql = "UPDATE KhachHang SET HoTen = ?, CCCD = ?, SoDienThoai = ?, GioiTinh = ?, NgaySinh = ? " +
                     "WHERE MaKhachHang = ?";
         } else {
             // Thêm mới khách hàng
-            sql = "INSERT INTO KhachHang (MaKhachHang, HoTen, CCCD, Tuoi, SoDienThoai, GioiTinh) " +
+            // SỬA SQL: Loại bỏ Tuoi, thêm NgaySinh
+            sql = "INSERT INTO KhachHang (MaKhachHang, HoTen, CCCD, SoDienThoai, GioiTinh, NgaySinh) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
         }
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
+            // Chuyển đổi LocalDate sang java.sql.Date (cho PreparedStatement)
+            java.sql.Date sqlNgaySinh = null;
+            if (kh.getNgaySinh() != null) {
+                sqlNgaySinh = java.sql.Date.valueOf(kh.getNgaySinh());
+            }
+
             if (isUpdate) {
-                // Tham số cho UPDATE: HoTen, CCCD, Tuoi, SDT, GioiTinh, MaKhachHang (vị trí 1-6)
+                // Tham số cho UPDATE: HoTen, CCCD, SDT, GioiTinh, NgaySinh, MaKhachHang (vị trí 1-6)
+
+                // 1. HoTen
                 pstmt.setString(1, kh.getHoTen());
+                // 2. CCCD
                 pstmt.setString(2, kh.getSoCCCD());
-                pstmt.setInt(3, kh.getTuoi());
+                // 3. SoDienThoai
+                pstmt.setString(3, kh.getSdt());
+
+                // 4. GioiTinh
+                if (kh.getGioiTinh() != null && !kh.getGioiTinh().isEmpty()) {
+                    pstmt.setString(4, kh.getGioiTinh());
+                } else {
+                    pstmt.setNull(4, Types.NVARCHAR);
+                }
+
+                // 5. NgaySinh
+                if (sqlNgaySinh != null) {
+                    pstmt.setDate(5, sqlNgaySinh);
+                } else {
+                    pstmt.setNull(5, Types.DATE);
+                }
+
+                // 6. MaKhachHang (trong WHERE)
+                pstmt.setString(6, kh.getMaKH());
+
+            } else {
+                // Tham số cho INSERT: MaKhachHang, HoTen, CCCD, SDT, GioiTinh, NgaySinh (vị trí 1-6)
+
+                // 1. MaKhachHang
+                pstmt.setString(1, kh.getMaKH());
+                // 2. HoTen
+                pstmt.setString(2, kh.getHoTen());
+                // 3. CCCD
+                pstmt.setString(3, kh.getSoCCCD());
+                // 4. SoDienThoai
                 pstmt.setString(4, kh.getSdt());
 
+                // 5. GioiTinh
                 if (kh.getGioiTinh() != null && !kh.getGioiTinh().isEmpty()) {
                     pstmt.setString(5, kh.getGioiTinh());
                 } else {
                     pstmt.setNull(5, Types.NVARCHAR);
                 }
-                pstmt.setString(6, kh.getMaKH()); // MaKhachHang ở vị trí cuối cùng
 
-            } else {
-                // Tham số cho INSERT: MaKhachHang, HoTen, CCCD, Tuoi, SDT, GioiTinh (vị trí 1-6)
-                pstmt.setString(1, kh.getMaKH());
-                pstmt.setString(2, kh.getHoTen());
-                pstmt.setString(3, kh.getSoCCCD());
-                pstmt.setInt(4, kh.getTuoi());
-                pstmt.setString(5, kh.getSdt());
-
-                if (kh.getGioiTinh() != null && !kh.getGioiTinh().isEmpty()) {
-                    pstmt.setString(6, kh.getGioiTinh());
+                // 6. NgaySinh
+                if (sqlNgaySinh != null) {
+                    pstmt.setDate(6, sqlNgaySinh);
                 } else {
-                    pstmt.setNull(6, Types.NVARCHAR);
+                    pstmt.setNull(6, Types.DATE);
                 }
             }
 
