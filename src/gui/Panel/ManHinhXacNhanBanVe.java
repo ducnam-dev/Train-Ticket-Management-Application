@@ -1393,8 +1393,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
             // --- 1. Tạo dữ liệu giả cho ChoDat (Ghế đã chọn) ---
             Map<String, ChoDat> mockGheDaChon = new LinkedHashMap<>();
 
-            ChoDat cho1 = new ChoDat("C15-SPT2-1", "SPT2-1", "A1", "GL", 1);
-            ChoDat cho2 = new ChoDat("C16-SPT2-2", "SPT2-1", "A2", "GL", 1);
+            ChoDat cho1 = new ChoDat("C15-SPT2-1", "SPT2-1", "A1", 1, 1);
+            ChoDat cho2 = new ChoDat("C16-SPT2-2", "SPT2-1", "A2", 1, 1);
 
             mockGheDaChon.put("C15-SPT2-1", cho1);
             mockGheDaChon.put("C16-SPT2-1", cho2);

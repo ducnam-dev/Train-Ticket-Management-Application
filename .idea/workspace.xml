@@ -9,24 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="xóa các class không cần thiết, pull code từ master của nam">
-      <change afterPath="$PROJECT_DIR$/.idea/artifacts/Train_Ticket_Management_Application2_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/thuVienDocExcel.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/libExcel/commons-collections4-4.4.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/libExcel/commons-compress-1.21.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/libExcel/poi-ooxml-full-5.2.3.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/libExcel/xmlbeans-5.1.1.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/control/VeSoDoTau.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVeUpdatePanelChuyenTau.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/commons_io_2_11_0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/jackson.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/log4j_api_2_18_0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/poi_3_17.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/poi_5_2_3.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/poi_ooxml_5_2_2.xml" beforeDir="false" />
+    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="hoàn thành 100% vẽ sơ đồ ghế. 100% chức năng tìm kiếm chuyến tàu">
+      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.project" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Train-Ticket-Management-Application2.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Train-Ticket-Management-Application2.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$1.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$2.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$3.class" afterDir="false" />
@@ -34,22 +19,20 @@
       <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$5.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$ChiTietKhach.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$ChiTietKhach.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/commons-io-2.11.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/lib/libExcel/commons-io-2.11.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/log4j-api-2.18.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/lib/libExcel/log4j-api-2.18.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/poi-5.2.3.jar" beforeDir="false" afterPath="$PROJECT_DIR$/lib/libExcel/poi-5.2.3.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/poi-ooxml-5.2.2.jar" beforeDir="false" afterPath="$PROJECT_DIR$/lib/libExcel/poi-ooxml-5.2.3.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/qr_thanh_toan_demo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/ChiTietHoaDonDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChiTietHoaDonDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/ChuyenTauDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChuyenTauDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/KhachHangDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/KhachHangDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/CSDL quan ly ve tau backup.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSDL quan ly ve tau backup.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/test2.2.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dao/VeDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/VeDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/KhachHang.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/KhachHang.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/Ve.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/Ve.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/ConnectDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/ConnectDB.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entity/ChoDat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/ChoDat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/AdminFullDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/AdminFullDashboard.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/ManHinhDangNhap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/ManHinhDangNhap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVeUpdatePanelChuyenTau.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhXacNhanBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhXacNhanBanVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test" beforeDir="false" afterPath="$PROJECT_DIR$/test" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,6 +64,16 @@
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/ducnam-dev/Train-Ticket-Management-Application.git&quot;,
     &quot;accountId&quot;: &quot;8c77214f-7c6d-450c-b97f-cfbb4d1119bb&quot;
+  },
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
+    },
+    &quot;owner&quot;: &quot;ducnam-dev&quot;,
+    &quot;repository&quot;: &quot;Train-Ticket-Management-Application&quot;
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
@@ -101,6 +94,7 @@
   "keyToString": {
     "Application.BanVeDashboard.executor": "Run",
     "Application.CustomTrainTicketPanel.executor": "Debug",
+    "Application.KiemTraChonToaPanel.executor": "Run",
     "Application.Main.executor": "Run",
     "Application.ManHinhBanVe.executor": "Run",
     "Application.ManHinhBanVe2.executor": "Run",
@@ -118,7 +112,7 @@
     "git-widget-placeholder": "fix-chuc-nang-ban-ve-2.0",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/06_Study/Stuby IUH/Hoc ki 5/Phat trien ung dung/DU AN/Train-Ticket-Management-Application/lib",
+    "last_opened_file_path": "D:/06_Study/Stuby IUH/Hoc ki 5/Phat trien ung dung/DU AN/Train-Ticket-Management-Application/sql",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
@@ -133,7 +127,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\Train-Ticket-Management-Application\sql" />
       <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\Train-Ticket-Management-Application\lib" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\Train-Ticket-Management-Application\sql" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="gui.Panel" />
@@ -153,12 +151,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CustomTrainTicketPanel" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.CustomTrainTicketPanel" />
+    <configuration name="KiemTraChonToaPanel" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.KiemTraChonToaPanel" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="gui.Panel.*" />
+          <option name="PATTERN" value="gui.MainFrame.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -215,10 +213,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.BanVeDashboard" />
-        <item itemvalue="Application.VeSoDoTau" />
         <item itemvalue="Application.ManHinhBanVeUpdatePanelChuyenTau" />
+        <item itemvalue="Application.KiemTraChonToaPanel" />
         <item itemvalue="Application.ManHinhBanVe" />
-        <item itemvalue="Application.CustomTrainTicketPanel" />
+        <item itemvalue="Application.VeSoDoTau" />
       </list>
     </recent_temporary>
   </component>
@@ -243,6 +241,8 @@
       <workItem from="1765561487794" duration="5212000" />
       <workItem from="1765567063787" duration="2147000" />
       <workItem from="1765622434968" duration="6090000" />
+      <workItem from="1765639176819" duration="7557000" />
+      <workItem from="1765707610751" duration="7778000" />
     </task>
     <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
       <option name="closed" value="true" />
@@ -276,7 +276,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765332028194</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="sửa tuổi =&gt; ngày sinh, tìm khách hàng nhanh theo cccd. Ngày 13/12 thêm chức năng hiện thị chuyến tàu đẹp mắt hơn">
+      <option name="closed" value="true" />
+      <created>1765639270174</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1765639270174</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -288,50 +296,12 @@
     <MESSAGE value="Update gitignore to ignore build outputs" />
     <MESSAGE value="fix ảnh" />
     <MESSAGE value="xóa các class không cần thiết, pull code từ master của nam" />
-    <option name="LAST_COMMIT_MESSAGE" value="xóa các class không cần thiết, pull code từ master của nam" />
+    <MESSAGE value="sửa tuổi =&gt; ngày sinh, tìm khách hàng nhanh theo cccd. Ngày 13/12 thêm chức năng hiện thị chuyến tàu đẹp mắt hơn" />
+    <option name="LAST_COMMIT_MESSAGE" value="sửa tuổi =&gt; ngày sinh, tìm khách hàng nhanh theo cccd. Ngày 13/12 thêm chức năng hiện thị chuyến tàu đẹp mắt hơn" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="java-method">
-          <url>file://$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java</url>
-          <line>650</line>
-          <properties class="gui.Panel.ManHinhBanVe2" method="kiemTraHopLeLoaiVeTheoNgaySinh">
-            <option name="EMULATED" value="true" />
-            <option name="WATCH_EXIT" value="false" />
-          </properties>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java</url>
-          <line>651</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java</url>
-          <line>653</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java</url>
-          <line>656</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java</url>
-          <line>655</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java</url>
-          <line>657</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java</url>
-          <line>654</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
         <breakpoint enabled="true" type="java-exception">
           <properties class="java.lang.IllegalArgumentException" package="java.lang" />
           <option name="timeStamp" value="12" />

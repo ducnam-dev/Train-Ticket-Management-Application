@@ -48,11 +48,6 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
 
         bangTrungTamDangNhap.setBackground(Color.WHITE);
 
-        // THÊM CHỨC NĂNG NHẤN ENTER ĐỂ ĐĂNG NHẬP
-//        JRootPane rootPane = SwingUtilities.getRootPane(this);
-//        if (rootPane != null) {
-//            rootPane.setDefaultButton(btnDangNhap); // Chỉ định nút mặc định
-//        }
 
         setVisible(true);
     }

@@ -380,9 +380,8 @@ public class VeDAO {
 
         // --- BƯỚC 2: KHỞI TẠO TRANSACTION VÀ THỰC HIỆN INSERT ---
         try {
-            // Tạm thời hardcode connection string nếu ConnectDB.getConnection() không hỗ trợ autocommit=false
-            // Tốt hơn nên cấu hình ConnectDB để trả về Connection có thể tùy chỉnh
-            conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=QuanLyVeTauTest2;trustServerCertificate=true", "sa", "sapassword");
+            // Lấy kết nối từ ConnectDB
+            conn = ConnectDB.getConnection();
             conn.setAutoCommit(false); // 1. Bắt đầu giao dịch
 
             // B1: Xử lý Khách hàng (Thêm mới hoặc Cập nhật)
@@ -433,6 +432,7 @@ public class VeDAO {
                 }
             }
             //
+            e.printStackTrace();
             throw e; // Ném lỗi lên để UI xử lý thông báo thất bại
         } finally {
             if (conn != null) {

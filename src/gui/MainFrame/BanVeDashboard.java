@@ -39,8 +39,6 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     private static final int ICON_SIZE = 20;
 
     public ManHinhBanVe manHinhBanVeInstance;
-    public ManHinhBanVe2 manHinhBanVeInstance2;
-    public ManHinhBanVeUpdatePanelChuyenTau manHinhBanVeInstance3;
 
 
     public BanVeDashboard() {
@@ -273,8 +271,8 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         panelNoiDung.add(new ManHinhMoCa(), "moCa");
         panelNoiDung.add(new ManHinhKetCa(), "ketCa");
 
-        manHinhBanVeInstance3 = new ManHinhBanVeUpdatePanelChuyenTau();
-        panelNoiDung.add(manHinhBanVeInstance3, "banVeMoi");
+        manHinhBanVeInstance = new ManHinhBanVe();
+        panelNoiDung.add(manHinhBanVeInstance, "banVeMoi");
 
         panelNoiDung.add(new ManHinhDoiVe(), "doiVe");
         panelNoiDung.add(new ManHinhTraVe(), "traVe");
