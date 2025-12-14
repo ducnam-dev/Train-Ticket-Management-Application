@@ -1,16 +1,15 @@
 Tai khoan mật khẩu
 
-NVBV0001 222
-
-NVQL0001 111
+NVBV0001 admin
+NVQL0001 admin
 
 csdl chính là DataVer3 có khóa ngoại
 CSDL dùng là CSDL backup
 
 Hướng dẫn sử dụng phần mềm bán vé tàu
 1. Đăng nhập
-   - Sử dụng tài khoản NVBV0001 với mật khẩu 222 để đăng nhập vào hệ thống.
-   - Sử dụng tài khoản NVQL0001 với mật khẩu 111 để đăng nhập với quyền quản lý.
+   - Sử dụng tài khoản NVBV0001 với mật khẩu admin để đăng nhập vào hệ thống.
+   - Sử dụng tài khoản NVQL0001 với mật khẩu admin để đăng nhập với quyền quản lý.
 2. Bán vé
     - Chọn chuyến tàu và số vé cần bán.
     - Nhập thông tin khách hàng và xác nhận giao dịch.
