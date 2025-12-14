@@ -172,7 +172,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         panelTrai.setBackground(Color.white);
 
         panelTrai.setBorder(new CompoundBorder(new LineBorder(Color.GRAY, 3, false),
-                new EmptyBorder(0, 0, 0, 0)));
+                new EmptyBorder(5, 5, 0, 0)));
         // emptyborder theo thứ tự trên, trái, dưới, phải
 
         panelTrai.add(createKhuVucTimKiem());
@@ -196,6 +196,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         JPanel khuVucThongTinKhach = createKhuVucThongTinKhach();
         panelPhai.add(khuVucThongTinKhach, BorderLayout.CENTER);
+
+
 
         return panelPhai;
     }
@@ -249,6 +251,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private JScrollPane createKhuVucDanhSachChuyenTau() {
         // Tên chuyến tàu và thông tin sẽ được hiển thị trên các Panel tùy chỉnh
         pnlChuyenTau = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        //border cho pnlChuyenTau
         pnlChuyenTau.setOpaque(false);
 
         // Bọc pnlChuyenTau vào JScrollPane
@@ -318,7 +321,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         scrToa.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
         // Giới hạn chiều cao của JScrollPane để nó không chiếm quá nhiều không gian
-        scrToa.setPreferredSize(new Dimension(600, 80));
+        scrToa.setPreferredSize(new Dimension(500, 80));
         scrToa.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
         // Thêm Label "Chọn toa:" ra ngoài ScrollPane để Label luôn hiển thị
@@ -393,6 +396,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY),
                 "Thông tin khách hàng"));
+        panel.setPreferredSize(new Dimension(600, 170));
+        panel.setMaximumSize(new Dimension(600, 200));
 
         JPanel infoScrollPanel = new JPanel();
         infoScrollPanel.setLayout(new BoxLayout(infoScrollPanel, BoxLayout.Y_AXIS));
@@ -405,7 +410,8 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         thongTinKhachScrollPane = new JScrollPane(infoScrollPanel);
         thongTinKhachScrollPane.setBorder(null);
         thongTinKhachScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        thongTinKhachScrollPane.setPreferredSize(new Dimension(700, 300));
+        thongTinKhachScrollPane.setPreferredSize(new Dimension(300, 400));
+        thongTinKhachScrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 250));
         panel.add(thongTinKhachScrollPane, BorderLayout.CENTER);
 
         SwingUtilities.invokeLater(this::capNhatThongTinKhachUI);
@@ -541,7 +547,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     }
 
     private JPanel taoNutChuyenTauVeSoDo(String maChuyen, String ngayDi, String gioDi, String ngayDen, String gioDen) {
-
         // 1. Tạo đối tượng VeSoDoTau (Cơ sở đồ họa)
         // Truyền thông tin giờ đi/ngày đi (đã định dạng) vào constructor
         String thoiGianDiHienThi = ngayDi + " " + gioDi;
@@ -556,12 +561,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         // 2. Tạo Container đóng vai trò là NÚT (Sử dụng JPanel đơn giản)
         JPanel nutChuyenTauContainer = new JPanel(new BorderLayout());
         nutChuyenTauContainer.add(soDoTauPanel, BorderLayout.CENTER);
-
-
-
-
         // 3. Định dạng Panel để mô phỏng trạng thái nút (Default State)
-        nutChuyenTauContainer.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2, true));
         nutChuyenTauContainer.setBackground(Color.WHITE);
 
         // Đặt kích thước để Panel phù hợp
@@ -577,7 +577,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                 originalBackground = nutChuyenTauContainer.getBackground();
                 originalBorder = nutChuyenTauContainer.getBorder();
                 nutChuyenTauContainer.setBackground(new Color(220, 220, 220)); // Hiệu ứng hover
-                nutChuyenTauContainer.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2, true));
             }
 
             @Override
@@ -597,13 +596,11 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         // 1. Reset trạng thái chọn của Panel cũ
         if (lastSelectedChuyenTauPanel != null) {
-            lastSelectedChuyenTauPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2, true));
             lastSelectedChuyenTauPanel.setBackground(Color.WHITE);
         }
 
         // 2. Đặt trạng thái chọn cho Panel hiện tại
-        currentPanel.setBorder(BorderFactory.createLineBorder(new Color(0, 123, 255), 3, true)); // Viền xanh dày hơn
-        // currentPanel.setBackground(); // Đổi màu thành màu cam đậm khi chọn
+        // Đổi màu thành màu cam đậm khi chọn
         currentPanel.setBackground(Color.orange);
 
         lastSelectedChuyenTauPanel = currentPanel; // Lưu Panel đã chọn
