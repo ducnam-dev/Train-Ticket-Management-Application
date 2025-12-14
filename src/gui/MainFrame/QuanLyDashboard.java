@@ -27,7 +27,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
     private JPanel navPanel;
 
     // Màu sắc theo phong cách BanVeDashboard
-    private final Color MAU_CHINH = new Color(34, 137, 203);
+    private final Color MAU_CHINH = new Color(0, 123, 255);
     private final Color MAU_DUOC_CHON = new Color(74, 184, 237);
     private final Color MAU_HOVER = new Color(45, 150, 215);
 

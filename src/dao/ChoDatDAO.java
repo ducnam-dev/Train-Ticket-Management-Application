@@ -39,7 +39,7 @@ public class ChoDatDAO {
                     while (rs.next()) {
                         String maCho = rs.getString("MaCho");
                         String soCho = rs.getString("SoCho");
-                        String khoang = rs.getString("Khoang");
+                        int khoang = rs.getInt("Khoang");
 
                         int tang = rs.getInt("Tang");
                         int daDatInt = rs.getInt("DaDatTrenChuyenTau");
@@ -80,7 +80,7 @@ public class ChoDatDAO {
                                 rs.getString("MaCho"),
                                 rs.getString("MaToa"),
                                 rs.getString("SoCho"),
-                                rs.getString("Khoang"),
+                                rs.getInt("Khoang"),
                                 rs.getInt("Tang")
                         );
                         cd.setDaDat(false);

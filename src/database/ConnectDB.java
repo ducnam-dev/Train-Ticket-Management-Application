@@ -26,7 +26,7 @@ public class ConnectDB {
 
         if(!isConnectionValid) {
             // Logic tạo kết nối chỉ chạy khi kết nối là NULL hoặc không hợp lệ/đã đóng
-            String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyVeTauTest2;trustServerCertificate=true";
+            String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyVeTau;trustServerCertificate=true";
             String user = "sa";
             String password = "sapassword";
             try {
@@ -55,7 +55,7 @@ public class ConnectDB {
         if (con == null || con.isClosed()) { // Kiểm tra trạng thái hiện tại
             getInstance().connect();
             if (con == null){
-                throw new SQLException("Failed to establish a database connection.");
+                throw new SQLException("Không thể thiết lập kết nối đến cơ sở dữ liệu.");
             }
         }
         return con;

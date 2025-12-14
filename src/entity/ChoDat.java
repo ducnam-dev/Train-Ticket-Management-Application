@@ -6,13 +6,13 @@ public class ChoDat {
         private String maCho;
         private String maToa;
         private String soCho;
-        private String khoang;
+        private int khoang;
         private int tang;
         private boolean daDat; // Trạng thái đặt vé tạm thời trên chuyến tàu cụ thể
 
         public ChoDat() {}
 
-    public ChoDat(String maCho, String maToa, String soCho, String khoang, int tang) {
+    public ChoDat(String maCho, String maToa, String soCho, int khoang, int tang) {
         this.maCho = maCho;
         this.maToa = maToa;
         this.soCho = soCho;
@@ -44,11 +44,11 @@ public class ChoDat {
         this.soCho = soCho;
     }
 
-    public String getKhoang() {
+    public int getKhoang() {
         return khoang;
     }
 
-    public void setKhoang(String khoang) {
+    public void setKhoang(int khoang) {
         this.khoang = khoang;
     }
 
