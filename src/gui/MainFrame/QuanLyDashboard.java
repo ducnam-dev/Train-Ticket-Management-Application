@@ -130,37 +130,37 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
 
         panel.add(taoDuongKe());
         // [1. Trang chủ]
-        btnTrangChu = createNavItem("Dashboard", "/images/home.png", "trangChu");
+        btnTrangChu = createNavItem("Dashboard", "/images/iconMenu/home.png", "trangChu");
         panel.add(btnTrangChu);
         panel.add(taoDuongKe());
 
         // [2. Quản lý chuyến tàu]
-        btnQLChuyenTau = createNavItem("QL chuyến tàu", "/images/chuyentau.png", "qlChuyenTau");
+        btnQLChuyenTau = createNavItem("QL chuyến tàu", "/images/iconMenu/chuyentau.png", "qlChuyenTau");
         panel.add(btnQLChuyenTau);
         panel.add(taoDuongKe());
 
         // [3. Quản lý tài khoản NV]
-        btnQLNV = createNavItem("QL tài khoản NV", "/images/nhanvien.png", "qlNhanVien");
+        btnQLNV = createNavItem("QL tài khoản NV", "/images/iconMenu/nhanvien.png", "qlNhanVien");
         panel.add(btnQLNV);
         panel.add(taoDuongKe());
 
         // [4. Quản lý giá vé]
-        btnQLGiaVe = createNavItem("QL giá vé", "/images/giave.png", "qlGiaVe");
+        btnQLGiaVe = createNavItem("QL giá vé", "/images/iconMenu/giave.png", "qlGiaVe");
         panel.add(btnQLGiaVe);
         panel.add(taoDuongKe());
 
         // [5. Quản lý khuyến mãi]
-        btnQLKhuyenMai = createNavItem("QL khuyến mãi", "/images/khuyenmai.png", "qlKhuyenMai");
+        btnQLKhuyenMai = createNavItem("QL khuyến mãi", "/images/iconMenu/khuyenmai.png", "qlKhuyenMai");
         panel.add(btnQLKhuyenMai);
         panel.add(taoDuongKe());
 
         // [6. Tra cứu hóa đơn]
-        btnTraCuuHD = createNavItem("Tra cứu hóa đơn", "/images/tracuuhoadon.png", "traCuuHD");
+        btnTraCuuHD = createNavItem("Tra cứu hóa đơn", "/images/iconMenu/tracuuhoadon.png", "traCuuHD");
         panel.add(btnTraCuuHD);
         panel.add(taoDuongKe());
 
         // [7. Thống kê báo cáo]
-        btnThongKe = createNavItem("Thống kê báo cáo", "/images/thongke.png", "thongKe");
+        btnThongKe = createNavItem("Thống kê báo cáo", "/images/iconMenu/thongke.png", "thongKe");
         panel.add(btnThongKe);
         panel.add(taoDuongKe());
 
@@ -170,7 +170,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         panel.add(taoPanelThongTinNV());
 
         // --- Nút Đăng xuất ---
-        btnDangXuat = createNavItem("Đăng xuất", "/images/logout.png", "dangXuat");
+        btnDangXuat = createNavItem("Đăng xuất", "/images/iconMenu/logout.png", "dangXuat");
         panel.add(btnDangXuat);
 
         return panel;

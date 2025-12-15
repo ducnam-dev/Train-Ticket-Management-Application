@@ -4,7 +4,10 @@ package gui.Panel;
 import control.CaLamViec;
 import dao.*;
 import entity.*;
+import gui.MainFrame.AdminFullDashboard;
 import gui.MainFrame.BanVeDashboard;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -19,9 +22,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
-import java.time.LocalDate; // Đã có
-import java.time.format.DateTimeFormatter; // Đã có
-// ...
+
 
 /*
 logic chính:
@@ -37,6 +38,7 @@ logic chính:
  * Tên biến và phương thức bằng tiếng Việt không dấu.
  */
 public class ManHinhXacNhanBanVe extends JPanel {
+    private static final Logger log = LogManager.getLogger(ManHinhXacNhanBanVe.class);
     private Map<String, ChoDat> danhSachGhe;
     private Map<String, Object> danhSachKhach;
     private final Map<String, Long> danhSachGiaVe;
@@ -57,13 +59,14 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private JLabel lblThongTinKhuyenMai;
 
     //UI Hoa don
-    private JLabel lblMaHoaDon; // FIX: Biến mới để hiển thị Mã HD
-    private JLabel lblNguoiLapHD; // FIX: Biến mới để hiển thị Người lập
-    private JLabel lblDienThoaiNV; // FIX: Biến mới để hiển thị SĐT NV
-    private JLabel lblTenNguoiDat; // FIX: Tên người đặt
-    private JLabel lblSdtNguoiDat; // FIX: SĐT người đặt
-    private JLabel lblPhuongThucTT; // FIX: Phương thức thanh toán (trong phần UI Tổng tiền)
+    private JLabel lblMaHoaDon;
+    private JLabel lblNguoiLapHD;
+    private JLabel lblDienThoaiNV;
+    private JLabel lblTenNguoiDat;
+    private JLabel lblSdtNguoiDat;
+    private JLabel lblPhuongThucTT;
 
+    private JLabel lblTongCongLon;
 
     // Khuyen mai dang ap dung
     private KhuyenMai khuyenMaiApDung = null;
@@ -87,6 +90,9 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private String maNV;
     private String tenNV;
     private String sdtNV;
+    private KhuyenMai bestKm;
+    private JLabel lblGiamGia;
+    private JLabel lblTenKhuyenMai;
 
     public ManHinhXacNhanBanVe(Map<String, ChoDat> danhSachGheDaChon,
                                Map<String, ?> danhSachKhachHang, // Nhận Map với giá trị generic
@@ -209,7 +215,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         String ngayStr = ngayDi != null ? df.format(ngayDi) : "-";
 
-//        noiDung.add(new JLabel("Mã tàu: " + (maChuyen != null ? maChuyen : "-")));
+        noiDung.add(new JLabel("Mã tàu: " + (maChuyen != null ? maChuyen : "-")));
         //ga đi ga đến
         // Ngày giờ khởi hàng (ngày đi)
         // Tàu, toa, số ghế
@@ -283,14 +289,35 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
         double giaVe = tinhGiaVe();
         Tong tong = tinhTongHoaDon(giaVe, khuyenMaiApDung);
-
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
 
-        box.add(new JLabel("Giá vé: " + nf.format((long) tong.subtotal) + " VND"));
-        String applied = (khuyenMaiApDung != null) ? khuyenMaiApDung.getMaKM() + " - " + khuyenMaiApDung.getTenKM() : "Không";
-        box.add(new JLabel("Chiết khấu áp dụng: " + applied));
+        // 1. Dòng Giá vé (Subtotal)
+        box.add(new JLabel("Giá vé: " + nf.format(Math.round(tong.subtotal)) + " VND"));
 
-        lblTongTien = new JLabel("Tổng số tiền phải thanh toán: " + nf.format((long) tong.total) + " VND");
+
+        lblTenKhuyenMai = new JLabel("Khuyến mãi áp dụng: " );
+        // không có tác dụng sẽ được cập nhật sau
+        box.add(lblTenKhuyenMai);
+
+        // 3. Dòng Tổng tiền giảm (Discount)
+        long giamGia = Math.round(tong.discount);
+        // Khởi tạo lblGiamGia (Biến instance)
+        lblGiamGia = new JLabel("Tổng tiền giảm: " + nf.format(giamGia) + " VND"); // Dòng này hiển thị GIÁ TRỊ GIẢM
+        lblGiamGia.setForeground(Color.RED);
+
+        // Thêm khoảng trắng và hiển thị giá trị giảm
+        box.add(Box.createRigidArea(new Dimension(0, 4)));
+        box.add(lblGiamGia);
+        box.add(Box.createRigidArea(new Dimension(0, 4)));
+
+
+        // 4. Dòng Tổng tiền phải thanh toán (Total)
+        lblTongTien = new JLabel("Tổng số tiền phải thanh toán: " + nf.format(Math.round(tong.total)) + " VND");
+
+        System.out.println( "gia ve" + nf.format(Math.round(tong.subtotal)) );
+
+        System.out.println( "tong" + nf.format(Math.round(tong.total)) );
+
         lblTongTien.setFont(lblTongTien.getFont().deriveFont(Font.BOLD));
         lblTongTien.setForeground(new Color(200, 60, 10));
         box.add(Box.createRigidArea(new Dimension(0, 6)));
@@ -313,9 +340,11 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
         cbKhuyenMai = new JComboBox<>();
         cbKhuyenMai.setPreferredSize(new Dimension(250, 26));
+        cbKhuyenMai.setEnabled(false);
         dongKm.add(cbKhuyenMai);
 
         btnApDungKhuyenMai = new JButton("Áp dụng");
+        btnApDungKhuyenMai.setEnabled(false);
         btnApDungKhuyenMai.addActionListener(e -> apDungKhuyenMaiChon());
         dongKm.add(btnApDungKhuyenMai);
 
@@ -329,18 +358,32 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
         panelThanhToan.add(dongKm);
 
+        // Khai báo Tong và NumberFormat ngay từ đầu (giá trị final hiệu quả)
+        Tong t = tinhTongHoaDon(tinhGiaVe(), khuyenMaiApDung);
+        long tongFinal = Math.round(t.total);
+        final NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+
+
         JPanel dong1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         dong1.setOpaque(false);
         dong1.add(new JLabel("Hình thức thanh toán: "));
-        cbHinhThuc = new JComboBox<>(new String[]{"Tiền mặt", "Chuyển khoản", "Thẻ"});
+        cbHinhThuc = new JComboBox<>(new String[]{"Tiền mặt", "Chuyển khoản"});
+
         dong1.add(cbHinhThuc);
         panelThanhToan.add(dong1);
 
+
+        cbHinhThuc.addActionListener(e -> {
+            capNhatThongTinNguoiDat(); // Cập nhật hiển thị Phương thức TT
+            xuLyLamTronTienMat(); // Logic làm tròn và gợi ý
+        });
+
         JPanel dong2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         dong2.setOpaque(false);
-        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
-        double tongKhongKm = tinhGiaVe() * 1.10;
-        txtTienKhachDua = new JTextField(nf.format((long) tongKhongKm), 12);
+
+        // 1. KHỞI TẠO txtTienKhachDua VỚI TỔNG TIỀN HÓA ĐƠN BAN ĐẦU (T_HD)
+        txtTienKhachDua = new JTextField(nf.format(tongFinal), 12);
+
         txtTienThoiLai = new JTextField(nf.format(0), 10);
         txtTienThoiLai.setEditable(false);
         dong2.add(new JLabel("Tiền khách đưa: "));
@@ -349,13 +392,55 @@ public class ManHinhXacNhanBanVe extends JPanel {
         dong2.add(txtTienThoiLai);
         panelThanhToan.add(dong2);
 
+
+        // =================================================================
+        // START: LOGIC GỢI Ý MỚI - Đã khắc phục lỗi Lambda
+        // =================================================================
+
         JPanel goiY = new JPanel(new FlowLayout(FlowLayout.LEFT));
         goiY.setOpaque(false);
         goiY.add(new JLabel("Gợi ý: "));
-        List<Long> goiYList = Arrays.asList((long) Math.round(tongKhongKm), (long) (tongKhongKm + 30000), (long) (tongKhongKm + 50000), (long) (tongKhongKm + 100000));
-        for (Long h : goiYList) {
+        // Tính toán giá trị làm tròn lên (Giá trị này sẽ được gán tự động khi chọn Tiền mặt)
+        long tongLamTron = lamTronLen(tongFinal);
+
+        List<Long> goiYListNew = new ArrayList<>();
+
+        if (tongFinal > 0) {
+            // 1. Gợi ý 1: Số tiền làm tròn lên theo quy tắc 50k (ví dụ: 120k -> 150k)
+            if (tongLamTron > tongFinal && !goiYListNew.contains(tongLamTron)) {
+                goiYListNew.add(tongLamTron);
+            } else if (tongLamTron == tongFinal) {
+                // Nếu đã tròn sẵn, gợi ý mệnh giá tròn lớn hơn 100k
+                long lamTron100K = (long) (Math.ceil(tongFinal / 100000.0) * 100000);
+                if (lamTron100K == tongFinal) {
+                    // Nếu đã tròn 100k, gợi ý mệnh giá 100k tiếp theo
+                    lamTron100K += 100000;
+                }
+                if (!goiYListNew.contains(lamTron100K)) {
+                    goiYListNew.add(lamTron100K);
+                }
+            }
+
+            // 2. Gợi ý 2 & 3: Mệnh giá lớn tròn chục/tròn trăm (200k, 500k, 1M,...)
+            if (tongFinal < 200000 && !goiYListNew.contains(200000L)) goiYListNew.add(200000L);
+            if (tongFinal < 500000 && !goiYListNew.contains(500000L)) goiYListNew.add(500000L);
+            if (tongFinal < 1000000 && !goiYListNew.contains(1000000L)) goiYListNew.add(1000000L);
+
+
+            // Xóa giá trị trùng và chỉ lấy 4 gợi ý
+            Set<Long> set = new LinkedHashSet<>(goiYListNew);
+            goiYListNew.clear();
+            goiYListNew.addAll(set);
+            goiYListNew.sort(Long::compare);
+
+            goiYListNew = goiYListNew.subList(0, Math.min(goiYListNew.size(), 4));
+        }
+
+        for (Long h : goiYListNew) { // Sử dụng danh sách gợi ý đã cập nhật
             JButton b = new JButton(nf.format(h));
             b.setMargin(new Insets(4, 8, 4, 8));
+
+            // SỬ DỤNG BIẾN NF ĐÃ KHAI BÁO FINAL BÊN NGOÀI
             b.addActionListener(e -> {
                 txtTienKhachDua.setText(nf.format(h));
                 capNhatTienThoi();
@@ -364,6 +449,9 @@ public class ManHinhXacNhanBanVe extends JPanel {
         }
         panelThanhToan.add(goiY);
 
+        // =================================================================
+        // END: LOGIC GỢI Ý MỚI
+        // =================================================================
         JPanel panelNut = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panelNut.setOpaque(false);
 
@@ -396,6 +484,9 @@ public class ManHinhXacNhanBanVe extends JPanel {
         txtTienKhachDua.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) { capNhatTienThoi(); }
         });
+        // 2. GỌI LÀM TRÒN LẦN ĐẦU (sau khi UI được tạo) ĐỂ KHỞI TẠO ĐÚNG GIÁ TRỊ THEO HÌNH THỨC TT MẶC ĐỊNH
+
+        SwingUtilities.invokeLater(() -> xuLyLamTronTienMat());
 
         return panelThanhToan;
     }
@@ -451,10 +542,10 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
         panelHoaDon.add(headerWrapper, BorderLayout.NORTH); // Thay thế dau bằng headerWrapper
 
-        String[] cotHd = {"STT", "Mã vé", "Số lượng", "Đơn giá", "Thành tiền"};
+        String[] cotHd = {"STT", "Mã vé", "Số lượng", "Giá vé", "Giảm giá", "Thành tiền"};
         DefaultTableModel modelHd = new DefaultTableModel(cotHd, 0);
 
-        modelHd.addRow(new Object[]{"", "Chưa có ghế", "", "", ""});
+        modelHd.addRow(new Object[]{"", "Chưa có ghế", "", "", "", ""});
 
 // --- KẾT THÚC LOGIC ĐIỀN DỮ LIỆU ---
 
@@ -478,11 +569,13 @@ public class ManHinhXacNhanBanVe extends JPanel {
         double tongVoiKM = tinhTongHoaDon(tinhGiaVe(), khuyenMaiApDung).total;
 
         // LABEL HIỂN THỊ TỔNG CỘNG LỚN (Đã có sẵn)
-        JLabel lblTongCongLon = new JLabel("Tổng cộng: " + nf.format(Math.round(tongVoiKM)));
+        // KHỞI TẠO BIẾN INSTANCE
+        lblTongCongLon = new JLabel("Tổng cộng: " + nf.format(Math.round(tongVoiKM)));
         lblTongCongLon.setFont(lblTongCongLon.getFont().deriveFont(Font.BOLD, 14f));
 
         panelTongCong.add(lblTongCongLon);
         chan.add(panelTongCong, BorderLayout.NORTH); // Thêm tổng cộng (phần trên của footer)
+
 
         // --- PHẦN TIỀN VIẾT BẰNG CHỮ (Giữ chỗ) ---
         JPanel panelTienChu = new JPanel(new GridLayout(1, 1));
@@ -545,23 +638,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         lblPhuongThucTT.setText("Phương thức: " + hinhThuc);
     }
 
-//// FIX: Cần gán sự kiện cho cbHinhThuc trong taoPanelThanhToan()
-//// ...
-//cbHinhThuc.addActionListener(e -> capNhatThongTinNguoiDat());
-    //// ...
-
-    // Thêm class MapGroup để hỗ trợ nhóm hóa đơn
-    private static class MapGroup {
-        String tenLoaiVe;
-        long giaDonVi; // Giá đã bao gồm chiết khấu loại vé, chưa bao gồm KM tổng và VAT
-        int soLuong;
-
-        public MapGroup(String tenLoaiVe, long giaDonVi) {
-            this.tenLoaiVe = tenLoaiVe;
-            this.giaDonVi = giaDonVi;
-            this.soLuong = 0;
-        }
-    }
 
     /**
      * Tính toán số tiền giảm giá tuyệt đối (VND) mà một KM mang lại.
@@ -630,7 +706,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         double subtotal = tinhGiaVe();
         int soLuongVe = (danhSachGhe == null) ? 0 : danhSachGhe.size();
 
-        KhuyenMai bestKm = null;
+        bestKm = null;
         double maxDiscount = 0.0;
 
         for (KhuyenMai km : activePromos) {
@@ -666,7 +742,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
             List<KhuyenMai> activePromos = khuyenMaiDAO.layTatCaKMHoatDong();
 
             // 2. TÌM KM TỐT NHẤT VÀ GÁN TỰ ĐỘNG
-            KhuyenMai bestKm = timKhuyenMaiTotNhat(activePromos);
+            bestKm = timKhuyenMaiTotNhat(activePromos);
 
             // 3. Tải tất cả KM hoạt động (và "Không áp dụng") vào ComboBox
             KhuyenMai none = new KhuyenMai();
@@ -762,10 +838,72 @@ public class ManHinhXacNhanBanVe extends JPanel {
         }
 
         t.discount = discount;
-        // 2. TÍNH TỔNG TIỀN CHỊU THUẾ (TAXABLE AMOUNT)
-        // Giá trị sau khi giảm KM, phải >= 0
         t.total = Math.max(0, subtotal - discount);
         return t;
+    }
+
+    /**
+     * Tính toán số tiền cần thu đã được làm tròn lên theo bội số quy định (ví dụ: 50.000).
+     * @param tong Số tiền chính xác phải thanh toán.
+     * @return Số tiền làm tròn (lớn hơn hoặc bằng tong).
+     */
+    private long lamTronLen(long tong) {
+        if (tong <= 0) return 0;
+
+        long boiSo = 50000L; // Quy tắc làm tròn: 50.000
+
+        // Làm tròn lên theo bội số
+        long tongLamTron = (long) (Math.ceil(tong / (double) boiSo) * boiSo);
+
+        return tongLamTron;
+    }
+
+    /**
+     * Xử lý làm tròn số tiền khách đưa khi chọn hình thức "Tiền mặt".
+     * Tuân thủ quy tắc làm tròn lên (Ví dụ: 120.000 -> 150.000).
+     */
+    private void xuLyLamTronTienMat() {
+        double tongPhaiThanhToan = tinhTongHoaDon(tinhGiaVe(), khuyenMaiApDung).total;
+        long tongFinal = Math.round(tongPhaiThanhToan);
+        long tongLamTron;
+
+
+        if ("Tiền mặt".equals(cbHinhThuc.getSelectedItem().toString())) {
+            tongLamTron = lamTronLen(tongFinal);
+
+            // Ví dụ làm tròn đơn giản: Lên 50.000 gần nhất
+            long tong = Math.round(tongPhaiThanhToan);
+
+            // Ví dụ: 120.000 -> 150.000; 180.000 -> 200.000
+            if (tong <= 0) {
+                tongLamTron = 0;
+            } else {
+                long boiSo = 50000L;
+                tongLamTron = (long) (Math.ceil(tong / (double) boiSo) * boiSo);
+                // Nếu làm tròn lên bằng chính nó hoặc thấp hơn, làm tròn lên mệnh giá 50k tiếp theo
+                if (tongLamTron < tong) {
+                    tongLamTron += boiSo;
+                }
+            }
+
+            // Nếu tổng tiền là 100.000, 150.000, 200.000, ... thì không cần làm tròn thêm
+            if (tongLamTron == 0 || tongLamTron == tong) {
+                // Giữ nguyên tổng tiền
+                tongLamTron = tong;
+            }
+
+            // Áp dụng số tiền thu đã làm tròn vào textfield
+            NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+            txtTienKhachDua.setText(nf.format(tongLamTron));
+            txtTienKhachDua.setEditable(true); // Cho phép chỉnh sửa nếu khách đưa khác
+            capNhatTienThoi(); // Cập nhật tiền thối lại ngay lập tức
+        } else {
+            // Chuyển khoản/Thẻ: Mặc định là tổng tiền hóa đơn
+            NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+            txtTienKhachDua.setText(nf.format(Math.round(tongPhaiThanhToan)));
+            txtTienKhachDua.setEditable(false); // Không cần nhập tiền khách đưa
+            txtTienThoiLai.setText(nf.format(0)); // Tiền thối lại là 0
+        }
     }
 
     /*
@@ -778,25 +916,42 @@ public class ManHinhXacNhanBanVe extends JPanel {
         double subtotal = tinhGiaVe();
         Tong t = tinhTongHoaDon(subtotal, khuyenMaiApDung);
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+        long tongTienFinal = Math.round(t.total);
+        long giamGia = Math.round(t.discount);
 
+        if (lblGiamGia != null){
+            lblGiamGia.setText("Tổng tiền giảm: " + nf.format(giamGia) + " VND");
+        }
+        if (lblTenKhuyenMai != null) {
+            String tenKm = (khuyenMaiApDung != null) ? khuyenMaiApDung.getTenKM() : "Không áp dụng";
+            lblTenKhuyenMai.setText("Khuyến mãi áp dụng: " + tenKm);
+        }
         if (lblTongTien != null) {
             lblTongTien.setText("Tổng số tiền phải thanh toán: " + nf.format(Math.round(t.total)) + " VND");
         }
-        if (txtTienKhachDua != null) {
-            txtTienKhachDua.setText(nf.format(Math.round(t.total)));
+
+        if (lblTongCongLon != null) {
+            lblTongCongLon.setText("Tổng cộng: " + nf.format(tongTienFinal));
         }
+        // GỌI HÀM LÀM TRÒN MỚI
+        if (cbHinhThuc != null && txtTienKhachDua != null) {
+            xuLyLamTronTienMat();
+        } else {
+            capNhatTienThoi(); // Nếu chưa tạo UI, gọi hàm cũ để tính toán tiền thối (nếu có)
+        }
+        // FIX MỚI: Cập nhật Tiền bằng chữ ngay khi tổng tiền thay đổi (trước khi thanh toán)
+        if (lblTienBangChu != null) {
+            lblTienBangChu.setText("Số tiền viết bằng chữ: " + docSo(tongTienFinal));
+        }
+
         capNhatTienThoi();
     }
 
     private double tinhGiaVe() {
-        // SỬA: Tính tổng giá vé từ Map danhSachGiaVe (giá mỗi ghế đã được tính)
         if (danhSachGiaVe == null || danhSachGiaVe.isEmpty()) {
             return 0;
         }
-
         double subtotal = 0;
-
-        // Cộng tổng giá tiền của tất cả các ghế đã chọn
         for (Long gia : danhSachGiaVe.values()) {
             if (gia != null) {
                 subtotal += gia.doubleValue();
@@ -838,38 +993,65 @@ public class ManHinhXacNhanBanVe extends JPanel {
         modelHd.setRowCount(0); // Xóa dữ liệu cũ
 
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
-        double tongTien = 0;
+        long tongTienThanhToan = 0L;
         int stt = 1;
+
+        // TÍNH TOÁN CÁC THÔNG SỐ CẦN THIẾT CHO VIỆC HIỂN THỊ
+        Tong tongKetQua = tinhTongHoaDon(tinhGiaVe(), khuyenMaiApDung);
+        double tongGiamTuyetDoi = tongKetQua.discount;
+        double tongSubtotal = tongKetQua.subtotal;
+
+        // Tạo Map để tra cứu giá gốc (subtotal) của từng vé trước khi áp dụng KM tổng
+        // (Đây là giá trị trong danhSachGiaVe)
+        Map<String, Long> giaGocCuaVe = danhSachGiaVe;
 
         // 1. Lặp qua danh sách vé và điền vào bảng
         for (Ve ve : danhSachVe) {
-            double thanhTienCoVAT = ve.getGiaVe()*1.1;
-            double giaTruocVAT = ve.getGiaVe() ;
-            tongTien += thanhTienCoVAT;
+
+            // Lấy giá trị thanh toán cuối cùng của vé (đã có trong Entity Ve sau giao dịch)
+            long giaVeThanhToan = (long) ve.getGiaVe();
+
+            // Tìm giá gốc của vé (từ map danhSachGiaVe)
+            long giaGoc = giaGocCuaVe.getOrDefault(ve.getMaChoDat(), Long.valueOf(giaVeThanhToan));
+
+            // Tính toán khoản giảm giá đã phân bổ: Giá Gốc - Giá Thanh Toán
+            long giamGiaPhanBo = giaGoc - giaVeThanhToan;
+
+            // Tính lại tổng tiền thanh toán (cần thiết nếu có sai số làm tròn)
+            tongTienThanhToan += giaVeThanhToan;
 
             modelHd.addRow(new Object[]{
                     stt++,
                     ve.getMaVe(),
                     1,
-                    nf.format(Math.round(giaTruocVAT)),
-                    nf.format(Math.round(thanhTienCoVAT))
+                    nf.format(giaGoc), // Giá vé (trước KM tổng)
+                    nf.format(giamGiaPhanBo), // Giảm giá KM đã phân bổ
+                    nf.format(giaVeThanhToan) // Thành tiền (cuối cùng)
             });
         }
 
         // --- 2. Cập nhật Footer ---
-        long tongTienFinal = Math.round(tongTien);
+
+        // Tổng tiền cuối cùng (có thể sử dụng tongKetQua.total hoặc tongTienThanhToan)
+        long tongTienFinal = Math.round(tongKetQua.total);
+
         // GỌI HÀM CHUYỂN SỐ THÀNH CHỮ
         String tienBangChu = docSo(tongTienFinal);
 
-        // Cập nhật nhãn tổng tiền chính
-        if (lblTongTien != null) {
-            lblTongTien.setText("Tổng số tiền phải thanh toán: " + nf.format(tongTienFinal) + " VND");
-        }
+        // Cập nhật nhãn Tổng cộng lớn (Panel phải, footer)
+        // Cần tìm lại JLabel lblTongCongLon (Giả định nó là một thành phần của UI)
+        // Do lblTongCongLon không phải là biến instance, ta cần sửa lại phần này
+        // Tạm thời bỏ qua việc cập nhật lblTongCongLon, chỉ tập trung vào lblTienBangChu
+        // Ghi chú: Cần kiểm tra lại cấu trúc taoPanelHoaDon để biết cách cập nhật lblTongCongLon
 
         // FIX: Cập nhật Tiền viết bằng chữ
         if (lblTienBangChu != null) {
             lblTienBangChu.setText("Số tiền viết bằng chữ: " + tienBangChu);
         }
+
+        // FIX: Cập nhật hiển thị Tổng tiền lớn trong footer Hóa đơn
+        // Do không thể truy cập lblTongCongLon, ta phải tìm cách khác.
+        // TẠM THỜI: Sửa lại tên JLabel trong taoPanelHoaDon() thành biến instance.
 
         // 3. Vô hiệu hóa nút Thanh toán và Khuyến mãi
         if (btnHuy != null) btnHuy.setEnabled(false);
@@ -879,6 +1061,9 @@ public class ManHinhXacNhanBanVe extends JPanel {
         if (btnXoaKhuyenMai != null) btnXoaKhuyenMai.setEnabled(false);
         if (cbHinhThuc != null) cbHinhThuc.setEnabled(false);
         if (btnKetThuc != null) btnKetThuc.setEnabled(true);
+        if (lblTongCongLon != null) {
+            lblTongCongLon.setText("Tổng cộng: " + nf.format(tongTienFinal));
+        }
     }
 
     // Mảng chữ số từ 0 đến 9
@@ -1158,22 +1343,23 @@ public class ManHinhXacNhanBanVe extends JPanel {
         // --- B3: Tạo danh sách thực thể Vé (Ve) và Phân bổ Chiết khấu ---
         List<Ve> danhSachVeMoi = new ArrayList<>();
 
-        // Lấy tổng tiền giảm đã tính được từ hàm tinhTongHoaDon()
-        // Đây là tổng tiền giảm tuyệt đối (VND)
         double tongGiamTuyetDoi = tongKetQua.discount;
-
-        // Lấy tổng tiền cơ sở (Subtotal) của toàn bộ các vé trước khi giảm KM
         double tongSubtotal = tongKetQua.subtotal;
-
-        // Khởi tạo biến theo dõi tổng tiền giảm đã phân bổ để xử lý sai số làm tròn cho vé cuối
-        double tongGiamDaPhanBo = 0.0;
+        // --- LOGIC MỚI: TÍNH TOÁN GIẢM GIÁ ĐỀU CHO TỪNG VÉ (nếu là KM cố định) ---
+        double giamGiaCoDinhTrenMoiVe = 0.0;
         int soLuongVe = danhSachGhe.size();
+        boolean laKhuyenMaiCoDinh = khuyenMaiApDung != null && "CO_DINH".equals(khuyenMaiApDung.getLoaiKM());
+
+        if (laKhuyenMaiCoDinh && soLuongVe > 0) {
+            // Trường hợp 1: Giảm giá cố định (ví dụ: 50K), chia đều cho N vé
+            giamGiaCoDinhTrenMoiVe = tongGiamTuyetDoi / soLuongVe;
+        }
+        double tongGiamDaPhanBo = 0.0;
         int count = 0; // Đếm số vé đang xử lý
 
         for (Map.Entry<String, ChoDat> entry : danhSachGhe.entrySet()) {
             ChoDat cho = entry.getValue();
             count++;
-
             // Lấy KhachHang Entity đã xử lý
             KhachHang khachHangChoVe = danhSachKhachHangEntity.get(entry.getKey());
 
@@ -1189,17 +1375,36 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
             // --- B3.1: PHÂN BỔ CHIẾT KHẤU KHUYẾN MÃI CHO TỪNG VÉ ---
             double giaSauKhuyenMai;
-            double giaTriGiamChoVeNay;
+            double giaTriGiamChoVeNay = 0.0;
 
-            if (tongGiamTuyetDoi > 0 && tongSubtotal > 0) {
-                if (count < soLuongVe) {
-                    // Tính chiết khấu theo tỷ lệ giá trị: (Giá vé/Tổng Subtotal) * Tổng Giảm Tuyệt Đối
-                    double tyLeGiaVe = (double) giaVeBase / tongSubtotal;
-                    giaTriGiamChoVeNay = tongGiamTuyetDoi * tyLeGiaVe;
-                    tongGiamDaPhanBo += giaTriGiamChoVeNay;
+            if (tongGiamTuyetDoi > 0) {
+                if (laKhuyenMaiCoDinh) {
+                    // TRƯỜNG HỢP 1: KM Cố định (50K): Chia đều cho từng vé
+
+                    if (count < soLuongVe) {
+                        giaTriGiamChoVeNay = giamGiaCoDinhTrenMoiVe;
+                        tongGiamDaPhanBo += giaTriGiamChoVeNay;
+                    } else {
+                        // Vé cuối cùng: Phân bổ phần còn lại để xử lý sai số làm tròn
+                        giaTriGiamChoVeNay = tongGiamTuyetDoi - tongGiamDaPhanBo;
+                    }
+
                 } else {
-                    // Vé cuối cùng: Phân bổ phần còn lại để xử lý sai số làm tròn
-                    giaTriGiamChoVeNay = tongGiamTuyetDoi - tongGiamDaPhanBo;
+                    // TRƯỜNG HỢP 2: KM Phần trăm (10%): Phân bổ theo tỷ lệ giá trị
+                    if (tongSubtotal > 0) {
+                        if (count < soLuongVe) {
+                            // Tính chiết khấu theo tỷ lệ giá trị: (Giá vé/Tổng Subtotal) * Tổng Giảm Tuyệt Đối
+                            double tyLeGiaVe = (double) giaVeBase / tongSubtotal;
+                            giaTriGiamChoVeNay = tongGiamTuyetDoi * tyLeGiaVe;
+                            tongGiamDaPhanBo += giaTriGiamChoVeNay;
+                        } else {
+                            // Vé cuối cùng: Phân bổ phần còn lại để xử lý sai số làm tròn
+                            giaTriGiamChoVeNay = tongGiamTuyetDoi - tongGiamDaPhanBo;
+                        }
+                    } else {
+                        // Tổng subtotal bằng 0, không giảm gì thêm
+                        giaTriGiamChoVeNay = 0.0;
+                    }
                 }
 
                 giaSauKhuyenMai = giaVeBase - giaTriGiamChoVeNay;
@@ -1208,9 +1413,10 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 // Không áp dụng Khuyến mãi
                 giaSauKhuyenMai = giaVeBase;
             }
+            // Đảm bảo giá vé sau KM không âm
+            giaSauKhuyenMai = Math.max(0, giaSauKhuyenMai);
 
             // --- B3.2: TẠO ENTITY VÉ ---
-
             // Lấy MaKhachHang đã được xác định từ Entity
             String maKhach = khachHangChoVe.getMaKH();
 
@@ -1288,9 +1494,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         if (hd != null) {
             lblMaHoaDon.setText(hd.getMaHD());
             lblMaHoaDon.setForeground(MAU_XANH_BTN);
-
-            // NOTE: Thông tin người lập HD và SĐT đã được gán giá trị mock ban đầu.
-            // Nếu bạn muốn hiển thị tên thật, cần truy vấn thêm từ NhanVienDAO.
         }
     }
 
@@ -1434,7 +1637,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
             return "HDERR" + System.currentTimeMillis();
         }
     }
-    //tong là đại diện cho subtotal, discount, total của hóa đơn
+//tong là đại diện cho subtotal, discount, total của hóa đơn
     private static class Tong {
         double subtotal;
         double discount;
@@ -1467,28 +1670,59 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
     /**
      * Helper chung để chuyển đổi giữa các Panel trong Dashboard.
+     * Phương thức này được tối ưu để hoạt động trên cả BanVeDashboard và AdminFullDashboard
+     * mà không cần sử dụng Interface, bằng cách kiểm tra kiểu tường minh.
      */
     private void chuyenManHinh(String cardName) {
         Window w = SwingUtilities.getWindowAncestor(this);
 
+        // Xác định tên card đích cuối cùng dựa trên Dashboard
+        String finalCardName = cardName;
+        String dashboardType = null;
+
         if (w instanceof BanVeDashboard) {
-            BanVeDashboard dashboard = (BanVeDashboard) w;
+            dashboardType = "BanVe";
+        } else if (w instanceof AdminFullDashboard) {
+            dashboardType = "Admin";
+        }
 
+        if (dashboardType != null) {
+            // 1. Chuẩn hóa tên card:
             if ("trangChu".equals(cardName)) {
-                // Cần tạo lại Panel Trang chủ nếu nó không phải là static
-                dashboard.themHoacCapNhatCard(new ManHinhTrangChuNVBanVe(), "trangChu");
-
-                cardName = "trangChuNV";
-            }else if ("manHinhBanVe".equals(cardName)) {
-                // Chỉ cần đảm bảo card được thêm vào nếu chưa có
-                cardName = "banVeMoi";
+                // Nếu muốn về trang chủ, phải dùng tên card chính xác của Dashboard
+                finalCardName = ("Admin".equals(dashboardType)) ? "trangChuQL" : "trangChuNV";
+            } else if ("manHinhBanVe".equals(cardName)) {
+                // Đảm bảo tên card Bán vé đúng
+                finalCardName = "banVeMoi";
             }
 
-            dashboard.chuyenManHinh(cardName);
+            // 2. Xử lý chuyển màn hình:
+            if ("BanVe".equals(dashboardType)) {
+                BanVeDashboard dashboard = (BanVeDashboard) w;
+
+                // Chỉ thêm/cập nhật nếu là Trang chủ (vì Trang chủ thường cần refresh)
+                if ("trangChuNV".equals(finalCardName)) {
+                    dashboard.themHoacCapNhatCard(new ManHinhTrangChuNVBanVe(), finalCardName);
+                }
+
+                dashboard.chuyenManHinh(finalCardName);
+
+            } else if ("Admin".equals(dashboardType)) {
+                AdminFullDashboard dashboard = (AdminFullDashboard) w;
+
+                // Chỉ thêm/cập nhật nếu là Trang chủ
+                if ("trangChuQL".equals(finalCardName)) {
+                    // Giả định AdminFullDashboard dùng ManHinhDashboardQuanLy làm trang chủ
+                    dashboard.themHoacCapNhatCard(new ManHinhDashboardQuanLy(), finalCardName);
+                }
+
+                // Chuyển màn hình bằng phương thức đã được chuẩn hóa
+                dashboard.chuyenManHinh(finalCardName);
+            }
 
         } else {
             JOptionPane.showMessageDialog(this,
-                    "Lỗi chuyển hướng hệ thống.",
+                    "Lỗi: Không tìm thấy Dashboard hợp lệ để chuyển hướng hệ thống.",
                     "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -1543,7 +1777,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         public LocalDate ngaySinh() { return ngaySinh; }
     }
 
-    // ...
+// ...
 // BỔ SUNG TRONG ManHinhXacNhanBanVe.java
     private static Object createMockChiTietKhach(
             ChoDat choDat,
@@ -1570,7 +1804,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
             Map<String, Object> mockKhachHang = new LinkedHashMap<>();
             LocalDate ngaySinhA = LocalDate.of(1990, 3, 15);
-            LocalDate ngaySinhB = LocalDate.of(2017, 6, 10);
+            LocalDate ngaySinhB = LocalDate.of(1990, 6, 10);
 
             Object khach1 = createMockChiTietKhach(
                     cho1,
@@ -1598,8 +1832,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
             // --- 4. Dữ liệu giá vé ---
             Map<String, Long> mockGiaVe = new HashMap<>();
-            mockGiaVe.put("C15-SPT2-1", 1000000L); // 500,000 VNĐ
-            mockGiaVe.put("C16-SPT2-1", 1500000L); // 250,000 VNĐ
+            mockGiaVe.put("C15-SPT2-1", 100000L); // 500,000 VNĐ
+            mockGiaVe.put("C16-SPT2-1", 20000L); // 250,000 VNĐ
 
             // --- 5. Khởi tạo màn hình XacNhanBanVe ---
             JFrame frame = new JFrame("Màn hình Xác nhận Bán vé (Test)");

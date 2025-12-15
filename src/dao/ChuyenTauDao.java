@@ -263,6 +263,7 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
         }
         return rowsAffected > 0;
     }
+
     public List<ChuyenTau> timChuyenTauTheoGaVaNgayDi(String gaXP, String gaKT, String ngayDi) {
         List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
 
@@ -308,14 +309,13 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
                     Ga gaDen = new Ga(rs.getString("GaDen"), rs.getString("TenGaDen"), rs.getString("DiaChiGaDen"));
                     // TẠO ĐỐI TƯỢNG TÀU
                     Tau tau = new Tau(rs.getString("MaTau"), rs.getString("TrangThaiTau"));
-                    // TẠO ĐỐI TƯỢNG NHÂN VIÊN
+
                     // 4. Nhân Viên (Gọi phương thức tĩnh từ NhanVienDao)
 
-                    // Lưu ý: Cần đảm bảo rs.getString("MaNV") không phải NULL trước khi tạo NV
                     NhanVien nv = null;
-//                    if (maNV != null) {
-//                        nv = NhanVienDao.taoDoiTuongNhanVienTuResultSet(rs);
-//                    }
+                    if (maNV != null && !maNV.isEmpty()) {
+                        nv = NhanVienDao.getNhanVienById(maNV);
+                    }
 
                     ChuyenTau ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
                     danhSachChuyenTau.add(ct);
@@ -328,6 +328,10 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
         }
         return danhSachChuyenTau;
     }
+    //chuyển trạng thái chuyến tàu theo mã chuyến tàu và trạng thái mới
+    //theo đúng lý thuyết, trạng thái chuyến tàu sẽ đổi từ "Đang Đặt" -> "Đã Khởi Hành" -> "Đã Kết Thúc"
+    //theo thời gian thực tế, tuy nhiên để đơn giản hóa, ta sẽ cho phép đổi trạng thái trực tiếp
+    // ınhư mong muốn
     public boolean chuyenTrangThaiChuyenTau(String maChuyenTau, String trangThai) {
         String sql = "UPDATE ChuyenTau SET TrangThai = ? WHERE MaChuyenTau = ?";
         try (Connection con = ConnectDB.getInstance().getConnection();

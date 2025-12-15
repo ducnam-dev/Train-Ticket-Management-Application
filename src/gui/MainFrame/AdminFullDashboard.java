@@ -23,8 +23,8 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
     // =================================================================================
     // HẰNG SỐ VÀ KHAI BÁO
     // =================================================================================
-    private CardLayout cardLayout;
-    private JPanel contentPanel;
+    private CardLayout boCucCard;
+    private JPanel panelNoiDung;
     private JScrollPane navScrollPane; // Thay thế navPanel bằng JScrollPane
     private JPanel navContentPanel; // Panel chứa nội dung menu
 
@@ -33,7 +33,7 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
     private final Color MAU_DUOC_CHON = new Color(74, 184, 237);
     private final Color MAU_HOVER = new Color(45, 150, 215);
 
-    private final Map<String, JButton> menuButtons = new HashMap<>();
+    private final Map<String, JButton> nutMenu = new HashMap<>();
     private static final int CHIEU_RONG_MENU = 220; // Tăng chiều rộng để dễ nhìn và có chỗ cho thanh cuộn
     private static final int ICON_SIZE = 20;
 
@@ -93,6 +93,11 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
             this.tenNVHienThi = "Toàn Quyền";
         }
     }
+//    @Override // Ghi đè từ CardSwitchable
+//    public void chuyenManHinh(String tenCard) {
+//        cardLayout.show(panelNoiDung, tenCard);
+//        highlightActiveButton(menuButtons.get(tenCard));
+//    }
 
     /**
      * Helper: Tải, điều chỉnh kích thước và trả về ImageIcon.
@@ -293,7 +298,7 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         button.setMinimumSize(itemSize);
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, fixedHeight));
 
-        menuButtons.put(cardName, button);
+        nutMenu.put(cardName, button);
 
         // Xử lý hiệu ứng hover/màu sắc
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -307,7 +312,7 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
                 // Chỉ đổi màu về MAU_CHINH nếu nó đang là MAU_HOVER và KHÔNG phải là nút đang được chọn
                 if (button.getBackground().equals(MAU_HOVER)) {
                     // Kiểm tra lại màu nếu cần thiết, vì nó có thể đã bị đổi thành MAU_DUOC_CHON trong quá trình xử lý sự kiện khác
-                    if (!menuButtons.get(cardName).getBackground().equals(MAU_DUOC_CHON)) {
+                    if (!nutMenu.get(cardName).getBackground().equals(MAU_DUOC_CHON)) {
                         button.setBackground(MAU_CHINH);
                     }
                 }
@@ -336,40 +341,40 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
      * Khởi tạo Panel chứa CardLayout với TẤT CẢ các Panel chức năng
      */
     private void initContentPanel() {
-        cardLayout = new CardLayout();
-        contentPanel = new JPanel(cardLayout);
+        boCucCard = new CardLayout();
+        panelNoiDung = new JPanel(boCucCard);
 
         // --- Chức năng Quản Lý (từ QuanLyDashboard) ---
-        contentPanel.add(new ManHinhDashboardQuanLy(), "trangChuQL"); // Đổi tên để tránh trùng với trang chủ NV
-        contentPanel.add(new ManhinhQuanLyChuyenTau(), "qlChuyenTau");
-        contentPanel.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
-        contentPanel.add(new ManHinhQuanLyKhuyenMai2(), "qlKhuyenMai");
-        contentPanel.add(new ManHinhQuanLyGiaVe(), "qlGiaVe");
-        contentPanel.add(new JPanel(), "thongKe");
+        panelNoiDung.add(new ManHinhDashboardQuanLy(), "trangChuQL"); // Đổi tên để tránh trùng với trang chủ NV
+        panelNoiDung.add(new ManhinhQuanLyChuyenTau(), "qlChuyenTau");
+        panelNoiDung.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
+        panelNoiDung.add(new ManHinhQuanLyKhuyenMai2(), "qlKhuyenMai");
+        panelNoiDung.add(new ManHinhQuanLyGiaVe(), "qlGiaVe");
+        panelNoiDung.add(new JPanel(), "thongKe");
 
         // --- Chức năng Bán Vé (từ BanVeDashboard) ---
         // SỬ DỤNG LẠI ManHinhDashboardQuanLy làm trang chủ tổng
-        contentPanel.add(new ManHinhMoCa(), "moCa");
-        contentPanel.add(new ManHinhKetCa(), "ketCa");
+        panelNoiDung.add(new ManHinhMoCa(), "moCa");
+        panelNoiDung.add(new ManHinhKetCa(), "ketCa");
 
         manHinhBanVeInstance = new ManHinhBanVe(); // Giữ instance để có thể tương tác nếu cần
-        contentPanel.add(manHinhBanVeInstance, "banVeMoi");
+        panelNoiDung.add(manHinhBanVeInstance, "banVeMoi");
 
-        contentPanel.add(new ManHinhDoiVe(), "doiVe");
-        contentPanel.add(new ManHinhTraVe(), "traVe");
-        contentPanel.add(new ManHinhTraCuuVe(), "traCuuVe");
+        panelNoiDung.add(new ManHinhDoiVe(), "doiVe");
+        panelNoiDung.add(new ManHinhTraVe(), "traVe");
+        panelNoiDung.add(new ManHinhTraCuuVe(), "traCuuVe");
         // Tra Cứu Hóa Đơn dùng chung
-        contentPanel.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
+        panelNoiDung.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
 
 
-        add(contentPanel, BorderLayout.CENTER);
+        add(panelNoiDung, BorderLayout.CENTER);
     }
 
     /**
      * Thiết lập Action Listener cho tất cả các nút menu
      */
     private void initEventHandlers() {
-        for (JButton button : menuButtons.values()) {
+        for (JButton button : nutMenu.values()) {
             button.addActionListener(this);
         }
     }
@@ -378,15 +383,15 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
      * Chuyển đổi màn hình trong CardLayout và highlight nút menu tương ứng
      */
     public void switchToCard(String cardName) {
-        cardLayout.show(contentPanel, cardName);
-        highlightActiveButton(menuButtons.get(cardName));
+        boCucCard.show(panelNoiDung, cardName);
+        danhDauNutDangChon(nutMenu.get(cardName));
     }
 
     /**
      * Đổi màu nền của nút menu đang được chọn
      */
-    private void highlightActiveButton(JButton active) {
-        for (JButton button : menuButtons.values()) {
+    private void danhDauNutDangChon(JButton active) {
+        for (JButton button : nutMenu.values()) {
             if (button != null) {
                 button.setBackground(MAU_CHINH);
             }
@@ -405,7 +410,7 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         String cardName = null;
 
         // Tìm tên card dựa trên nút được click
-        for (Map.Entry<String, JButton> entry : menuButtons.entrySet()) {
+        for (Map.Entry<String, JButton> entry : nutMenu.entrySet()) {
             if (entry.getValue() == src) {
                 cardName = entry.getKey();
                 break;
@@ -434,6 +439,31 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
             switchToCard(cardName);
         }
     }
+
+    public void themHoacCapNhatCard(JPanel panelMoi, String tenCard) {
+        Component thanhPhanCu = null;
+
+        for (Component comp : panelNoiDung.getComponents()) {
+            if (comp.getName() != null && comp.getName().equals(tenCard)) {
+                thanhPhanCu = comp;
+                break;
+            }
+        }
+        if (thanhPhanCu != null) {
+            panelNoiDung.remove(thanhPhanCu);
+        }
+        panelMoi.setName(tenCard);
+        panelNoiDung.add(panelMoi, tenCard);
+
+        panelNoiDung.revalidate();
+        panelNoiDung.repaint();
+    }
+    public void chuyenManHinh(String tenCard) {
+        boCucCard.show(panelNoiDung, tenCard);
+        danhDauNutDangChon(nutMenu.get(tenCard));
+    }
+
+
 
     // =================================================================================
     // MAIN

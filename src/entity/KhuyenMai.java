@@ -27,7 +27,7 @@ public class KhuyenMai{
 
     // 3. Constructor Đầy Đủ
     public KhuyenMai(String maKM, String tenKM, String loaiKM, BigDecimal giaTriGiam, String dkApDung,
-                     BigDecimal giaTriDK, LocalDateTime ngayBD, LocalDateTime ngayKT, String trangThai) {
+                              BigDecimal giaTriDK, LocalDateTime ngayBD, LocalDateTime ngayKT, String trangThai) {
         this.maKM = maKM;
         this.tenKM = tenKM;
         this.loaiKM = loaiKM;

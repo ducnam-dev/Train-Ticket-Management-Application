@@ -1,7 +1,6 @@
-//ManHinhQuanLyKhuyenMai2
-
 package gui.Panel;
 
+// Import cần thiết
 import com.toedter.calendar.JDateChooser;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,11 +11,17 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import gui.Popup.PopupTaoKhuyenMai; // Import lớp Popup mới
+import java.util.List;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
+// Import các lớp DAO và Entity
+import dao.KhuyenMaiDAO;
+import entity.KhuyenMai;
+import gui.Popup.PopupTaoKhuyenMai;
 
 /**
- * Lớp này tạo giao diện Quản lý Khuyến Mãi (Màn hình chính).
- * Chỉ hiển thị bảng và các nút điều khiển chính.
+ * Lớp này tạo giao diện Quản lý Khuyến Mãi (Màn hình chính) với chức năng Lọc và Tìm kiếm.
  */
 public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
 
@@ -36,23 +41,35 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
     private JTable table;
     private DefaultTableModel tableModel;
 
+    // Các Component MỚI cho LỌC/TÌM KIẾM
+    private JTextField txtTimKiem;
+    private JComboBox<String> cbLocTrangThai;
+    private JButton btnTimKiem;
+
     // Các nút chức năng
     private JButton btnThem, btnSua, btnKetThuc, btnGiaHan, btnLamMoi;
 
-    // Các trường dữ liệu sẽ được sử dụng cho chức năng Sửa/Kết thúc/Gia hạn
-    private JTextField txtMaKM; // Giữ lại để lưu Mã KM được chọn từ bảng
-
-    // Gán tham chiếu của JFrame/JDialog cha để Popup có thể lấy
+    private JTextField txtMaKM;
+    private KhuyenMaiDAO khuyenMaiDAO;
     private JFrame parentFrame;
 
     public ManHinhQuanLyKhuyenMai2() {
+        // Khởi tạo DAO
+        khuyenMaiDAO = new KhuyenMaiDAO();
+
         // Tìm JFrame cha (nếu có)
         SwingUtilities.invokeLater(() -> {
             Container parent = getTopLevelAncestor();
             if (parent instanceof JFrame) {
                 parentFrame = (JFrame) parent;
             } else if (parent instanceof JDialog) {
-                parentFrame = (JFrame) ((JDialog) parent).getParent();
+                // Xử lý trường hợp nằm trong JDialog
+                Window window = SwingUtilities.getWindowAncestor(this);
+                if (window instanceof JDialog) {
+                    parentFrame = (JFrame) ((JDialog) window).getOwner();
+                } else if (window instanceof JFrame) {
+                    parentFrame = (JFrame) window;
+                }
             }
         });
 
@@ -67,7 +84,7 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
         title.setHorizontalAlignment(SwingConstants.LEFT);
         add(title, BorderLayout.NORTH);
 
-        // --- Khu vực chính (Nút và Bảng) ---
+        // --- Khu vực chính (Điều khiển và Bảng) ---
         JPanel mainArea = new JPanel();
         mainArea.setLayout(new BoxLayout(mainArea, BoxLayout.Y_AXIS));
         mainArea.setOpaque(false);
@@ -77,9 +94,9 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
         txtMaKM.setVisible(false);
         this.add(txtMaKM);
 
-        // 1. Panel Nút chức năng
-        JPanel buttonPanel = createButtonPanel();
-        mainArea.add(buttonPanel);
+        // 1. Panel Điều khiển (Nút chức năng, Lọc & Tìm kiếm)
+        JPanel controlPanel = createControlPanel(); // Dùng panel mới
+        mainArea.add(controlPanel);
 
         // Khoảng cách
         mainArea.add(Box.createRigidArea(new Dimension(0, 20)));
@@ -96,13 +113,17 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
     }
 
     /**
-     * Tạo panel chứa các nút chức năng (Tạo, Sửa, Kết thúc, Gia hạn)
+     * Tạo panel điều khiển (chứa các nút chức năng và khu vực lọc/tìm kiếm)
      */
-    private JPanel createButtonPanel() {
+    private JPanel createControlPanel() {
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+        controlPanel.setOpaque(false);
+
+        // --- 1. Panel Nút chức năng chính ---
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
         buttonPanel.setOpaque(false);
 
-        // Thay đổi: Nút "Tạo Khuyến Mãi" sẽ mở popup
         btnThem = new JButton("➕ Tạo Khuyến Mãi");
         btnSua = new JButton("📝 Cập Nhật");
         btnKetThuc = new JButton("⛔ Kết Thúc KM");
@@ -113,6 +134,13 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
         btnThem.setBackground(PRIMARY_COLOR);
         btnThem.setForeground(Color.WHITE);
         btnThem.setFocusPainted(false);
+
+        // Đặt font
+        btnThem.setFont(FONT_PLAIN_14);
+        btnSua.setFont(FONT_PLAIN_14);
+        btnKetThuc.setFont(FONT_PLAIN_14);
+        btnGiaHan.setFont(FONT_PLAIN_14);
+        btnLamMoi.setFont(FONT_PLAIN_14);
 
         // Đăng ký sự kiện
         btnThem.addActionListener(this);
@@ -125,9 +153,38 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
         buttonPanel.add(btnSua);
         buttonPanel.add(btnKetThuc);
         buttonPanel.add(btnGiaHan);
-        buttonPanel.add(btnLamMoi);
 
-        return buttonPanel;
+        controlPanel.add(buttonPanel);
+        controlPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Khoảng cách
+
+        // --- 2. Panel Lọc và Tìm kiếm MỚI ---
+        JPanel searchFilterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
+        searchFilterPanel.setOpaque(false);
+        searchFilterPanel.setBorder(BorderFactory.createTitledBorder("Tìm kiếm & Lọc"));
+
+        // Tìm kiếm theo Mã/Tên
+        txtTimKiem = new JTextField(20);
+        txtTimKiem.setFont(FONT_PLAIN_14);
+        btnTimKiem = new JButton("🔎 Tìm Kiếm");
+        btnTimKiem.setFont(FONT_PLAIN_14);
+        btnTimKiem.addActionListener(this);
+
+        // Lọc theo Trạng thái
+        cbLocTrangThai = new JComboBox<>(new String[]{"Tất cả", "Đang Hoạt Động", "Chưa Hoạt Động", "Đã Kết Thúc"});
+        cbLocTrangThai.setFont(FONT_PLAIN_14);
+        cbLocTrangThai.addActionListener(this); // Đăng ký sự kiện để tự động lọc khi đổi trạng thái
+
+        searchFilterPanel.add(new JLabel("Mã/Tên KM:"));
+        searchFilterPanel.add(txtTimKiem);
+        searchFilterPanel.add(btnTimKiem);
+        searchFilterPanel.add(Box.createRigidArea(new Dimension(30, 0)));
+        searchFilterPanel.add(new JLabel("Lọc theo Trạng thái:"));
+        searchFilterPanel.add(cbLocTrangThai);
+        searchFilterPanel.add(btnLamMoi); // Chuyển nút Làm Mới xuống đây cho tiện
+
+        controlPanel.add(searchFilterPanel);
+
+        return controlPanel;
     }
 
 
@@ -142,9 +199,14 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
                 new EmptyBorder(5, 5, 5, 5)
         ));
 
-        // Tên cột: Bao gồm các cột chính của KhuyenMai
-        String[] columnNames = {"Mã KM", "Tên KM", "Bắt đầu", "Kết thúc", "Loại", "Giảm (%)", "Giảm (VND)", "Trạng thái"};
-        tableModel = new DefaultTableModel(columnNames, 0);
+        // Tên cột: (Đã điều chỉnh thứ tự cho hợp lý)
+        String[] columnNames = {"Mã KM", "Tên KM", "Loại Giảm", "Giảm (%)", "Giảm (VND)", "DK Áp Dụng", "Bắt đầu", "Kết thúc", "Trạng thái"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Không cho phép chỉnh sửa bảng
+            }
+        };
         table = new JTable(tableModel);
 
         table.setFillsViewportHeight(true);
@@ -153,12 +215,19 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
         table.getTableHeader().setFont(FONT_BOLD_14);
         table.getTableHeader().setBackground(new Color(230, 230, 230));
 
+        // Thiết lập chiều rộng cột (tùy chọn)
+        table.getColumnModel().getColumn(0).setPreferredWidth(80); // Mã KM
+        table.getColumnModel().getColumn(1).setPreferredWidth(200); // Tên KM
+        table.getColumnModel().getColumn(5).setPreferredWidth(150); // DK Áp Dụng
+        table.getColumnModel().getColumn(8).setPreferredWidth(120); // Trạng thái
+
         // Thêm sự kiện click chuột để lưu MaKM được chọn và bật nút
         table.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 int row = table.getSelectedRow();
                 if (row != -1) {
-                    fillFormFromTable(row); // fillFormFromTable giờ chỉ cập nhật trạng thái
+                    fillFormFromTable(row);
                 }
             }
         });
@@ -171,42 +240,107 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
     }
 
     /**
-     * [Giả định] Đổ dữ liệu mẫu lên bảng
+     * Đổ dữ liệu thực tế từ DAO lên bảng, áp dụng LỌC và TÌM KIẾM
      */
     public void loadDataToTable() {
-        // ... (Giữ nguyên logic loadDataToTable)
         tableModel.setRowCount(0); // Xóa dữ liệu cũ
 
-        Object[][] data = {
-                {"KM001", "Trẻ em 1/6", "2026-06-01", "2026-06-01", "VE_DON", 30.0, 0, "HoatDong"},
-                {"KM002", "Mua 4 vé -10%", "2025-10-01", "2026-01-31", "HOA_DON", 10.0, 0, "HoatDong"},
-                {"KM003", "Giảm 50k / 500k", "2025-01-01", "2026-12-31", "HOA_DON", 0.0, 50000, "HoatDong"},
-                {"KM004", "Hè giảm 20%", "2025-06-01", "2025-08-31", "HOA_DON", 20.0, 0, "DaKetThuc"}
-        };
+        // Lấy điều kiện lọc và tìm kiếm từ component
+        String keyword = txtTimKiem.getText().trim().toLowerCase();
+        String selectedStatus = (String) cbLocTrangThai.getSelectedItem();
 
-        for (Object[] row : data) {
-            // Định dạng lại các giá trị số và ngày cho hiển thị trên bảng
-            Object[] newRow = row.clone();
-            newRow[5] = row[5] + "%";
-            newRow[6] = VND_FORMAT.format(row[6]);
-            tableModel.addRow(newRow);
+        List<KhuyenMai> dsKM = khuyenMaiDAO.layTatCaKhuyenMai(); // Lấy tất cả KM
+
+        for (KhuyenMai km : dsKM) {
+
+            // --- BƯỚC 1: LỌC THEO TRẠNG THÁI & TÌM KIẾM ---
+            String trangThaiHienThi = getStatusHienThi(km.getTrangThai());
+
+            // Lọc theo Trạng thái
+            if (!"Tất cả".equals(selectedStatus) && !selectedStatus.equals(trangThaiHienThi)) {
+                continue; // Bỏ qua nếu không khớp trạng thái
+            }
+
+            // Tìm kiếm theo Mã hoặc Tên (case-insensitive)
+            if (!keyword.isEmpty()) {
+                boolean matchMa = km.getMaKM().toLowerCase().contains(keyword);
+                boolean matchTen = km.getTenKM().toLowerCase().contains(keyword);
+                if (!matchMa && !matchTen) {
+                    continue; // Bỏ qua nếu không khớp tìm kiếm
+                }
+            }
+
+            // --- BƯỚC 2: CHUẨN BỊ DỮ LIỆU HIỂN THỊ ---
+
+            double giamPhanTram = 0.0;
+            double giamCoDinh = 0.0;
+            String loaiHienThi = "";
+
+            if ("PHAN_TRAM_GIA".equals(km.getLoaiKM())) {
+                giamPhanTram = km.getGiaTriGiam().doubleValue();
+                loaiHienThi = "Phần Trăm";
+            } else if ("CO_DINH".equals(km.getLoaiKM())) {
+                giamCoDinh = km.getGiaTriGiam().doubleValue();
+                loaiHienThi = "Cố Định";
+            }
+
+            String dkApDungHienThi;
+            if ("MIN_GIA".equals(km.getDkApDung()) && km.getGiaTriDK() != null) {
+                dkApDungHienThi = "HĐ >= " + VND_FORMAT.format(km.getGiaTriDK()) + " VND";
+            } else if ("MIN_SL".equals(km.getDkApDung()) && km.getGiaTriDK() != null) {
+                dkApDungHienThi = "SL Vé >= " + km.getGiaTriDK().intValue();
+            } else {
+                dkApDungHienThi = "Không";
+            }
+
+            // --- BƯỚC 3: THÊM DÒNG VÀO BẢNG ---
+            Object[] row = new Object[]{
+                    km.getMaKM(),
+                    km.getTenKM(),
+                    loaiHienThi,
+                    giamPhanTram > 0 ? giamPhanTram + "%" : "",
+                    giamCoDinh > 0 ? VND_FORMAT.format(giamCoDinh) : "",
+                    dkApDungHienThi,
+                    km.getNgayBD().toLocalDate().toString(),
+                    km.getNgayKT().toLocalDate().toString(),
+                    trangThaiHienThi
+            };
+            tableModel.addRow(row);
         }
         lamMoiTrangThaiChon();
     }
 
     /**
+     * Chuyển trạng thái lưu trong DB sang trạng thái hiển thị trên UI.
+     */
+    private String getStatusHienThi(String status) {
+        if("HOAT_DONG".equals(status)) {
+            return "Đang Hoạt Động";
+        } else if("HET_HAN".equals(status)) {
+            return "Đã Kết Thúc";
+        } else { // KHONG_HOAT_DONG
+            return "Chưa Hoạt Động";
+        }
+    }
+
+
+    /**
      * Cập nhật trạng thái nút khi click vào một hàng trên bảng.
      */
     private void fillFormFromTable(int row) {
+        // Lấy Mã KM thực tế (cột 0)
         String maKM = tableModel.getValueAt(row, 0).toString();
-        String trangThai = tableModel.getValueAt(row, 7).toString();
+        // Lấy Trạng thái hiển thị (cột 8, là cột cuối cùng)
+        String trangThaiHienThi = tableModel.getValueAt(row, tableModel.getColumnCount() - 1).toString();
 
         txtMaKM.setText(maKM);
 
         // Kích hoạt các nút Sửa/Kết thúc/Gia hạn
         btnSua.setEnabled(true);
-        btnKetThuc.setEnabled("HoatDong".equals(trangThai));
         btnGiaHan.setEnabled(true);
+
+        // Chỉ cho phép kết thúc nếu KM đang hoạt động
+        btnKetThuc.setEnabled("Đang Hoạt Động".equals(trangThaiHienThi));
     }
 
     /**
@@ -224,60 +358,46 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
     // LOGIC XỬ LÝ SỰ KIỆN (ActionListener)
     // =================================================================================
 
-    // [Giả định] Hàm này không còn được dùng, nhưng giữ lại để tránh lỗi nếu bạn muốn dùng
-    private String generateNewMaKM() {
-        return "KM" + (int)(Math.random() * 9000 + 1000); // Mã giả định
-    }
-
-
     @Override
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
 
         if (src == btnLamMoi) {
+            txtTimKiem.setText(""); // Xóa ô tìm kiếm
+            cbLocTrangThai.setSelectedIndex(0); // Đặt lại lọc là "Tất cả"
             lamMoiTrangThaiChon();
             loadDataToTable(); // Tải lại bảng
         }
+        else if (src == btnTimKiem || src == cbLocTrangThai) {
+            // Tự động load lại bảng khi nhấn Tìm kiếm hoặc thay đổi ComboBox
+            loadDataToTable();
+        }
         else if (src == btnThem) {
-            // Mở Popup Tạo Khuyến Mãi
+            // Mở Popup Tạo Khuyến Mãi (Tham số null báo hiệu là chế độ THÊM)
             PopupTaoKhuyenMai popup = new PopupTaoKhuyenMai(parentFrame, this, null);
             popup.setVisible(true);
         }
         else if (src == btnSua) {
-            // Mở Popup Sửa Khuyến Mãi (cần load dữ liệu MaKM)
-            String maKM = txtMaKM.getText();
-            if (maKM.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn Khuyến Mãi cần Sửa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            // Lấy dữ liệu đầy đủ của Khuyến Mãi (Giả định)
-            // Object khuyenMai = KhuyenMaiDAO.getByID(maKM);
-
-            // Lấy dữ liệu cơ bản từ bảng để truyền (Giả định)
-            int row = table.getSelectedRow();
-            if (row == -1) {
-                // Xảy ra nếu người dùng click nút Sửa sau khi chọn rồi bỏ chọn
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn Khuyến Mãi cần Sửa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            // Giả định: Lấy tạm dữ liệu row để truyền cho popup, thực tế nên gọi DAO
-            String tenKM = tableModel.getValueAt(row, 1).toString();
-            String ngayBD = tableModel.getValueAt(row, 2).toString();
-            String ngayKT = tableModel.getValueAt(row, 3).toString();
-
-            PopupTaoKhuyenMai popup = new PopupTaoKhuyenMai(parentFrame, this, maKM);
-            // Giả định: Thiết lập dữ liệu cho popup để sửa
-            // popup.setFormData(maKM, tenKM, ngayBD, ngayKT, ...);
-            popup.setVisible(true);
+            handleSuaKhuyenMai();
         }
         else if (src == btnKetThuc) {
             handleKetThucKhuyenMai();
         }
         else if (src == btnGiaHan) {
-            // Mở Popup Gia Hạn hoặc dùng dialog đơn giản
             handleGiaHanKhuyenMai();
         }
+    }
+
+    private void handleSuaKhuyenMai() {
+        String maKM = txtMaKM.getText();
+        if (maKM.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn Khuyến Mãi cần Cập Nhật.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Mở Popup Sửa Khuyến Mãi (Truyền MaKM để Popup load dữ liệu và chuyển sang chế độ SỬA)
+        PopupTaoKhuyenMai popup = new PopupTaoKhuyenMai(parentFrame, this, maKM);
+        popup.setVisible(true);
     }
 
 
@@ -288,14 +408,29 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
             return;
         }
 
+        // Kiểm tra lại trạng thái KM trong CSDL trước khi kết thúc
+        KhuyenMai km = khuyenMaiDAO.layKhuyenMaiTheoMa(maKM);
+        if (km == null || !"HOAT_DONG".equals(km.getTrangThai())) {
+            JOptionPane.showMessageDialog(this, "Khuyến Mãi này không ở trạng thái HOAT_DONG để có thể kết thúc.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Bạn có chắc chắn muốn KẾT THÚC Khuyến Mãi [" + maKM + "] ngay lập tức?",
                 "Xác nhận Kết thúc", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            // [Logic DAO]: Gọi DAO.ketThucKhuyenMai(MaKM, NgayHomNay)
-            JOptionPane.showMessageDialog(this, "Đã Kết Thúc Khuyến Mãi [" + maKM + "].", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            loadDataToTable();
+            LocalDateTime now = LocalDateTime.now();
+
+            // Gọi DAO.capNhatTrangThai để chuyển trạng thái sang HET_HAN và đặt Ngày KT là hiện tại
+            boolean success = khuyenMaiDAO.capNhatTrangThai(maKM, "HET_HAN", now);
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Đã Kết Thúc Khuyến Mãi [" + maKM + "].", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                loadDataToTable(); // Tải lại bảng
+            } else {
+                JOptionPane.showMessageDialog(this, "Kết thúc Khuyến Mãi [" + maKM + "] thất bại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -306,11 +441,18 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
             return;
         }
 
-        // **Trong thực tế: Mở một JDialog đơn giản để chọn Ngày Kết Thúc mới**
+        KhuyenMai km = khuyenMaiDAO.layKhuyenMaiTheoMa(maKM);
+        if (km == null) {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy Khuyến Mãi.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-        // Giả định: Sử dụng JDateChooser tạm thời để lấy ngày mới
+        // Tạo JDateChooser để chọn Ngày Kết Thúc mới
         JDateChooser newDateChooser = new JDateChooser();
         newDateChooser.setDateFormatString("dd/MM/yyyy");
+        // Đặt ngày mặc định là Ngày Kết Thúc cũ
+        newDateChooser.setDate(Date.from(km.getNgayKT().atZone(ZoneId.systemDefault()).toInstant()));
+
         JPanel datePanel = new JPanel(new FlowLayout());
         datePanel.add(new JLabel("Chọn Ngày Kết Thúc mới:"));
         datePanel.add(newDateChooser);
@@ -318,19 +460,38 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
         int result = JOptionPane.showConfirmDialog(this, datePanel, "Gia Hạn Khuyến Mãi [" + maKM + "]", JOptionPane.OK_CANCEL_OPTION);
 
         if (result == JOptionPane.OK_OPTION && newDateChooser.getDate() != null) {
-            Date ngayKetThucMoi = newDateChooser.getDate();
-            // [Logic DAO]: Gọi DAO.giaHanKhuyenMai(MaKM, NgayKetThucMoi)
-            JOptionPane.showMessageDialog(this, "Gia Hạn Khuyến Mãi [" + maKM + "] đến " + DATE_FORMAT.format(ngayKetThucMoi) + " thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            loadDataToTable();
+            Date ngayKetThucMoiDate = newDateChooser.getDate();
+            LocalDateTime ngayKetThucMoi = ngayKetThucMoiDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+            // Đặt giờ kết thúc là cuối ngày (23:59:59)
+            ngayKetThucMoi = ngayKetThucMoi.withHour(23).withMinute(59).withSecond(59);
+
+            // Xác định trạng thái mới (Nếu Ngày Bắt Đầu đã qua thì là HOAT_DONG, nếu chưa qua thì là KHONG_HOAT_DONG)
+            String trangThaiMoi = km.getNgayBD().isBefore(LocalDateTime.now()) ? "HOAT_DONG" : "KHONG_HOAT_DONG";
+
+            // Gọi DAO.capNhatTrangThai để cập nhật ngày và trạng thái
+            boolean success = khuyenMaiDAO.capNhatTrangThai(maKM, trangThaiMoi, ngayKetThucMoi);
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Gia Hạn Khuyến Mãi [" + maKM + "] đến " + DATE_FORMAT.format(ngayKetThucMoiDate) + " thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                loadDataToTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "Gia Hạn Khuyến Mãi [" + maKM + "] thất bại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+
         } else if (result == JOptionPane.OK_OPTION && newDateChooser.getDate() == null) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn Ngày Kết Thúc mới.", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+
     /**
      * Phương thức main để chạy độc lập
      */
     public static void main(String[] args) {
+        // Cần khởi tạo kết nối CSDL tại đây nếu bạn muốn chạy độc lập
+        // ConnectDB.getInstance().connect();
+
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Kiểm tra Màn hình Quản lý Khuyến Mãi");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
