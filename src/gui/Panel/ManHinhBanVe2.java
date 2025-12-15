@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-public class ManHinhBanVe extends JPanel implements MouseListener, ActionListener {
+public class ManHinhBanVe2 extends JPanel implements MouseListener, ActionListener {
 
     private static final Color COLOR_BLUE_LIGHT = new Color(52, 152, 219);
     private static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
@@ -145,7 +145,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     // MODULE: 3. CONSTRUCTOR VÀ LAYOUT CHÍNH (MAIN LAYOUT)
     // ====================================================================================
 
-    public ManHinhBanVe() {
+    public ManHinhBanVe2() {
         setLayout(new BorderLayout());
 
 //        setBackground(new Color(240, 242, 245));
@@ -922,6 +922,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         boolean allValid = true;
 
         for (String maCho : danhSachKhachHang.keySet()) {
+            // Lấy components từ Map
             JTextField hoTenField = inputFieldsMap.get(maCho + "_hoTen");
             JLabel hoTenErrorLabel = errorLabelsMap.get(maCho + "_hoTen");
 
@@ -934,651 +935,311 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             JTextField sdtField = inputFieldsMap.get(maCho + "_sdt");
             JLabel sdtErrorLabel = errorLabelsMap.get(maCho + "_sdt");
 
-            // --- 1. Kiểm tra Họ tên (BẮT BUỘC) ---
-            if (hoTenField != null && hoTenField.getText().trim().isEmpty()) {
-                showValidationError(hoTenField, hoTenErrorLabel, "Họ và tên không được để trống.");
-                allValid = false;
-            } else if (hoTenField != null) {
-                clearValidationError(hoTenField, hoTenErrorLabel);
+            // --- Kiểm tra từng trường bằng hàm chung ---
+            // Sử dụng toán tử & (bitwise AND) thay vì && để đảm bảo TẤT CẢ các hàm validateField đều được chạy
+            // (để hiển thị lỗi cho tất cả các trường sai, không chỉ trường đầu tiên)
+
+            boolean v1 = true, v2 = true, v3 = true, v4 = true;
+
+            if (hoTenField != null) {
+                v1 = validateField(hoTenField, hoTenErrorLabel, "hoTen");
+            }
+            if (cccdField != null) {
+                v2 = validateField(cccdField, cccdErrorLabel, "cccd");
+            }
+            if (ngaySinhField != null) {
+                v3 = validateField(ngaySinhField, ngaySinhErrorLabel, "ngaySinh");
+            }
+            if (sdtField != null) {
+                v4 = validateField(sdtField, sdtErrorLabel, "sdt");
             }
 
-            // --- 2. Kiểm tra CCCD (BẮT BUỘC & Định dạng) ---
-            String cccd = cccdField != null ? cccdField.getText().trim() : "";
-            if (cccd.isEmpty()) {
-                showValidationError(cccdField, cccdErrorLabel, "CCCD không được để trống.");
+            if (!(v1 && v2 && v3 && v4)) {
                 allValid = false;
-            } else if (!cccd.matches("^\\d{12}$")) {
-                showValidationError(cccdField, cccdErrorLabel, "CCCD phải có đúng 12 chữ số.");
-                allValid = false;
-            } else {
-                clearValidationError(cccdField, cccdErrorLabel);
-            }
-
-            // --- 3. Kiểm tra Ngày sinh (BẮT BUỘC & Định dạng/Tuổi) ---
-            String ngaySinh = ngaySinhField != null ? ngaySinhField.getText().trim() : "";
-            if (ngaySinh.isEmpty()) {
-                showValidationError(ngaySinhField, ngaySinhErrorLabel, "Ngày sinh không được để trống.");
-                allValid = false;
-            } else {
-                try {
-                    Date dob = INPUT_DATE_FORMAT.parse(ngaySinh);
-                    if (dob.after(new Date())) {
-                        showValidationError(ngaySinhField, ngaySinhErrorLabel, "Ngày sinh không được ở tương lai.");
-                        allValid = false;
-                    } else if (tinhTuoi(ngaySinh) < 0) {
-                        showValidationError(ngaySinhField, ngaySinhErrorLabel, "Ngày sinh không hợp lệ.");
-                        allValid = false;
-                    } else {
-                        clearValidationError(ngaySinhField, ngaySinhErrorLabel);
-                    }
-                } catch (ParseException e) {
-                    showValidationError(ngaySinhField, ngaySinhErrorLabel, "Ngày sinh phải theo định dạng dd/MM/yyyy.");
-                    allValid = false;
-                }
-            }
-
-            // --- 4. Kiểm tra SĐT (Tùy chọn: Định dạng nếu có) ---
-            String sdt = sdtField != null ? sdtField.getText().trim() : "";
-            if (!sdt.isEmpty() && !sdt.matches("^0\\d{9}$")) {
-                showValidationError(sdtField, sdtErrorLabel, "SĐT gồm 10 số, bắt đầu 0.");
-                allValid = false;
-            } else if (sdtField != null) {
-                clearValidationError(sdtField, sdtErrorLabel);
             }
         }
         return allValid;
     }
-
 
     // ====================================================================================
     // MODULE: 7. CẬP NHẬT GIAO DIỆN KHÁCH HÀNG (UI UPDATERS)
     // ====================================================================================
 
     private JPanel createKhachPanel(ChiTietKhach khach) {
-
-        JPanel panel = new JPanel();
-
-        panel.setLayout(new BorderLayout());
-
+        // --- KHỞI TẠO PANEL CHÍNH ---
+        JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(true);
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(new CompoundBorder(
+                new MatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+                new EmptyBorder(5, 5, 5, 5)
+        ));
 
-
-
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90)); // Giới hạn chiều cao mỗi panel khách
-
-        panel.setPreferredSize(new Dimension(300, 90));
-
-
-
-// ĐẶT MÀU TEST: PANEL CHÍNH CỦA KHÁCH HÀNG (Màu nền nhẹ)
-
-        panel.setBackground(new Color(230, 240, 255));
-
-
-
-// Loại bỏ border bên trái (Giá trị thứ 2 = 0), giữ border phân tách dưới (1)
-
-        panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
-
+        // Tăng chiều cao lên một chút để chứa đủ 4 dòng (Input + Error + Input + Error)
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 140));
+        panel.setPreferredSize(new Dimension(300, 140));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         panel.setName(khach.choDat().getMaCho());
 
+        // --- 1. HEADER (Giữ nguyên) ---
+        JPanel pnlHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 2));
+        pnlHeader.setOpaque(true);
+        pnlHeader.setBackground(new Color(255, 228, 204));
 
-
-        String maCho = khach.choDat().getMaCho();
-
-        String soCho = khach.choDat().getSoCho();
-
-        String soThuTuToa = laySoThuTuToa(khach.choDat().getMaToa());
-
-        String loaiKhachHienThi = getTenLoaiVeHienThi(khach.maLoaiVe());
-
-
-
-        final int FIELD_HEIGHT = 20;
-
-// --- KHAI BÁO KÍCH THƯỚC CỐ ĐỊNH CHO CĂN CHỈNH BOXLAYOUT ---
-
-        final int LABEL_WIDTH = 90; // Chiều rộng cố định cho Label (để thẳng hàng)
-
-        final int FIELD_WIDTH = 100; // Chiều rộng cố định cho Text Field
-
-        final int GAP_WIDTH = 15; // Khoảng cách giữa hai cặp input
-
-
-
-        final Dimension FIXED_COMBO_SIZE = new Dimension(130, FIELD_HEIGHT);
-
-        final Dimension FIXED_LABEL_SIZE = new Dimension(LABEL_WIDTH, FIELD_HEIGHT); // Kích thước cố định cho Label
-
-        final Dimension FIXED_FIELD_SIZE = new Dimension(FIELD_WIDTH, FIELD_HEIGHT); // Kích thước cố định cho Field
-
-
-
-        final Font ERROR_FONT = new Font("Segoe UI", Font.ITALIC, 11);
-
-        final Color ERROR_COLOR = Color.RED;
-
-
-
-// --- 1. Header Row (Ghế, Loại vé, Giá) ---
-
-        JPanel pnlGhe_LoaiVe_GiaVe = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-
-
-
-        pnlGhe_LoaiVe_GiaVe.setOpaque(true);
-
-        pnlGhe_LoaiVe_GiaVe.setBackground(new Color(255, 220, 180));
-
-        pnlGhe_LoaiVe_GiaVe.setAlignmentY(Component.CENTER_ALIGNMENT);
-
-
-
-        JLabel maGheLabel = new JLabel("Chỗ: " + soCho + " / Toa: " + soThuTuToa);
-
-        maGheLabel.setFont(maGheLabel.getFont().deriveFont(Font.BOLD));
-
-        pnlGhe_LoaiVe_GiaVe.add(maGheLabel);
-
-
+        String thongTinCho = "Chỗ: " + khach.choDat().getSoCho() + " / Toa: " + laySoThuTuToa(khach.choDat().getMaToa());
+        JLabel lblCho = new JLabel(thongTinCho);
+        lblCho.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        pnlHeader.add(lblCho);
 
         JComboBox<String> cbLoaiKhach = new JComboBox<>(getLoaiVeOptions());
-
-        cbLoaiKhach.setSelectedItem(loaiKhachHienThi);
-
-        cbLoaiKhach.setPreferredSize(FIXED_COMBO_SIZE);
-
-        cbLoaiKhach.setMaximumSize(FIXED_COMBO_SIZE);
-
-        cbLoaiKhach.addActionListener(e -> {
-
-            String maMoi = getMaLoaiVeFromHienThi((String) cbLoaiKhach.getSelectedItem());
-
-            ChiTietKhach updatedKhach = khach.withMaLoaiVe(maMoi);
-
-            danhSachKhachHang.put(maCho, updatedKhach);
-
-            try {
-
-                long gia = tinhGiaVeTau(updatedKhach.choDat(), updatedKhach.maLoaiVe());
-
-                danhSachGiaVe.put(maCho, gia);
-
-            } catch (Exception ex) {
-
-                JOptionPane.showMessageDialog(this, "Không thể tính lại giá: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-
-                danhSachGiaVe.remove(maCho);
-
-            }
-
-            capNhatThongTinKhachUI();
-
-            capNhatTongTienUI();
-
-        });
-
-        pnlGhe_LoaiVe_GiaVe.add(cbLoaiKhach);
-
-
-
-        JLabel giaLabel = new JLabel("...");
-
-        giaLabel.setFont(giaLabel.getFont().deriveFont(Font.BOLD, 14f));
-
-        giaLabel.setForeground(COLOR_BLUE_LIGHT);
-
-
-
-// Đảm bảo căn chỉnh Y (trục dọc)
-
-        giaLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
-
-        giaLabelMap.put(maCho, giaLabel);
-
-
-
-        pnlGhe_LoaiVe_GiaVe.add(giaLabel);
-
-
-
-        panel.add(pnlGhe_LoaiVe_GiaVe, BorderLayout.NORTH);
-
-
-
-// --- 2. Input Fields (Đã chuyển sang BoxLayout lồng nhau) ---
-
-
-
-// Container bao bọc tất cả inputs và canh chỉnh lề trái
-
-        JPanel pnlInputContainer = new JPanel();
-
-        pnlInputContainer.setLayout(new BoxLayout(pnlInputContainer, BoxLayout.Y_AXIS));
-
-        pnlInputContainer.setOpaque(true);
-
-        pnlInputContainer.setBackground(new Color(240, 240, 240));
-
-        pnlInputContainer.setBorder(new EmptyBorder(5, 5, 5, 5)); // Padding cho khu vực input
-
-        pnlInputContainer.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-
-
-
-
-// --- Hàng 1: Họ tên và Ngày sinh (BoxLayout.X_AXIS) ---
-
-        JPanel row1 = new JPanel();
-
-        row1.setLayout(new BoxLayout(row1, BoxLayout.X_AXIS));
-
-        row1.setOpaque(true);
-
-        row1.setBackground(new Color(240, 240, 240));
-
-        row1.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-
-
-// Cặp 1: Họ tên
-
-        JLabel lblHoTen = new JLabel("Họ và tên*:");
-
-        lblHoTen.setPreferredSize(FIXED_LABEL_SIZE);
-
-        lblHoTen.setMaximumSize(FIXED_LABEL_SIZE);
-
-        JTextField hoTenField = new JTextField(khach.hoTen());
-
-        hoTenField.setPreferredSize(FIXED_FIELD_SIZE);
-
-        hoTenField.setMaximumSize(FIXED_FIELD_SIZE);
-
-
-
-        row1.add(lblHoTen);
-
-        row1.add(hoTenField);
-
-        row1.add(Box.createHorizontalStrut(GAP_WIDTH)); // Khoảng cách giữa 2 cặp
-
-
-
-// Cặp 2: Ngày sinh
-
-        JLabel lblNgaySinh = new JLabel("Ngày sinh*:");
-
-        lblNgaySinh.setPreferredSize(FIXED_LABEL_SIZE);
-
-        lblNgaySinh.setMaximumSize(FIXED_LABEL_SIZE);
-
-        JTextField ngaySinhField = new JTextField(khach.ngaySinh() != null ? khach.ngaySinh() : "");
-
-        ngaySinhField.setPreferredSize(FIXED_FIELD_SIZE);
-
-        ngaySinhField.setMaximumSize(FIXED_FIELD_SIZE);
-
-
-
-        row1.add(lblNgaySinh);
-
-        row1.add(ngaySinhField);
-
-        row1.add(Box.createHorizontalGlue()); // Đẩy các thành phần sang trái
-
-
-
-        pnlInputContainer.add(row1);
-
-        pnlInputContainer.add(Box.createVerticalStrut(5)); // Khoảng cách giữa các hàng
-
-
-
-
-
-// --- Hàng 2: Số điện thoại và CCCD (BoxLayout.X_AXIS) ---
-
-        JPanel row2 = new JPanel();
-
-        row2.setLayout(new BoxLayout(row2, BoxLayout.X_AXIS));
-
-        row2.setOpaque(true);
-
-        row2.setBackground(new Color(240, 240, 240));
-
-        row2.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-
-
-// Cặp 1: Số điện thoại
-
-        JLabel lblSdt = new JLabel("Số điện thoại:");
-
-        lblSdt.setPreferredSize(FIXED_LABEL_SIZE);
-
-        lblSdt.setMaximumSize(FIXED_LABEL_SIZE);
-
-        JTextField sdtField = new JTextField(khach.sdt());
-
-        sdtField.setPreferredSize(FIXED_FIELD_SIZE);
-
-        sdtField.setMaximumSize(FIXED_FIELD_SIZE);
-
-
-
-        row2.add(lblSdt);
-
-        row2.add(sdtField);
-
-        row2.add(Box.createHorizontalStrut(GAP_WIDTH)); // Khoảng cách giữa 2 cặp
-
-
-
-// Cặp 2: CCCD
-
-        JLabel lblCccd = new JLabel("CCCD*:");
-
-        lblCccd.setPreferredSize(FIXED_LABEL_SIZE);
-
-        lblCccd.setMaximumSize(FIXED_LABEL_SIZE);
-
-        JTextField cccdField = new JTextField(khach.cccd());
-
-        cccdField.setPreferredSize(FIXED_FIELD_SIZE);
-
-        cccdField.setMaximumSize(FIXED_FIELD_SIZE);
-
-
-
-        row2.add(lblCccd);
-
-        row2.add(cccdField);
-
-        row2.add(Box.createHorizontalGlue()); // Đẩy các thành phần sang trái
-
-
-
-        pnlInputContainer.add(row2);
-
-
-
-// Thêm Input Container vào Panel cha
-
-        panel.add(pnlInputContainer, BorderLayout.CENTER);
-
-
-
-
-
-// --- 3. Error Row (Sử dụng lại FlowLayout, nhưng căn chỉnh bằng strusts) ---
-
-        JPanel errorRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
-
-        errorRow.setOpaque(true);
-
-
-
-        errorRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        errorRow.setBorder(new EmptyBorder(0, 5, 5, 5));
-
-
-
-        JLabel hoTenErrorLabel = new JLabel(" "); hoTenErrorLabel.setFont(ERROR_FONT); hoTenErrorLabel.setForeground(ERROR_COLOR); errorLabelsMap.put(maCho + "_hoTen", hoTenErrorLabel);
-
-        JLabel ngaySinhErrorLabel = new JLabel(" "); ngaySinhErrorLabel.setFont(ERROR_FONT); ngaySinhErrorLabel.setForeground(ERROR_COLOR); errorLabelsMap.put(maCho + "_ngaySinh", ngaySinhErrorLabel);
-
-        JLabel sdtErrorLabel = new JLabel(" "); sdtErrorLabel.setFont(ERROR_FONT); sdtErrorLabel.setForeground(ERROR_COLOR); errorLabelsMap.put(maCho + "_sdt", sdtErrorLabel);
-
-        JLabel cccdErrorLabel = new JLabel(" "); cccdErrorLabel.setFont(ERROR_FONT); cccdErrorLabel.setForeground(ERROR_COLOR); errorLabelsMap.put(maCho + "_cccd", cccdErrorLabel);
-
-
-
-// Lỗi HoTen (Cặp 1)
-
-        errorRow.add(Box.createHorizontalStrut(LABEL_WIDTH + 15));
-
-        errorRow.add(hoTenErrorLabel);
-
-
-
-// Khoảng trống giữa HoTen và NgaySinh (Gap + Độ rộng Label)
-
-        errorRow.add(Box.createHorizontalStrut(GAP_WIDTH + LABEL_WIDTH));
-
-        errorRow.add(ngaySinhErrorLabel);
-
-
-
-// Lỗi SĐT (Cặp 2 - Cặp 3)
-
-// Khoảng trống = (Khoảng cách giữa 2 cặp) + (Độ rộng Label) - (FlowLayout Gap cũ 15)
-
-        errorRow.add(Box.createHorizontalStrut(GAP_WIDTH + LABEL_WIDTH - 15));
-
-        errorRow.add(sdtErrorLabel);
-
-
-
-// Lỗi CCCD (Cặp 3 - Cặp 4)
-
-        errorRow.add(Box.createHorizontalStrut(GAP_WIDTH + LABEL_WIDTH));
-
-        errorRow.add(cccdErrorLabel);
-
-
-
-
-
-// Lưu trữ các trường Field vào Map (Dùng biến đã khai báo trong logic BoxLayout)
-
-        inputFieldsMap.put(maCho + "_hoTen", hoTenField);
-
-        inputFieldsMap.put(maCho + "_ngaySinh", ngaySinhField);
-
-        inputFieldsMap.put(maCho + "_sdt", sdtField);
-
-        inputFieldsMap.put(maCho + "_cccd", cccdField);
-
-
-
-        panel.add(errorRow, BorderLayout.SOUTH);
-
-
-
-// --- FOCUS LISTENERS ---
-
-        hoTenField.addFocusListener(new FocusAdapter() {
-
+        cbLoaiKhach.setSelectedItem(getTenLoaiVeHienThi(khach.maLoaiVe()));
+        cbLoaiKhach.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        cbLoaiKhach.setPreferredSize(new Dimension(140, 22));
+        pnlHeader.add(cbLoaiKhach);
+
+        JLabel lblGia = new JLabel("...");
+        lblGia.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblGia.setForeground(new Color(52, 152, 219));
+        try {
+            long gia = tinhGiaVeTau(khach.choDat(), khach.maLoaiVe());
+            danhSachGiaVe.put(khach.choDat().getMaCho(), gia);
+            lblGia.setText(formatVnd(gia));
+        } catch (Exception e) { lblGia.setText("0 VNĐ"); }
+        giaLabelMap.put(khach.choDat().getMaCho(), lblGia);
+        pnlHeader.add(lblGia);
+
+        panel.add(pnlHeader, BorderLayout.NORTH);
+
+        // --- 2. FORM INPUT (CẤU TRÚC 4 DÒNG) ---
+        JPanel pnlContent = new JPanel(new GridBagLayout());
+        pnlContent.setOpaque(false);
+        pnlContent.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // Font chữ
+        Font fontLabel = new Font("Segoe UI", Font.BOLD, 12);
+        Font fontInput = new Font("Segoe UI", Font.PLAIN, 12);
+        Font fontError = new Font("Segoe UI", Font.ITALIC, 10); // Font nhỏ cho lỗi
+        Color colorError = Color.RED;
+
+        // --- Init Components ---
+        JTextField txtHoTen = new JTextField(khach.hoTen()); txtHoTen.setFont(fontInput);
+        JTextField txtNgaySinh = new JTextField(khach.ngaySinh()); txtNgaySinh.setFont(fontInput);
+        JTextField txtSDT = new JTextField(khach.sdt()); txtSDT.setFont(fontInput);
+        JTextField txtCCCD = new JTextField(khach.cccd()); txtCCCD.setFont(fontInput);
+
+        // Labels báo lỗi riêng biệt
+        JLabel errHoTen = new JLabel(" "); errHoTen.setFont(fontError); errHoTen.setForeground(colorError);
+        JLabel errNgaySinh = new JLabel(" "); errNgaySinh.setFont(fontError); errNgaySinh.setForeground(colorError);
+        JLabel errSDT = new JLabel(" "); errSDT.setFont(fontError); errSDT.setForeground(colorError);
+        JLabel errCCCD = new JLabel(" "); errCCCD.setFont(fontError); errCCCD.setForeground(colorError);
+
+        String maCho = khach.choDat().getMaCho();
+        inputFieldsMap.put(maCho + "_hoTen", txtHoTen);
+        inputFieldsMap.put(maCho + "_ngaySinh", txtNgaySinh);
+        inputFieldsMap.put(maCho + "_sdt", txtSDT);
+        inputFieldsMap.put(maCho + "_cccd", txtCCCD);
+
+        errorLabelsMap.put(maCho + "_hoTen", errHoTen);
+        errorLabelsMap.put(maCho + "_ngaySinh", errNgaySinh);
+        errorLabelsMap.put(maCho + "_sdt", errSDT);
+        errorLabelsMap.put(maCho + "_cccd", errCCCD);
+
+        // --- DÒNG 1: INPUT [Họ tên] và [Ngày sinh] ---
+        gbc.gridy = 0;
+        gbc.insets = new Insets(2, 0, 0, 5); // padding
+
+        // Label Họ tên
+        gbc.gridx = 0; gbc.weightx = 0;
+        JLabel lblHoTen = new JLabel("Họ tên*:"); lblHoTen.setFont(fontLabel);
+        pnlContent.add(lblHoTen, gbc);
+
+        // Field Họ tên
+        gbc.gridx = 1; gbc.weightx = 0.6;
+        gbc.insets = new Insets(2, 0, 0, 15); // Cách phải 15px để tách nhóm
+        pnlContent.add(txtHoTen, gbc);
+
+        // Label Ngày sinh
+        gbc.gridx = 2; gbc.weightx = 0;
+        gbc.insets = new Insets(2, 0, 0, 5);
+        JLabel lblNgaySinh = new JLabel("Ngày sinh*:"); lblNgaySinh.setFont(fontLabel);
+        pnlContent.add(lblNgaySinh, gbc);
+
+        // Field Ngày sinh
+        gbc.gridx = 3; gbc.weightx = 0.4;
+        gbc.insets = new Insets(2, 0, 0, 0);
+        pnlContent.add(txtNgaySinh, gbc);
+
+        // --- DÒNG 2: THÔNG BÁO LỖI CHO DÒNG 1 ---
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 5, 0); // Padding dưới để cách dòng 3
+
+        // Lỗi Họ tên (Nằm dưới Field Họ tên - cột 1)
+        gbc.gridx = 1; gbc.weightx = 0.6;
+        pnlContent.add(errHoTen, gbc);
+
+        // Lỗi Ngày sinh (Nằm dưới Field Ngày sinh - cột 3)
+        gbc.gridx = 3; gbc.weightx = 0.4;
+        pnlContent.add(errNgaySinh, gbc);
+
+        // --- DÒNG 3: INPUT [SĐT] và [CCCD] ---
+        gbc.gridy = 2;
+        gbc.insets = new Insets(2, 0, 0, 5);
+
+        // Label SĐT
+        gbc.gridx = 0; gbc.weightx = 0;
+        JLabel lblSDT = new JLabel("SĐT:"); lblSDT.setFont(fontLabel);
+        pnlContent.add(lblSDT, gbc);
+
+        // Field SĐT
+        gbc.gridx = 1; gbc.weightx = 0.6;
+        gbc.insets = new Insets(2, 0, 0, 15);
+        pnlContent.add(txtSDT, gbc);
+
+        // Label CCCD
+        gbc.gridx = 2; gbc.weightx = 0;
+        gbc.insets = new Insets(2, 0, 0, 5);
+        JLabel lblCCCD = new JLabel("CCCD*:"); lblCCCD.setFont(fontLabel);
+        pnlContent.add(lblCCCD, gbc);
+
+        // Field CCCD
+        gbc.gridx = 3; gbc.weightx = 0.4;
+        gbc.insets = new Insets(2, 0, 0, 0);
+        pnlContent.add(txtCCCD, gbc);
+
+        // --- DÒNG 4: THÔNG BÁO LỖI CHO DÒNG 3 ---
+        gbc.gridy = 3;
+        gbc.insets = new Insets(0, 0, 0, 0);
+
+        // Lỗi SĐT
+        gbc.gridx = 1; gbc.weightx = 0.6;
+        pnlContent.add(errSDT, gbc);
+
+        // Lỗi CCCD
+        gbc.gridx = 3; gbc.weightx = 0.4;
+        pnlContent.add(errCCCD, gbc);
+
+        panel.add(pnlContent, BorderLayout.CENTER);
+
+        // --- SỰ KIỆN LOGIC (Focus Listener) ---
+        FocusAdapter validationListener = new FocusAdapter() {
             @Override
-
-            public void focusLost(FocusEvent evt) {
-
-                String value = hoTenField.getText().trim();
-
-                updateKhachRecord(maCho, value, "hoTen");
-
-
-
-// Validate
-
-                if (value.isEmpty()) {
-
-                    showValidationError(hoTenField, hoTenErrorLabel, "Họ tên không được để trống.");
-
-                } else {
-
-                    clearValidationError(hoTenField, hoTenErrorLabel);
-
-                }
-
-            }
-
-        });
-
-
-
-// 2. Kiểm tra Số điện thoại
-
-        sdtField.addFocusListener(new FocusAdapter() {
-
-            @Override
-
-            public void focusLost(FocusEvent evt) {
-
-                String value = sdtField.getText().trim();
-
-                updateKhachRecord(maCho, value, "sdt");
-
-
-
-// Validate (SĐT không bắt buộc, nhưng nếu nhập thì phải đúng)
-
-                if (!value.isEmpty() && !value.matches("^0\\d{9}$")) {
-
-                    showValidationError(sdtField, sdtErrorLabel, "SĐT phải gồm 10 số, bắt đầu là 0.");
-
-                } else {
-
-                    clearValidationError(sdtField, sdtErrorLabel);
-
-                }
-
-            }
-
-        });
-
-
-
-// 3. Kiểm tra Ngày sinh
-
-        ngaySinhField.addFocusListener(new FocusAdapter() {
-
-            @Override
-
-            public void focusLost(FocusEvent evt) {
-
-                String value = ngaySinhField.getText().trim();
-
-                updateKhachRecord(maCho, value, "ngaySinh");
-
-
-
-// Validate
-
-                if (value.isEmpty()) {
-
-                    showValidationError(ngaySinhField, ngaySinhErrorLabel, "Ngày sinh không được để trống.");
-
-                } else {
-
-                    try {
-
-                        Date dob = INPUT_DATE_FORMAT.parse(value);
-
-                        if (dob.after(new Date())) {
-
-                            showValidationError(ngaySinhField, ngaySinhErrorLabel, "Ngày sinh không hợp lệ (Tương lai).");
-
-                        } else {
-
-                            clearValidationError(ngaySinhField, ngaySinhErrorLabel);
-
-
-
-// Logic nghiệp vụ: Tính lại giá nếu hợp lệ
-
-                            JLabel finalGiaLabel = giaLabelMap.get(maCho);
-
-                            if (finalGiaLabel != null) {
-
-                                xuLyNgaySinhThayDoi(maCho, value, finalGiaLabel);
-
-                            }
-
-// Logic nghiệp vụ: Kiểm tra tuổi vé (Panel lỗi chung)
-
-// kiemTraVaHienThiLoiLogic();
-
-                        }
-
-                    } catch (ParseException e) {
-
-                        showValidationError(ngaySinhField, ngaySinhErrorLabel, "Định dạng sai (dd/MM/yyyy).");
-
+            public void focusLost(FocusEvent e) {
+                JTextField source = (JTextField) e.getSource();
+                String fieldName = "";
+
+                // Xác định field và validate ngay lập tức
+                if (source == txtHoTen) {
+                    fieldName = "hoTen";
+                    validateField(source, errHoTen, "hoTen");
+                } else if (source == txtNgaySinh) {
+                    fieldName = "ngaySinh";
+                    validateField(source, errNgaySinh, "ngaySinh");
+                    // Logic phụ: tính giá
+                    if (errNgaySinh.getText().trim().isEmpty() && giaLabelMap.get(maCho) != null) {
+                        xuLyNgaySinhThayDoi(maCho, source.getText(), giaLabelMap.get(maCho));
                     }
-
+                } else if (source == txtSDT) {
+                    fieldName = "sdt";
+                    validateField(source, errSDT, "sdt");
+                } else if (source == txtCCCD) {
+                    fieldName = "cccd";
+                    validateField(source, errCCCD, "cccd");
+                    // Logic phụ: nhập nhanh
+                    if (errCCCD.getText().trim().isEmpty()) {
+                        xuLyNhapNhanhKhachHang(txtCCCD, txtHoTen, txtSDT, txtNgaySinh, maCho);
+                    }
                 }
-
+                updateKhachRecord(maCho, source.getText(), fieldName);
             }
+        };
 
+        txtHoTen.addFocusListener(validationListener);
+        txtNgaySinh.addFocusListener(validationListener);
+        txtSDT.addFocusListener(validationListener);
+        txtCCCD.addFocusListener(validationListener);
+
+        // ComboBox Event
+        cbLoaiKhach.addActionListener(e -> {
+            String maMoi = getMaLoaiVeFromHienThi((String) cbLoaiKhach.getSelectedItem());
+            ChiTietKhach updatedKhach = khach.withMaLoaiVe(maMoi);
+            danhSachKhachHang.put(maCho, updatedKhach);
+            try {
+                long gia = tinhGiaVeTau(updatedKhach.choDat(), updatedKhach.maLoaiVe());
+                danhSachGiaVe.put(maCho, gia);
+                lblGia.setText(formatVnd(gia));
+            } catch (Exception ex) {}
+            capNhatTongTienUI();
         });
-
-
-
-// 4. Kiểm tra CCCD
-
-        cccdField.addFocusListener(new FocusAdapter() {
-
-            @Override
-
-            public void focusLost(FocusEvent evt) {
-
-                String value = cccdField.getText().trim();
-
-                updateKhachRecord(maCho, value, "cccd");
-
-
-
-// Validate
-
-                if (value.isEmpty()) {
-
-                    showValidationError(cccdField, cccdErrorLabel, "CCCD không được để trống.");
-
-                } else if (!value.matches("^\\d{12}$")) {
-
-                    showValidationError(cccdField, cccdErrorLabel, "CCCD phải có 12 chữ số.");
-
-                } else {
-
-                    clearValidationError(cccdField, cccdErrorLabel);
-
-// Logic nghiệp vụ: Tự động điền (nếu hợp lệ)
-
-                    xuLyNhapNhanhKhachHang(cccdField, hoTenField, sdtField, ngaySinhField, maCho);
-
-                }
-
-            }
-
-        });
-
-
-
-
-
-// --- Cập nhật giá ---
-
-        Long giaTinh = danhSachGiaVe.get(maCho);
-
-        if (giaTinh != null) { giaLabel.setText(formatVnd(giaTinh)); }
-
-        else { try { long gia = tinhGiaVeTau(khach.choDat(), khach.maLoaiVe()); danhSachGiaVe.put(maCho, gia); giaLabel.setText(formatVnd(gia)); } catch (Exception ex) { giaLabel.setText("Lỗi giá"); giaLabel.setForeground(Color.RED); } }
-
-
-
-        panel.setAlignmentX(LEFT_ALIGNMENT);
-
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, panel.getPreferredSize().height));
 
         return panel;
-
     }
+
+    private boolean validateField(JTextField field, JLabel errorLabel, String type) {
+        String value = field.getText().trim();
+        String errorMsg = "";
+        boolean isValid = true;
+        Border errorBorder = BorderFactory.createLineBorder(Color.RED);
+        Border normalBorder = UIManager.getBorder("TextField.border");
+
+        switch (type) {
+            case "hoTen":
+                if (value.isEmpty()) {
+                    isValid = false;
+                    errorMsg = "Họ tên không để trống.";
+                }
+                break;
+            case "ngaySinh":
+                if (value.isEmpty()) {
+                    isValid = false;
+                    errorMsg = "Ngày sinh không để trống.";
+                } else {
+                    try {
+                        Date dob = INPUT_DATE_FORMAT.parse(value);
+                        if (dob.after(new Date())) {
+                            isValid = false;
+                            errorMsg = "Ngày tương lai.";
+                        }
+                    } catch (ParseException e) {
+                        isValid = false;
+                        errorMsg = "Sai định dạng dd/mm/yyyy.";
+                    }
+                }
+                break;
+            case "cccd":
+                if (value.isEmpty()) {
+                    isValid = false;
+                    errorMsg = "CCCD không để trống.";
+                } else if (!value.matches("\\d{12}")) {
+                    isValid = false;
+                    errorMsg = "CCCD đủ 12 số.";
+                }
+                break;
+            case "sdt":
+                if (value.isEmpty()) {
+                    isValid = false;
+                    errorMsg = "SDT không để trống.";
+                } else if (!value.matches("0\\d{9}")) {
+                    isValid = false;
+                    errorMsg = "SDT đủ 10 số bắt đầu bằng 0.";
+                }
+                break;
+        }
+
+        if (!isValid) {
+            field.setBorder(errorBorder);
+            if (errorLabel != null) errorLabel.setText(errorMsg);
+        } else {
+            field.setBorder(normalBorder);
+            if (errorLabel != null) errorLabel.setText(" ");
+        }
+
+        return isValid;
+    }
+
     private void capNhatThongTinKhachUI() {
         if (thongTinKhachScrollPane == null) {
             System.out.println("Lỗi: thongTinKhachScrollPane chưa được khởi tạo.");
@@ -1829,7 +1490,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                 dashboard.themHoacCapNhatCard(confirmPanel, "xacNhanBanVe");
                 dashboard.chuyenManHinh("xacNhanBanVe");
             }
-            } else {
+        } else {
             JOptionPane.showMessageDialog(this,
                     "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
                     "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
@@ -2585,7 +2246,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             JFrame frame = new JFrame("Panel Bán vé (Kiểm tra)");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setLayout(new BorderLayout());
-            frame.add(new ManHinhBanVe(), BorderLayout.CENTER);
+            frame.add(new ManHinhBanVe2(), BorderLayout.CENTER);
             frame.pack();
             frame.setSize(1200, 850);
             frame.setLocationRelativeTo(null);

@@ -187,7 +187,7 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
         }
         return rowsAffected > 0;
     }
-    public boolean addChuyenTau(ChuyenTau ct) throws SQLException {
+    public boolean addChuyenTau1(ChuyenTau ct) throws SQLException {
         Connection conn = null;
         PreparedStatement pstmt = null;
 
@@ -263,6 +263,96 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
         }
         return rowsAffected > 0;
     }
+    public boolean addChuyenTau(ChuyenTau ct) throws SQLException {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        int rowsAffected = 0;
+
+        // 1. CÂU SQL CHUẨN HÓA (Khớp với DB QuanLyVeTauProMax)
+        String sql = "INSERT INTO ChuyenTau (MaChuyenTau, MaTuyen, MaTau, MaNV, NgayKhoiHanh, GioKhoiHanh, TrangThai) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        // 2. KIỂM TRA DỮ LIỆU ĐẦU VÀO
+        if (ct == null || ct.getMaChuyenTau() == null || ct.getMaChuyenTau().isEmpty()) {
+            throw new IllegalArgumentException("Mã chuyến tàu không được để trống.");
+        }
+        // Kiểm tra các thành phần bắt buộc khác (Tuyến, Tàu, Ngày)
+        if (ct.getTuyen() == null || ct.getTau() == null || ct.getNgayKhoiHanh() == null) {
+            throw new IllegalArgumentException("Thông tin chuyến tàu thiếu (Tuyến, Tàu hoặc Ngày đi).");
+        }
+
+        try {
+            // Lấy kết nối
+            conn = ConnectDB.getInstance().getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            // --- THIẾT LẬP THAM SỐ (SET PARAMETERS) ---
+
+            // 1. MaChuyenTau
+            pstmt.setString(1, ct.getMaChuyenTau());
+
+            // 2. MaTuyen (Lấy từ đối tượng Tuyen trong ChuyenTau)
+            // Đảm bảo entity ChuyenTau có phương thức getTuyen()
+            pstmt.setString(2, ct.getTuyen().getMaTuyen());
+
+            // 3. MaTau (Lấy từ đối tượng Tau)
+            pstmt.setString(3, ct.getTau().getSoHieu());
+
+            // 4. MaNV (Xử lý Null nếu chưa phân công nhân viên)
+            if (ct.getNhanVien() != null && ct.getNhanVien().getMaNV() != null) {
+                pstmt.setString(4, ct.getNhanVien().getMaNV());
+            } else {
+                pstmt.setNull(4, Types.NVARCHAR);
+            }
+
+            // 5. NgayKhoiHanh (Chuyển đổi LocalDate -> java.sql.Date)
+            pstmt.setDate(5, java.sql.Date.valueOf(ct.getNgayKhoiHanh()));
+
+            // 6. GioKhoiHanh (Chuyển đổi LocalTime -> java.sql.Time)
+            if (ct.getGioKhoiHanh() != null) {
+                pstmt.setTime(6, java.sql.Time.valueOf(ct.getGioKhoiHanh()));
+            } else {
+                pstmt.setNull(6, Types.TIME);
+            }
+
+            // 7. TrangThai (Lấy String từ Enum hoặc thuộc tính)
+            // Giả sử bạn dùng Enum TrangThaiChuyenTau, cần chuyển về String hoặc lấy tên hiển thị
+            if (ct.getThct() != null) {
+                pstmt.setString(7, ct.getThct().toString());
+            } else {
+                pstmt.setString(7, "Chờ khởi hành"); // Giá trị mặc định
+            }
+
+            // --- THỰC THI ---
+            rowsAffected = pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi CSDL khi thêm chuyến tàu: " + e.getMessage());
+
+            // Bắt lỗi trùng khóa chính (Error Code 2627 hoặc 2601 trong SQL Server)
+            if (e.getErrorCode() == 2627 || e.getMessage().contains("PRIMARY KEY")) {
+                throw new SQLException("Mã chuyến tàu '" + ct.getMaChuyenTau() + "' đã tồn tại trong hệ thống.", e.getSQLState(), e);
+            }
+            // Bắt lỗi khóa ngoại (Ví dụ: Mã Tàu hoặc Mã Tuyến không tồn tại)
+            if (e.getMessage().contains("FOREIGN KEY")) {
+                throw new SQLException("Dữ liệu tham chiếu không hợp lệ (Tuyến hoặc Tàu không tồn tại).", e.getSQLState(), e);
+            }
+
+            throw e; // Ném lại các lỗi khác để Controller xử lý
+        } finally {
+            // Đóng PreparedStatement (Connection thường được quản lý bởi ConnectDB singleton)
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return rowsAffected > 0;
+    }
+
 
     public List<ChuyenTau> timChuyenTauTheoGaVaNgayDi(String gaXP, String gaKT, String ngayDi) {
         List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();

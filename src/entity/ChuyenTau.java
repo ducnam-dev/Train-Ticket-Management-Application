@@ -8,6 +8,7 @@ import entity.lopEnum.TrangThaiChuyenTau;
 
 public class ChuyenTau {
     public String maChuyenTau;
+    public Tuyen tuyen;
     public String maTau;
     public LocalDate ngayKhoiHanh;
     public LocalTime gioKhoiHanh;
@@ -22,8 +23,32 @@ public class ChuyenTau {
     public ChuyenTau() {
 
     }
-
-    public ChuyenTau(String maChuyenTau, String maTau, LocalDate ngayKhoiHanh, LocalTime gioKhoiHanh, Ga gaDi, Ga gaDen, Tau tau, LocalDate ngayDenDuKien, LocalTime gioDenDuKien, NhanVien nhanVien, TrangThaiChuyenTau thct) {
+    // Constructor đầy đủ với đối tượng Tuyen
+    public ChuyenTau(String maChuyenTau, Tuyen tuyen, String maTau,
+                     LocalDate ngayKhoiHanh, LocalTime gioKhoiHanh,
+                     Ga gaDi, Ga gaDen, Tau tau,
+                     LocalDate ngayDenDuKien, LocalTime gioDenDuKien,
+                     NhanVien nhanVien, TrangThaiChuyenTau thct) {
+        this.maChuyenTau = maChuyenTau;
+        this.tuyen = tuyen; // <--- Gán giá trị
+        this.maTau = maTau;
+        this.ngayKhoiHanh = ngayKhoiHanh;
+        this.gioKhoiHanh = gioKhoiHanh;
+        this.gaDi = gaDi;
+        this.gaDen = gaDen;
+        this.tau = tau;
+        this.ngayDenDuKien = ngayDenDuKien;
+        this.gioDenDuKien = gioDenDuKien;
+        this.nhanVien = nhanVien;
+        this.thct = thct;
+    }
+    //11 tham số
+    // Constructor đầy đủ với đối tượng Tuyen
+    public ChuyenTau(String maChuyenTau, String maTau,
+                     LocalDate ngayKhoiHanh, LocalTime gioKhoiHanh,
+                     Ga gaDi, Ga gaDen, Tau tau,
+                     LocalDate ngayDenDuKien, LocalTime gioDenDuKien,
+                     NhanVien nhanVien, TrangThaiChuyenTau thct) {
         this.maChuyenTau = maChuyenTau;
         this.maTau = maTau;
         this.ngayKhoiHanh = ngayKhoiHanh;
@@ -35,7 +60,7 @@ public class ChuyenTau {
         this.gioDenDuKien = gioDenDuKien;
         this.nhanVien = nhanVien;
         this.thct = thct;
-    }//11 tham số
+    }
     // Dựa trên lỗi, 6 tham số đầu là String, 3 tham số cuối là Object (null)
     public ChuyenTau(
             String maChuyenTau,
@@ -80,7 +105,14 @@ public class ChuyenTau {
         // ... Logic gán các giá trị cho các thuộc tính tương ứng ...
     }
 
+    // --- Getter/Setter cho Tuyến (MỚI) ---
+    public Tuyen getTuyen() {
+        return tuyen;
+    }
 
+    public void setTuyen(Tuyen tuyen) {
+        this.tuyen = tuyen;
+    }
 
     public String getMaChuyenTau() {
         return maChuyenTau;

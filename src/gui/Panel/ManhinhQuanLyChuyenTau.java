@@ -43,10 +43,7 @@ import control.CaLamViec;
 import dao.ChuyenTauDao; // Cần tạo
 import dao.GaDao;
 import dao.TauDAO;
-import entity.ChuyenTau; // Cần tạo
-import entity.Ga;       // Cần tạo
-import entity.NhanVien; // Cần tạo
-import entity.Tau;       // Cần tạo
+import entity.*;
 
 // Import lớp kết nối
 import database.ConnectDB;
@@ -641,10 +638,10 @@ public class ManhinhQuanLyChuyenTau extends JPanel {
         // [SỬA LỖI 2] Lấy maTau (String - là SoHieu) từ đối tượng Tau
         // Giả sử entity Tau của bạn có getSoHieu() khớp với CSDL
         String maTauString = tau.getSoHieu();
-
+        // Giả sử Tau có phương thức getTuyen()
         // [SỬA LỖI 3] Gọi đúng constructor theo thứ tự của entity/ChuyenTau.java
         return new ChuyenTau(
-                maCT,             // 1. String maChuyenTau
+                maCT, // 1. String maChuyenTau
                 maTauString,      // 2. String maTau (SoHieu)
                 localDate,        // 3. LocalDate ngayKhoiHanh
                 localTime,        // 4. LocalTime gioKhoiHanh
