@@ -7,6 +7,7 @@ package gui.Panel;
 import com.toedter.calendar.JDateChooser;
 import dao.*;
 import entity.*;
+import gui.MainFrame.AdminFullDashboard;
 import gui.MainFrame.BanVeDashboard;
 import control.VeSoDoTau;
 import org.apache.poi.ss.usermodel.*;
@@ -1387,17 +1388,27 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         Window w = SwingUtilities.getWindowAncestor(this);
 
-        if (w instanceof BanVeDashboard) {
-            BanVeDashboard dashboard = (BanVeDashboard) w;
+        if (w instanceof BanVeDashboard || w instanceof AdminFullDashboard) {
 
-            ManHinhTrangChuNVBanVe confirmPanel = new ManHinhTrangChuNVBanVe();
+            // Xác định tên card Trang chủ tương ứng với Dashboard
+            String tenCardTrangChu = (w instanceof AdminFullDashboard) ? "trangChuQL" : "trangChuNV";
 
-            dashboard.themHoacCapNhatCard(confirmPanel, "trangChu");
-            dashboard.chuyenManHinh("trangChu");
+            ManHinhTrangChuNVBanVe trangChuPanel = new ManHinhTrangChuNVBanVe();
+
+            if (w instanceof BanVeDashboard) {
+                BanVeDashboard dashboard = (BanVeDashboard) w;
+                dashboard.themHoacCapNhatCard(trangChuPanel, tenCardTrangChu);
+                dashboard.chuyenManHinh(tenCardTrangChu);
+
+            } else if (w instanceof AdminFullDashboard) {
+                AdminFullDashboard dashboard = (AdminFullDashboard) w;
+                dashboard.themHoacCapNhatCard(trangChuPanel, tenCardTrangChu);
+                dashboard.chuyenManHinh(tenCardTrangChu);
+            }
 
         } else {
             JOptionPane.showMessageDialog(this,
-                    "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
+                    "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ Dashboard hợp lệ.",
                     "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -1437,21 +1448,29 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         Window w = SwingUtilities.getWindowAncestor(this);
 
-        if (w instanceof BanVeDashboard) {
-            BanVeDashboard dashboard = (BanVeDashboard) w;
+        if (w instanceof BanVeDashboard || w instanceof AdminFullDashboard) {
 
+            // Khởi tạo Panel Xác nhận
             ManHinhXacNhanBanVe confirmPanel = new ManHinhXacNhanBanVe(
                     danhSachGheDaChon,
                     danhSachKhachHang,
                     maChuyenTauHienTai,
-                    dateChooserNgayDi.getDate(), // Lấy Date từ JDateChooser
+                    dateChooserNgayDi.getDate(),
                     new HashMap<>(danhSachGiaVe)
             );
 
-            dashboard.themHoacCapNhatCard(confirmPanel, "xacNhanBanVe");
-            dashboard.chuyenManHinh("xacNhanBanVe");
+            if (w instanceof BanVeDashboard) {
+                BanVeDashboard dashboard = (BanVeDashboard) w;
+                dashboard.themHoacCapNhatCard(confirmPanel, "xacNhanBanVe");
+                dashboard.chuyenManHinh("xacNhanBanVe");
 
-        } else {
+            } else if (w instanceof AdminFullDashboard) {
+                // Ép kiểu sang AdminFullDashboard để gọi các phương thức chung
+                AdminFullDashboard dashboard = (AdminFullDashboard) w;
+                dashboard.themHoacCapNhatCard(confirmPanel, "xacNhanBanVe");
+                dashboard.chuyenManHinh("xacNhanBanVe");
+            }
+            } else {
             JOptionPane.showMessageDialog(this,
                     "Không thể tìm thấy cửa sổ Dashboard. Vui lòng chạy ứng dụng từ BanVeDashboard.",
                     "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);

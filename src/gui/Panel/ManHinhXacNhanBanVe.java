@@ -4,6 +4,7 @@ package gui.Panel;
 import control.CaLamViec;
 import dao.*;
 import entity.*;
+import gui.MainFrame.AdminFullDashboard;
 import gui.MainFrame.BanVeDashboard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,9 +22,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
-import java.time.LocalDate; // Đã có
-import java.time.format.DateTimeFormatter; // Đã có
-// ...
+
 
 /*
 logic chính:
@@ -60,12 +59,12 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private JLabel lblThongTinKhuyenMai;
 
     //UI Hoa don
-    private JLabel lblMaHoaDon; // FIX: Biến mới để hiển thị Mã HD
-    private JLabel lblNguoiLapHD; // FIX: Biến mới để hiển thị Người lập
-    private JLabel lblDienThoaiNV; // FIX: Biến mới để hiển thị SĐT NV
-    private JLabel lblTenNguoiDat; // FIX: Tên người đặt
-    private JLabel lblSdtNguoiDat; // FIX: SĐT người đặt
-    private JLabel lblPhuongThucTT; // FIX: Phương thức thanh toán (trong phần UI Tổng tiền)
+    private JLabel lblMaHoaDon;
+    private JLabel lblNguoiLapHD;
+    private JLabel lblDienThoaiNV;
+    private JLabel lblTenNguoiDat;
+    private JLabel lblSdtNguoiDat;
+    private JLabel lblPhuongThucTT;
 
     private JLabel lblTongCongLon;
 
@@ -639,23 +638,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         lblPhuongThucTT.setText("Phương thức: " + hinhThuc);
     }
 
-//// FIX: Cần gán sự kiện cho cbHinhThuc trong taoPanelThanhToan()
-//// ...
-//cbHinhThuc.addActionListener(e -> capNhatThongTinNguoiDat());
-//// ...
-
-    // Thêm class MapGroup để hỗ trợ nhóm hóa đơn
-    private static class MapGroup {
-        String tenLoaiVe;
-        long giaDonVi; // Giá đã bao gồm chiết khấu loại vé, chưa bao gồm KM tổng và VAT
-        int soLuong;
-
-        public MapGroup(String tenLoaiVe, long giaDonVi) {
-            this.tenLoaiVe = tenLoaiVe;
-            this.giaDonVi = giaDonVi;
-            this.soLuong = 0;
-        }
-    }
 
     /**
      * Tính toán số tiền giảm giá tuyệt đối (VND) mà một KM mang lại.
@@ -1688,28 +1670,59 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
     /**
      * Helper chung để chuyển đổi giữa các Panel trong Dashboard.
+     * Phương thức này được tối ưu để hoạt động trên cả BanVeDashboard và AdminFullDashboard
+     * mà không cần sử dụng Interface, bằng cách kiểm tra kiểu tường minh.
      */
     private void chuyenManHinh(String cardName) {
         Window w = SwingUtilities.getWindowAncestor(this);
 
+        // Xác định tên card đích cuối cùng dựa trên Dashboard
+        String finalCardName = cardName;
+        String dashboardType = null;
+
         if (w instanceof BanVeDashboard) {
-            BanVeDashboard dashboard = (BanVeDashboard) w;
+            dashboardType = "BanVe";
+        } else if (w instanceof AdminFullDashboard) {
+            dashboardType = "Admin";
+        }
 
+        if (dashboardType != null) {
+            // 1. Chuẩn hóa tên card:
             if ("trangChu".equals(cardName)) {
-                // Cần tạo lại Panel Trang chủ nếu nó không phải là static
-                dashboard.themHoacCapNhatCard(new ManHinhTrangChuNVBanVe(), "trangChu");
-
-                cardName = "trangChuNV";
-            }else if ("manHinhBanVe".equals(cardName)) {
-                // Chỉ cần đảm bảo card được thêm vào nếu chưa có
-                cardName = "banVeMoi";
+                // Nếu muốn về trang chủ, phải dùng tên card chính xác của Dashboard
+                finalCardName = ("Admin".equals(dashboardType)) ? "trangChuQL" : "trangChuNV";
+            } else if ("manHinhBanVe".equals(cardName)) {
+                // Đảm bảo tên card Bán vé đúng
+                finalCardName = "banVeMoi";
             }
 
-            dashboard.chuyenManHinh(cardName);
+            // 2. Xử lý chuyển màn hình:
+            if ("BanVe".equals(dashboardType)) {
+                BanVeDashboard dashboard = (BanVeDashboard) w;
+
+                // Chỉ thêm/cập nhật nếu là Trang chủ (vì Trang chủ thường cần refresh)
+                if ("trangChuNV".equals(finalCardName)) {
+                    dashboard.themHoacCapNhatCard(new ManHinhTrangChuNVBanVe(), finalCardName);
+                }
+
+                dashboard.chuyenManHinh(finalCardName);
+
+            } else if ("Admin".equals(dashboardType)) {
+                AdminFullDashboard dashboard = (AdminFullDashboard) w;
+
+                // Chỉ thêm/cập nhật nếu là Trang chủ
+                if ("trangChuQL".equals(finalCardName)) {
+                    // Giả định AdminFullDashboard dùng ManHinhDashboardQuanLy làm trang chủ
+                    dashboard.themHoacCapNhatCard(new ManHinhDashboardQuanLy(), finalCardName);
+                }
+
+                // Chuyển màn hình bằng phương thức đã được chuẩn hóa
+                dashboard.chuyenManHinh(finalCardName);
+            }
 
         } else {
             JOptionPane.showMessageDialog(this,
-                    "Lỗi chuyển hướng hệ thống.",
+                    "Lỗi: Không tìm thấy Dashboard hợp lệ để chuyển hướng hệ thống.",
                     "Lỗi Hệ thống", JOptionPane.ERROR_MESSAGE);
         }
     }
