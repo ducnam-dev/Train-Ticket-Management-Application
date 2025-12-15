@@ -10,29 +10,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="hoàn thành 100% vẽ sơ đồ ghế. 100% chức năng tìm kiếm chuyến tàu">
-      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/MainTestDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTimKiemChuyenTau.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$3.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$4.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$5.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$ChiTietKhach.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$ChiTietKhach.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/CSDL quan ly ve tau backup.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSDL quan ly ve tau backup.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/test2.2.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/VeDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/VeDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/ConnectDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/ConnectDB.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/ChoDat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/ChoDat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$3.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$4.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$5.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2$ChiTietKhach.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Panel/ManHinhBanVe2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/ChiTietHoaDonDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChiTietHoaDonDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/ChuyenTauDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChuyenTauDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/DieuKienKhuyenMaiDAO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/GiaVeCoBanTheoGaDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/GiaVeCoBanTheoGaDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/KhuyenMaiDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/KhuyenMaiDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entity/DieuKienKhuyenMai.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entity/KhuyenMai.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/KhuyenMai.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/AdminFullDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/AdminFullDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/ManHinhDangNhap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/ManHinhDangNhap.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVeUpdatePanelChuyenTau.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyKhuyenMai2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyKhuyenMai2.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhXacNhanBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhXacNhanBanVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Popup/PopUpChiTietHoaDon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Popup/PopUpChiTietHoaDon.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Popup/PopupTaoKhuyenMai.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Popup/PopupTaoKhuyenMai.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,13 +81,14 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/dao/ChuyenTauDao.java" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/src/dao/KhachHangDAO.java" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 6
+  &quot;associatedIndex&quot;: 0
 }</component>
   <component name="ProjectId" id="34qFYRkLqvIAKxFNq395BANpeTV" />
   <component name="ProjectViewState">
@@ -92,13 +97,19 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.AdminFullDashboard.executor": "Run",
     "Application.BanVeDashboard.executor": "Run",
     "Application.CustomTrainTicketPanel.executor": "Debug",
     "Application.KiemTraChonToaPanel.executor": "Run",
     "Application.Main.executor": "Run",
+    "Application.MainTestDAO.executor": "Run",
     "Application.ManHinhBanVe.executor": "Run",
     "Application.ManHinhBanVe2.executor": "Run",
     "Application.ManHinhBanVeUpdatePanelChuyenTau.executor": "Run",
+    "Application.ManHinhDangNhap.executor": "Run",
+    "Application.ManHinhQuanLyKhuyenMai.executor": "Run",
+    "Application.ManHinhQuanLyKhuyenMai2.executor": "Run",
+    "Application.ManHinhTimKiemChuyenTau.executor": "Run",
     "Application.ManHinhTraCuuHoaDon.executor": "Run",
     "Application.ManHinhXacNhanBanVe.executor": "Run",
     "Application.PopUpChiTietHoaDon.executor": "Run",
@@ -109,7 +120,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "fix-chuc-nang-ban-ve-2.0",
+    "git-widget-placeholder": "master",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/06_Study/Stuby IUH/Hoc ki 5/Phat trien ung dung/DU AN/Train-Ticket-Management-Application/sql",
@@ -137,9 +148,9 @@
       <recent name="gui.Panel" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.BanVeDashboard">
-    <configuration name="BanVeDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.BanVeDashboard" />
+  <component name="RunManager" selected="Application.AdminFullDashboard">
+    <configuration name="AdminFullDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.AdminFullDashboard" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -151,8 +162,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="KiemTraChonToaPanel" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.KiemTraChonToaPanel" />
+    <configuration name="BanVeDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.BanVeDashboard" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -184,8 +195,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhBanVeUpdatePanelChuyenTau" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhBanVeUpdatePanelChuyenTau" />
+    <configuration name="ManHinhXacNhanBanVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhXacNhanBanVe" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -197,12 +208,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="VeSoDoTau" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="control.VeSoDoTau" />
+    <configuration name="QuanLyDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.QuanLyDashboard" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="control.*" />
+          <option name="PATTERN" value="gui.MainFrame.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -212,11 +223,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.AdminFullDashboard" />
+        <item itemvalue="Application.ManHinhXacNhanBanVe" />
         <item itemvalue="Application.BanVeDashboard" />
-        <item itemvalue="Application.ManHinhBanVeUpdatePanelChuyenTau" />
-        <item itemvalue="Application.KiemTraChonToaPanel" />
         <item itemvalue="Application.ManHinhBanVe" />
-        <item itemvalue="Application.VeSoDoTau" />
+        <item itemvalue="Application.QuanLyDashboard" />
       </list>
     </recent_temporary>
   </component>
@@ -243,6 +254,16 @@
       <workItem from="1765622434968" duration="6090000" />
       <workItem from="1765639176819" duration="7557000" />
       <workItem from="1765707610751" duration="7778000" />
+      <workItem from="1765716884792" duration="26000" />
+      <workItem from="1765716920512" duration="8214000" />
+      <workItem from="1765728688125" duration="4000" />
+      <workItem from="1765780380281" duration="4060000" />
+      <workItem from="1765784825314" duration="378000" />
+      <workItem from="1765785247868" duration="4722000" />
+      <workItem from="1765790617116" duration="13000" />
+      <workItem from="1765790692421" duration="3000" />
+      <workItem from="1765790749182" duration="2883000" />
+      <workItem from="1765795510159" duration="9087000" />
     </task>
     <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
       <option name="closed" value="true" />

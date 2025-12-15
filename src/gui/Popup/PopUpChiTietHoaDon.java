@@ -834,12 +834,30 @@ public class PopUpChiTietHoaDon extends JPanel {
 
         // 5. Khuyến mãi
         System.out.println("KHUYẾN MÃI:");
-        if (khuyenMai.getPhanTramGiam() > 0) {
-            System.out.printf("  Giảm: %.0f%% | Mô tả: %s%n",
-                    khuyenMai.getPhanTramGiam(), khuyenMai.getMoTa().trim());
+
+// Giả định bạn đã có một đối tượng KhuyenMai hợp lệ (không null)
+        if (khuyenMai != null) {
+            if (khuyenMai.getGiaTriGiam().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                String loaiKM = khuyenMai.getLoaiKM();
+                String giaTriGiamFormatted;
+                if ("PHAN_TRAM_GIA".equals(loaiKM)) {
+                    giaTriGiamFormatted = String.format("%.0f%%", khuyenMai.getGiaTriGiam());
+                } else if ("CO_DINH".equals(loaiKM)) {
+                    java.text.NumberFormat nf = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+                    giaTriGiamFormatted = nf.format(khuyenMai.getGiaTriGiam()) + " VNĐ";
+                } else {
+                    giaTriGiamFormatted = khuyenMai.getGiaTriGiam().toString();
+                }
+                System.out.printf("  Giảm: %s | Mô tả: %s%n",
+                        giaTriGiamFormatted, khuyenMai.getTenKM().trim());
+
+            } else {
+                System.out.println("  Không có khuyến mãi áp dụng.");
+            }
         } else {
-            System.out.println("  Không có khuyến mãi.");
+            System.out.println("  Không có khuyến mãi áp dụng.");
         }
+
         System.out.println();
 
         // 6. Danh sách khách hàng đi vé
@@ -897,9 +915,45 @@ public class PopUpChiTietHoaDon extends JPanel {
         lblSoTienPhaiThanhToan.setText(String.format("%,.0f ₫", hoaDon.getTongTien()));
         lblNguoiThanhToan.setText(khachHangDat.getHoTen());
 
-        //5 khuyến mãi
-        lblKMchoHoaDon.setText(String.format("%.0f%%", khuyenMai.getPhanTramGiam()));
-        lblNoiDungKhuyenMai.setText(khuyenMai.getMoTa().trim());
+        // 5. Khuyến mãi (Đã sửa để kiểm tra loại khuyến mãi)
+
+// BƯỚC 1: Đảm bảo đối tượng KhuyenMai không null và có giá trị giảm > 0
+        if (khuyenMai != null && khuyenMai.getGiaTriGiam().compareTo(java.math.BigDecimal.ZERO) > 0) {
+
+            String loaiKM = khuyenMai.getLoaiKM();
+            java.math.BigDecimal giaTriGiam = khuyenMai.getGiaTriGiam();
+            String textHienThiKM;
+
+            // BƯỚC 2: Kiểm tra loại KM để định dạng giá trị chính xác
+            if ("PHAN_TRAM_GIA".equals(loaiKM)) {
+                // Loại 1: Giảm theo Phần trăm giá
+                // Hiển thị giá trị giảm + ký hiệu %
+                textHienThiKM = String.format("%.0f%%", giaTriGiam);
+
+            } else if ("CO_DINH".equals(loaiKM)) {
+                // Loại 2: Giảm cố định (VNĐ)
+                // Định dạng tiền tệ cho dễ đọc (ví dụ: 50.000)
+                java.text.NumberFormat nf = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+                textHienThiKM = nf.format(giaTriGiam) + " VNĐ";
+
+            } else {
+                // Trường hợp không xác định
+                textHienThiKM = giaTriGiam.toString();
+            }
+
+            // BƯỚC 3: Cập nhật Labels trên giao diện
+
+            // Cập nhật Label hiển thị giá trị giảm (ví dụ: "10%" hoặc "50.000 VNĐ")
+            lblKMchoHoaDon.setText(textHienThiKM);
+
+            // Cập nhật Label hiển thị mô tả/tên khuyến mãi
+            lblNoiDungKhuyenMai.setText(khuyenMai.getTenKM().trim());
+
+        } else {
+            // Trường hợp không có khuyến mãi áp dụng hoặc giá trị giảm <= 0
+            lblKMchoHoaDon.setText("0%"); // Hoặc "Không áp dụng" tùy theo thiết kế
+            lblNoiDungKhuyenMai.setText("Không có Khuyến mãi phù hợp.");
+        }
 
         // 6. Cập nhật bảng chi tiết hành khách
         DefaultTableModel model = (DefaultTableModel) BangChiTietHanhKhach.getModel();

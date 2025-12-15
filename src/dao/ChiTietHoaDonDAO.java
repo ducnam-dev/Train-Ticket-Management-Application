@@ -168,10 +168,19 @@ public class ChiTietHoaDonDAO {
     }
 
     public static KhuyenMai layThongTinKhuyenMaiTheoMaHD(String maHD) {
-        KhuyenMai km = new KhuyenMai(); // Luôn tạo object, không trả về null
-        String sql = "SELECT PhanTramGiam, MoTa " +
+        // Luôn tạo object, không trả về null, đảm bảo an toàn.
+        KhuyenMai km = new KhuyenMai();
+
+        // Khởi tạo các giá trị mặc định an toàn
+        km.setGiaTriGiam(java.math.BigDecimal.ZERO);
+        km.setTenKM(" ");
+        km.setLoaiKM("NONE"); // Thiết lập loại mặc định để tránh NullPointerException khi hiển thị
+
+        // Lấy thông tin KM: LoaiKM, GiaTriGiam, TenKM
+        // Lưu ý: Đảm bảo bảng HoaDon có cột MaKM
+        String sql = "SELECT KM.LoaiKM, KM.GiaTriGiam, KM.TenKM " +
                 "FROM HoaDon HD LEFT JOIN KhuyenMai KM ON HD.MaKM = KM.MaKM " +
-                "WHERE MaHD = ?";
+                "WHERE HD.MaHD = ?"; // Dùng HD.MaHD để rõ ràng
 
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -180,33 +189,40 @@ public class ChiTietHoaDonDAO {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                Double phanTramGiamDB = rs.getObject("PhanTramGiam", Double.class); // Có thể null
-                String moTa = rs.getString("MoTa");
 
-                if (phanTramGiamDB != null) {
-                    km.setPhanTramGiam(phanTramGiamDB * 100); // 0.10 → 10.0
-                    km.setMoTa(moTa != null ? moTa : " ");
+                // Lấy các trường theo cấu trúc mới
+                String loaiKMDB = rs.getString("LoaiKM"); // Có thể null nếu MaKM trong Hóa Đơn là NULL
+                java.math.BigDecimal giaTriGiamDB = rs.getBigDecimal("GiaTriGiam");
+                String tenKM = rs.getString("TenKM");
+
+                if (loaiKMDB != null && giaTriGiamDB != null) {
+                    // Trường hợp có Khuyến mãi được áp dụng
+
+                    km.setLoaiKM(loaiKMDB);
+                    km.setTenKM(tenKM != null ? tenKM.trim() : "Ưu đãi");
+
+                    // GIẢI QUYẾT VẤN ĐỀ LOGIC TÍNH TOÁN (0.10 -> 10.0):
+                    // Nếu KM là PHAN_TRAM_GIA, giá trị trong CSDL đã là 10.0 (10%)
+                    // Nếu KM là CO_DINH, giá trị trong CSDL đã là 50000.00 (50K)
+
+                    // Do đó, chúng ta KHÔNG cần nhân với 100 nữa.
+                    km.setGiaTriGiam(giaTriGiamDB);
+
                 } else {
-                    // Không có khuyến mãi (MaKM = null)
-                    km.setPhanTramGiam(0.0);
-                    km.setMoTa(" ");
+                    // Hóa đơn được tìm thấy nhưng MaKM là NULL (Không áp dụng KM)
+                    // Đã được xử lý bởi giá trị mặc định ở đầu phương thức
                 }
             } else {
-                // Không tìm thấy hóa đơn (hiếm xảy ra, nhưng vẫn xử lý)
-                km.setPhanTramGiam(0.0);
-                km.setMoTa(" ");
+                // Không tìm thấy hóa đơn (Đã được xử lý bởi giá trị mặc định ở đầu phương thức)
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            // Vẫn trả về object an toàn
-            km.setPhanTramGiam(0.0);
-            km.setMoTa(" ");
+            // Lỗi CSDL -> Trả về giá trị mặc định (đã thiết lập ở đầu phương thức)
         }
 
         return km; // Luôn trả về KhuyenMai hợp lệ
     }
-
 
     public static KhachHang layKhachHangTheoHoaDon(String maHD) {
         KhachHang khachHang = new KhachHang();

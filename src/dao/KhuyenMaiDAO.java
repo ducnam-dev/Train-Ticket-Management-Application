@@ -1,442 +1,252 @@
 package dao;
 
 import database.ConnectDB;
-import entity.KhachHang;
-import entity.KhuyenMai;
-import entity.DieuKienKhuyenMai;
+import entity.KhuyenMai; // Đã đổi tên từ KhuyenMaiOptimized thành KhuyenMai
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
+import java.time.format.DateTimeFormatter; // Để format LocalDateTime sang String cho SQL
+import java.time.LocalDateTime;
 /**
- * DAO cho KhuyenMai - tải kèm danh sách dieu kien
+ * DAO cho KhuyenMai - Tương ứng với cấu trúc CSDL đã được tối ưu hóa.
  */
 public class KhuyenMaiDAO {
-    private DieuKienKhuyenMaiDAO dieuKienDao = new DieuKienKhuyenMaiDAO();
+
+    // Sử dụng định dạng DATETIME của SQL Server
+    private static final DateTimeFormatter SQL_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
-     * Lấy tất cả khuyến mãi "active".
-     * Lưu ý: cột TrangThai là NVARCHAR(50) theo schema mới;
-     * query so sánh với '1' hoặc 'ACTIVE' (case-insensitive).
-     * Nếu bạn dùng giá trị khác cho TrangThai, chỉnh WHERE tương ứng.
+     * Lấy TẤT CẢ khuyến mãi (bao gồm cả Đã kết thúc và Chưa hoạt động) để hiển thị lên bảng quản lý.
+     * Đây là phương thức cần dùng cho loadDataToTable() trong ManHinhQuanLyKhuyenMai.
      */
-//    getAllActivePromosWithConditions tên tiếng VIệt là lấyTấtCảKhuyếnMãiHoạtĐộngVớiĐiềuKiện
-
-
-    public List<KhuyenMai> layTatCaKMHoatDongVoiDK() {
+    public List<KhuyenMai> layTatCaKhuyenMai() {
         List<KhuyenMai> list = new ArrayList<>();
-        String sql = "SELECT MaKM, TenKM, NgayBatDau, NgayKetThuc, MoTa, PhanTramGiam, GiaTienGiamTru, LoaiApDung, TrangThai " +
-                "FROM KhuyenMai " +
-                "WHERE (TrangThai = '1' OR UPPER(TrangThai) = 'HoatDong')";
+        // Sắp xếp theo NgayBD (mới nhất lên trên)
+        String sql = "SELECT * FROM KhuyenMai ORDER BY NgayBD DESC";
 
         try (Connection con = ConnectDB.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                KhuyenMai km = new KhuyenMai();
-                km.setMaKM(rs.getString("MaKM"));
-                km.setTenKM(rs.getString("TenKM"));
-                java.sql.Date d1 = rs.getDate("NgayBatDau");
-                if (d1 != null) km.setNgayBatDau(new Date(d1.getTime()));
-                java.sql.Date d2 = rs.getDate("NgayKetThuc");
-                if (d2 != null) km.setNgayKetThuc(new Date(d2.getTime()));
-                km.setMoTa(rs.getString("MoTa"));
-                // PhanTramGiam DECIMAL -> double
-                km.setPhanTramGiam(rs.getDouble("PhanTramGiam"));
-                // GiaTienGiamTru DECIMAL(18,0) -> long
-                try {
-                    km.setGiaTienGiamTru(rs.getLong("GiaTienGiamTru"));
-                } catch (SQLException ex) {
-                    // nếu trường null hoặc khác, set 0
-                    km.setGiaTienGiamTru(0L);
-                }
-                km.setLoaiApDung(rs.getString("LoaiApDung"));
-                km.setTrangThai(rs.getString("TrangThai"));
-
-                // load điều kiện liên quan
-                List<DieuKienKhuyenMai> dkList = dieuKienDao.loadByMaKM(con, km.getMaKM());
-                km.setDieuKienList(dkList);
-
+                KhuyenMai km = chuyenKetQuaSangKhuyenMai(rs);
                 list.add(km);
             }
-
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Lỗi truy vấn lấy TẤT CẢ Khuyến mãi: " + e.getMessage());
         }
         return list;
     }
 
     /**
-     * Lấy 1 khuyến mãi theo MaKM (kèm điều kiện)
+     * Lấy tất cả khuyến mãi "active" theo logic thời gian (NgayBD, NgayKT).
      */
-    public KhuyenMai findByMaKM(String maKM) {
-        String sql = "SELECT MaKM, TenKM, NgayBatDau, NgayKetThuc, MoTa, PhanTramGiam, GiaTienGiamTru, LoaiApDung, TrangThai " +
-                "FROM KhuyenMai WHERE MaKM = ?";
+    public List<KhuyenMai> layTatCaKMHoatDong() {
+        List<KhuyenMai> activeList = new ArrayList<>();
+        // LƯU Ý: Điều kiện TrangThai = 'HOAT_DONG' loại trừ các KM bị quản lý viên tạm dừng thủ công
+        String sql = "SELECT * FROM KhuyenMai " +
+                "WHERE TrangThai = 'HOAT_DONG' " +
+                "  AND NgayBD <= GETDATE() " +
+                "  AND NgayKT >= GETDATE()";
+
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                KhuyenMai km = chuyenKetQuaSangKhuyenMai(rs);
+                activeList.add(km);
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi truy vấn lấy Khuyến mãi hoạt động: " + e.getMessage());
+        }
+        return activeList;
+    }
+    /**
+     * Tìm kiếm Khuyến mãi theo Mã KM. (Đổi tên cho rõ ràng)
+     * @param maKM Mã Khuyến mãi cần tìm.
+     * @return Đối tượng KhuyenMai nếu tìm thấy, null nếu không tìm thấy.
+     */
+    public KhuyenMai layKhuyenMaiTheoMa(String maKM) {
+        KhuyenMai km = null;
+        String sql = "SELECT * FROM KhuyenMai WHERE MaKM = ?";
+
         try (Connection con = ConnectDB.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setString(1, maKM);
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    KhuyenMai km = new KhuyenMai();
-                    km.setMaKM(rs.getString("MaKM"));
-                    km.setTenKM(rs.getString("TenKM"));
-                    java.sql.Date d1 = rs.getDate("NgayBatDau");
-                    if (d1 != null) km.setNgayBatDau(new Date(d1.getTime()));
-                    java.sql.Date d2 = rs.getDate("NgayKetThuc");
-                    if (d2 != null) km.setNgayKetThuc(new Date(d2.getTime()));
-                    km.setMoTa(rs.getString("MoTa"));
-                    km.setPhanTramGiam(rs.getDouble("PhanTramGiam"));
-                    try {
-                        km.setGiaTienGiamTru(rs.getLong("GiaTienGiamTru"));
-                    } catch (SQLException ex) {
-                        km.setGiaTienGiamTru(0L);
-                    }
-                    km.setLoaiApDung(rs.getString("LoaiApDung"));
-                    km.setTrangThai(rs.getString("TrangThai"));
-
-                    List<DieuKienKhuyenMai> dkList = dieuKienDao.loadByMaKM(con, km.getMaKM());
-                    km.setDieuKienList(dkList);
-                    return km;
+                    km = chuyenKetQuaSangKhuyenMai(rs);
                 }
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm kiếm Khuyến mãi: " + e.getMessage());
         }
-        return null;
+        return km;
     }
-
     /**
-     * Thêm một Khuyến Mãi mới vào CSDL (kèm các điều kiện liên quan).
-     * @param km Khuyến Mãi cần thêm.
-     * @return true nếu thành công, false nếu thất bại.
+     * Phương thức thêm mới một Khuyến mãi vào CSDL.
      */
-    public boolean addKhuyenMai(KhuyenMai km) {
-        String sql = "INSERT INTO KhuyenMai (MaKM, TenKM, NgayBatDau, NgayKetThuc, MoTa, PhanTramGiam, GiaTienGiamTru, LoaiApDung, TrangThai) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'HoatDong')"; // Mặc định trạng thái là 'HoatDong'
+    public boolean themKhuyenMai(KhuyenMai km) {
+        // ... (Giữ nguyên logic thêmKhuyenMai)
+        String sql = "INSERT INTO KhuyenMai (MaKM, TenKM, LoaiKM, GiaTriGiam, DKApDung, GiaTriDK, NgayBD, NgayKT, TrangThai) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        Connection con = null;
-        try {
-            con = ConnectDB.getConnection();
-            con.setAutoCommit(false); // Bắt đầu giao dịch
+            ps.setString(1, km.getMaKM());
+            ps.setNString(2, km.getTenKM());
+            ps.setString(3, km.getLoaiKM());
+            ps.setBigDecimal(4, km.getGiaTriGiam());
+            ps.setString(5, km.getDkApDung());
 
-            // 1. Thêm Khuyến Mãi chính
-            try (PreparedStatement ps = con.prepareStatement(sql)) {
-                ps.setString(1, km.getMaKM());
-                ps.setString(2, km.getTenKM());
-                ps.setDate(3, new java.sql.Date(km.getNgayBatDau().getTime()));
-                ps.setDate(4, new java.sql.Date(km.getNgayKetThuc().getTime()));
-                ps.setString(5, km.getMoTa());
-                ps.setDouble(6, km.getPhanTramGiam());
-                ps.setLong(7, km.getGiaTienGiamTru());
-                ps.setString(8, km.getLoaiApDung());
-
-                if (ps.executeUpdate() <= 0) {
-                    con.rollback();
-                    return false;
-                }
+            if (km.getGiaTriDK() != null) {
+                ps.setBigDecimal(6, km.getGiaTriDK());
+            } else {
+                ps.setNull(6, Types.DECIMAL);
             }
 
-            // 2. Thêm các Điều kiện Khuyến Mãi
-            if (km.getDieuKienList() != null) {
-                for (DieuKienKhuyenMai dk : km.getDieuKienList()) {
-                    dk.setMaKM(km.getMaKM()); // Gán lại MaKM
-                    if (!dieuKienDao.addDieuKien(con, dk)) {
-                        con.rollback();
-                        return false;
-                    }
-                }
-            }
+            ps.setTimestamp(7, Timestamp.valueOf(km.getNgayBD()));
+            ps.setTimestamp(8, Timestamp.valueOf(km.getNgayKT()));
+            ps.setString(9, km.getTrangThai());
 
-            con.commit(); // Hoàn thành giao dịch
-            return true;
-
-        } catch (SQLException ex) {
-            try {
-                if (con != null) con.rollback();
-            } catch (SQLException rollbackEx) {
-                rollbackEx.printStackTrace();
-            }
-            ex.printStackTrace();
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi thêm Khuyến mãi: " + e.getMessage());
             return false;
-        } finally {
-            try {
-                if (con != null) con.setAutoCommit(true);
-                if (con != null) con.close();
-            } catch (SQLException closeEx) {
-                closeEx.printStackTrace();
-            }
         }
     }
 
-    // =========================================================================
-    // PHƯƠNG THỨC CẬP NHẬT (UPDATE)
-    // =========================================================================
-
     /**
-     * Cập nhật thông tin Khuyến Mãi (và các điều kiện liên quan).
-     * @param km Khuyến Mãi đã sửa đổi.
-     * @return true nếu thành công, false nếu thất bại.
+     * Phương thức cập nhật toàn bộ thông tin Khuyến mãi.
      */
-    public boolean updateKhuyenMai(KhuyenMai km) {
-        String sql = "UPDATE KhuyenMai SET TenKM=?, NgayBatDau=?, NgayKetThuc=?, MoTa=?, PhanTramGiam=?, GiaTienGiamTru=?, LoaiApDung=?, TrangThai=? " +
+    public boolean suaKhuyenMai(KhuyenMai km) {
+        // ... (Giữ nguyên logic suaKhuyenMai)
+        String sql = "UPDATE KhuyenMai SET TenKM=?, LoaiKM=?, GiaTriGiam=?, DKApDung=?, GiaTriDK=?, NgayBD=?, NgayKT=?, TrangThai=? " +
                 "WHERE MaKM=?";
-
-        Connection con = null;
-        try {
-            con = ConnectDB.getConnection();
-            con.setAutoCommit(false); // Bắt đầu giao dịch
-
-            // 1. Cập nhật Khuyến Mãi chính
-            try (PreparedStatement ps = con.prepareStatement(sql)) {
-                ps.setString(1, km.getTenKM());
-                ps.setDate(2, new java.sql.Date(km.getNgayBatDau().getTime()));
-                ps.setDate(3, new java.sql.Date(km.getNgayKetThuc().getTime()));
-                ps.setString(4, km.getMoTa());
-                ps.setDouble(5, km.getPhanTramGiam());
-                ps.setLong(6, km.getGiaTienGiamTru());
-                ps.setString(7, km.getLoaiApDung());
-                ps.setString(8, km.getTrangThai());
-                ps.setString(9, km.getMaKM());
-
-                if (ps.executeUpdate() <= 0) {
-                    con.rollback();
-                    return false;
-                }
-            }
-
-            // 2. Xóa các Điều kiện Khuyến Mãi cũ
-            dieuKienDao.deleteByMaKM(con, km.getMaKM());
-
-            // 3. Thêm các Điều kiện Khuyến Mãi mới
-            if (km.getDieuKienList() != null) {
-                for (DieuKienKhuyenMai dk : km.getDieuKienList()) {
-                    dk.setMaKM(km.getMaKM());
-                    if (!dieuKienDao.addDieuKien(con, dk)) {
-                        con.rollback();
-                        return false;
-                    }
-                }
-            }
-
-            con.commit(); // Hoàn thành giao dịch
-            return true;
-
-        } catch (SQLException ex) {
-            try {
-                if (con != null) con.rollback();
-            } catch (SQLException rollbackEx) {
-                rollbackEx.printStackTrace();
-            }
-            ex.printStackTrace();
-            return false;
-        } finally {
-            try {
-                if (con != null) con.setAutoCommit(true);
-                if (con != null) con.close();
-            } catch (SQLException closeEx) {
-                closeEx.printStackTrace();
-            }
-        }
-    }
-
-    // =========================================================================
-    // PHƯƠNG THỨC KẾT THÚC (END)
-    // =========================================================================
-
-    /**
-     * Cập nhật trạng thái Khuyến Mãi thành 'DaKetThuc' và đặt Ngày Kết Thúc là ngày hiện tại.
-     * @param maKM Mã Khuyến Mãi cần kết thúc.
-     * @return true nếu thành công, false nếu thất bại.
-     */
-    public boolean ketThucKhuyenMai(String maKM) {
-        // Cập nhật NgayKetThuc thành ngày hôm nay
-        String sql = "UPDATE KhuyenMai SET NgayKetThuc = ?, TrangThai = 'DaKetThuc' WHERE MaKM = ? AND TrangThai = 'HoatDong'";
         try (Connection con = ConnectDB.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            // Lấy ngày hiện tại
-            java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
+            ps.setNString(1, km.getTenKM());
+            ps.setString(2, km.getLoaiKM());
+            ps.setBigDecimal(3, km.getGiaTriGiam());
+            ps.setString(4, km.getDkApDung());
 
-            ps.setDate(1, today);
-            ps.setString(2, maKM);
+            if (km.getGiaTriDK() != null) {
+                ps.setBigDecimal(5, km.getGiaTriDK());
+            } else {
+                ps.setNull(5, Types.DECIMAL);
+            }
+
+            ps.setTimestamp(6, Timestamp.valueOf(km.getNgayBD()));
+            ps.setTimestamp(7, Timestamp.valueOf(km.getNgayKT()));
+            ps.setString(8, km.getTrangThai());
+            ps.setString(9, km.getMaKM());
 
             return ps.executeUpdate() > 0;
-
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Lỗi sửa Khuyến mãi: " + e.getMessage());
             return false;
         }
     }
 
-    // =========================================================================
-    // PHƯƠNG THỨC GIA HẠN (EXTEND)
-    // =========================================================================
+    // =================================================================================
+    // 3. CẬP NHẬT TRẠNG THÁI (Kết thúc/Gia hạn)
+    // =================================================================================
 
     /**
-     * Gia hạn Khuyến Mãi bằng cách cập nhật Ngày Kết Thúc và đảm bảo trạng thái là 'HoatDong'.
-     * @param maKM Mã Khuyến Mãi cần gia hạn.
-     * @param newNgayKetThuc Ngày Kết Thúc mới.
-     * @return true nếu thành công, false nếu thất bại.
+     * Phương thức cập nhật trạng thái và/hoặc ngày kết thúc.
+     * Dùng cho chức năng Kết Thúc KM (ngayKT = NgayHomNay) và Gia Hạn KM (ngayKT = NgayMoi).
+     * @param maKM Mã KM cần cập nhật.
+     * @param trangThai Trạng thái mới (ví dụ: 'HET_HAN' hoặc 'HOAT_DONG').
+     * @param ngayKetThucMoi Ngày kết thúc mới.
+     * @return true nếu thành công.
      */
-    public boolean giaHanKhuyenMai(String maKM, Date newNgayKetThuc) {
-        String sql = "UPDATE KhuyenMai SET NgayKetThuc = ?, TrangThai = 'HoatDong' WHERE MaKM = ?";
+    public boolean capNhatTrangThai(String maKM, String trangThai, LocalDateTime ngayKetThucMoi) {
+        String sql = "UPDATE KhuyenMai SET TrangThai = ?, NgayKT = ? WHERE MaKM = ?";
         try (Connection con = ConnectDB.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setDate(1, new java.sql.Date(newNgayKetThuc.getTime()));
-            ps.setString(2, maKM);
+            ps.setString(1, trangThai);
+            ps.setTimestamp(2, Timestamp.valueOf(ngayKetThucMoi));
+            ps.setString(3, maKM);
 
             return ps.executeUpdate() > 0;
-
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Lỗi cập nhật Trạng thái Khuyến mãi: " + e.getMessage());
             return false;
         }
     }
 
-    private List<KhachHang> dsKhachHang = new ArrayList<>();
 
-    public static KhachHang timKhachHangTheoMaHoaDon(String maHoaDon) {
-        String sql = """
-        SELECT DISTINCT KH.HoTen, KH.SoDienThoai, KH.CCCD
-        FROM HoaDon HD 
-        JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
-        JOIN Ve V ON V.MaVe = CT.MaVe
-        JOIN KhachHang KH ON KH.MaKhachHang = HD.MaKhachHang
-        JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
-        WHERE HD.MaHD = ?
-        """;
+    // =================================================================================
+    // 4. PHƯƠNG THỨC TRỢ GIÚP
+    // =================================================================================
 
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    private KhuyenMai chuyenKetQuaSangKhuyenMai(ResultSet rs) throws SQLException {
+        KhuyenMai km = new KhuyenMai();
+        km.setMaKM(rs.getString("MaKM"));
+        km.setTenKM(rs.getNString("TenKM")); // Dùng getNString cho NVARCHAR
+        km.setLoaiKM(rs.getString("LoaiKM"));
+        km.setGiaTriGiam(rs.getBigDecimal("GiaTriGiam"));
+        km.setDkApDung(rs.getString("DKApDung"));
+        km.setGiaTriDK(rs.getBigDecimal("GiaTriDK"));
 
-            pstmt.setString(1, maHoaDon);
-            ResultSet rs = pstmt.executeQuery();
+        // Chuyển đổi từ SQL DATETIME sang Java LocalDateTime
+        km.setNgayBD(rs.getTimestamp("NgayBD").toLocalDateTime());
+        km.setNgayKT(rs.getTimestamp("NgayKT").toLocalDateTime());
+
+        km.setTrangThai(rs.getString("TrangThai"));
+        return km;
+    }
+
+    /**
+     * Tự động khởi tạo mã khuyến mãi mới (KMxxxx) bằng cách tìm mã lớn nhất hiện có và tăng lên 1.
+     * @return Mã khuyến mãi mới dưới dạng chuỗi (ví dụ: KM0005).
+     */
+    public String khoiTaoMaKMMoi() {
+        String latestMaKM = null;
+        String newMaKM = "KM0001"; // Mã mặc định nếu chưa có KM nào
+
+        // Truy vấn lấy Mã KM lớn nhất (sắp xếp giảm dần và lấy 1)
+        String sql = "SELECT TOP 1 MaKM FROM KhuyenMai ORDER BY MaKM DESC";
+
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
-                KhachHang kh = new KhachHang();
-                kh.hoTen = rs.getString("HoTen");
-                kh.sdt = rs.getString("SoDienThoai");
-                kh.soCCCD = rs.getString("CCCD");
-                // Các trường khác để mặc định
-                return kh;
+                latestMaKM = rs.getString("MaKM");
             }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Lỗi truy vấn khởi tạo Mã Khuyến mãi: " + e.getMessage());
+            // Trả về mã mặc định nếu có lỗi
+            return newMaKM;
         }
-        return null;
-    }
 
-    public static ArrayList<KhachHang> timKhachHangTheoSoDienThoai(String giaTriTimKiem) {
-        ArrayList<KhachHang> danhSach = new ArrayList<>();
-        String sql = """
-        SELECT KH.HoTen, KH.SoDienThoai, KH.CCCD, HD.MaHD
-        FROM HoaDon HD 
-        JOIN KhachHang KH ON HD.MaKhachHang = KH.MaKhachHang
-        WHERE KH.SoDienThoai = ?
-        """;
+        // Xử lý tạo mã mới từ mã lớn nhất tìm được
+        if (latestMaKM != null && latestMaKM.startsWith("KM")) {
+            try {
+                // Lấy phần số từ chuỗi (ví dụ: "KM0004" -> 4)
+                String numberPart = latestMaKM.substring(2);
+                int number = Integer.parseInt(numberPart);
 
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                // Tăng lên 1
+                int newNumber = number + 1;
 
-            pstmt.setString(1, giaTriTimKiem);
-            ResultSet rs = pstmt.executeQuery();
+                // Format lại thành chuỗi 4 chữ số (ví dụ: 5 -> "0005")
+                newMaKM = String.format("KM%04d", newNumber);
 
-            while (rs.next()) {
-                KhachHang kh = new KhachHang();
-                kh.hoTen = rs.getString("HoTen");
-                kh.sdt = rs.getString("SoDienThoai");
-                kh.soCCCD = rs.getString("CCCD");
-                // Có thể thêm MaHD vào nếu cần (tạo thêm thuộc tính hoặc dùng Map)
-                danhSach.add(kh);
+            } catch (NumberFormatException e) {
+                System.err.println("Lỗi định dạng Mã Khuyến mãi: " + latestMaKM);
+                // Nếu định dạng sai, vẫn trả về mã mặc định
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return danhSach;
+
+        return newMaKM;
     }
-
-    public static ArrayList<KhachHang> timKhachHangTheoCCCD(String giaTriTimKiem) {
-        ArrayList<KhachHang> danhSach = new ArrayList<>();
-        String sql = """
-        SELECT KH.HoTen, KH.SoDienThoai, KH.CCCD, HD.MaHD
-        FROM HoaDon HD 
-        JOIN KhachHang KH ON HD.MaKhachHang = KH.MaKhachHang
-        WHERE KH.CCCD = ?
-        """;
-
-        try (Connection conn = ConnectDB.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, giaTriTimKiem);
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                KhachHang kh = new KhachHang();
-                kh.hoTen = rs.getString("HoTen");
-                kh.sdt = rs.getString("SoDienThoai");
-                kh.soCCCD = rs.getString("CCCD");
-                // Nếu cần MaHD, thêm thuộc tính hoặc dùng class khác
-                danhSach.add(kh);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return danhSach;
-    }
-
-    // Lọc Khách Hàng theo SĐT + Tháng/Năm hóa đơn
-    public static ArrayList<KhachHang> timKhachHangTheoSDTLocThangNam(String sdt, int thang, int nam) {
-        ArrayList<KhachHang> danhSach = new ArrayList<>();
-        String sql = """
-            SELECT DISTINCT HD.MaHD, KH.MaKhachHang, KH.HoTen, KH.SoDienThoai, KH.CCCD
-            FROM KhachHang KH
-            JOIN HoaDon HD ON KH.MaKhachHang = HD.MaKhachHang
-            WHERE KH.SoDienThoai = ? AND MONTH(HD.NgayLap) = ? AND YEAR(HD.NgayLap) = ?
-            """;
-        try (Connection conn = ConnectDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, sdt);
-            pstmt.setInt(2, thang);
-            pstmt.setInt(3, nam);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                KhachHang kh = new KhachHang(); // Giả sử có setters hoặc constructor phù hợp
-                kh.setHoTen(rs.getString("HoTen"));
-                kh.setSdt(rs.getString("SoDienThoai"));
-                kh.setSoCCCD(rs.getString("CCCD"));
-                danhSach.add(kh);
-            }
-        } catch (SQLException e) { e.printStackTrace(); }
-        return danhSach;
-    }
-
-    // Lọc Khách Hàng theo CCCD + Tháng/Năm hóa đơn
-    public static ArrayList<KhachHang> timKhachHangTheoCCCDLocThangNam(String cccd, int thang, int nam) {
-        ArrayList<KhachHang> danhSach = new ArrayList<>();
-        String sql = """
-            SELECT DISTINCT HD.MaHD, KH.MaKhachHang, KH.HoTen, KH.SoDienThoai, KH.CCCD
-            FROM KhachHang KH
-            JOIN HoaDon HD ON KH.MaKhachHang = HD.MaKhachHang
-            WHERE KH.CCCD = ? AND MONTH(HD.NgayLap) = ? AND YEAR(HD.NgayLap) = ?
-                
-            """;
-        try (Connection conn = ConnectDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, cccd);
-            pstmt.setInt(2, thang);
-            pstmt.setInt(3, nam);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                KhachHang kh = new KhachHang();
-                kh.setHoTen(rs.getString("HoTen"));
-                kh.setSdt(rs.getString("SoDienThoai"));
-                kh.setSoCCCD(rs.getString("CCCD"));
-                danhSach.add(kh);
-            }
-        } catch (SQLException e) { e.printStackTrace(); }
-        return danhSach;
-    }
-
 }

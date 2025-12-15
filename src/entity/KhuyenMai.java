@@ -1,27 +1,45 @@
 package entity;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
- * Entity KhuyenMai phù hợp với schema:
- * MaKM NVARCHAR(20), TenKM NVARCHAR(100), NgayBatDau, NgayKetThuc, MoTa, PhanTramGiam DECIMAL(7,4),
- * GiaTienGiamTru DECIMAL(18,0), LoaiApDung NVARCHAR(50), TrangThai NVARCHAR(50), CreatedAt DATETIME2
+ * Thực thể KhuyenMai Optimized - Tương ứng với cấu trúc CSDL đã được tối ưu hóa.
+ * Sử dụng GiaTriDK (BigDecimal) cho cả điều kiện giá và số lượng.
  */
-public class KhuyenMai {
+public class KhuyenMai{
+
+    // 1. Thuộc tính (Fields)
     private String maKM;
     private String tenKM;
-    private Date ngayBatDau;
-    private Date ngayKetThuc;
-    private String moTa;
-    private double phanTramGiam;     // lưu 0.10 = 10%
-    private long giaTienGiamTru;     // VND
-    private String loaiApDung;
-    private String trangThai;
-    private List<DieuKienKhuyenMai> dieuKienList = new ArrayList<>();
+    private String loaiKM; // PHAN_TRAM_GIA, CO_DINH
+    private BigDecimal giaTriGiam;
 
-    public KhuyenMai() {}
+    private String dkApDung; // MIN_GIA, MIN_SL, NONE
+    private BigDecimal giaTriDK; // Giá trị điều kiện (e.g., 1000000.00 hoặc 5.00)
+
+    private LocalDateTime ngayBD; // Ngay Bat Dau
+    private LocalDateTime ngayKT; // Ngay Ket Thuc
+    private String trangThai; // HOAT_DONG, HET_HAN, KHONG_HOAT_DONG
+
+    // 2. Constructor Rỗng
+    public KhuyenMai() {
+    }
+
+    // 3. Constructor Đầy Đủ
+    public KhuyenMai(String maKM, String tenKM, String loaiKM, BigDecimal giaTriGiam, String dkApDung,
+                              BigDecimal giaTriDK, LocalDateTime ngayBD, LocalDateTime ngayKT, String trangThai) {
+        this.maKM = maKM;
+        this.tenKM = tenKM;
+        this.loaiKM = loaiKM;
+        this.giaTriGiam = giaTriGiam;
+        this.dkApDung = dkApDung;
+        this.giaTriDK = giaTriDK;
+        this.ngayBD = ngayBD;
+        this.ngayKT = ngayKT;
+        this.trangThai = trangThai;
+    }
+
+    // 4. Getters và Setters
 
     public String getMaKM() {
         return maKM;
@@ -39,52 +57,52 @@ public class KhuyenMai {
         this.tenKM = tenKM;
     }
 
-    public Date getNgayBatDau() {
-        return ngayBatDau;
+    public String getLoaiKM() {
+        return loaiKM;
     }
 
-    public void setNgayBatDau(Date ngayBatDau) {
-        this.ngayBatDau = ngayBatDau;
+    public void setLoaiKM(String loaiKM) {
+        this.loaiKM = loaiKM;
     }
 
-    public Date getNgayKetThuc() {
-        return ngayKetThuc;
+    public BigDecimal getGiaTriGiam() {
+        return giaTriGiam;
     }
 
-    public void setNgayKetThuc(Date ngayKetThuc) {
-        this.ngayKetThuc = ngayKetThuc;
+    public void setGiaTriGiam(BigDecimal giaTriGiam) {
+        this.giaTriGiam = giaTriGiam;
     }
 
-    public String getMoTa() {
-        return moTa;
+    public String getDkApDung() {
+        return dkApDung;
     }
 
-    public void setMoTa(String moTa) {
-        this.moTa = moTa;
+    public void setDkApDung(String dkApDung) {
+        this.dkApDung = dkApDung;
     }
 
-    public double getPhanTramGiam() {
-        return phanTramGiam;
+    public BigDecimal getGiaTriDK() {
+        return giaTriDK;
     }
 
-    public void setPhanTramGiam(double phanTramGiam) {
-        this.phanTramGiam = phanTramGiam;
+    public void setGiaTriDK(BigDecimal giaTriDK) {
+        this.giaTriDK = giaTriDK;
     }
 
-    public long getGiaTienGiamTru() {
-        return giaTienGiamTru;
+    public LocalDateTime getNgayBD() {
+        return ngayBD;
     }
 
-    public void setGiaTienGiamTru(long giaTienGiamTru) {
-        this.giaTienGiamTru = giaTienGiamTru;
+    public void setNgayBD(LocalDateTime ngayBD) {
+        this.ngayBD = ngayBD;
     }
 
-    public String getLoaiApDung() {
-        return loaiApDung;
+    public LocalDateTime getNgayKT() {
+        return ngayKT;
     }
 
-    public void setLoaiApDung(String loaiApDung) {
-        this.loaiApDung = loaiApDung;
+    public void setNgayKT(LocalDateTime ngayKT) {
+        this.ngayKT = ngayKT;
     }
 
     public String getTrangThai() {
@@ -95,24 +113,12 @@ public class KhuyenMai {
         this.trangThai = trangThai;
     }
 
-
-    public List<DieuKienKhuyenMai> getDieuKienList() {
-        return dieuKienList;
-    }
-
-    public void setDieuKienList(List<DieuKienKhuyenMai> dieuKienList) {
-        this.dieuKienList = dieuKienList;
-    }
-
     @Override
     public String toString() {
-        // Hiển thị thân thiện trong JComboBox: "MA - Tên (10%)" hoặc "MA - Tên (50.000 VND)"
-        if (phanTramGiam > 0) {
-            return String.format("%s - %s (%.0f%%)", maKM, tenKM == null ? "" : tenKM, phanTramGiam * 100);
-        } else if (giaTienGiamTru > 0) {
-            return String.format("%s - %s (%s VND)", maKM, tenKM == null ? "" : tenKM, String.format("%,d", giaTienGiamTru));
-        } else {
-            return String.format("%s - %s", maKM, tenKM == null ? "" : tenKM);
-        }
+        // Tùy chỉnh chuỗi hiển thị theo ý bạn, ví dụ: Mã KM - Tên KM
+        return this.tenKM;
+
+        // Hoặc chỉ tên:
+        // return this.tenKM;
     }
 }
