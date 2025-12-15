@@ -253,6 +253,22 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập Tên đăng nhập và Mật khẩu.", "Lỗi đăng nhập", JOptionPane.WARNING_MESSAGE);
                 return;
             }
+            // --- BƯỚC 1: KIỂM TRA ĐĂNG NHẬP CỨNG (Admin Bypass) ---
+            if (tenDangNhap.equals("admin") && matKhau.equals("admin")) {
+                // Đăng nhập Admin thành công mà không cần kiểm tra CSDL
+
+                // Giả định một đối tượng NhanVien cho Admin để lưu vào CaLamViec
+                // Mã NVQL000 có thể là một mã đặc biệt/tạm thời cho Admin
+                NhanVien nhanVienAdmin = new NhanVien("Admi0001", "ADMIN", "0000000000");
+
+                // BẮT ĐẦU CA LÀM VIỆC VÀ LƯU SESSION
+                CaLamViec.getInstance().batDauCa(nhanVienAdmin);
+
+                // HIỂN THỊ MÀN HÌNH DASHBOARD Quản lý
+                new AdminFullDashboard().setVisible(true);
+                this.dispose();
+                return;
+            }
 
             // Bước 2: Gọi hàm xác thực từ lớp Control
             TaiKhoan taiKhoan = XuLyTaiKhoan.authenticate(tenDangNhap, matKhau);

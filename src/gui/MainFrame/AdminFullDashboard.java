@@ -23,17 +23,18 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
     // =================================================================================
     // HẰNG SỐ VÀ KHAI BÁO
     // =================================================================================
-    private CardLayout cardLayout;
-    private JPanel contentPanel;
-    private JPanel navPanel;
+    private CardLayout boCucCard;
+    private JPanel panelNoiDung;
+    private JScrollPane navScrollPane; // Thay thế navPanel bằng JScrollPane
+    private JPanel navContentPanel; // Panel chứa nội dung menu
 
     // Màu sắc
     private final Color MAU_CHINH = new Color(0, 123, 255);
     private final Color MAU_DUOC_CHON = new Color(74, 184, 237);
     private final Color MAU_HOVER = new Color(45, 150, 215);
 
-    private final Map<String, JButton> menuButtons = new HashMap<>();
-    private static final int CHIEU_RONG_MENU = 200; // Tăng chiều rộng để dễ nhìn
+    private final Map<String, JButton> nutMenu = new HashMap<>();
+    private static final int CHIEU_RONG_MENU = 220; // Tăng chiều rộng để dễ nhìn và có chỗ cho thanh cuộn
     private static final int ICON_SIZE = 20;
 
     // Khai báo TẤT CẢ các nút từ 2 Dashboard
@@ -62,9 +63,9 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
 
         layThongTinNhanVien();
 
-        // 1. Panel Menu bên trái
-        navPanel = createNavPanel();
-        add(navPanel, BorderLayout.WEST);
+        // 1. Panel Menu bên trái (Bây giờ là JScrollPane)
+        navScrollPane = createNavPanelWithScroll();
+        add(navScrollPane, BorderLayout.WEST);
 
         // 2. Panel nội dung (CardLayout)
         initContentPanel();
@@ -92,14 +93,17 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
             this.tenNVHienThi = "Toàn Quyền";
         }
     }
+//    @Override // Ghi đè từ CardSwitchable
+//    public void chuyenManHinh(String tenCard) {
+//        cardLayout.show(panelNoiDung, tenCard);
+//        highlightActiveButton(menuButtons.get(tenCard));
+//    }
 
     /**
      * Helper: Tải, điều chỉnh kích thước và trả về ImageIcon.
      */
     private ImageIcon createIcon(String path) {
         // Tải icon từ class path.
-        // Cần đảm bảo các file icon tồn tại trong thư mục tương ứng
-        // (ví dụ: /images/iconMenu/home.png)
         URL imageUrl = getClass().getResource(path);
         if (imageUrl == null) {
             System.err.println("Không tìm thấy tài nguyên icon: " + path);
@@ -117,15 +121,17 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
     }
 
     // =================================================================================
-    // KHU VỰC MENU
+    // KHU VỰC MENU (CÓ THANH CUỘN)
     // =================================================================================
 
-    private JPanel createNavPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(MAU_CHINH);
-        panel.setPreferredSize(new Dimension(CHIEU_RONG_MENU, 0));
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+    /**
+     * Tạo JScrollPane chứa Panel Menu
+     */
+    private JScrollPane createNavPanelWithScroll() {
+        navContentPanel = new JPanel();
+        navContentPanel.setLayout(new BoxLayout(navContentPanel, BoxLayout.Y_AXIS));
+        navContentPanel.setBackground(MAU_CHINH);
+        navContentPanel.setBorder(new EmptyBorder(10, 10, 10, 10)); // Border cho nội dung
 
         // --- Phần Header (Logo và ID) ---
         JPanel headerPanel = new JPanel();
@@ -139,76 +145,100 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         logoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         headerPanel.add(logoLabel);
         headerPanel.add(Box.createVerticalStrut(10));
-        panel.add(headerPanel);
+        navContentPanel.add(headerPanel);
 
         // --- MỤC: CHỨC NĂNG CHUNG ---
-        panel.add(taoTieuDeMenu("TỔNG QUAN"));
+        navContentPanel.add(taoTieuDeMenu("TỔNG QUAN"));
         btnTrangChu = createNavItem("Dashboard", "/images/iconMenu/home.png", "trangChuQL");
-        panel.add(btnTrangChu);
-        panel.add(taoDuongKe());
+        navContentPanel.add(btnTrangChu);
+        navContentPanel.add(taoDuongKe());
 
         // --- MỤC: CHỨC NĂNG BÁN VÉ/CA ---
-        panel.add(taoTieuDeMenu("NHIỆM VỤ CA/VÉ"));
 
         btnMoCa = createNavItem("Mở ca", "/images/iconMenu/moca.png", "moCa");
-        panel.add(btnMoCa);
+        navContentPanel.add(btnMoCa);
         btnKetCa = createNavItem("Kết ca", "/images/iconMenu/ketca.png", "ketCa");
-        panel.add(btnKetCa);
-        panel.add(taoDuongKe());
+        navContentPanel.add(btnKetCa);
+        navContentPanel.add(taoDuongKe());
 
         btnBanVe = createNavItem("Bán vé mới", "/images/iconMenu/banve.png", "banVeMoi");
-        panel.add(btnBanVe);
+        navContentPanel.add(btnBanVe);
         btnDoiVe = createNavItem("Đổi vé", "/images/iconMenu/doive.png", "doiVe");
-        panel.add(btnDoiVe);
+        navContentPanel.add(btnDoiVe);
         btnTraVe = createNavItem("Trả vé", "/images/iconMenu/trave.png", "traVe");
-        panel.add(btnTraVe);
-        panel.add(taoDuongKe());
+        navContentPanel.add(btnTraVe);
+        navContentPanel.add(taoDuongKe());
 
         btnTraCuuVe = createNavItem("Tra cứu vé", "/images/iconMenu/tracuu.png", "traCuuVe");
-        panel.add(btnTraCuuVe);
+        navContentPanel.add(btnTraCuuVe);
         btnTraCuuHD = createNavItem("Tra cứu HĐ", "/images/iconMenu/tracuuhoadon.png", "traCuuHD");
-        panel.add(btnTraCuuHD);
-        panel.add(taoDuongKe());
-
-
+        navContentPanel.add(btnTraCuuHD);
+        navContentPanel.add(taoDuongKe());
         // --- MỤC: CHỨC NĂNG QUẢN LÝ ---
-        panel.add(taoTieuDeMenu("QUẢN LÝ HỆ THỐNG"));
 
         btnQLChuyenTau = createNavItem("QL Chuyến tàu", "/images/iconMenu/chuyentau.png", "qlChuyenTau");
-        panel.add(btnQLChuyenTau);
+        navContentPanel.add(btnQLChuyenTau);
 
         btnQLNV = createNavItem("QL Tài khoản NV", "/images/iconMenu/nhanvien.png", "qlNhanVien");
-        panel.add(btnQLNV);
+        navContentPanel.add(btnQLNV);
 
         btnQLGiaVe = createNavItem("QL Giá vé", "/images/iconMenu/giave.png", "qlGiaVe");
-        panel.add(btnQLGiaVe);
+        navContentPanel.add(btnQLGiaVe);
 
         btnQLKhuyenMai = createNavItem("QL Khuyến mãi", "/images/iconMenu/khuyenmai.png", "qlKhuyenMai");
-        panel.add(btnQLKhuyenMai);
-        panel.add(taoDuongKe());
+        navContentPanel.add(btnQLKhuyenMai);
+        navContentPanel.add(taoDuongKe());
 
         btnThongKe = createNavItem("Thống kê Báo cáo", "/images/iconMenu/thongke.png", "thongKe");
-        panel.add(btnThongKe);
-        panel.add(taoDuongKe());
+        navContentPanel.add(btnThongKe);
+        navContentPanel.add(taoDuongKe());
 
 
-        panel.add(Box.createVerticalGlue()); // Đẩy phần dưới cùng xuống
-
-        // --- THÔNG TIN NV ---
-        panel.add(taoPanelThongTinNV());
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
+        bottomPanel.setBackground(MAU_CHINH);
+        bottomPanel.add(Box.createVerticalGlue()); // Đẩy phần trên xuống
+        bottomPanel.add(taoPanelThongTinNV());
 
         // --- Nút Đăng xuất ---
         btnDangXuat = createNavItem("Đăng xuất", "/images/iconMenu/logout.png", "dangXuat");
-        panel.add(btnDangXuat);
+        bottomPanel.add(btnDangXuat);
+        bottomPanel.setBorder(new EmptyBorder(0, 10, 10, 10)); // Border cho phần dưới cùng
 
-        return panel;
+        // Thêm một panel riêng để chứa menu content và đẩy phần dưới cùng xuống
+        // Sử dụng JPanel kết hợp BoxLayout và VerticalGlue để đẩy phần dưới cùng xuống
+        JPanel wrapperPanel = new JPanel(new BorderLayout());
+        wrapperPanel.add(navContentPanel, BorderLayout.NORTH); // Đảm bảo nội dung menu nằm trên cùng
+
+        // Thêm một Box.createVerticalGlue() vào navContentPanel để đẩy các thành phần
+        // xuống dưới cùng sẽ không hoạt động tốt với JScrollPane, nên ta sử dụng
+        // một wrapper panel đơn giản với BorderLayout và Box.createVerticalGlue() ở giữa
+        // Hoặc đơn giản là dùng VerticalGlue trong navContentPanel và đặt nó là viewport
+        // (đã thử và là cách tốt nhất)
+
+        navContentPanel.add(Box.createVerticalGlue()); // Đẩy phần dưới cùng xuống
+
+        // --- THÔNG TIN NV & Đăng xuất (đã di chuyển vào navContentPanel) ---
+        navContentPanel.add(taoPanelThongTinNV());
+        navContentPanel.add(btnDangXuat);
+        navContentPanel.add(Box.createVerticalStrut(10)); // Khoảng trống cuối cùng
+
+        // Khởi tạo JScrollPane
+        JScrollPane scrollPane = new JScrollPane(navContentPanel);
+        scrollPane.setPreferredSize(new Dimension(CHIEU_RONG_MENU, 0));
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); // Không cần thanh cuộn ngang
+        scrollPane.setBorder(BorderFactory.createEmptyBorder()); // Xóa border mặc định của JScrollPane
+        scrollPane.getVerticalScrollBar().setUnitIncrement(10); // Tăng tốc độ cuộn
+
+        return scrollPane;
     }
+
 
     private Component taoTieuDeMenu(String tieuDe) {
         JLabel label = new JLabel(tieuDe);
         label.setFont(new Font("Segoe UI", Font.BOLD, 12));
         label.setForeground(Color.decode("#FFFFFF"));
-        label.setBorder(new EmptyBorder(15, 10, 5, 0));
+        label.setBorder(new EmptyBorder(15, 5, 5, 0)); // Giảm padding trái vì navContentPanel đã có 10
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
         return label;
     }
@@ -218,7 +248,7 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(MAU_CHINH);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.setBorder(new EmptyBorder(10, 5, 10, 5)); // Giảm padding trái vì navContentPanel đã có 10
 
         JLabel nhanTenNV = new JLabel("QUYỀN: **ADMIN**");
         nhanTenNV.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -257,28 +287,34 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         button.setFocusPainted(false);
         button.setHorizontalAlignment(SwingConstants.LEFT);
 
-        button.setBorder(new EmptyBorder(10, 15, 10, 15));
+        button.setBorder(new EmptyBorder(10, 15, 10, 15)); // Giữ padding nội bộ
         button.setOpaque(true);
 
         int fixedHeight = 45;
         Dimension itemSize = new Dimension(CHIEU_RONG_MENU, fixedHeight);
 
+        // Đảm bảo nút chiếm toàn bộ chiều rộng có sẵn trong BoxLayout (trừ padding)
         button.setPreferredSize(itemSize);
         button.setMinimumSize(itemSize);
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, fixedHeight));
 
-        menuButtons.put(cardName, button);
+        nutMenu.put(cardName, button);
 
         // Xử lý hiệu ứng hover/màu sắc
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
+                // Chỉ đổi màu hover nếu nút không phải là nút đang được chọn
                 if (button.getBackground().equals(MAU_CHINH)) {
                     button.setBackground(MAU_HOVER);
                 }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (button.getBackground().equals(MAU_HOVER) && !menuButtons.get(cardName).getBackground().equals(MAU_DUOC_CHON)) {
-                    button.setBackground(MAU_CHINH);
+                // Chỉ đổi màu về MAU_CHINH nếu nó đang là MAU_HOVER và KHÔNG phải là nút đang được chọn
+                if (button.getBackground().equals(MAU_HOVER)) {
+                    // Kiểm tra lại màu nếu cần thiết, vì nó có thể đã bị đổi thành MAU_DUOC_CHON trong quá trình xử lý sự kiện khác
+                    if (!nutMenu.get(cardName).getBackground().equals(MAU_DUOC_CHON)) {
+                        button.setBackground(MAU_CHINH);
+                    }
                 }
             }
         });
@@ -305,40 +341,40 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
      * Khởi tạo Panel chứa CardLayout với TẤT CẢ các Panel chức năng
      */
     private void initContentPanel() {
-        cardLayout = new CardLayout();
-        contentPanel = new JPanel(cardLayout);
+        boCucCard = new CardLayout();
+        panelNoiDung = new JPanel(boCucCard);
 
         // --- Chức năng Quản Lý (từ QuanLyDashboard) ---
-        contentPanel.add(new ManHinhDashboardQuanLy(), "trangChuQL"); // Đổi tên để tránh trùng với trang chủ NV
-        contentPanel.add(new ManhinhQuanLyChuyenTau(), "qlChuyenTau");
-        contentPanel.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
-        contentPanel.add(new ManHinhQuanLyKhuyenMai2(), "qlKhuyenMai");
-        contentPanel.add(new ManHinhQuanLyGiaVe(), "qlGiaVe");
-        contentPanel.add(new JPanel(), "thongKe");
+        panelNoiDung.add(new ManHinhDashboardQuanLy(), "trangChuQL"); // Đổi tên để tránh trùng với trang chủ NV
+        panelNoiDung.add(new ManhinhQuanLyChuyenTau(), "qlChuyenTau");
+        panelNoiDung.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
+        panelNoiDung.add(new ManHinhQuanLyKhuyenMai2(), "qlKhuyenMai");
+        panelNoiDung.add(new ManHinhQuanLyGiaVe(), "qlGiaVe");
+        panelNoiDung.add(new JPanel(), "thongKe");
 
         // --- Chức năng Bán Vé (từ BanVeDashboard) ---
         // SỬ DỤNG LẠI ManHinhDashboardQuanLy làm trang chủ tổng
-        contentPanel.add(new ManHinhMoCa(), "moCa");
-        contentPanel.add(new ManHinhKetCa(), "ketCa");
+        panelNoiDung.add(new ManHinhMoCa(), "moCa");
+        panelNoiDung.add(new ManHinhKetCa(), "ketCa");
 
         manHinhBanVeInstance = new ManHinhBanVe(); // Giữ instance để có thể tương tác nếu cần
-        contentPanel.add(manHinhBanVeInstance, "banVeMoi");
+        panelNoiDung.add(manHinhBanVeInstance, "banVeMoi");
 
-        contentPanel.add(new ManHinhDoiVe(), "doiVe");
-        contentPanel.add(new ManHinhTraVe(), "traVe");
-        contentPanel.add(new ManHinhTraCuuVe(), "traCuuVe");
+        panelNoiDung.add(new ManHinhDoiVe(), "doiVe");
+        panelNoiDung.add(new ManHinhTraVe(), "traVe");
+        panelNoiDung.add(new ManHinhTraCuuVe(), "traCuuVe");
         // Tra Cứu Hóa Đơn dùng chung
-        contentPanel.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
+        panelNoiDung.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
 
 
-        add(contentPanel, BorderLayout.CENTER);
+        add(panelNoiDung, BorderLayout.CENTER);
     }
 
     /**
      * Thiết lập Action Listener cho tất cả các nút menu
      */
     private void initEventHandlers() {
-        for (JButton button : menuButtons.values()) {
+        for (JButton button : nutMenu.values()) {
             button.addActionListener(this);
         }
     }
@@ -347,15 +383,15 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
      * Chuyển đổi màn hình trong CardLayout và highlight nút menu tương ứng
      */
     public void switchToCard(String cardName) {
-        cardLayout.show(contentPanel, cardName);
-        highlightActiveButton(menuButtons.get(cardName));
+        boCucCard.show(panelNoiDung, cardName);
+        danhDauNutDangChon(nutMenu.get(cardName));
     }
 
     /**
      * Đổi màu nền của nút menu đang được chọn
      */
-    private void highlightActiveButton(JButton active) {
-        for (JButton button : menuButtons.values()) {
+    private void danhDauNutDangChon(JButton active) {
+        for (JButton button : nutMenu.values()) {
             if (button != null) {
                 button.setBackground(MAU_CHINH);
             }
@@ -374,7 +410,7 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         String cardName = null;
 
         // Tìm tên card dựa trên nút được click
-        for (Map.Entry<String, JButton> entry : menuButtons.entrySet()) {
+        for (Map.Entry<String, JButton> entry : nutMenu.entrySet()) {
             if (entry.getValue() == src) {
                 cardName = entry.getKey();
                 break;
@@ -404,15 +440,35 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         }
     }
 
+    public void themHoacCapNhatCard(JPanel panelMoi, String tenCard) {
+        Component thanhPhanCu = null;
+
+        for (Component comp : panelNoiDung.getComponents()) {
+            if (comp.getName() != null && comp.getName().equals(tenCard)) {
+                thanhPhanCu = comp;
+                break;
+            }
+        }
+        if (thanhPhanCu != null) {
+            panelNoiDung.remove(thanhPhanCu);
+        }
+        panelMoi.setName(tenCard);
+        panelNoiDung.add(panelMoi, tenCard);
+
+        panelNoiDung.revalidate();
+        panelNoiDung.repaint();
+    }
+    public void chuyenManHinh(String tenCard) {
+        boCucCard.show(panelNoiDung, tenCard);
+        danhDauNutDangChon(nutMenu.get(tenCard));
+    }
+
+
+
     // =================================================================================
     // MAIN
     // =================================================================================
     public static void main(String[] args) {
-        try{
-            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (Exception e){
-            // Dùng giao diện mặc định nếu Nimbus không khả dụng
-        }
 
         try {
             // MOCKUP NhanVien Admin
