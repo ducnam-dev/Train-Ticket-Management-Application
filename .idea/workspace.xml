@@ -9,8 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="tính giá vé theo hệ số người lớn, trẻ em">
+    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="sửa lý thành công khuyến mãi và 100% khuyến mãi">
+      <change afterPath="$PROJECT_DIR$/src/view/ManHinhQuanLyToa.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/ToaDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ToaDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entity/Toa.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/Toa.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +30,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="feature/quen-mat-khau" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -81,11 +84,8 @@
     &quot;Application.ManHinhBanVe2.executor&quot;: &quot;Run&quot;,
     &quot;Application.ManHinhBanVeUpdatePanelChuyenTau.executor&quot;: &quot;Run&quot;,
     &quot;Application.ManHinhDangNhap.executor&quot;: &quot;Run&quot;,
-    &quot;Application.ManHinhKetCa.executor&quot;: &quot;Run&quot;,
-    &quot;Application.ManHinhMoCa.executor&quot;: &quot;Run&quot;,
     &quot;Application.ManHinhQuanLyKhuyenMai.executor&quot;: &quot;Run&quot;,
     &quot;Application.ManHinhQuanLyKhuyenMai2.executor&quot;: &quot;Run&quot;,
-    &quot;Application.ManHinhQuanLyLoaiVe.executor&quot;: &quot;Run&quot;,
     &quot;Application.ManHinhTimKiemChuyenTau.executor&quot;: &quot;Run&quot;,
     &quot;Application.ManHinhTraCuuHoaDon.executor&quot;: &quot;Run&quot;,
     &quot;Application.ManHinhXacNhanBanVe.executor&quot;: &quot;Run&quot;,
@@ -111,7 +111,6 @@
     &quot;project.structure.side.proportion&quot;: &quot;0.1150748&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;project.propCompiler&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vcs.patch.path&quot;: &quot;C:/Users/nbduy/Downloads&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -127,9 +126,9 @@
       <recent name="gui.Panel" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.ManHinhQuanLyLoaiVe">
-    <configuration name="BanVeDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.BanVeDashboard" />
+  <component name="RunManager" selected="Application.ManHinhQuanLyToa">
+    <configuration name="AdminFullDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.AdminFullDashboard" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -148,8 +147,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhBanVe2" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhBanVe2" />
+    <configuration name="ManHinhBanVe (1)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhBanVe" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -161,8 +160,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhKetCa" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhKetCa" />
+    <configuration name="ManHinhBanVe (2)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhBanVe" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -174,8 +173,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhMoCa" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhMoCa" />
+    <configuration name="ManHinhBanVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhBanVe" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -187,8 +186,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhQuanLyLoaiVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="view.ManHinhQuanLyLoaiVe" />
+    <configuration name="ManHinhQuanLyToa" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="view.ManHinhQuanLyToa" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -202,11 +201,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.ManHinhQuanLyLoaiVe" />
-        <item itemvalue="Application.ManHinhKetCa" />
-        <item itemvalue="Application.ManHinhMoCa" />
-        <item itemvalue="Application.BanVeDashboard" />
-        <item itemvalue="Application.ManHinhBanVe2" />
+        <item itemvalue="Application.ManHinhQuanLyToa" />
+        <item itemvalue="Application.AdminFullDashboard" />
+        <item itemvalue="Application.ManHinhBanVe (2)" />
+        <item itemvalue="Application.ManHinhBanVe (1)" />
+        <item itemvalue="Application.ManHinhBanVe" />
       </list>
     </recent_temporary>
   </component>
@@ -244,9 +243,6 @@
       <workItem from="1765790749182" duration="2883000" />
       <workItem from="1765795510159" duration="10382000" />
       <workItem from="1765807783944" duration="249000" />
-      <workItem from="1765855396975" duration="955000" />
-      <workItem from="1765856415698" duration="12139000" />
-      <workItem from="1765871563712" duration="405000" />
     </task>
     <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
       <option name="closed" value="true" />
@@ -296,23 +292,7 @@
       <option name="project" value="LOCAL" />
       <updated>1765804790250</updated>
     </task>
-    <task id="LOCAL-00007" summary="sửa giao diện bán vé, ràng buộc dữ liệu nhập, số srollPanel">
-      <option name="closed" value="true" />
-      <created>1765823167111</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1765823167111</updated>
-    </task>
-    <task id="LOCAL-00008" summary="tính giá vé theo hệ số người lớn, trẻ em">
-      <option name="closed" value="true" />
-      <created>1765871471338</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1765871471338</updated>
-    </task>
-    <option name="localTasksCounter" value="9" />
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -326,9 +306,7 @@
     <MESSAGE value="xóa các class không cần thiết, pull code từ master của nam" />
     <MESSAGE value="sửa tuổi =&gt; ngày sinh, tìm khách hàng nhanh theo cccd. Ngày 13/12 thêm chức năng hiện thị chuyến tàu đẹp mắt hơn" />
     <MESSAGE value="sửa lý thành công khuyến mãi và 100% khuyến mãi" />
-    <MESSAGE value="sửa giao diện bán vé, ràng buộc dữ liệu nhập, số srollPanel" />
-    <MESSAGE value="tính giá vé theo hệ số người lớn, trẻ em" />
-    <option name="LAST_COMMIT_MESSAGE" value="tính giá vé theo hệ số người lớn, trẻ em" />
+    <option name="LAST_COMMIT_MESSAGE" value="sửa lý thành công khuyến mãi và 100% khuyến mãi" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -337,24 +315,14 @@
           <properties class="java.lang.IllegalArgumentException" package="java.lang" />
           <option name="timeStamp" value="12" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java</url>
-          <line>359</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java</url>
-          <line>1937</line>
-          <option name="timeStamp" value="22" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
-          <url>file://$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java</url>
-          <line>1703</line>
-          <properties class="gui.Panel.ManHinhBanVe2" method="docDuLieuKhachHangTuFile">
+          <url>file://$PROJECT_DIR$/src/dao/ToaDAO.java</url>
+          <line>89</line>
+          <properties class="dao.ToaDAO" method="themToa">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
-          <option name="timeStamp" value="16" />
+          <option name="timeStamp" value="23" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

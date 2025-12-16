@@ -46,7 +46,8 @@ public class ToaDAO {
 
                     // 3. Tạo đối tượng Toa
                     // Giả định Toa có constructor: (maToa, tau, loaiToa)
-                    Toa toa = new Toa(maToa, tau, loaiToaStr);
+                    double test = 0.0; // Giá trị tạm thời cho heSoToa
+                    Toa toa = new Toa(maToa, tau, loaiToaStr, test);
                     danhSachToa.add(toa);
                 }
             }
@@ -74,8 +75,9 @@ public class ToaDAO {
                     String loaiToaStr = rs.getString("LoaiToa");
 
                     Tau tau = TauDAO.getTauById(maTauDB);
+                    double test = 0.0;
 
-                    toa = new Toa(maToa, tau, loaiToaStr);
+                    toa = new Toa(maToa, tau, loaiToaStr, test);
                 }
             }
         } catch (SQLException e) {
@@ -102,4 +104,52 @@ public class ToaDAO {
         }
         return false;
     }
+    public List<Toa> getAllToa() {
+        List<Toa> danhSachToa = new ArrayList<>();
+        // Truy vấn lấy các cột cần thiết, bao gồm mã tàu và hệ số toa
+        String sql = "SELECT maToa, soHieuTau, loaiToa, heSoToa FROM Toa";
+
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Toa toa = new Toa();
+                toa.setMaToa(rs.getString("maToa"));
+                toa.setLoaiToa(rs.getString("loaiToa"));
+                toa.setHeSoToa(rs.getDouble("heSoToa"));
+
+                // Xử lý thực thể Tau: Tạo đối tượng Tau mới và gán mã tàu vào
+                // Nếu bạn có TauDAO, bạn có thể gọi TauDAO.getTauByMa() để lấy đầy đủ thông tin tàu
+                Tau tau = new Tau();
+                tau.setSoHieu(rs.getString("maTau"));
+                toa.setTau(tau);
+
+                danhSachToa.add(toa);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return danhSachToa;
+    }
+    public boolean capNhatHeSoToa(String maToa, double heSoMoi) {
+        String sql = "UPDATE Toa SET heSoToa = ? WHERE maToa = ?";
+
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            stmt.setDouble(1, heSoMoi);
+            stmt.setString(2, maToa);
+
+            // Trả về true nếu có ít nhất một dòng được cập nhật thành công
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi cập nhật hệ số toa: " + e.getMessage());
+            return false;
+        }
+    }
+
+
 }
