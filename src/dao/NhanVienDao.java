@@ -523,5 +523,20 @@ public class NhanVienDao {
         }
         return null;
     }
-
+    public static String layEmailTheoMa(String maNV) {
+        String email = null;
+        String sql = "SELECT Email FROM NhanVien WHERE MaNV = ?";
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, maNV);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    email = rs.getString("Email");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return email;
+    }
 }

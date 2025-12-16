@@ -38,7 +38,10 @@ public class XuLyTaiKhoan {
             return null;
         }
     }
-
+    public static boolean doiMatKhau(String maNV, String matKhauMoi) {
+        // Gọi trực tiếp phương thức vừa thêm ở TaiKhoanDAO
+        return TaiKhoanDAO.doiMatKhau(maNV, matKhauMoi);
+    }
     // Thêm các phương thức xử lý nghiệp vụ khác như:
     // thayDoiMatKhau(TaiKhoan tk, String matKhauMoi), taoTaiKhoanMoi(NhanVien nv, String matKhau), ...
 }

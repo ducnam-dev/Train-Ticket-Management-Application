@@ -5,7 +5,10 @@ import control.XuLyTaiKhoan;
 import entity.NhanVien;
 import entity.TaiKhoan;
 import control.CaLamViec;
-
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.util.Properties;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.JTextComponent;
@@ -173,7 +176,7 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
         nutQuenMatKhau.setCursor(new Cursor(Cursor.HAND_CURSOR));
         nutQuenMatKhau.setFont(new Font("Arial", Font.PLAIN, 12));
         nutQuenMatKhau.setAlignmentX(Component.LEFT_ALIGNMENT);
-
+        nutQuenMatKhau.addActionListener(e -> xuLyQuenMatKhau());
         // Thêm các thành phần vào Panel
         bang.add(btnDangNhap);
         bang.add(Box.createVerticalStrut(10));
@@ -310,6 +313,80 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
             } else {
                 JOptionPane.showMessageDialog(this, "Tên đăng nhập hoặc mật khẩu không đúng.", "Lỗi đăng nhập", JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+
+    public class EmailService {
+        // Thông tin tài khoản gửi (Bạn nên dùng mật khẩu ứng dụng của Gmail)
+        private static final String username = "trannaml91920@gmail.com";
+        private static final String password = "yapglsgxacmittlh"; // Mã 16 ký tự App Password
+
+        public static boolean guiOTP(String emailNguoiNhan, String maOTP) {
+            Properties prop = new Properties();
+            prop.put("mail.smtp.host", "smtp.gmail.com");
+            prop.put("mail.smtp.port", "587");
+            prop.put("mail.smtp.auth", "true");
+            prop.put("mail.smtp.starttls.enable", "true"); // Bảo mật TLS
+
+            Session session = Session.getInstance(prop, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(username, password);
+                }
+            });
+
+            try {
+                Message message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(username));
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailNguoiNhan));
+                message.setSubject("Mã xác thực phục hồi mật khẩu");
+                message.setText("Mã xác thực của bạn là: " + maOTP + "\nMã này có hiệu lực trong 5 phút.");
+
+                Transport.send(message);
+                return true;
+            } catch (MessagingException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
+    private void xuLyQuenMatKhau() {
+        // 1. Nhập mã nhân viên
+        String maNV = JOptionPane.showInputDialog(this, "Nhập Mã nhân viên cần lấy lại mật khẩu:");
+        if (maNV == null || maNV.isEmpty()) return;
+
+        // 2. Lấy Email từ CSDL (Giả sử bạn đã có hàm này trong XuLyNhanVien)
+        String emailNV = XuLyNhanVien.layEmailNhanVien(maNV);
+
+        if (emailNV != null) {
+            // 3. Tạo mã OTP 6 số
+            String maOTP = String.valueOf((int)((Math.random() * 899999) + 100000));
+
+            // Gửi mail (Chạy trên một luồng phụ để không bị treo giao diện)
+            new Thread(() -> {
+                boolean daGui = EmailService.guiOTP(emailNV, maOTP);
+                if (daGui) {
+                    // 4. Yêu cầu nhập OTP xác nhận
+                    String nhapOTP = JOptionPane.showInputDialog(this, "Mã OTP đã gửi đến email: " + emailNV + "\nVui lòng nhập mã vào đây:");
+
+                    if (maOTP.equals(nhapOTP)) {
+                        // Cho phép đổi mật khẩu mới
+                        String mkMoi = JOptionPane.showInputDialog(this, "Xác thực thành công! Nhập mật khẩu mới:");
+                        if (mkMoi != null) {
+                            XuLyTaiKhoan.doiMatKhau(maNV, mkMoi);
+                            JOptionPane.showMessageDialog(this, "Đã cập nhật mật khẩu mới.");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Mã OTP không chính xác!");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Lỗi gửi Email. Vui lòng kiểm tra kết nối mạng.");
+                }
+            }).start();
+
+        } else {
+            JOptionPane.showMessageDialog(this, "Mã nhân viên không tồn tại hoặc chưa đăng ký Email!");
         }
     }
 }

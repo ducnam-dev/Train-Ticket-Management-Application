@@ -4,11 +4,21 @@ import dao.NhanVienDao;
 import entity.NhanVien;
 
 public class XuLyNhanVien {
-    NhanVienDao nhanVienDAO = new NhanVienDao();
+    // Khởi tạo đối tượng DAO để sử dụng
+    private static final NhanVienDao nhanVienDAO = new NhanVienDao();
 
+    /**
+     * Lấy thông tin nhân viên để phục vụ ca làm việc
+     */
     public static NhanVien layThongTinNhanVienChoCaLamViec(String maNV) {
-        // Gọi DAO để truy vấn CSDL
         return NhanVienDao.getNhanVienByMaNV(maNV);
+    }
+
+    /**
+     * Lấy Email của nhân viên phục vụ chức năng Quên mật khẩu
+     */
+    public static String layEmailNhanVien(String maNV) {
+        return NhanVienDao.layEmailTheoMa(maNV);
     }
 }
 
