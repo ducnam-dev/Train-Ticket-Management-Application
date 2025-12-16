@@ -22,6 +22,16 @@ public class GiaVeCoBanTheoGaDAO {
         mock.put("GADN-GASG", 100000L);
         mock.put("GASG-GAPT", 500000L);
         mock.put("GAPT-GASG", 500000L);
+
+        /*
+        sài gòn - Nha trang
+        sài gòn - đà nẵng
+        sài gòn - huế
+        sài gòn - quảng trị
+        sài gòn - lâm đồng
+        sài gòn - phan thiết
+         */
+
         // Thêm vài dữ liệu mẫu nếu cần
         // Kết nối CSDL (chưa sử dụng trong mock)
         /*hiện tại chưa nghĩ ra cách lấy dữ liệu từ csdl để tính toán giá vé cơ bản theo ga nên

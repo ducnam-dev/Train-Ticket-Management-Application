@@ -1563,19 +1563,39 @@ public class ManHinhXacNhanBanVe extends JPanel {
      */
     private void resetManHinhBanVeChinh() {
         Window w = SwingUtilities.getWindowAncestor(this);
-        if (w instanceof BanVeDashboard) {
-            BanVeDashboard dashboard = (BanVeDashboard) w;
+        if (w instanceof BanVeDashboard || w instanceof AdminFullDashboard) {
 
-            // 1. Lấy Panel ManHinhBanVe (Giả sử tên card là "manHinhBanVe")
+            // 2. Khai báo một tham chiếu chung tới ManHinhBanVeInstance
+            gui.Panel.ManHinhBanVe manHinhBanVeDeReset = null;
 
-            // 2. Ép kiểu và gọi resetAllData()
-            // FIX: Rút gọn điều kiện kiểm tra (Lỗi thường là do componentBanVe là null hoặc sai type)
-            if (dashboard.manHinhBanVeInstance != null) {
-                dashboard.manHinhBanVeInstance.resetAllData();
-                System.out.println("Đã gọi resetAllData() thành công qua tham chiếu trực tiếp.");
-            } else {
-                System.err.println("LỖI: manHinhBanVeInstance trong Dashboard là NULL.");
+            if (w instanceof BanVeDashboard) {
+                BanVeDashboard dashboard = (BanVeDashboard) w;
+                manHinhBanVeDeReset = dashboard.manHinhBanVeInstance;
+
+            } else if (w instanceof AdminFullDashboard) {
+                AdminFullDashboard dashboard = (AdminFullDashboard) w;
+                manHinhBanVeDeReset = dashboard.manHinhBanVeInstance;
             }
+
+            // 3. Thực hiện reset dữ liệu
+            if (manHinhBanVeDeReset != null) {
+                manHinhBanVeDeReset.resetAllData();
+                System.out.println("Đã gọi resetAllData() thành công trên Dashboard " + w.getClass().getSimpleName());
+
+                // --- Thêm logic chuyển màn hình (Nếu cần) ---
+                // Ví dụ: Sau khi reset thì quay về màn hình Bán vé
+                if (w instanceof BanVeDashboard) {
+                    ((BanVeDashboard) w).chuyenManHinh("banVeMoi");
+                } else if (w instanceof AdminFullDashboard) {
+                    ((AdminFullDashboard) w).chuyenManHinh("banVeMoi");
+                }
+
+            } else {
+                System.err.println("LỖI: manHinhBanVeInstance trong Dashboard là NULL. Không thể reset.");
+            }
+
+        } else {
+            System.err.println("LỖI: Cửa sổ cha không phải là BanVeDashboard hay AdminFullDashboard.");
         }
     }
 

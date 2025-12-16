@@ -371,7 +371,7 @@ public class ChiTietHoaDonDAO {
                 loaiVe.setTenLoai(rs.getString("TenLoaiVe"));
                 // Các thuộc tính khác để null hoặc mặc định
                 loaiVe.setMaLoaiVe(null);      // Không có trong truy vấn
-                loaiVe.setMucGiaGiam(0.0);     // Không có trong truy vấn
+                loaiVe.setMucGiamGia(0.0);     // Không có trong truy vấn
                 danhSachLoaiVe.add(loaiVe);
             }
 
