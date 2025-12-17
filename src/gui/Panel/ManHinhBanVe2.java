@@ -25,6 +25,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
@@ -244,7 +246,7 @@ public class ManHinhBanVe2 extends JPanel implements MouseListener, ActionListen
         //test
         cbGaDi.setSelectedIndex(1);
         if (danhSachGa.size() > 1) {
-            cbGaDen.setSelectedIndex(4);
+            cbGaDen.setSelectedIndex(2);
         }
 
         JLabel lblNgayDi = new JLabel("Ngày đi");
@@ -253,6 +255,9 @@ public class ManHinhBanVe2 extends JPanel implements MouseListener, ActionListen
         dateChooserNgayDi = new JDateChooser();
         dateChooserNgayDi.setDateFormatString("dd/MM/yyyy");
         dateChooserNgayDi.setDate(new Date());
+
+        dateChooserNgayDi.setMinSelectableDate(new Date());
+
         dateChooserNgayDi.setPreferredSize(new Dimension(100, 25));
         panel.add(dateChooserNgayDi);
 
@@ -496,16 +501,34 @@ public class ManHinhBanVe2 extends JPanel implements MouseListener, ActionListen
         Ga gaDiSelected = (Ga) cbGaDi.getSelectedItem();
         Ga gaDenSelected = (Ga) cbGaDen.getSelectedItem();
 
-        String tenGaDi =  gaDiSelected.getTenGa();
-        String tenGaDen = gaDenSelected.getTenGa();
+        String maGaDi =  gaDiSelected.getMaGa();
+        String maGaDen = gaDenSelected.getMaGa();
 
+        // 2. [QUAN TRỌNG] Kiểm tra trùng Ga Đi và Ga Đến
+        if (maGaDi.equals(maGaDen)) {
+            JOptionPane.showMessageDialog(this, "Ga đi và Ga đến không được trùng nhau. Vui lòng chọn lại!", "Lỗi chọn ga", JOptionPane.WARNING_MESSAGE);
+            return; // Dừng hàm tại đây, không thực hiện tìm kiếm
+        }
+        // 3. Lấy ngày đi và chuyển định dạng sang SQL
         Date date = dateChooserNgayDi.getDate();
-
         String ngayDiSQL = SQL_DATE_FORMAT.format(date);
 
+        //4. Kiểm tra ngày đi không được trước ngày hiện tại
+        // 1. Chuyển đổi Date sang LocalDate (Chỉ lấy ngày, bỏ giờ)
+        LocalDate ngayChon = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate homNay = LocalDate.now();
+        // 2. So sánh: Nếu ngày chọn TRƯỚC ngày hôm nay
+        if (ngayChon.isBefore(homNay)) {
+            JOptionPane.showMessageDialog(this,
+                    "Ngày đi không được chọn trong quá khứ. Vui lòng chọn lại!",
+                    "Lỗi ngày đi",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         ChuyenTauDao dao = new ChuyenTauDao();
-        System.out.println("Tìm chuyến tàu từ " + tenGaDi + " đến " + tenGaDen + " vào ngày " + ngayDiSQL);
-        ketQua = dao.timChuyenTauTheoGaVaNgayDi(tenGaDi, tenGaDen, ngayDiSQL);
+        System.out.println("Tìm chuyến tàu từ " + maGaDi + " đến " + maGaDen + " vào ngày " + ngayDiSQL);
+        ketQua = dao.timChuyenTauTheoGaVaNgayDi(maGaDi, maGaDen, ngayDiSQL);
 
         if (ketQua == null || ketQua.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Không tìm thấy chuyến tàu nào phù hợp.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
@@ -569,15 +592,13 @@ public class ManHinhBanVe2 extends JPanel implements MouseListener, ActionListen
 
     private JPanel taoNutChuyenTauVeSoDo(String maChuyen, String ngayDi, String gioDi, String ngayDen, String gioDen) {
         // 1. Tạo đối tượng VeSoDoTau (Cơ sở đồ họa)
-        // Truyền thông tin giờ đi/ngày đi (đã định dạng) vào constructor
         String thoiGianDiHienThi = ngayDi + " " + gioDi;
-        String thoiGianDenHienThi = ngayDen + " "+ gioDen; // Thường cần thời gian đến từ CSDL
+        String thoiGianDenHienThi = ngayDen + " "+ gioDen;
 
-        String maTau = maChuyen.split("-")[0];
-        String tenTau = maTau;
-        // Ví dụ: SE8-M1 -> SE8
+        //mã chuyến tàu dạng SE1_251218_DNANTR => lấy mã tuyến SE1
+        String maTuyen = maChuyen.split("_")[0];
 
-        VeSoDoTau soDoTauPanel = new VeSoDoTau(maTau, thoiGianDiHienThi, thoiGianDenHienThi);
+        VeSoDoTau soDoTauPanel = new VeSoDoTau(maTuyen, thoiGianDiHienThi, thoiGianDenHienThi);
 
         // 2. Tạo Container đóng vai trò là NÚT (Sử dụng JPanel đơn giản)
         JPanel nutChuyenTauContainer = new JPanel(new BorderLayout());
@@ -1445,6 +1466,7 @@ public class ManHinhBanVe2 extends JPanel implements MouseListener, ActionListen
         if (loaiToa == null) throw new Exception("Không tìm thấy thông tin loại toa cho ghế.");
 
         double heSoToa = loaiChoDatDAO.getHeSoByLoaiToa(loaiToa);
+
         double heSoLoaiVe = loaiVeDAO.getHeSoByMaLoaiVe(maLoaiVe);
 
         double price = base * heSoToa * heSoLoaiVe;

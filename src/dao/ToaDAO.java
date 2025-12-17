@@ -45,9 +45,7 @@ public class ToaDAO {
                     Tau tau = new Tau(maTauDB, trangThaiTau);
 
                     // 3. Tạo đối tượng Toa
-                    // Giả định Toa có constructor: (maToa, tau, loaiToa)
-                    double test = 0.0; // Giá trị tạm thời cho heSoToa
-                    Toa toa = new Toa(maToa, tau, loaiToaStr, test);
+                    Toa toa = new Toa(maToa, tau, loaiToaStr);
                     danhSachToa.add(toa);
                 }
             }
@@ -75,9 +73,8 @@ public class ToaDAO {
                     String loaiToaStr = rs.getString("LoaiToa");
 
                     Tau tau = TauDAO.getTauById(maTauDB);
-                    double test = 0.0;
 
-                    toa = new Toa(maToa, tau, loaiToaStr, test);
+                    toa = new Toa(maToa, tau, loaiToaStr);
                 }
             }
         } catch (SQLException e) {
@@ -117,7 +114,6 @@ public class ToaDAO {
                 Toa toa = new Toa();
                 toa.setMaToa(rs.getString("maToa"));
                 toa.setLoaiToa(rs.getString("loaiToa"));
-                toa.setHeSoToa(rs.getDouble("heSoToa"));
 
                 // Xử lý thực thể Tau: Tạo đối tượng Tau mới và gán mã tàu vào
                 // Nếu bạn có TauDAO, bạn có thể gọi TauDAO.getTauByMa() để lấy đầy đủ thông tin tàu

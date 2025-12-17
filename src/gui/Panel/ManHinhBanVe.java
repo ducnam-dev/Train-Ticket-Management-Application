@@ -1350,6 +1350,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         if (loaiToa == null) throw new Exception("Không tìm thấy thông tin loại toa cho ghế.");
 
         double heSoToa = loaiChoDatDAO.getHeSoByLoaiToa(loaiToa);
+
         double heSoLoaiVe = loaiVeDAO.getHeSoByMaLoaiVe(maLoaiVe);
 
         double price = base * heSoToa * heSoLoaiVe;

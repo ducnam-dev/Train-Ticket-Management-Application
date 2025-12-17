@@ -1,6 +1,7 @@
 package dao;
 
 import database.ConnectDB;
+import entity.ChuyenTau;
 import entity.GaTrongTuyen;
 import entity.Tuyen;
 
@@ -13,17 +14,12 @@ import java.util.List;
  * Đã sửa đổi để sử dụng kiểu INT (số phút) cho các trường thời gian.
  */
 public class GaTrongTuyenDao {
-    private Connection con;
     private TuyenDao tuyenDao;
 
     public GaTrongTuyenDao() {
-        try {
-            con = ConnectDB.getInstance().getConnection();
-        } catch (SQLException e) {
-            System.err.println("Không thể kết nối CSDL trong GaTrongTuyenDao." + e.getMessage());
-        }
         tuyenDao = new TuyenDao();
     }
+
 
     /**
      * Lấy danh sách GaTrongTuyen theo Mã Tuyến. (SỬA: Đọc INT)
@@ -33,38 +29,26 @@ public class GaTrongTuyenDao {
     public List<GaTrongTuyen> layGaTrongTuyenTheoMa(String maTuyen) throws SQLException {
         List<GaTrongTuyen> danhSach = new ArrayList<>();
 
-        // Cần đảm bảo tên cột trong CSDL là: ThoiGianDiChuyenToiGaTiepTheo và ThoiGianDung
-        String sql = "SELECT MaTuyen, MaGa, ThuTuGa, KhoangCachTichLuy, ThoiGianDiChuyenToiGaTiepTheo, ThoiGianDung " +
-                "FROM GA_TRONG_TUYEN WHERE MaTuyen = ? ORDER BY ThuTuGa ASC";
+        // Lấy thông tin Tuyen TRƯỚC khi mở kết nối cho GaTrongTuyen
+        // Việc này đảm bảo nếu layTuyenTheoMa có đóng kết nối, nó cũng không ảnh hưởng đến truy vấn sau
+        Tuyen tuyen = tuyenDao.layTuyenTheoMa(maTuyen);
+        if (tuyen == null) return danhSach;
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        String sql = "SELECT * FROM GA_TRONG_TUYEN WHERE MaTuyen = ? ORDER BY ThuTuGa ASC";
+
+        try (Connection conn = ConnectDB.getInstance().getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+
             pst.setString(1, maTuyen);
             try (ResultSet rs = pst.executeQuery()) {
-
-                // Tải đối tượng Tuyen một lần
-                Tuyen tuyen = tuyenDao.layTuyenTheoMa(maTuyen); // Giả định TuyenDao.layTuyenTheoMa hoạt động
-                if (tuyen == null) {
-                    // Nếu không tìm thấy Tuyến cha, không thể load con -> Return list rỗng hoặc throw
-                    System.err.println("Lỗi logic: Không tìm thấy Tuyến có mã " + maTuyen);
-                    return new ArrayList<>();
-                }
-
                 while (rs.next()) {
-                    // LỖI LOGIC GỐC: Tên cột CSDL trong script tổng là GA_TRONG_TUYEN.[ThoiGianDiChuyenToiGaTiepTheo]
-                    // TÊN CỘT ĐƯỢC DÙNG TRONG SELECT PHẢI KHỚP VỚI CSDL
-
-                    // SỬA: Đọc giá trị thời gian dưới dạng INT
-                    int tgDi = rs.getInt("ThoiGianDiChuyenToiGaTiepTheo");
-                    int tgDung = rs.getInt("ThoiGianDung");
-
-                    // SỬA: Tạo Entity GaTrongTuyen với kiểu INT cho thời gian
                     GaTrongTuyen gtt = new GaTrongTuyen(
                             tuyen,
                             rs.getString("MaGa"),
                             rs.getInt("ThuTuGa"),
                             rs.getInt("KhoangCachTichLuy"),
-                            tgDi, // Dùng INT
-                            tgDung // Dùng INT
+                            rs.getInt("ThoiGianDiChuyenToiGaTiepTheo"),
+                            rs.getInt("ThoiGianDung")
                     );
                     danhSach.add(gtt);
                 }
@@ -72,6 +56,59 @@ public class GaTrongTuyenDao {
         }
         return danhSach;
     }
+    public void checkDatabaseLogic() {
+        try {
+            Tuyen t = tuyenDao.layTuyenTheoMa("SE1"); // Giả sử mã T01 có trong DB
+            if (t != null) {
+                System.out.println("✅ CSDL Hoạt động tốt: Lấy được tuyến " + t.getTenTuyen());
+            } else {
+                System.out.println("❓ CSDL Hoạt động: Nhưng không tìm thấy mã tuyến.");
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ CSDL Lỗi: Kết nối thất bại hoặc SQL sai.");
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public int tinhKhoangCachGiuaHaiGa(String maTuyen, String maGaDi, String maGaDen) throws SQLException {
+        // SQL để lấy khoảng cách tích lũy của 2 ga cụ thể trong cùng 1 tuyến
+        String sql = "SELECT MaGa, KhoangCachTichLuy FROM GaTrongTuyen " +
+                "WHERE MaTuyen = ? AND (MaGa = ? OR MaGa = ?)";
+
+        int dist1 = -1;
+        int dist2 = -1;
+
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setString(1, maTuyen);
+            pstmt.setString(2, maGaDi);
+            pstmt.setString(3, maGaDen);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String currentMaGa = rs.getString("MaGa");
+                    int dist = rs.getInt("KhoangCachTichLuy");
+
+                    if (currentMaGa.equals(maGaDi)) {
+                        dist1 = dist;
+                    } else if (currentMaGa.equals(maGaDen)) {
+                        dist2 = dist;
+                    }
+                }
+            }
+        }
+
+        // Kiểm tra xem có tìm thấy đủ 2 ga không
+        if (dist1 != -1 && dist2 != -1) {
+            return Math.abs(dist1 - dist2);
+        } else {
+            throw new IllegalArgumentException("Không tìm thấy Ga hoặc Ga không thuộc Tuyến này.");
+        }
+    }
+
 
     /**
      * Thêm một GaTrongTuyen mới. (SỬA: Gán INT)
@@ -80,7 +117,8 @@ public class GaTrongTuyenDao {
         String sql = "INSERT INTO GA_TRONG_TUYEN (MaTuyen, MaGa, ThuTuGa, KhoangCachTichLuy, ThoiGianDiChuyenToiGaTiepTheo, ThoiGianDung) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = ConnectDB.getConnection();
+                PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, gtt.getTuyen().getMaTuyen());
             pst.setString(2, gtt.getMaGa());
             pst.setInt(3, gtt.getThuTuGa());
@@ -99,7 +137,8 @@ public class GaTrongTuyenDao {
         String sql = "UPDATE GA_TRONG_TUYEN SET ThuTuGa = ?, KhoangCachTichLuy = ?, ThoiGianDiChuyenToiGaTiepTheo = ?, ThoiGianDung = ? " +
                 "WHERE MaTuyen = ? AND MaGa = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = ConnectDB.getConnection();
+                PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, gtt.getThuTuGa());
             pst.setInt(2, gtt.getKhoangCachTichLuy());
             // SỬA: Gán giá trị INT cho PreparedStatement
@@ -117,7 +156,8 @@ public class GaTrongTuyenDao {
     public boolean xoaGaTrongTuyen(String maTuyen, String maGa) throws SQLException {
         String sql = "DELETE FROM GA_TRONG_TUYEN WHERE MaTuyen = ? AND MaGa = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = ConnectDB.getConnection();
+                PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, maTuyen);
             pst.setString(2, maGa);
             return pst.executeUpdate() > 0;

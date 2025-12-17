@@ -8,10 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import database.ConnectDB;
+import entity.ChuyenTau;
 import entity.Tau; // Đảm bảo bạn đã import entity.Tau
 
 
 public class TauDAO {
+
+    private final ArrayList<Tau> danhSachTau;
 
     /**
      * Lấy tất cả các tàu có trong CSDL.
@@ -19,7 +22,7 @@ public class TauDAO {
      */
     public List<Tau> layTatCa() {
         List<Tau> danhSachTau = new ArrayList<>();
-        String sql = "SELECT SoHieu, TrangThai FROM Tau"; // Dựa trên CSDL QuanLyVeTauTest2
+        String sql = "SELECT SoHieu, TrangThai FROM Tau";
 
         try (Connection con = ConnectDB.getConnection();
              PreparedStatement pstmt = con.prepareStatement(sql);
@@ -29,7 +32,6 @@ public class TauDAO {
                 String soHieu = rs.getString("SoHieu");
                 String trangThai = rs.getString("TrangThai");
 
-                // Giả định entity.Tau có constructor (String, String)
                 Tau tau = new Tau(soHieu, trangThai);
                 danhSachTau.add(tau);
             }
@@ -92,6 +94,7 @@ public class TauDAO {
 
     // Constructor (Giữ nguyên)
     public TauDAO() {
+        danhSachTau = new ArrayList<Tau>();
     }
 
     /**

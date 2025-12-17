@@ -6,7 +6,6 @@ public class Toa {
     private String maToa;
     private Tau tau;        // Thực thể Tàu (Quan hệ n-1)
     private String loaiToa;
-    private double heSoToa; // Hệ số giá riêng cho từng toa
 
     // --- CONSTRUCTORS ---
 
@@ -17,11 +16,10 @@ public class Toa {
         this.maToa = maToa;
     }
 
-    public Toa(String maToa, Tau tau, String loaiToa, double heSoToa) {
+    public Toa(String maToa, Tau tau, String loaiToa) {
         this.maToa = maToa;
         this.tau = tau;
         this.loaiToa = loaiToa;
-        this.heSoToa = heSoToa;
     }
 
     // --- GETTERS VÀ SETTERS ---
@@ -53,14 +51,9 @@ public class Toa {
         this.loaiToa = loaiToa;
     }
 
-    public double getHeSoToa() {
-        return heSoToa;
-    }
 
-    public void setHeSoToa(double heSoToa) {
-        // Đảm bảo hệ số mặc định tối thiểu là 1.0
-        this.heSoToa = (heSoToa <= 0) ? 1.0 : heSoToa;
-    }
+
+
 
     // --- PHƯƠNG THỨC BỔ TRỢ ---
 
@@ -70,7 +63,6 @@ public class Toa {
                 "maToa='" + maToa + '\'' +
                 ", tau=" + (tau != null ? tau.getSoHieu() : "null") +
                 ", loaiToa='" + loaiToa + '\'' +
-                ", heSoToa=" + heSoToa +
                 '}';
     }
 

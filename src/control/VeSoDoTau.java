@@ -7,7 +7,7 @@ import java.awt.geom.RoundRectangle2D;
 
 public class VeSoDoTau extends JPanel {
 
-    private String maTau;
+    private String maTuyen;
     private String thoiGianDi;
     private String thoiGianDen;
 
@@ -17,8 +17,8 @@ public class VeSoDoTau extends JPanel {
     private static final int CHIEU_RONG_THAN = 130;
     private static final Color MAU_XANH_TAU = new Color(0, 153, 204);
 
-    public VeSoDoTau(String maTau, String thoiGianDi, String thoiGianDen) {
-        this.maTau = maTau;
+    public VeSoDoTau(String maTuyen, String thoiGianDi, String thoiGianDen) {
+        this.maTuyen = maTuyen;
         this.thoiGianDi = thoiGianDi;
         this.thoiGianDen = thoiGianDen;
 
@@ -121,7 +121,7 @@ public class VeSoDoTau extends JPanel {
 
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 12));
-        g2d.drawString(maTau, xStart + 8, yStart + 18);
+        g2d.drawString(maTuyen, xStart + 8, yStart + 18);
 
         // 4. Vẽ Bánh Xe (Màu xám đậm)
         int kichThuocBanhXe = 20;

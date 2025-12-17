@@ -346,7 +346,7 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
 
         // --- Chức năng Quản Lý (từ QuanLyDashboard) ---
         panelNoiDung.add(new ManHinhDashboardQuanLy(), "trangChuQL"); // Đổi tên để tránh trùng với trang chủ NV
-        panelNoiDung.add(new ManhinhQuanLyChuyenTau(), "qlChuyenTau");
+        panelNoiDung.add(new ManHinhQuanLyChuyenTau(), "qlChuyenTau");
         panelNoiDung.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
         panelNoiDung.add(new ManHinhQuanLyKhuyenMai2(), "qlKhuyenMai");
         panelNoiDung.add(new ManHinhQuanLyGiaVe(), "qlGiaVe");
