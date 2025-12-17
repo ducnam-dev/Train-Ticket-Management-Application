@@ -23,9 +23,26 @@ public class NhanVienDao {
 
     /**
      * Truy vấn CSDL để lấy thông tin NhanVien bằng Mã NV.
-     * @param maNV Mã nhân viên cần truy vấn.
+     *
      * @return Đối tượng NhanVien nếu tìm thấy, ngược lại trả về null.
      */
+
+    public static String layEmailTheoMa(String maNV) {
+        String email = null;
+        String sql = "SELECT Email FROM NhanVien WHERE MaNV = ?"; //
+        try (Connection con = database.ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, maNV); //
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    email = rs.getString("Email"); //
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return email;
+    }
     public static NhanVien getNhanVienByMaNV(String maNV) {
         NhanVien nv = null;
         String sql = "SELECT * FROM NhanVien WHERE MaNV = ?";
