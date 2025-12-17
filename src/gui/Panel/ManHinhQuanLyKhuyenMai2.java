@@ -216,10 +216,10 @@ public class ManHinhQuanLyKhuyenMai2 extends JPanel implements ActionListener {
         table.getTableHeader().setBackground(new Color(230, 230, 230));
 
         // Thiết lập chiều rộng cột (tùy chọn)
-        table.getColumnModel().getColumn(0).setPreferredWidth(80); // Mã KM
-        table.getColumnModel().getColumn(1).setPreferredWidth(200); // Tên KM
-        table.getColumnModel().getColumn(5).setPreferredWidth(150); // DK Áp Dụng
-        table.getColumnModel().getColumn(8).setPreferredWidth(120); // Trạng thái
+        table.getColumnModel().getColumn(0).setPreferredWidth(80);
+        table.getColumnModel().getColumn(1).setPreferredWidth(200);
+        table.getColumnModel().getColumn(5).setPreferredWidth(150);
+        table.getColumnModel().getColumn(8).setPreferredWidth(120);
 
         // Thêm sự kiện click chuột để lưu MaKM được chọn và bật nút
         table.addMouseListener(new java.awt.event.MouseAdapter() {

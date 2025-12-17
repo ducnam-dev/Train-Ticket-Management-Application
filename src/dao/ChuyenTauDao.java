@@ -724,4 +724,19 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
         }
         return ds;
     }
+
+    // Trong lớp ChuyenTauDao.java
+    public boolean kiemTraTonTaiChuyenTau(String maTuyen, LocalDate ngay) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM ChuyenTau WHERE maTuyen = ? AND ngayKhoiHanh = ?";
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, maTuyen);
+            ps.setDate(2, java.sql.Date.valueOf(ngay));
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        }
+        return false;
     }
+}

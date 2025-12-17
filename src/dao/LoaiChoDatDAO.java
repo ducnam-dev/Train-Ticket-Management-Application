@@ -27,39 +27,33 @@ public class LoaiChoDatDAO {
      * @param loaiToa Tên loại toa (ví dụ: "Giường nằm", "Ghế ngồi")
      * @return Hệ số nhân (mặc định 1.0 nếu không tìm thấy hoặc có lỗi)
      */
-    public double getHeSoByLoaiToa(String loaiToa) {
-        if (loaiToa == null || loaiToa.trim().isEmpty()) {
-            return 1.0;
-        }
-
-        double heSo = 1.0;
-        // Giả sử bảng tên là Toa, cột là loaiToa và heSoToa
-        // Nếu bạn có bảng riêng cho Loại Toa, hãy đổi tên bảng tương ứng
-        String sql = "SELECT heSoToa FROM Toa WHERE loaiToa = ?";
-
-        try (Connection con = ConnectDB.getConnection();
-             PreparedStatement stmt = con.prepareStatement(sql)) {
-
-            stmt.setString(1, loaiToa);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    heSo = rs.getDouble("heSoToa");
-                }
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi truy vấn hệ số loại chỗ đặt: " + e.getMessage());
-            // Log lỗi nếu cần thiết
-        }
-
-        return heSo;
-    }
-
 //    public double getHeSoByLoaiToa(String loaiToa) {
-//        if (loaiToa == null) return 1.0;
-//        return mock.getOrDefault(loaiToa, 1.0);
+//        if (loaiToa == null || loaiToa.trim().isEmpty()) {
+//            return 1.0;
+//        }
+//        double heSo = 1.0;
+//        String sql = "SELECT heSoToa FROM Toa WHERE loaiToa = ?";
+//
+//        try (Connection con = ConnectDB.getConnection();
+//             PreparedStatement stmt = con.prepareStatement(sql)) {
+//
+//            stmt.setString(1, loaiToa);
+//
+//            try (ResultSet rs = stmt.executeQuery()) {
+//                if (rs.next()) {
+//                    heSo = rs.getDouble("heSoToa");
+//                }
+//            }
+//        } catch (SQLException e) {
+//            System.err.println("Lỗi khi truy vấn hệ số loại chỗ đặt: " + e.getMessage());
+//        }
+//        return heSo;
 //    }
+
+    public double getHeSoByLoaiToa(String loaiToa) {
+        if (loaiToa == null) return 1.0;
+        return mock.getOrDefault(loaiToa, 1.0);
+    }
 
 
 

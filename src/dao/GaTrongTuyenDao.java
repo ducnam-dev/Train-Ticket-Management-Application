@@ -72,9 +72,9 @@ public class GaTrongTuyenDao {
 
 
 
-    public int tinhKhoangCachGiuaHaiGa(String maTuyen, String maGaDi, String maGaDen) throws SQLException {
-        // SQL để lấy khoảng cách tích lũy của 2 ga cụ thể trong cùng 1 tuyến
-        String sql = "SELECT MaGa, KhoangCachTichLuy FROM GaTrongTuyen " +
+    public static int tinhKhoangCachGiuaHaiGa(String maTuyen, String maGaDi, String maGaDen) throws SQLException {
+        // 1. Sửa tên bảng cho đúng với script SQL của bạn (GA_TRONG_TUYEN)
+        String sql = "SELECT MaGa, KhoangCachTichLuy FROM GA_TRONG_TUYEN " +
                 "WHERE MaTuyen = ? AND (MaGa = ? OR MaGa = ?)";
 
         int dist1 = -1;
@@ -89,26 +89,29 @@ public class GaTrongTuyenDao {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    String currentMaGa = rs.getString("MaGa");
+                    // Sử dụng trim() để tránh lỗi nếu DB định dạng kiểu CHAR có khoảng trắng dư
+                    String currentMaGa = rs.getString("MaGa").trim();
                     int dist = rs.getInt("KhoangCachTichLuy");
 
-                    if (currentMaGa.equals(maGaDi)) {
+                    if (currentMaGa.equalsIgnoreCase(maGaDi.trim())) {
                         dist1 = dist;
-                    } else if (currentMaGa.equals(maGaDen)) {
+                    }
+                    if (currentMaGa.equalsIgnoreCase(maGaDen.trim())) {
                         dist2 = dist;
                     }
                 }
             }
         }
 
-        // Kiểm tra xem có tìm thấy đủ 2 ga không
+        // 2. Kiểm tra kết quả
         if (dist1 != -1 && dist2 != -1) {
             return Math.abs(dist1 - dist2);
         } else {
-            throw new IllegalArgumentException("Không tìm thấy Ga hoặc Ga không thuộc Tuyến này.");
+            // In log để debug khi không tìm thấy
+            System.out.println("Lỗi: Không tìm thấy đủ ga. Dist1: " + dist1 + ", Dist2: " + dist2);
+            throw new IllegalArgumentException("Không tìm thấy dữ liệu cho Tuyến: " + maTuyen + " từ " + maGaDi + " đến " + maGaDen);
         }
     }
-
 
     /**
      * Thêm một GaTrongTuyen mới. (SỬA: Gán INT)

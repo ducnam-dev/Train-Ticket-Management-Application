@@ -1566,7 +1566,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
         if (w instanceof BanVeDashboard || w instanceof AdminFullDashboard) {
 
             // 2. Khai báo một tham chiếu chung tới ManHinhBanVeInstance
-            gui.Panel.ManHinhBanVe manHinhBanVeDeReset = null;
+            ManHinhBanVe manHinhBanVeDeReset = null;
 
             if (w instanceof BanVeDashboard) {
                 BanVeDashboard dashboard = (BanVeDashboard) w;
