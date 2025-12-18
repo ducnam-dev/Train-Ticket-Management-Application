@@ -19,6 +19,7 @@ public class VeDAO {
      * @param sdt Số điện thoại khách hàng
      * @return Đối tượng Ve đã nạp đầy đủ thông tin chi tiết (ChiTiet)
      */
+
     public Ve getChiTietVeChoTraVe(String maVe, String sdt) {
         Ve ve = null;
 
@@ -99,7 +100,7 @@ public class VeDAO {
     public List<Ve> timVeTheoKhachHang(String hoTen, String sdt, String cccd, String maVe) {
         List<Ve> danhSachVe = new ArrayList<>();
 
-        // Lấy các trường cần thiết, bao gồm Khóa ngoại MaLoaiVe, MaNV
+        // 1. Xây dựng câu lệnh SQL (giữ nguyên logic của bạn)
         StringBuilder sql = new StringBuilder(
                 "SELECT V.MaVe, V.GiaVe, V.TrangThai, V.MaKhachHang, V.MaChuyenTau, V.MaChoDat, V.MaLoaiVe, V.MaNV " +
                         "FROM Ve V " +
@@ -107,85 +108,60 @@ public class VeDAO {
                         "WHERE 1=1"
         );
 
-        if (maVe != null && !maVe.isEmpty()) {
-            sql.append(" AND V.MaVe = ?");
-        }
-        if (hoTen != null && !hoTen.isEmpty()) {
-            sql.append(" AND KH.HoTen LIKE ?");
-        }
-        if (sdt != null && !sdt.isEmpty()) {
-            sql.append(" AND KH.SoDienThoai LIKE ?");
-        }
-        if (cccd != null && !cccd.isEmpty()) {
-            sql.append(" AND KH.CCCD LIKE ?");
-        }
+        if (maVe != null && !maVe.isEmpty()) sql.append(" AND V.MaVe = ?");
+        if (hoTen != null && !hoTen.isEmpty()) sql.append(" AND KH.HoTen LIKE ?");
+        if (sdt != null && !sdt.isEmpty()) sql.append(" AND KH.SoDienThoai LIKE ?");
+        if (cccd != null && !cccd.isEmpty()) sql.append(" AND KH.CCCD LIKE ?");
 
-        Connection con = null;
-        try {
-            con = ConnectDB.getConnection();
-            try (PreparedStatement pstmt = con.prepareStatement(sql.toString())) {
+        // 2. BƯỚC 1: LẤY DỮ LIỆU THÔ TỪ CSDL VÀO DANH SÁCH TẠM
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql.toString())) {
 
-                int paramIndex = 1;
-                if (maVe != null && !maVe.isEmpty()) {
-                    pstmt.setString(paramIndex++, maVe);
-                }
-                if (hoTen != null && !hoTen.isEmpty()) {
-                    pstmt.setString(paramIndex++, "%" + hoTen + "%");
-                }
-                if (sdt != null && !sdt.isEmpty()) {
-                    pstmt.setString(paramIndex++, "%" + sdt + "%");
-                }
-                if (cccd != null && !cccd.isEmpty()) {
-                    pstmt.setString(paramIndex++, "%" + cccd + "%");
-                }
+            int paramIndex = 1;
+            if (maVe != null && !maVe.isEmpty()) pstmt.setString(paramIndex++, maVe);
+            if (hoTen != null && !hoTen.isEmpty()) pstmt.setString(paramIndex++, "%" + hoTen + "%");
+            if (sdt != null && !sdt.isEmpty()) pstmt.setString(paramIndex++, "%" + sdt + "%");
+            if (cccd != null && !cccd.isEmpty()) pstmt.setString(paramIndex++, "%" + cccd + "%");
 
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    while (rs.next()) {
-                        Ve ve = new Ve();
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Ve ve = new Ve();
+                    ve.setMaVe(rs.getString("MaVe"));
+                    ve.setGiaVe(rs.getDouble("GiaVe"));
+                    ve.setTrangThai(rs.getString("TrangThai"));
+                    ve.setMaLoaiVe(rs.getString("MaLoaiVe"));
 
-                        // 1. Gán thuộc tính chính
-                        ve.setMaVe(rs.getString("MaVe"));
-                        ve.setGiaVe(rs.getDouble("GiaVe"));
-                        ve.setTrangThai(rs.getString("TrangThai"));
-                        ve.setMaLoaiVe(rs.getString("MaLoaiVe"));
+                    // Chỉ gán mã (khóa ngoại) trước
+                    ve.setMaKhachHang(rs.getString("MaKhachHang"));
+                    ve.setMaChuyenTau(rs.getString("MaChuyenTau"));
+                    ve.setMaChoDat(rs.getString("MaChoDat"));
+                    ve.setMaNV(rs.getString("MaNV"));
 
-                        // 2. Gán Khóa ngoại
-                        String maKHDb = rs.getString("MaKhachHang");
-                        String maCTDb = rs.getString("MaChuyenTau");
-                        String maChoDatDb = rs.getString("MaChoDat");
-                        String maNVDb = rs.getString("MaNV");
-
-                        ve.setMaKhachHang(maKHDb);
-                        ve.setMaChuyenTau(maCTDb);
-                        ve.setMaChoDat(maChoDatDb);
-                        ve.setMaNV(maNVDb);
-
-
-                        // 3. GỌI DAO PHỤ TRỢ (Nạp Entity Chi tiết)
-                        KhachHang kh = (maKHDb != null) ? KhachHangDAO.getKhachHangById(maKHDb) : null;
-                        ChuyenTau ct = (maCTDb != null) ? ChuyenTauDao.layChuyenTauBangMa(maCTDb) : null;
-                        ChoDat cd = (maChoDatDb != null) ? ChoDatDAO.getChoDatById(maChoDatDb) : null;
-
-                        // Gán Entity chi tiết vào Ve
-                        ve.setKhachHangChiTiet(kh);
-                        ve.setChuyenTauChiTiet(ct);
-                        ve.setChoDatChiTiet(cd);
-
-                        // 4. Gán thuộc tính tiện ích
-                        if (kh != null) {
-                            ve.setTenKhachHang(kh.getHoTen());
-                        }
-
-                        danhSachVe.add(ve);
-                    }
+                    danhSachVe.add(ve);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Lỗi khi tìm vé theo Khách hàng: " + e.getMessage());
+            System.err.println("Lỗi khi tìm vé: " + e.getMessage());
             e.printStackTrace();
         } finally {
-            ConnectDB.disconnect();
+            ConnectDB.disconnect(); // Đóng kết nối chính sau khi đọc xong ResultSet
         }
+
+        // 3. BƯỚC 2: NẠP CHI TIẾT ENTITY (Tránh gọi DAO lồng nhau khi đang mở ResultSet)
+        for (Ve ve : danhSachVe) {
+            if (ve.getMaKhachHang() != null) {
+                KhachHang kh = KhachHangDAO.getKhachHangById(ve.getMaKhachHang());
+                ve.setKhachHangChiTiet(kh);
+                if (kh != null) ve.setTenKhachHang(kh.getHoTen());
+            }
+            if (ve.getMaChuyenTau() != null) {
+                ve.setChuyenTauChiTiet(ChuyenTauDao.layChuyenTauBangMa(ve.getMaChuyenTau()));
+            }
+            if (ve.getMaChoDat() != null) {
+                ve.setChoDatChiTiet(ChoDatDAO.getChoDatById(ve.getMaChoDat()));
+            }
+        }
+
         return danhSachVe;
     }
 

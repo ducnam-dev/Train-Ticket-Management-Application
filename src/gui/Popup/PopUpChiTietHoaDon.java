@@ -103,7 +103,7 @@ public class PopUpChiTietHoaDon extends JPanel {
 
         // --- BẮT ĐẦU CODE CUSTOM BẢNG ---
         JTableHeader header = BangChiTietHanhKhach.getTableHeader();
-        header.setBackground(new Color(230, 230, 230)); // Đã sửa java.awt.Color -> Color
+        header.setBackground(new Color(100, 100, 100)); // Đã sửa java.awt.Color -> Color
         header.setForeground(Color.BLACK); // Đã sửa
         header.setFont(new Font("Helvetica Neue", Font.BOLD, 15)); // Đã sửa java.awt.Font -> Font
         DefaultTableCellRenderer headerRenderer = (DefaultTableCellRenderer) header.getDefaultRenderer();
