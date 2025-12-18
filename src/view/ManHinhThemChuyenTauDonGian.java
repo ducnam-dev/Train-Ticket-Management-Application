@@ -154,7 +154,7 @@ public class ManHinhThemChuyenTauDonGian extends JFrame {
             // Các trường GaDi, GaDen, NV, v.v.. có thể để null lúc này vì CSDL đã chuẩn hóa
 
             // 5. Gọi DAO lưu
-            if (chuyenTauDao.addChuyenTau(ct)) {
+            if (chuyenTauDao.themChuyenTauNangCao(ct)) {
                 JOptionPane.showMessageDialog(this, "Thêm thành công chuyến: " + maChuyen);
             } else {
                 JOptionPane.showMessageDialog(this, "Thêm thất bại!");

@@ -12,6 +12,10 @@ public enum TrangThaiChuyenTau {
     TrangThaiChuyenTau(String tenHienThi) {
         this.tenHienThi = tenHienThi;
     }
+    //Không dùng tên hiển thị nữa dùng trực tiếp enum như thế nào
+
+
+
 
     public String getTenHienThi() {
         return tenHienThi;

@@ -290,7 +290,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
 
         // Thêm các màn hình quản lý vào CardLayout
         contentPanel.add(new ManHinhDashboardQuanLy(), "trangChu");
-        contentPanel.add(new ManhinhQuanLyChuyenTau(), "qlChuyenTau");
+        contentPanel.add(new ManHinhQuanLyChuyenTau(), "qlChuyenTau");
         contentPanel.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
         contentPanel.add(new ManHinhQuanLyKhuyenMai2(), "qlKhuyenMai");
         contentPanel.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
