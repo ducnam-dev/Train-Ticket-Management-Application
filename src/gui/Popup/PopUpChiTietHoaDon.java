@@ -57,16 +57,16 @@ public class PopUpChiTietHoaDon extends JPanel {
         // --- BẮT ĐẦU CODE CUSTOM CỦA BẠN ---
 
         // 1. Đường dẫn ảnh (giữ nguyên)
-        String imagePath_Train = "/images/iconMenu/train.png";
-        String imagePath_Passenger = "/images/iconMenu/hanhkhach.png";
-        String imagePath_Telephone = "/images/iconMenu/telephone.png";
-        String imagePath_Passengers = "/images/iconMenu/nhieuhanhkhach.png";
-        String imagePath_Transaction = "/images/iconMenu/payment-success.png";
-        String imagePath_PaymentMethod = "/images/iconMenu/payment-method.png";
-        String imagePath_Calendar = "/images/iconMenu/schedule.png";
-        imagePath_Male = "/images/iconMenu/male-gender.png";
-        imagePath_Female = "/images/iconMenu/female-gender.png";
-        String imagePath_Gender = "/images/iconMenu/gender.png";
+        String imagePath_Train = "/images/train.png";
+        String imagePath_Passenger = "/images/hanhkhach.png";
+        String imagePath_Telephone = "/images/telephone.png";
+        String imagePath_Passengers = "/images/nhieuhanhkhach.png";
+        String imagePath_Transaction = "/images/payment-success.png";
+        String imagePath_PaymentMethod = "/images/payment-method.png";
+        String imagePath_Calendar = "/images/schedule.png";
+        imagePath_Male = "/images/male-gender.png";
+        imagePath_Female = "/images/female-gender.png";
+        String imagePath_Gender = "/images/gender.png";
 
         // 3. Gọi hàm resize
         ImageIcon resizedTrainIcon = resizeIcon(imagePath_Train, 28, 28);

@@ -350,7 +350,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     }
 
     // MAIN
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         try {
             NhanVien nvMock = new NhanVien("NVBV0001", "Trần Đức Nam", "0123456789");
             CaLamViec.getInstance().batDauCa(nvMock);
@@ -367,7 +367,36 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         SwingUtilities.invokeLater(() -> {
             new BanVeDashboard();
         });
+    }*/
+
+    // HÀM MAIN ÉP SANG GIAO DIỆN METAL CHO MACOS (để dùng cho cả win và mac)
+    public static void main(String[] args) {
+        // 1. Phần Mockup dữ liệu (Giữ nguyên)
+        try {
+            NhanVien nvMock = new NhanVien("NVBV0001", "Trần Đức Nam","0123456789");
+            CaLamViec.getInstance().batDauCa(nvMock);
+        } catch (Exception e) {
+            System.err.println("Lỗi MOCKUP NhanVien/CaLamViec: " + e.getMessage());
+        }
+
+        // 2. Cài đặt giao diện METAL (Cross-platform)
+        try {
+            // Đây là dòng lệnh gọi giao diện Metal chuẩn
+            javax.swing.UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+
+            // Tùy chọn thêm: Nếu muốn bật theme Ocean (xanh nhẹ) của Metal cho đẹp hơn chút thì bỏ comment dòng dưới:
+            // javax.swing.plaf.metal.MetalLookAndFeel.setCurrentTheme(new javax.swing.plaf.metal.OceanTheme());
+
+        } catch (Exception ex) {
+            System.err.println("Lỗi cài đặt giao diện.");
+        }
+
+        // 3. Khởi chạy giao diện
+        SwingUtilities.invokeLater(() -> {
+            new BanVeDashboard();
+        });
     }
+
 
     public Component layCardTheoTen(String tenCard) {
         for (Component comp : panelNoiDung.getComponents()) {

@@ -9,7 +9,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="sửa lý thành công khuyến mãi và 100% khuyến mãi" />
+    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="sửa lý thành công khuyến mãi và 100% khuyến mãi">
+      <change afterPath="$PROJECT_DIR$/src/dao/DTO/ThongTinVeDTODAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/entity/DTO/ThongTinVeDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/ConnectDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/ConnectDB.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhDoiVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhDoiVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Popup/PopUpChiTietHoaDon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Popup/PopUpChiTietHoaDon.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -79,6 +87,7 @@
     "Application.ManHinhBanVe2.executor": "Run",
     "Application.ManHinhBanVeUpdatePanelChuyenTau.executor": "Run",
     "Application.ManHinhDangNhap.executor": "Run",
+    "Application.ManHinhDoiVe.executor": "Run",
     "Application.ManHinhQuanLyKhuyenMai.executor": "Run",
     "Application.ManHinhQuanLyKhuyenMai2.executor": "Run",
     "Application.ManHinhTimKiemChuyenTau.executor": "Run",
@@ -87,13 +96,15 @@
     "Application.ManhinhQuanLyChuyenTau.executor": "Run",
     "Application.PopUpChiTietHoaDon.executor": "Run",
     "Application.QuanLyDashboard.executor": "Run",
+    "Application.ThongTinVeDTODAO.executor": "Run",
+    "Application.TicketBookingUI.executor": "Run",
     "Application.VeSoDoTau.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "fix-chuc-nang-ban-ve-2.0",
+    "git-widget-placeholder": "master",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/06_Study/Stuby IUH/Hoc ki 5/Phat trien ung dung/DU AN/Train-Ticket-Management-Application/sql",
@@ -121,7 +132,7 @@
       <recent name="gui.Panel" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.ManhinhQuanLyChuyenTau">
+  <component name="RunManager">
     <configuration name="AdminFullDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="gui.MainFrame.AdminFullDashboard" />
       <module name="Train-Ticket-Management-Application2" />
@@ -196,9 +207,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.BanVeDashboard" />
         <item itemvalue="Application.ManhinhQuanLyChuyenTau" />
         <item itemvalue="Application.AdminFullDashboard" />
-        <item itemvalue="Application.BanVeDashboard" />
         <item itemvalue="Application.ManHinhXacNhanBanVe" />
         <item itemvalue="Application.ManHinhBanVe" />
       </list>
