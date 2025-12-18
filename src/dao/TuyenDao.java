@@ -30,53 +30,52 @@ public class TuyenDao {
 
     public List<Tuyen> layTatCaTuyen() throws SQLException {
         List<Tuyen> danhSach = new ArrayList<>();
-        // Truy vấn SQL phải khớp với cấu trúc bảng Tuyen của bạn
         String sql = "SELECT MaTuyen, TenTuyen, GaDau, GaCuoi FROM Tuyen";
 
-        // Sử dụng try-with-resources để đảm bảo PreparedStatement và ResultSet được đóng (Đã có)
-        try (PreparedStatement pst = con.prepareStatement(sql);
+        // Mở kết nối NGAY TRONG try-with-resources
+        try (Connection con = ConnectDB.getInstance().getConnection();
+             PreparedStatement pst = con.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
-                // Khởi tạo đối tượng Tuyen với dữ liệu từ ResultSet
                 Tuyen t = new Tuyen(
                         rs.getString("MaTuyen"),
                         rs.getString("TenTuyen"),
-                        rs.getString("GaDau"), // Giả định là Mã Ga
-                        rs.getString("GaCuoi")  // Giả định là Mã Ga
+                        rs.getString("GaDau"),
+                        rs.getString("GaCuoi")
                 );
                 danhSach.add(t);
             }
         }
-        // Không cần khối catch ở đây vì phương thức đã khai báo throws SQLException
-        // và các tài nguyên (pst, rs) sẽ tự động đóng.
-
         return danhSach;
     }
+    // Lấy tuyến theo Mã Tuyến
 
-    /**
-     * Tìm Tuyen theo mã.
-     * @param maTuyen Mã tuyến cần tìm.
-     * @return Đối tượng Tuyen hoặc null nếu không tìm thấy.
-     */
     public Tuyen layTuyenTheoMa(String maTuyen) throws SQLException {
-        Tuyen tuyen = null;
+        if (maTuyen == null || maTuyen.trim().isEmpty()) {
+            return null;
+        }
+
         String sql = "SELECT MaTuyen, TenTuyen, GaDau, GaCuoi FROM Tuyen WHERE MaTuyen = ?";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setString(1, maTuyen);
+
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    tuyen = new Tuyen(
-                            rs.getString("MaTuyen"),
-                            rs.getString("TenTuyen"),
-                            rs.getString("GaDau"),
-                            rs.getString("GaCuoi")
-                    );
+                    // Sử dụng biến tạm để dễ debug nếu cần
+                    String ma = rs.getString("MaTuyen");
+                    String ten = rs.getString("TenTuyen");
+                    String gaD = rs.getString("GaDau");
+                    String gaC = rs.getString("GaCuoi");
+
+                    return new Tuyen(ma, ten, gaD, gaC);
                 }
             }
         }
-        return tuyen;
+        return null; // Không tìm thấy
     }
 
     /**

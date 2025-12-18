@@ -263,14 +263,15 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
         }
         return rowsAffected > 0;
     }
-    public boolean addChuyenTau(ChuyenTau ct) throws SQLException {
+    public boolean themChuyenTauNangCao(ChuyenTau ct) throws SQLException {
         Connection conn = null;
         PreparedStatement pstmt = null;
         int rowsAffected = 0;
 
         // 1. CÂU SQL CHUẨN HÓA (Khớp với DB QuanLyVeTauProMax)
-        String sql = "INSERT INTO ChuyenTau (MaChuyenTau, MaTuyen, MaTau, MaNV, NgayKhoiHanh, GioKhoiHanh, TrangThai) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ChuyenTau (MaChuyenTau, MaTuyen, MaTau, MaNV, GaDi, GaDen, " +
+                "NgayKhoiHanh, GioKhoiHanh, NgayDenDuKien, GioDenDuKien, TrangThai) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         // 2. KIỂM TRA DỮ LIỆU ĐẦU VÀO
         if (ct == null || ct.getMaChuyenTau() == null || ct.getMaChuyenTau().isEmpty()) {
@@ -291,37 +292,48 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
             // 1. MaChuyenTau
             pstmt.setString(1, ct.getMaChuyenTau());
 
-            // 2. MaTuyen (Lấy từ đối tượng Tuyen trong ChuyenTau)
-            // Đảm bảo entity ChuyenTau có phương thức getTuyen()
+            // 2. MaTuyen
             pstmt.setString(2, ct.getTuyen().getMaTuyen());
 
-            // 3. MaTau (Lấy từ đối tượng Tau)
+            // 3. MaTau
             pstmt.setString(3, ct.getTau().getSoHieu());
 
-            // 4. MaNV (Xử lý Null nếu chưa phân công nhân viên)
-            if (ct.getNhanVien() != null && ct.getNhanVien().getMaNV() != null) {
+            // 4. MaNV
+            if (ct.getNhanVien() != null) {
                 pstmt.setString(4, ct.getNhanVien().getMaNV());
             } else {
-                pstmt.setNull(4, Types.NVARCHAR);
+                pstmt.setNull(4, java.sql.Types.NVARCHAR);
             }
 
-            // 5. NgayKhoiHanh (Chuyển đổi LocalDate -> java.sql.Date)
-            pstmt.setDate(5, java.sql.Date.valueOf(ct.getNgayKhoiHanh()));
+            // 5. GaDi
+            pstmt.setString(5, ct.getGaDi().getMaGa());
 
-            // 6. GioKhoiHanh (Chuyển đổi LocalTime -> java.sql.Time)
-            if (ct.getGioKhoiHanh() != null) {
-                pstmt.setTime(6, java.sql.Time.valueOf(ct.getGioKhoiHanh()));
+            // 6. GaDen
+            pstmt.setString(6, ct.getGaDen().getMaGa());
+
+            // 7. NgayKhoiHanh
+            pstmt.setDate(7, java.sql.Date.valueOf(ct.getNgayKhoiHanh()));
+
+            // 8. GioKhoiHanh
+            pstmt.setTime(8, java.sql.Time.valueOf(ct.getGioKhoiHanh()));
+
+            // 9. NgayDenDuKien
+            if (ct.getNgayDenDuKien() != null) {
+                pstmt.setDate(9, java.sql.Date.valueOf(ct.getNgayDenDuKien()));
             } else {
-                pstmt.setNull(6, Types.TIME);
+                pstmt.setNull(9, java.sql.Types.DATE);
             }
 
-            // 7. TrangThai (Lấy String từ Enum hoặc thuộc tính)
-            // Giả sử bạn dùng Enum TrangThaiChuyenTau, cần chuyển về String hoặc lấy tên hiển thị
-            if (ct.getThct() != null) {
-                pstmt.setString(7, ct.getThct().toString());
+            // 10. GioDenDuKien
+            if (ct.getGioDenDuKien() != null) {
+                pstmt.setTime(10, java.sql.Time.valueOf(ct.getGioDenDuKien()));
             } else {
-                pstmt.setString(7, "Chờ khởi hành"); // Giá trị mặc định
+                pstmt.setNull(10, java.sql.Types.TIME);
             }
+
+            // 11. TrangThai
+            String tenHienThi = ct.getThct() != null ? ct.getThct().getTenHienThi() : "Chờ khởi hành";
+            pstmt.setString(11, tenHienThi);
 
             // --- THỰC THI ---
             rowsAffected = pstmt.executeUpdate();
@@ -340,7 +352,6 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
 
             throw e; // Ném lại các lỗi khác để Controller xử lý
         } finally {
-            // Đóng PreparedStatement (Connection thường được quản lý bởi ConnectDB singleton)
             if (pstmt != null) {
                 try {
                     pstmt.close();
@@ -378,6 +389,7 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
             pstmt.setString(2, gaKT);
             pstmt.setString(3, ngayDi);
 
+
             // 2. Thực thi truy vấn và ánh xạ
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -391,6 +403,8 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
                     LocalDate ngayDen = rs.getDate("NgayDenDuKien").toLocalDate();
                     LocalTime gioDen = rs.getTime("GioDenDuKien").toLocalTime();
                     String trangThai = rs.getString("TrangThai");
+                    //trangThai lúc lấy là DANG_CHO
+                    //không dùng fromString
                     TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
 
                     // TẠO ĐỐI TƯỢNG GA DI
@@ -644,6 +658,85 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
         return danhSach;
     }
 
+    public List<ChuyenTau> layChuyenTauTheoDieuKien(String maTuyen, LocalDate ngay) throws SQLException {
+        List<ChuyenTau> ds = new ArrayList<>();
+        // JOIN với các bảng liên quan để lấy đầy đủ thông tin hiển thị
+        String sql = "SELECT CT.*, T.TrangThai AS TrangThaiTau, " +
+                "G1.TenGa AS TenGaDi, G2.TenGa AS TenGaDen " +
+                "FROM ChuyenTau CT " +
+                "LEFT JOIN Tau T ON CT.MaTau = T.SoHieu " +
+                "LEFT JOIN Ga G1 ON CT.GaDi = G1.MaGa " +
+                "LEFT JOIN Ga G2 ON CT.GaDen = G2.MaGa " +
+                "WHERE CT.MaTuyen = ? AND CT.NgayKhoiHanh = ? " +
+                "ORDER BY CT.GioKhoiHanh ASC";
 
+        try (Connection conn = ConnectDB.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
 
+            pst.setString(1, maTuyen);
+            pst.setDate(2, java.sql.Date.valueOf(ngay));
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    // 1. Lấy dữ liệu cơ bản
+                    String maChuyenTau = rs.getString("MaChuyenTau");
+                    String maTau = rs.getString("MaTau");
+                    LocalDate ngayKH = rs.getDate("NgayKhoiHanh").toLocalDate();
+                    LocalTime gioKH = rs.getTime("GioKhoiHanh").toLocalTime();
+
+                    // Xử lý Ngày/Giờ đến dự kiến (có thể null)
+                    Date sqlNgayDen = rs.getDate("NgayDenDuKien");
+                    LocalDate ngayDen = (sqlNgayDen != null) ? sqlNgayDen.toLocalDate() : null;
+                    Time sqlGioDen = rs.getTime("GioDenDuKien");
+                    LocalTime gioDen = (sqlGioDen != null) ? sqlGioDen.toLocalTime() : null;
+
+                    // 2. Tạo các Object liên quan (Mapping từ kết quả JOIN)
+                    Ga gaDi = new Ga(rs.getString("GaDi"), rs.getString("TenGaDi"), null);
+                    Ga gaDen = new Ga(rs.getString("GaDen"), rs.getString("TenGaDen"), null);
+                    Tau tau = new Tau(maTau, rs.getString("TrangThaiTau"));
+
+                    // 3. Xử lý Trạng thái (Enum)
+                    String trangThaiStr = rs.getString("TrangThai");
+                    TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThaiStr);
+
+                    // 4. Khởi tạo đối tượng ChuyenTau (Dùng constructor khớp với entity của bạn)
+                    // Lưu ý: Nếu constructor yêu cầu Tuyen, bạn có thể tạo 1 object Tuyen rỗng chỉ có mã
+                    ChuyenTau ct = new ChuyenTau(
+                            maChuyenTau,
+                            maTau,
+                            ngayKH,
+                            gioKH,
+                            gaDi,
+                            gaDen,
+                            tau,
+                            ngayDen,
+                            gioDen,
+                            null, // NhanVien set null nếu không cần hiển thị ngay
+                            tt
+                    );
+
+                    ds.add(ct);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi lọc chuyến tàu theo điều kiện: " + e.getMessage());
+            throw e;
+        }
+        return ds;
+    }
+
+    // Trong lớp ChuyenTauDao.java
+    public boolean kiemTraTonTaiChuyenTau(String maTuyen, LocalDate ngay) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM ChuyenTau WHERE maTuyen = ? AND ngayKhoiHanh = ?";
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, maTuyen);
+            ps.setDate(2, java.sql.Date.valueOf(ngay));
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        }
+        return false;
+    }
 }
