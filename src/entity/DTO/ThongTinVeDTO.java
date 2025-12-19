@@ -5,12 +5,20 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class ThongTinVeDTO {
+    // --- CÁC TRƯỜNG ID QUAN TRỌNG ---
+    private String maKhachHang;
+    private String maLoaiVe;
+
     private String maVe;
     private String tenLoaiVe;
     private String hoTen;
     private String cccd;
-    private String soDienThoai; // Có thể null
+    private String soDienThoai;
+    private LocalDate ngaySinh;
+
     private String maChuyenTau;
+    private String maGaDi;
+    private String maGaDen;
     private String gaDi;
     private String gaDen;
     private LocalDate ngayKhoiHanh;
@@ -21,12 +29,11 @@ public class ThongTinVeDTO {
     private String maToa;
     private String loaiToa;
     private String soCho;
-    private String khoang; // Có thể null
-    private String tang;   // Có thể null
+    private String khoang;
+    private String tang;
     private double giaVe;
-    private String trangThai; // "DA_BAN" hoặc "DA_HUY"
+    private String trangThai;
 
-    // Formatter để dùng khi cần hiển thị ra String
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -34,17 +41,19 @@ public class ThongTinVeDTO {
     }
 
     public ThongTinVeDTO(String maVe, String tenLoaiVe, String hoTen, String cccd, String soDienThoai,
-                         String maChuyenTau, String gaDi, String gaDen,
+                         LocalDate ngaySinh, String maChuyenTau, String gaDi, String gaDen,
                          LocalDate ngayKhoiHanh, LocalTime gioKhoiHanh,
                          LocalDate ngayDenDuKien, LocalTime gioDenDuKien,
                          String soHieuTau, String maToa, String loaiToa, String soCho,
-                         String khoang, String tang, double giaVe, String trangThai) {
+                         String khoang, String tang, double giaVe, String trangThai,
+                         String maGaDi, String maGaDen,
+                         String maKhachHang, String maLoaiVe) {
         this.maVe = maVe;
         this.tenLoaiVe = tenLoaiVe;
         this.hoTen = hoTen;
         this.cccd = cccd;
-        // Xử lý null cho 3 trường này theo yêu cầu
         this.soDienThoai = (soDienThoai == null) ? "" : soDienThoai;
+        this.ngaySinh = ngaySinh;
         this.maChuyenTau = maChuyenTau;
         this.gaDi = gaDi;
         this.gaDen = gaDen;
@@ -56,19 +65,29 @@ public class ThongTinVeDTO {
         this.maToa = maToa;
         this.loaiToa = loaiToa;
         this.soCho = soCho;
-        // Xử lý null
         this.khoang = (khoang == null) ? "" : khoang;
         this.tang = (tang == null) ? "" : tang;
         this.giaVe = giaVe;
         this.trangThai = trangThai;
+        this.maGaDi = maGaDi;
+        this.maGaDen = maGaDen;
+        this.maKhachHang = maKhachHang;
+        this.maLoaiVe = maLoaiVe;
     }
 
-    // --- Getters lấy dữ liệu gốc ---
+    // --- GETTERS ---
+    public String getMaKhachHang() { return maKhachHang; }
+    public String getMaLoaiVe() { return maLoaiVe; }
+
     public String getMaVe() { return maVe; }
     public String getTenLoaiVe() { return tenLoaiVe; }
     public String getHoTen() { return hoTen; }
     public String getCccd() { return cccd; }
     public String getSoDienThoai() { return soDienThoai; }
+    public LocalDate getNgaySinh() { return ngaySinh; }
+
+    public String getNgaySinhStr() { return ngaySinh != null ? ngaySinh.format(DATE_FMT) : ""; }
+
     public String getMaChuyenTau() { return maChuyenTau; }
     public String getGaDi() { return gaDi; }
     public String getGaDen() { return gaDen; }
@@ -84,18 +103,27 @@ public class ThongTinVeDTO {
     public String getTang() { return tang; }
     public double getGiaVe() { return giaVe; }
     public String getTrangThai() { return trangThai; }
+    public String getMaGaDi() { return maGaDi; }
+    public String getMaGaDen() { return maGaDen; }
 
-    // --- Helper Getters: Trả về String đã format cho UI dùng luôn ---
+    // --- CÁC HÀM FORMAT NGÀY GIỜ (QUAN TRỌNG CHO UI) ---
     public String getNgayDiStr() {
         return ngayKhoiHanh != null ? ngayKhoiHanh.format(DATE_FMT) : "";
     }
     public String getGioDiStr() {
         return gioKhoiHanh != null ? gioKhoiHanh.format(TIME_FMT) : "";
     }
+
+    // --> ĐÂY LÀ 2 HÀM BỊ THIẾU GÂY LỖI ĐỎ <--
     public String getNgayDenStr() {
         return ngayDenDuKien != null ? ngayDenDuKien.format(DATE_FMT) : "";
     }
     public String getGioDenStr() {
         return gioDenDuKien != null ? gioDenDuKien.format(TIME_FMT) : "";
+    }
+
+    @Override
+    public String toString() {
+        return maVe + " - " + hoTen;
     }
 }
