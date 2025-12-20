@@ -24,7 +24,7 @@ SELECT
     t.MaToa,
     FORMAT(gm.STT, '00') AS SoCho, -- SoCho là số thứ tự 01, 02, ... 64
     N'Ghế mềm' AS LoaiCho,
-    gm.Khoang,
+    NULL AS Khoang,
     NULL AS Tang
 FROM GhếMềm gm
 -- Áp dụng cho 4 toa ghế mềm
@@ -71,5 +71,77 @@ SELECT
 FROM GiườngNằm gn
 -- Áp dụng cho 4 toa giường nằm
 CROSS JOIN (VALUES (N'SPT2-5'), (N'SPT2-6'), (N'SPT2-7'), (N'SPT2-8')) AS t(MaToa);
+
+GO
+
+USE [QuanLyVeTau]
+GO
+
+-- 1. XÓA DỮ LIỆU CŨ (Nếu cần làm sạch để chạy lại)
+-- DELETE FROM ChoDat;
+-- GO
+
+-- =============================================================
+-- I. CHÈN CHO GHẾ MỀM (SE1: Toa 1, 2) - 64 Ghế/Toa
+-- =============================================================
+WITH Numbers AS (
+    SELECT TOP 64 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS STT FROM sys.columns c1, sys.columns c2
+)
+INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [LoaiCho], [Khoang], [Tang])
+SELECT 
+    t.MaToa + '-C' + FORMAT(n.STT, '00') AS MaCho,
+    t.MaToa,
+    FORMAT(n.STT, '00') AS SoCho,
+    N'Ghế mềm' AS LoaiCho,
+    NULL AS Khoang,
+    NULL AS Tang
+FROM Numbers n
+CROSS JOIN (VALUES (N'SE1-1'), (N'SE1-2')) AS t(MaToa);
+
+-- =============================================================
+-- II. CHÈN CHO GHẾ CỨNG (SE2: Toa 1, 2) - 64 Ghế/Toa 
+-- (Bạn có thể sửa TOP 64 thành 80 nếu muốn ghế cứng nhiều hơn)
+-- =============================================================
+WITH Numbers AS (
+    SELECT TOP 64 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS STT FROM sys.columns c1, sys.columns c2
+)
+INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [LoaiCho], [Khoang], [Tang])
+SELECT 
+    t.MaToa + '-C' + FORMAT(n.STT, '00') AS MaCho,
+    t.MaToa,
+    FORMAT(n.STT, '00') AS SoCho,
+    N'Ghế cứng' AS LoaiCho,
+    NULL AS Khoang,
+    NULL AS Tang
+FROM Numbers n
+CROSS JOIN (VALUES (N'SE2-1'), (N'SE2-2')) AS t(MaToa);
+
+-- =============================================================
+-- III. CHÈN CHO GIƯỜNG NẰM (SE1: Toa 3,4,5,6 & SE2: Toa 3,4,5,6)
+-- 42 Giường/Toa: 7 Khoang x 6 Giường (Tầng 1, 2, 3)
+-- =============================================================
+WITH Numbers AS (
+    SELECT TOP 42 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS N FROM sys.columns c1, sys.columns c2
+),
+GiườngLogic AS (
+    SELECT 
+        N,
+        ((N - 1) / 6) + 1 AS Khoang,
+        ((N - 1) % 6) / 2 + 1 AS Tang
+    FROM Numbers
+)
+INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [LoaiCho], [Khoang], [Tang])
+SELECT 
+    t.MaToa + '-C' + FORMAT(gl.N, '00') AS MaCho,
+    t.MaToa,
+    FORMAT(gl.N, '00') AS SoCho,
+    N'Giường nằm' AS LoaiCho,
+    gl.Khoang,
+    gl.Tang
+FROM GiườngLogic gl
+CROSS JOIN (VALUES 
+    (N'SE1-3'), (N'SE1-4'), (N'SE1-5'), (N'SE1-6'),
+    (N'SE2-3'), (N'SE2-4'), (N'SE2-5'), (N'SE2-6')
+) AS t(MaToa);
 
 GO

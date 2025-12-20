@@ -3,7 +3,7 @@ package gui.Popup;
 import com.toedter.calendar.JDateChooser;
 import dao.KhuyenMaiDAO; // Import DAO
 import entity.KhuyenMai; // Import Entity
-import gui.Panel.ManHinhQuanLyKhuyenMai2;
+import gui.Panel.ManHinhQuanLyKhuyenMai;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -53,7 +53,7 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
 
     // Tham chiếu DAO và Panel
     private KhuyenMaiDAO khuyenMaiDAO;
-    private ManHinhQuanLyKhuyenMai2 parentPanel;
+    private ManHinhQuanLyKhuyenMai parentPanel;
     private String currentMaKM;
 
     // Tên trường trong DB dùng chung cho cả Form và Validation
@@ -65,7 +65,7 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
     private static final String LOAI_GIAM_CO_DINH = "CO_DINH";
 
 
-    public PopupTaoKhuyenMai(JFrame parent, ManHinhQuanLyKhuyenMai2 parentPanel, String maKM) {
+    public PopupTaoKhuyenMai(JFrame parent, ManHinhQuanLyKhuyenMai parentPanel, String maKM) {
         super(parent, true);
         this.parentPanel = parentPanel;
         this.currentMaKM = maKM;

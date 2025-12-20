@@ -94,4 +94,30 @@ public class TuyenDao {
     }
 
     // TODO: Bổ sung các phương thức Sửa và Xóa Tuyến nếu cần
+
+
+    //todo: lấy giá và sửa giá theo mã tuyến
+    public double layGiaTheoMaTuyen(String maTuyen) throws SQLException {
+        String sql = "SELECT DonGiaKM FROM Tuyen WHERE MaTuyen = ?";
+        try (Connection con = ConnectDB.getConnection();
+                PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setString(1, maTuyen);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("Gia");
+                }
+            }
+        }
+        return -1; // Trả về -1 nếu không tìm thấy
+    }
+    public boolean suaGiaTheoMaTuyen(String maTuyen, double giaMoi) throws SQLException {
+        String sql = "UPDATE Tuyen SET DonGiaKM = ? WHERE MaTuyen = ?";
+        try (
+                Connection con = ConnectDB.getConnection();
+                PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setDouble(1, giaMoi);
+            pst.setString(2, maTuyen);
+            return pst.executeUpdate() > 0;
+        }
+    }
 }

@@ -86,7 +86,7 @@ public class ChoDatDAO {
                 "    WHERE v.MaChoDat = cd.MaCho " +
                 "    AND ct_booked.MaTuyen = ? " +
                 "    AND v.MaChuyenTau LIKE ? " +
-                "    AND v.TrangThai <> N'DA-HUY' " +
+                "    AND v.TrangThai = N'DA_BAN' " +
                 "    AND gtt_t_di.ThuTuGa < gtt_s_den.ThuTuGa " +
                 "    AND gtt_t_den.ThuTuGa > gtt_s_di.ThuTuGa " +
                 ") THEN 1 ELSE 0 END AS DaDat " +

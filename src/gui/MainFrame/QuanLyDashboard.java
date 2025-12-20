@@ -292,7 +292,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         contentPanel.add(new ManHinhDashboardQuanLy(), "trangChu");
         contentPanel.add(new ManHinhQuanLyChuyenTau(), "qlChuyenTau");
         contentPanel.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
-        contentPanel.add(new ManHinhQuanLyKhuyenMai2(), "qlKhuyenMai");
+        contentPanel.add(new ManHinhQuanLyKhuyenMai(), "qlKhuyenMai");
         contentPanel.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
         contentPanel.add(new ManHinhQuanLyGiaVe(), "qlGiaVe");
         contentPanel.add(new JPanel(), "thongKe");

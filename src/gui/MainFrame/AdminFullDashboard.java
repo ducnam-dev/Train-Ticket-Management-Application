@@ -4,7 +4,6 @@ package gui.MainFrame;
 import control.CaLamViec;
 import entity.NhanVien;
 import gui.Panel.*;
-import view.ManHinhQuanLyChuyenTau2;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -349,7 +348,7 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         panelNoiDung.add(new ManHinhDashboardQuanLy(), "trangChuQL"); // Đổi tên để tránh trùng với trang chủ NV
         panelNoiDung.add(new ManHinhQuanLyChuyenTau(), "qlChuyenTau");
         panelNoiDung.add(new ManHinhQuanLyNhanVien(), "qlNhanVien");
-        panelNoiDung.add(new ManHinhQuanLyKhuyenMai2(), "qlKhuyenMai");
+        panelNoiDung.add(new ManHinhQuanLyKhuyenMai(), "qlKhuyenMai");
         panelNoiDung.add(new ManHinhQuanLyGiaVe(), "qlGiaVe");
         panelNoiDung.add(new JPanel(), "thongKe");
 
