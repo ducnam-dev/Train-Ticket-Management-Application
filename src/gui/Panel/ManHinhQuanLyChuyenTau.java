@@ -460,27 +460,11 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
         // 2. Thực hiện tạo lịch trình
         try {
             Tuyen tuyenObj = tuyenDao.layTuyenTheoMa(maTuyen);
-            if (tuyenObj == null) {
-                hienThiThongBaoLoi("Không tìm thấy thông tin Tuyến trong CSDL.");
-                return;
-            }
-
             List<GaTrongTuyen> danhSachGa = gaTrongTuyenDao.layGaTrongTuyenTheoMa(maTuyen);
-            if (danhSachGa.size() < 2) {
-                hienThiThongBaoLoi("Tuyến này chưa cấu hình đủ Ga (cần ít nhất 2 ga).");
-                return;
-            }
-            // KIỂM TRA TÀU
-            Tau tauDuocChon = (Tau) cbChonTau.getSelectedItem();
-            if (tauDuocChon == null) {
-                hienThiThongBaoLoi("Vui lòng chọn Tàu để thực hiện lịch trình.");
-                return;
-            }
+            Tau tauObj = (Tau) cbChonTau.getSelectedItem();
 
-            StringBuilder ngayBiTrung = new StringBuilder();
-            int soLuongChuyenTaoMoi = 0;
-
-            Tau tauObj = tauDuocChon;
+            StringBuilder ngayBiTrung = new StringBuilder(); // Lưu danh sách ngày đã có lịch
+            int soLuongChuyenTaoMoi = 0; // Đếm số chuyến tàu đã tạo mới
 
             LocalDate currentDay = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate endDay = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -488,18 +472,20 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
             while (!currentDay.isAfter(endDay)) {
-                // BƯỚC KIỂM TRA MỚI:
-                if (chuyenTauDao.kiemTraTonTaiChuyenTau(tuyenObj.getMaTuyen(), currentDay)) {
+                // Bước 1: Tạo chuỗi ngày định dạng ddMMyy (Ví dụ: 201225)
+                String ngayDauTienStr = currentDay.format(DateTimeFormatter.ofPattern("ddMMyy"));
+
+                // BƯỚC KIỂM TRA MỚI (CHÍNH XÁC):
+                // Kiểm tra xem mã SE1_201225_... đã tồn tại trong CSDL chưa
+                if (chuyenTauDao.kiemTraDaCoLichTrinhNgay(tuyenObj.getMaTuyen(), ngayDauTienStr)) {
                     ngayBiTrung.append(currentDay.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append(", ");
                 } else {
-                    // Nếu chưa có thì mới tiến hành tạo các trạm dừng (master schedule)
+                    // Nếu chưa có "Gốc" tàu ngày này, tiến hành tạo toàn bộ các chặng
                     int count = taoLichTrinhNgay(tuyenObj, tauObj, currentDay, gioBatDauCoDinh, danhSachGa);
                     soLuongChuyenTaoMoi += count;
                 }
                 currentDay = currentDay.plusDays(1);
-            }
 
-            this.setCursor(Cursor.getDefaultCursor());
 
             // Thông báo kết quả tổng hợp
             String thongBao = "Hoàn tất!\nĐã tạo mới " + soLuongChuyenTaoMoi + " bản ghi chuyến tàu.";
@@ -509,7 +495,9 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
 
             JOptionPane.showMessageDialog(this, thongBao, "Kết quả", JOptionPane.INFORMATION_MESSAGE);
 
-        } catch (SQLException e) {
+        }
+        }
+        catch (SQLException e) {
             this.setCursor(Cursor.getDefaultCursor());
             hienThiThongBaoLoi("Lỗi CSDL: " + e.getMessage());
             e.printStackTrace();
@@ -551,7 +539,7 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
                 masterSchedule.put(gaKeTiep.getMaGa(), thoiDiemHienTai);
             }
         }
-
+        String ngayDauTienStr = ngayKhoiHanh.format(DateTimeFormatter.ofPattern("ddMMyy"));
         // 2. Tạo các cặp Chuyến Tàu
         for (int i = 0; i < danhSachGa.size(); i++) {
             for (int j = i + 1; j < danhSachGa.size(); j++) {
@@ -568,9 +556,9 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
                 }
 
                 // Tạo Mã Chuyến Tàu
-                String maChuyenTau = String.format("%s_%s_%s%s",
-                        tuyenObj.getMaTuyen(),
-                        thoiDiemDi.format(DateTimeFormatter.ofPattern("yyMMdd")),
+                String maChuyenTau = String.format("%s_%s_%s_%s",
+                        tuyenObj.getMaTuyen().trim(),
+                        ngayDauTienStr,
                         gttDi.getMaGa(), gttDen.getMaGa());
 
                 Ga gaDi = new Ga(gttDi.getMaGa());

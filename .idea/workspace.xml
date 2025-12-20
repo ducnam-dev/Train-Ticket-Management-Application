@@ -9,14 +9,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="sửa lý thành công khuyến mãi và 100% khuyến mãi">
-      <change afterPath="$PROJECT_DIR$/src/dao/DTO/ThongTinVeDTODAO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/entity/DTO/ThongTinVeDTO.java" afterDir="false" />
+    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/control/QuanLyTrangThaiGhe.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/ChuyenTauDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChuyenTauDao.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/database/ConnectDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/ConnectDB.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhDoiVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhDoiVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Popup/PopUpChiTietHoaDon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Popup/PopUpChiTietHoaDon.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyChuyenTau.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyChuyenTau.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,7 +33,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="baoluucode" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -75,51 +75,52 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.AdminFullDashboard.executor": "Run",
-    "Application.BanVeDashboard.executor": "Run",
-    "Application.CustomTrainTicketPanel.executor": "Debug",
-    "Application.KiemTraChonToaPanel.executor": "Run",
-    "Application.Main.executor": "Run",
-    "Application.MainTestDAO.executor": "Run",
-    "Application.ManHinhBanVe.executor": "Run",
-    "Application.ManHinhBanVe2.executor": "Run",
-    "Application.ManHinhBanVeUpdatePanelChuyenTau.executor": "Run",
-    "Application.ManHinhDangNhap.executor": "Run",
-    "Application.ManHinhDoiVe.executor": "Run",
-    "Application.ManHinhQuanLyKhuyenMai.executor": "Run",
-    "Application.ManHinhQuanLyKhuyenMai2.executor": "Run",
-    "Application.ManHinhTimKiemChuyenTau.executor": "Run",
-    "Application.ManHinhTraCuuHoaDon.executor": "Run",
-    "Application.ManHinhXacNhanBanVe.executor": "Run",
-    "Application.ManhinhQuanLyChuyenTau.executor": "Run",
-    "Application.PopUpChiTietHoaDon.executor": "Run",
-    "Application.QuanLyDashboard.executor": "Run",
-    "Application.ThongTinVeDTODAO.executor": "Run",
-    "Application.TicketBookingUI.executor": "Run",
-    "Application.VeSoDoTau.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "master",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/06_Study/Stuby IUH/Hoc ki 5/Phat trien ung dung/DU AN/Train-Ticket-Management-Application/sql",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Artifacts",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.1150748",
-    "settings.editor.selected.configurable": "project.propCompiler",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.AdminFullDashboard.executor&quot;: &quot;Run&quot;,
+    &quot;Application.BanVeDashboard.executor&quot;: &quot;Run&quot;,
+    &quot;Application.CustomTrainTicketPanel.executor&quot;: &quot;Debug&quot;,
+    &quot;Application.KiemTraChonToaPanel.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Application.MainTestDAO.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhBanVe.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhBanVe2.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhBanVeUpdatePanelChuyenTau.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhDangNhap.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhDoiVe.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhQuanLyChuyenTau.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhQuanLyKhuyenMai.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhQuanLyKhuyenMai2.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhTimKiemChuyenTau.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhTraCuuHoaDon.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManHinhXacNhanBanVe.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ManhinhQuanLyChuyenTau.executor&quot;: &quot;Run&quot;,
+    &quot;Application.PopUpChiTietHoaDon.executor&quot;: &quot;Run&quot;,
+    &quot;Application.QuanLyDashboard.executor&quot;: &quot;Run&quot;,
+    &quot;Application.ThongTinVeDTODAO.executor&quot;: &quot;Run&quot;,
+    &quot;Application.TicketBookingUI.executor&quot;: &quot;Run&quot;,
+    &quot;Application.VeSoDoTau.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/06_Study/Stuby IUH/Hoc ki 5/Phat trien ung dung/DU AN/Train-Ticket-Management-Application/sql&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.1150748&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propCompiler&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\Train-Ticket-Management-Application\sql" />
@@ -132,7 +133,7 @@
       <recent name="gui.Panel" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.AdminFullDashboard">
     <configuration name="AdminFullDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="gui.MainFrame.AdminFullDashboard" />
       <module name="Train-Ticket-Management-Application2" />
@@ -166,12 +167,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhBanVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhBanVe" />
+    <configuration name="ManHinhDangNhap" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.ManHinhDangNhap" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="gui.Panel.*" />
+          <option name="PATTERN" value="gui.MainFrame.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -179,8 +180,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhXacNhanBanVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhXacNhanBanVe" />
+    <configuration name="ManHinhQuanLyChuyenTau" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhQuanLyChuyenTau" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -207,11 +208,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.AdminFullDashboard" />
+        <item itemvalue="Application.ManHinhDangNhap" />
+        <item itemvalue="Application.ManHinhQuanLyChuyenTau" />
         <item itemvalue="Application.BanVeDashboard" />
         <item itemvalue="Application.ManhinhQuanLyChuyenTau" />
-        <item itemvalue="Application.AdminFullDashboard" />
-        <item itemvalue="Application.ManHinhXacNhanBanVe" />
-        <item itemvalue="Application.ManHinhBanVe" />
       </list>
     </recent_temporary>
   </component>
@@ -249,6 +250,7 @@
       <workItem from="1765790749182" duration="2883000" />
       <workItem from="1765795510159" duration="10382000" />
       <workItem from="1765807783944" duration="249000" />
+      <workItem from="1766214677978" duration="4823000" />
     </task>
     <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
       <option name="closed" value="true" />
@@ -321,6 +323,11 @@
           <properties class="java.lang.IllegalArgumentException" package="java.lang" />
           <option name="timeStamp" value="12" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/dao/ChuyenTauDao.java</url>
+          <line>665</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

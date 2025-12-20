@@ -839,9 +839,18 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         System.out.println("Đã chọn Toa: " + maToa + ". Tiến hành tải sơ đồ ghế." );
 
-        List<ChoDat> danhSachChoDat = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(
+//        List<ChoDat> danhSachChoDat = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(
+//                maToa,
+//                maChuyenTauHienTai
+//        );
+        String maGaDiStr = ((Ga) cbGaDi.getSelectedItem()).getMaGa();
+        String maGaDenStr = ((Ga) cbGaDen.getSelectedItem()).getMaGa();
+
+        List<ChoDat> danhSachChoDat = choDatDao.getDanhSachChoDatTheoPhanChanh(
                 maToa,
-                maChuyenTauHienTai
+                maChuyenTauHienTai,
+                maGaDiStr,
+                maGaDenStr
         );
 
         String loaiToa = "";
@@ -2307,7 +2316,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
     // Hàm hỗ trợ: Tạo và thiết lập trạng thái cho JButton
     private JButton taoNutChoDat(ChoDat cho, Dimension kichThuoc) {
-        // Tên hiển thị: Ghế thường là SoCho, Giường nằm nên có thêm số tầng
         String tenHienThi = cho.getSoCho();
 
         JButton btnCho = new JButton(tenHienThi);

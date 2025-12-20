@@ -379,7 +379,11 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
                 "LEFT JOIN Ga GA_DEN ON CT.GaDen = GA_DEN.MaGa " +
                 "LEFT JOIN Tau T ON CT.MaTau = T.SoHieu " +
                 "LEFT JOIN NhanVien NV ON CT.MaNV = NV.MaNV " +
-                "WHERE CT.GaDi = ? AND CT.GaDen = ? AND CT.NgayKhoiHanh = ?";
+                "WHERE CT.GaDi = ? AND CT.GaDen = ? AND CT.NgayKhoiHanh = ?" +
+                "AND (" +
+                "      CT.NgayKhoiHanh > CAST(GETDATE() AS DATE) \n" +
+                "      OR (CT.NgayKhoiHanh = CAST(GETDATE() AS DATE) AND CT.GioKhoiHanh > CAST(GETDATE() AS TIME))\n" +
+                "  )";
 
         try (Connection con = ConnectDB.getConnection();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
@@ -738,5 +742,20 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
             }
         }
         return false;
+    }
+    // Trong ChuyenTauDao.java
+    public boolean kiemTraDaCoLichTrinhNgay(String maTuyen, String ngayGocStr) throws SQLException {
+        // Logic: Tìm bất kỳ chuyến tàu nào có mã bắt đầu bằng "SE1_201225_"
+        // Nếu tồn tại dù chỉ 1 chặng, nghĩa là ngày đó đã được khởi tạo rồi.
+        String prefix = maTuyen.trim() + "_" + ngayGocStr + "_%";
+        String sql = "SELECT TOP 1 1 FROM ChuyenTau WHERE MaChuyenTau LIKE ?";
+
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, prefix);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next(); // Trả về true nếu đã có dữ liệu
+            }
+        }
     }
 }
