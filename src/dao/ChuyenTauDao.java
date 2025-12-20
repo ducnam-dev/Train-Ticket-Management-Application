@@ -292,6 +292,7 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
 
     public List<ChuyenTau> timChuyenTauTheoGaVaNgayDi(String gaXP, String gaKT, String ngayDi) {
         List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
+        System.out.println(gaXP + " | " + gaKT + " | " + ngayDi);
 
         // SQL Tối ưu (JOIN tất cả các bảng phụ)
         String sql = "SELECT CT.*, " +
@@ -351,6 +352,7 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
                     }
 
                     ChuyenTau ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
+
                     danhSachChuyenTau.add(ct);
                 }
             }

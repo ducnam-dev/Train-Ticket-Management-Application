@@ -1,2 +1,21 @@
+# --- Bỏ các file và thư mục không quan trọng khi commit
+
+# --- Các file biên dịch Java ---
 /classes/
 *.class
+
+# --- IntelliJ IDEA (QUAN TRỌNG) ---
+# File này chứa cấu hình cá nhân, tuyệt đối không push
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/shelf/
+
+# Thư mục build mặc định của IntelliJ (chứa file .class biên dịch ra)
+/out/
+
+# --- macOS (Vì thấy bạn dùng Mac) ---
+.DS_Store
+
+# --- Các file log hệ thống ---
+*.log

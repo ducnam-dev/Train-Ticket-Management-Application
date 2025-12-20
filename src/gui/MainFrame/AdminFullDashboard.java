@@ -472,9 +472,16 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
     public static void main(String[] args) {
 
         try {
+            // Set Metal Look and Feel
+            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+        } catch (Exception e) {
+            System.err.println("Không set được Metal LAF: " + e.getMessage());
+        }
+
+        try {
             // MOCKUP NhanVien Admin
             NhanVien nvMock = new NhanVien("ADMIN001", "Admin Tổng", "0999888777");
-            CaLamViec.getInstance().batDauCa(nvMock); // Giả lập ca làm việc đã bắt đầu
+            CaLamViec.getInstance().batDauCa(nvMock);
         } catch (Exception e) {
             System.err.println("Lỗi MOCKUP NhanVien/CaLamViec: " + e.getMessage());
         }

@@ -1,5 +1,8 @@
 package gui.Panel;
 
+import gui.MainFrame.BanVeDashboard;
+import gui.Panel.ManHinhBanVe_DoiVe;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -14,31 +17,25 @@ import java.util.Vector;
 
 import com.toedter.calendar.JDateChooser;
 import dao.GaDao;
-import dao.DTO.ThongTinVeDTODAO; // Import DAO
+import dao.DTO.ThongTinVeDTODAO;
 import database.ConnectDB;
-import entity.DTO.ThongTinVeDTO;   // Import DTO
+import entity.DTO.ThongTinVeDTO;
 import entity.Ga;
 
 public class ManHinhDoiVe extends JPanel {
 
     private static final Font GLOBAL_FONT = new Font("Arial", Font.PLAIN, 13);
 
-    // --- KHAI BÁO BIẾN UI ---
+    // --- UI ---
     private JPanel pnlListTickets;
     private JTextField txtNhapThongTin;
     private JComboBox<String> cboTimKiemTheo;
     private JComboBox<String> cboGaDi;
     private JComboBox<String> cboGaDen;
     private JDateChooser dateChooserNgayDi;
-
-    // Biến toàn cục nút Đổi toàn bộ để xử lý Enable/Disable
     private JButton btnDoiToanBo;
 
-    // --- DAO ---
     private ThongTinVeDTODAO ticketDao;
-
-    // Lưu ý: Không còn dùng List<DTO> toàn cục để xử lý đổi vé nữa
-    // mà sẽ quét trực tiếp trên giao diện như bạn yêu cầu.
 
     public ManHinhDoiVe() {
         ticketDao = new ThongTinVeDTODAO();
@@ -50,7 +47,7 @@ public class ManHinhDoiVe extends JPanel {
         setBackground(Color.WHITE);
 
         // =========================================================================
-        // 1. PHẦN TOP (TÌM KIẾM & LỌC)
+        // PHẦN TOP (GIỮ NGUYÊN)
         // =========================================================================
         JPanel pnlTop = new JPanel(new GridBagLayout());
         pnlTop.setBorder(new EmptyBorder(15, 15, 15, 15));
@@ -59,7 +56,6 @@ public class ManHinhDoiVe extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // --- Hàng 1: Tìm kiếm ---
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
         pnlTop.add(createLabel("Tìm kiếm theo :"), gbc);
 
@@ -88,7 +84,6 @@ public class ManHinhDoiVe extends JPanel {
         pnlBtnRow1.add(btnXoaInput);
         pnlTop.add(pnlBtnRow1, gbc);
 
-        // --- Hàng 2: Bộ lọc ---
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
         gbc.insets = new Insets(15, 10, 5, 5);
         pnlTop.add(createLabel("Ga đi :"), gbc);
@@ -155,14 +150,12 @@ public class ManHinhDoiVe extends JPanel {
         pnlResultArea.add(scrollPane, BorderLayout.CENTER);
 
         JPanel pnlFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnQuayLai = createStyledButton("Quay lại", new Color(230, 124, 50), Color.WHITE);
+
         JButton btnXoaTrang = createStyledButton("Xóa trắng", new Color(234, 67, 53), Color.WHITE);
 
-        // Khởi tạo nút Đổi toàn bộ -> DISABLE BAN ĐẦU
         btnDoiToanBo = createStyledButton("Đổi toàn bộ", new Color(40, 70, 220), Color.WHITE);
         btnDoiToanBo.setEnabled(false);
 
-        pnlFooter.add(btnQuayLai);
         pnlFooter.add(btnXoaTrang);
         pnlFooter.add(btnDoiToanBo);
         pnlResultArea.add(pnlFooter, BorderLayout.SOUTH);
@@ -198,9 +191,6 @@ public class ManHinhDoiVe extends JPanel {
                 }
 
                 results.removeIf(java.util.Objects::isNull);
-
-                // Cập nhật trạng thái nút Đổi toàn bộ dựa trên kết quả tìm kiếm
-                // Nếu có kết quả -> Enable nút để người dùng thao tác
                 btnDoiToanBo.setEnabled(!results.isEmpty());
 
                 if (results.isEmpty()) {
@@ -268,7 +258,6 @@ public class ManHinhDoiVe extends JPanel {
                     results = ticketDao.getVeTheoCCCDVaLoTrinh(input, gaDi, gaDen, ngayKhoiHanhSQL);
                 }
 
-                // Cập nhật trạng thái nút
                 btnDoiToanBo.setEnabled(!results.isEmpty());
 
                 if (results.isEmpty()) {
@@ -289,7 +278,7 @@ public class ManHinhDoiVe extends JPanel {
             pnlListTickets.repaint();
         });
 
-        // --- NÚT XÓA / RESET ---
+        // --- NÚT RESET ---
         btnXoaLoc.addActionListener(e -> {
             cboGaDi.setSelectedIndex(0);
             cboGaDen.setSelectedIndex(0);
@@ -304,8 +293,6 @@ public class ManHinhDoiVe extends JPanel {
             pnlListTickets.removeAll();
             pnlListTickets.repaint();
             txtNhapThongTin.requestFocus();
-
-            // Xóa hết thì disable nút đổi
             btnDoiToanBo.setEnabled(false);
         });
 
@@ -313,44 +300,36 @@ public class ManHinhDoiVe extends JPanel {
             pnlListTickets.removeAll();
             pnlListTickets.revalidate();
             pnlListTickets.repaint();
-
-            // Xóa hết thì disable nút đổi
             btnDoiToanBo.setEnabled(false);
         });
 
         // =========================================================================
-        // LOGIC NÚT ĐỔI TOÀN BỘ (SỬA LẠI: DUYỆT CÁC PANEL TRÊN MÀN HÌNH)
+        // LOGIC THU THẬP DỮ LIỆU ĐỔI VÉ
         // =========================================================================
-        // =========================================================================
-// LOGIC NÚT ĐỔI TOÀN BỘ (SỬA LẠI: THÊM JOPTIONPANE XÁC NHẬN)
-// =========================================================================
         btnDoiToanBo.addActionListener(e -> {
             List<ThongTinVeDTO> danhSachVeCanDoi = new ArrayList<>();
 
-            // 1. Lấy tất cả component con đang nằm trong pnlListTickets
+            // 1. Duyệt qua các TicketPanel để lấy vé hợp lệ
             Component[] components = pnlListTickets.getComponents();
-
-            // 2. Duyệt qua từng component để lấy dữ liệu
             for (Component comp : components) {
                 if (comp instanceof TicketPanel) {
                     TicketPanel panel = (TicketPanel) comp;
+
+                    // --- MẤU CHỐT: Lấy DTO từ Panel ---
+                    // DTO này đã chứa đủ MaKhachHang, MaLoaiVe, NgaySinh nhờ DAO đã được cập nhật
                     ThongTinVeDTO ve = panel.getTicket();
 
-                    // Kiểm tra điều kiện đổi vé lần nữa cho chắc chắn
                     if (checkDieuKienDoiVe(ve)) {
                         danhSachVeCanDoi.add(ve);
                     }
                 }
             }
 
-            // 3. Xử lý sau khi duyệt
             if (danhSachVeCanDoi.isEmpty()) {
-                // Nếu không có vé nào hợp lệ (hoặc list trống)
                 JOptionPane.showMessageDialog(this,
                         "Không tìm thấy vé nào đủ điều kiện đổi trên màn hình!",
                         "Thông báo", JOptionPane.WARNING_MESSAGE);
             } else {
-                // --- THÊM HỘP THOẠI XÁC NHẬN TẠI ĐÂY ---
                 String msg = "Tìm thấy " + danhSachVeCanDoi.size() + " vé hợp lệ.\n"
                         + "Bạn có chắc chắn muốn đổi TOÀN BỘ danh sách này không?";
 
@@ -358,12 +337,23 @@ public class ManHinhDoiVe extends JPanel {
                         "Xác nhận đổi toàn bộ", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
                 if (choice == JOptionPane.YES_OPTION) {
-                    System.out.println("User chọn YES. Đang xử lý " + danhSachVeCanDoi.size() + " vé...");
+                    // --- GỌI HÀM IN KIỂM TRA RA CONSOLE ---
+                    inDanhSachVeRaConsole(danhSachVeCanDoi, "DANH SÁCH ĐỔI TOÀN BỘ");
 
-                    // ========================================================================
-                    // TODO: CHUYỂN MÀN HÌNH BÁN VÉ TẠI ĐÂY (CHO LIST)
-                    // Truyền 'danhSachVeCanDoi' sang màn hình mới.
-                    // ========================================================================
+                    ManHinhBanVe_DoiVe panelDoiVeMoi = new ManHinhBanVe_DoiVe(danhSachVeCanDoi);
+                    Window win = SwingUtilities.getWindowAncestor(this);
+
+                    if (win instanceof BanVeDashboard) {
+                        BanVeDashboard dashboard = (BanVeDashboard) win;
+                        dashboard.themHoacCapNhatCard(panelDoiVeMoi, "banVe_cheDoDoiVe");
+                        dashboard.chuyenManHinh("banVe_cheDoDoiVe");
+                    } else {
+                        JDialog dialog = new JDialog((Frame) win, "Đổi Vé", true);
+                        dialog.setContentPane(panelDoiVeMoi);
+                        dialog.setSize(1200, 800);
+                        dialog.setLocationRelativeTo(null);
+                        dialog.setVisible(true);
+                    }
                 }
             }
         });
@@ -380,23 +370,28 @@ public class ManHinhDoiVe extends JPanel {
         loadDataToCombobox();
     }
 
-    // --- HÀM LOGIC: KIỂM TRA ĐIỀU KIỆN ĐỔI VÉ ---
     private boolean checkDieuKienDoiVe(ThongTinVeDTO t) {
         if (t == null) return false;
-
-        // 1. Kiểm tra đã hủy chưa
-        if ("Đã hủy".equalsIgnoreCase(t.getTrangThai())) {
-            return false;
-        }
-
-        // 2. Kiểm tra hạn đổi (trước 24h)
+        if ("Đã hủy".equalsIgnoreCase(t.getTrangThai())) return false;
         if (t.getNgayKhoiHanh() != null && t.getGioKhoiHanh() != null) {
             LocalDateTime departureTime = LocalDateTime.of(t.getNgayKhoiHanh(), t.getGioKhoiHanh());
             LocalDateTime deadline = departureTime.minusHours(24);
-            // Nếu hiện tại đã quá deadline -> Không được đổi
             return !LocalDateTime.now().isAfter(deadline);
         }
         return true;
+    }
+
+    // --- HÀM IN KIỂM TRA DỮ LIỆU ĐƯỢC THU THẬP ---
+    private void inDanhSachVeRaConsole(List<ThongTinVeDTO> list, String title) {
+        System.out.println("\n====== " + title + " ======");
+        for (ThongTinVeDTO ve : list) {
+            System.out.println("Vé: " + ve.getMaVe());
+            System.out.println(" - Khách: " + ve.getHoTen() + " (" + ve.getMaKhachHang() + ")");
+            System.out.println(" - Ngày sinh: " + ve.getNgaySinhStr());
+            System.out.println(" - Loại vé: " + ve.getTenLoaiVe() + " (" + ve.getMaLoaiVe() + ")");
+            System.out.println("------------------------------------");
+        }
+        System.out.println("==================================================\n");
     }
 
     private void loadDataToCombobox() {
@@ -469,19 +464,16 @@ public class ManHinhDoiVe extends JPanel {
     // CLASS TICKET PANEL
     // =================================================================================
     public class TicketPanel extends JPanel {
-        // UI Components
         public JLabel lblMaVe, lblHoTen, lblCCCD, lblMaChuyen;
         public JLabel lblGaDi, lblNgayDi, lblGioDi;
         public JLabel lblGaDen, lblNgayDen, lblGioDen;
         public JLabel lblSoHieuTau, lblKhoang, lblGiaVe, lblSoCho;
-        public JLabel lblLoaiVe, lblGioiTinh, lblSDT;
+        public JLabel lblLoaiVe, lblNgaySinh, lblSDT;
         public JLabel lblToa, lblTang, lblTrangThai;
         public JButton btnDoiVe, btnClose;
 
-        // Biến lưu trữ DTO để sau này getComponents() có thể lấy được
         private ThongTinVeDTO currentTicketDTO;
 
-        // Fonts & Formatter
         private final Font FONT_LABEL = new Font("Arial", Font.PLAIN, 16);
         private final Font FONT_VALUE = new Font("Arial", Font.PLAIN, 16);
         private final Font FONT_STATION = new Font("Arial", Font.BOLD, 20);
@@ -490,56 +482,73 @@ public class ManHinhDoiVe extends JPanel {
         public TicketPanel() {
             initUI();
 
-            // Xử lý sự kiện nút Đổi vé đơn lẻ
+            // Xử lý sự kiện nút Đổi vé đơn lẻ (BÊN TRONG TicketPanel)
             btnDoiVe.addActionListener(e -> {
                 if (currentTicketDTO != null) {
-
-                    // BƯỚC 1: KIỂM TRA HỢP LỆ (Logic nghiệp vụ)
-                    // Gọi hàm checkDieuKienDoiVe từ lớp cha (ManHinhDoiVe.this)
+                    // 1. Kiểm tra điều kiện đổi vé
                     if (!ManHinhDoiVe.this.checkDieuKienDoiVe(currentTicketDTO)) {
                         JOptionPane.showMessageDialog(this,
                                 "Vé này không đủ điều kiện đổi (Quá hạn đổi hoặc đã hủy)!",
                                 "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        return; // Dừng lại ngay
+                        return;
                     }
 
-                    // BƯỚC 2: HỘP THOẠI XÁC NHẬN (Confirm Dialog)
+                    // 2. Hộp thoại xác nhận
                     int choice = JOptionPane.showConfirmDialog(this,
                             "Bạn có chắc chắn muốn đổi vé mã: " + currentTicketDTO.getMaVe() + " không?",
                             "Xác nhận đổi vé", JOptionPane.YES_NO_OPTION);
 
-                    // BƯỚC 3: XỬ LÝ NẾU CHỌN YES
                     if (choice == JOptionPane.YES_OPTION) {
+                        // 3. Tạo danh sách chứa 1 vé duy nhất
                         List<ThongTinVeDTO> singleList = new ArrayList<>();
                         singleList.add(currentTicketDTO);
 
-                        System.out.println("User chọn YES. Đang đổi vé lẻ: " + currentTicketDTO.getMaVe());
+                        // --- GỌI HÀM IN KIỂM TRA RA CONSOLE (Tùy chọn) ---
+                        inDanhSachVeRaConsole(singleList, "DANH SÁCH ĐỔI VÉ LẺ");
 
-                        // ========================================================================
-                        // TODO: CHUYỂN MÀN HÌNH BÁN VÉ TẠI ĐÂY (CHO 1 VÉ)
-                        // Truyền 'singleList' sang màn hình mới.
-                        // ========================================================================
+                        // 4. Khởi tạo màn hình Bán Vé (Chế độ Đổi)
+                        ManHinhBanVe_DoiVe panelDoiVeMoi = new ManHinhBanVe_DoiVe(singleList);
+
+                        // 5. Lấy cửa sổ cha (Dashboard)
+                        Window win = SwingUtilities.getWindowAncestor(TicketPanel.this);
+
+                        if (win instanceof gui.MainFrame.BanVeDashboard) {
+                            gui.MainFrame.BanVeDashboard dashboard = (gui.MainFrame.BanVeDashboard) win;
+
+                            // 6. Thêm Panel mới vào CardLayout và hiển thị
+                            dashboard.themHoacCapNhatCard(panelDoiVeMoi, "banVe_cheDoDoiVe");
+                            dashboard.chuyenManHinh("banVe_cheDoDoiVe");
+                        } else {
+                            // Dự phòng cho trường hợp chạy test độc lập
+                            JDialog dialog = new JDialog((Frame) win, "Đổi Vé Lẻ", true);
+                            dialog.setContentPane(panelDoiVeMoi);
+                            dialog.setSize(1200, 800);
+                            dialog.setLocationRelativeTo(null);
+                            dialog.setVisible(true);
+                        }
                     }
                 }
             });
         }
 
-        // --- Hàm lấy dữ liệu vé từ Panel này (Quan trọng cho nút Đổi toàn bộ) ---
         public ThongTinVeDTO getTicket() {
             return this.currentTicketDTO;
         }
 
         public void setTicket(ThongTinVeDTO t) {
-            this.currentTicketDTO = t; // Lưu lại DTO
+            this.currentTicketDTO = t;
 
             lblMaVe.setText(t.getMaVe());
             lblHoTen.setText(t.getHoTen());
             lblCCCD.setText(t.getCccd());
             lblMaChuyen.setText(t.getMaChuyenTau());
-            lblGaDi.setText(t.getGaDi());
+
+            // --- SỬA HIỂN THỊ TÊN GA [MÃ GA] ---
+            lblGaDi.setText(t.getGaDi() + " [" + t.getMaGaDi() + "]");
+            lblGaDen.setText(t.getGaDen() + " [" + t.getMaGaDen() + "]");
+
             lblNgayDi.setText(t.getNgayDiStr());
             lblGioDi.setText(t.getGioDiStr());
-            lblGaDen.setText(t.getGaDen());
             lblNgayDen.setText(t.getNgayDenStr());
             lblGioDen.setText(t.getGioDenStr());
             lblSoHieuTau.setText(t.getSoHieuTau());
@@ -548,14 +557,15 @@ public class ManHinhDoiVe extends JPanel {
             lblKhoang.setText(t.getKhoang());
             lblTang.setText(t.getTang());
             lblLoaiVe.setText(t.getTenLoaiVe());
+
+            // --- GỌI HÀM getNgaySinhStr() ĐÃ FORMAT SẴN TRONG DTO ---
+            lblNgaySinh.setText(t.getNgaySinhStr());
+
             lblSDT.setText(t.getSoDienThoai());
             lblGiaVe.setText(currencyVN.format(t.getGiaVe()) + " VND");
 
-            // Tái sử dụng logic kiểm tra từ hàm chung của lớp cha
             boolean allowChange = checkDieuKienDoiVe(t);
-
             if (!allowChange) {
-                // Logic hiển thị khi không đổi được
                 if ("Đã hủy".equalsIgnoreCase(t.getTrangThai())) {
                     lblTrangThai.setText("Đã hủy");
                     lblTrangThai.setForeground(Color.RED);
@@ -584,7 +594,6 @@ public class ManHinhDoiVe extends JPanel {
             setBorder(new LineBorder(new Color(76, 175, 80), 3));
             setPreferredSize(new Dimension(0, 400));
 
-            // Header (Close Button) - Logic xóa Panel
             JPanel pnlHeader = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
             pnlHeader.setOpaque(false);
             btnClose = new JButton("X");
@@ -597,7 +606,7 @@ public class ManHinhDoiVe extends JPanel {
             btnClose.addActionListener(e -> {
                 Container parent = this.getParent();
                 if(parent != null) {
-                    parent.remove(this); // Xóa chính nó khỏi giao diện
+                    parent.remove(this);
                     parent.revalidate();
                     parent.repaint();
                 }
@@ -605,12 +614,10 @@ public class ManHinhDoiVe extends JPanel {
             pnlHeader.add(btnClose);
             add(pnlHeader, BorderLayout.NORTH);
 
-            // Body
             JPanel pnlContent = new JPanel(new GridBagLayout());
             pnlContent.setOpaque(false);
             pnlContent.setBorder(new EmptyBorder(0, 20, 0, 20));
 
-            // Init Labels
             lblMaVe = new JLabel(); lblHoTen = new JLabel(); lblCCCD = new JLabel();
             lblMaChuyen = new JLabel();
             lblGaDi = new JLabel(); lblGaDi.setFont(FONT_STATION);
@@ -620,7 +627,7 @@ public class ManHinhDoiVe extends JPanel {
             lblSoHieuTau = new JLabel(); lblSoHieuTau.setFont(new Font("Arial", Font.BOLD, 19));
             lblSoCho = new JLabel(); lblSoCho.setFont(new Font("Arial", Font.BOLD, 16));
             lblKhoang = new JLabel(); lblGiaVe = new JLabel();
-            lblLoaiVe = new JLabel(); lblGioiTinh = new JLabel(); lblSDT = new JLabel();
+            lblLoaiVe = new JLabel(); lblNgaySinh = new JLabel(); lblSDT = new JLabel();
             lblToa = new JLabel(); lblTang = new JLabel();
             lblTrangThai = new JLabel(); lblTrangThai.setFont(new Font("Arial", Font.BOLD, 16));
 
@@ -631,6 +638,10 @@ public class ManHinhDoiVe extends JPanel {
 
             addLabelPair(pnlContent, "Mã vé : ", lblMaVe, 0, 0);
             addLabelPair(pnlContent, "Họ tên : ", lblHoTen, 0, 1);
+
+            // --- HIỂN THỊ NGÀY SINH ---
+            addLabelPair(pnlContent, "Ngày Sinh : ", lblNgaySinh, 2, 1);
+
             addLabelPair(pnlContent, "Số CCCD/Định danh : ", lblCCCD, 0, 2);
             addLabelPair(pnlContent, "Loại vé : ", lblLoaiVe, 2, 0);
             addLabelPair(pnlContent, "Số điện thoại : ", lblSDT, 2, 2);
