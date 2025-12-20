@@ -1,19 +1,28 @@
 package view;
 
+import dao.TuyenDao;
+import entity.Tuyen;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+
+
 public class ManHinhQuanLyDonGiaTuyen extends JPanel {
     private JTable tableTuyen;
     private DefaultTableModel tableModel;
     private JTextField txtMaTuyen, txtTenTuyen, txtDonGia;
     private JButton btnCapNhat;
+
+    private static final TuyenDao tuyenDao = new TuyenDao();
 
     public ManHinhQuanLyDonGiaTuyen() {
         // Sử dụng BorderLayout với khoảng cách 15px giữa các thành phần
@@ -126,27 +135,60 @@ public class ManHinhQuanLyDonGiaTuyen extends JPanel {
     }
 
     private void taiDuLieu() {
+//        tableModel.setRowCount(0);
+//        tableModel.addRow(new Object[]{"SE1", "Tàu Thống Nhất Bắc Nam", 1000});
+//        tableModel.addRow(new Object[]{"SE2", "Tàu siêu tốc Nam Bắc", 1200});
+//        tableModel.addRow(new Object[]{"SPT2", "Tàu Sài Gòn - Phan Thiết", 1500});
+
+
         tableModel.setRowCount(0);
-        tableModel.addRow(new Object[]{"SE1", "Tàu Thống Nhất Bắc Nam", 1000});
-        tableModel.addRow(new Object[]{"SE2", "Tàu siêu tốc Nam Bắc", 1200});
-        tableModel.addRow(new Object[]{"SPT2", "Tàu Sài Gòn - Phan Thiết", 1500});
+        try {
+            List<Tuyen> danhSachTuyen = tuyenDao.layTatCaTuyen();
+            for (Tuyen t : danhSachTuyen) {
+                tableModel.addRow(new Object[]{t.getMaTuyen(), t.getTenTuyen(), t.getDonGiaKM()});
+            }
+        } catch (SQLException e) {
+            System.err.println ("Lỗi tải dữ liệu Tuyến: " + e.getMessage());
+        }
+
     }
 
     private void capNhatDonGia() {
-        String ma = txtMaTuyen.getText();
+        String ma = txtMaTuyen.getText().trim();
+        String giaStr = txtDonGia.getText().trim();
+
+        // 1. Kiểm tra rỗng
         if (ma.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn một tuyến từ bảng!");
             return;
         }
-        try {
-            int giaMoi = Integer.parseInt(txtDonGia.getText().trim());
-            if (giaMoi < 0) throw new NumberFormatException();
 
-            // Logic cập nhật vào CSDL ở đây
-            JOptionPane.showMessageDialog(this, "Đã cập nhật đơn giá cho tuyến " + ma + " thành công!");
-            taiDuLieu();
+        try {
+            // 2. Kiểm tra định dạng số
+            double giaMoi = Double.parseDouble(giaStr);
+            if (giaMoi < 0) {
+                JOptionPane.showMessageDialog(this, "Lỗi: Đơn giá không được âm!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // 3. Gọi logic cập nhật vào CSDL
+            // Giả sử bạn đã khởi tạo đối tượng DAO (ví dụ: tuyenDAO)
+            TuyenDao tuyenDAO = new TuyenDao();
+            boolean result = tuyenDAO.suaGiaTheoMaTuyen(ma, giaMoi);
+
+            // 4. Thông báo kết quả
+            if (result) {
+                JOptionPane.showMessageDialog(this, "Đã cập nhật đơn giá cho tuyến " + ma + " thành công!");
+                taiDuLieu(); // Làm mới bảng hiển thị
+            } else {
+                JOptionPane.showMessageDialog(this, "Cập nhật thất bại. Có thể mã tuyến không tồn tại!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            }
+
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Lỗi: Đơn giá phải là số nguyên dương!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Lỗi: Đơn giá phải là một con số!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi kết nối cơ sở dữ liệu: " + ex.getMessage(), "Lỗi SQL", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }
 }

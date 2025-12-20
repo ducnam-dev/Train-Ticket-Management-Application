@@ -13,6 +13,7 @@ public class NghiepVuTinhGiaVe {
     private static final ToaDAO toaDao = new ToaDAO();
     private static final LoaiChoDatDAO loaiChoDatDao = new LoaiChoDatDAO();
     private static final LoaiVeDAO loaiVeDao = new LoaiVeDAO();
+    private static final TuyenDao tuyenDao = new TuyenDao();
 
     /**
      * Hàm tính giá vé tổng thể
@@ -28,9 +29,11 @@ public class NghiepVuTinhGiaVe {
         } catch (SQLException e) {
             throw new Exception("Lỗi khi tính khoảng cách: " + e.getMessage());
         }
+        // lấy đơn gia theo km từ tuyến dao
+        int donGiaTheoKm = tuyenDao.layGiaDonGia(maTuyen);
 
         // 3. Tính giá cơ bản
-        long basePrice = khoangCachKm * DON_GIA_MOI_KM;
+        long basePrice = khoangCachKm * donGiaTheoKm;
 
         // 4. Lấy hệ số toa (Loại chỗ: Ghế mềm, Giường nằm...)
         double heSoToa = layHeSoToa(cho.getMaToa(), maChuyenTau);
@@ -45,8 +48,6 @@ public class NghiepVuTinhGiaVe {
     }
 
     private static double layHeSoToa(String maToa, String maChuyenTau) throws Exception {
-        // Tìm thông tin tàu từ mã chuyến để biết toa đó thuộc loại gì trong chuyến đó
-        // (Trong thực tế bạn có thể truyền thẳng ChuyenTau vào để tối ưu)
         ChuyenTauDao ctDao = new ChuyenTauDao();
         ChuyenTau ct = ctDao.layChuyenTauBangMa(maChuyenTau);
         if (ct == null) throw new Exception("Không tìm thấy thông tin chuyến tàu.");

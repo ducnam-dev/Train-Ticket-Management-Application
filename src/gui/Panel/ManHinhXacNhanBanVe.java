@@ -166,18 +166,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
             return null;
         }
     }
-    // Helper để lấy tên loại vé (Vì Record ChiTietKhach có tenLoaiVeHienThi)
-    private String getTenLoaiVeHienThi(Object khach) {
-        String maLoaiVe = getKhachField(khach, "maLoaiVe", String.class);
-        if (maLoaiVe == null) return "Chưa xác định";
-        return switch (maLoaiVe) {
-            case "VT01" -> "Người lớn";
-            case "VT02" -> "Trẻ em";
-            case "VT03" -> "Người cao tuổi";
-            case "VT04" -> "Sinh viên";
-            default -> "Khác";
-        };
-    }
+
 
     private JPanel taoPanelTrai() {
         JPanel panelTrai = new JPanel();
@@ -212,25 +201,70 @@ public class ManHinhXacNhanBanVe extends JPanel {
         JPanel noiDung = new JPanel(new GridLayout(0, 1));
         noiDung.setOpaque(false);
 
-        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        String ngayStr = ngayDi != null ? df.format(ngayDi) : "-";
+        //mã chuyến tàu là SE1_251218_HAN_SAG
 
-        noiDung.add(new JLabel("Mã tàu: " + (maChuyen != null ? maChuyen : "-")));
-        //ga đi ga đến
-        // Ngày giờ khởi hàng (ngày đi)
-        // Tàu, toa, số ghế
-        /*
-        Sài gòn  - phan thiết  20/12/2023 08:00
-        2 hàng khách
+        ChuyenTau chuyenTau = ChuyenTauDao.layChuyenTauBangMa(maChuyen);
 
-         */
+        String tuyenStr = "-";
+        String tenGaDi = "Chưa xác định";
+        String tenGaDen = "Chưa xác định";
+        String maTau = "-";
+        String thoiGianHienThi = "-";
+        if (maChuyen != null && maChuyen.contains("_")) {
+            tuyenStr = chuyenTau.maTau;
 
-        noiDung.add(new JLabel("Ngày giờ: " + ngayStr));
-        int count = danhSachGhe != null ? danhSachGhe.size() : 0;
-        noiDung.add(new JLabel("Số lượng ghế: " + count));
+
+            String[] parts = maChuyen.split("_");
+            if (parts.length >= 4) {
+                maTau = parts[0]; // SE1
+                String maGaDi = parts[2]; // HAN
+                String maGaDen = parts[3]; // SAG
+
+                // Gọi DAO để lấy tên ga thực tế từ Database
+                GaDao gaDao = new GaDao();
+                Ga gaDi = gaDao.layGaBangMa(maGaDi);
+                Ga gaDen = gaDao.layGaBangMa(maGaDen);
+
+                if (gaDi != null) tenGaDi = gaDi.getTenGa();
+                if (gaDen != null) tenGaDen = gaDen.getTenGa();
+
+
+            }
+            DateTimeFormatter ngayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            DateTimeFormatter gioFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+            String ngay = chuyenTau.getNgayKhoiHanh().format(ngayFormatter);
+            String gio = chuyenTau.getGioKhoiHanh().format(gioFormatter);
+
+            thoiGianHienThi = gio + " ngày " + ngay;
+
+        }
+        //ngày đi chỉ thể hiện được này đi thôi, không thể hiện được giờ đi
+        int count = (danhSachGhe != null) ? danhSachGhe.size() : 0;
+
+        noiDung.add(new JLabel("Tuyến tàu: " + (tuyenStr != null ? tuyenStr : "-")));
+
+
+
+        // Tuyến đường: Ga Đi - Ga Đến
+        noiDung.add(new JLabel("Tuyến đường: " + tenGaDi + " ➔ " + tenGaDen));
+
+        // Thời gian khởi hành
+        noiDung.add(new JLabel("Khởi hành: "+ thoiGianHienThi));
+
+
+        // Mã tàu (đã tách từ mã chuyến)
+        noiDung.add(new JLabel("Số hiệu tàu: "+ maTau));
+
+
+        // Số lượng khách
+        noiDung.add(new JLabel("Số lượng: "+ count + " hành khách"));
+
 
         panelThongTin.add(noiDung, BorderLayout.CENTER);
         return panelThongTin;
+
     }
 
     private JPanel taoPanelDanhSachKhach() {
@@ -865,41 +899,18 @@ public class ManHinhXacNhanBanVe extends JPanel {
     private void xuLyLamTronTienMat() {
         double tongPhaiThanhToan = tinhTongHoaDon(tinhGiaVe(), khuyenMaiApDung).total;
         long tongFinal = Math.round(tongPhaiThanhToan);
-        long tongLamTron;
 
+        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
 
         if ("Tiền mặt".equals(cbHinhThuc.getSelectedItem().toString())) {
-            tongLamTron = lamTronLen(tongFinal);
 
-            // Ví dụ làm tròn đơn giản: Lên 50.000 gần nhất
-            long tong = Math.round(tongPhaiThanhToan);
+            txtTienKhachDua.setText(nf.format(tongFinal));
 
-            // Ví dụ: 120.000 -> 150.000; 180.000 -> 200.000
-            if (tong <= 0) {
-                tongLamTron = 0;
-            } else {
-                long boiSo = 50000L;
-                tongLamTron = (long) (Math.ceil(tong / (double) boiSo) * boiSo);
-                // Nếu làm tròn lên bằng chính nó hoặc thấp hơn, làm tròn lên mệnh giá 50k tiếp theo
-                if (tongLamTron < tong) {
-                    tongLamTron += boiSo;
-                }
-            }
+            txtTienKhachDua.setEditable(true);
 
-            // Nếu tổng tiền là 100.000, 150.000, 200.000, ... thì không cần làm tròn thêm
-            if (tongLamTron == 0 || tongLamTron == tong) {
-                // Giữ nguyên tổng tiền
-                tongLamTron = tong;
-            }
-
-            // Áp dụng số tiền thu đã làm tròn vào textfield
-            NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
-            txtTienKhachDua.setText(nf.format(tongLamTron));
-            txtTienKhachDua.setEditable(true); // Cho phép chỉnh sửa nếu khách đưa khác
             capNhatTienThoi(); // Cập nhật tiền thối lại ngay lập tức
         } else {
             // Chuyển khoản/Thẻ: Mặc định là tổng tiền hóa đơn
-            NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
             txtTienKhachDua.setText(nf.format(Math.round(tongPhaiThanhToan)));
             txtTienKhachDua.setEditable(false); // Không cần nhập tiền khách đưa
             txtTienThoiLai.setText(nf.format(0)); // Tiền thối lại là 0

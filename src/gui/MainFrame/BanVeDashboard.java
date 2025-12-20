@@ -125,16 +125,9 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         panel.add(nutTrangChu);
         panel.add(taoDuongKe());
 
-        // [2. Mở ca]
-        // Sử dụng đường dẫn của bạn: Train-Ticket-Management-Application\src\images\moca.png
-        nutMoCa = taoMucMenu("Mở ca", "/images/iconMenu/moca.png", "moCa");
-        panel.add(nutMoCa);
-        panel.add(taoDuongKe());
 
-        // [3. Kết ca]
-        nutKetCa = taoMucMenu("Kết ca", "/images/iconMenu/ketca.png", "ketCa");
-        panel.add(nutKetCa);
-        panel.add(taoDuongKe());
+
+
 
         // [4. Bán vé mới]
         nutBanVe = taoMucMenu("Bán vé", "/images/iconMenu/banve.png", "banVeMoi");

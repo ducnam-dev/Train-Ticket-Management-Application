@@ -7,10 +7,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import entity.ChuyenTau;
-import entity.Ga;
-import entity.NhanVien;
-import entity.Tau;
+import entity.*;
 import database.ConnectDB;
 import entity.lopEnum.TrangThaiChuyenTau;
 

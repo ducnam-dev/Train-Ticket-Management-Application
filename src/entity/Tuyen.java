@@ -9,7 +9,8 @@ public class Tuyen {
     private String maTuyen;
     private String tenTuyen;
     private String gaDau;   // Ga xuất phát của tuyến (ví dụ: 'HN')
-    private String gaCuoi;  // Ga cuối của tuyến (ví dụ: 'SG')
+    private String gaCuoi;// Ga cuối của tuyến (ví dụ: 'SG')
+    private int donGiaKM;
 
     // Constructors
     public Tuyen() {}
@@ -19,6 +20,13 @@ public class Tuyen {
         this.tenTuyen = tenTuyen;
         this.gaDau = gaDau;
         this.gaCuoi = gaCuoi;
+    }
+    public Tuyen(String maTuyen, String tenTuyen, String gaDau, String gaCuoi, int donGiaKM) {
+        this.maTuyen = maTuyen;
+        this.tenTuyen = tenTuyen;
+        this.gaDau = gaDau;
+        this.gaCuoi = gaCuoi;
+        this.donGiaKM = donGiaKM;
     }
 
     // Getters and Setters
@@ -52,6 +60,13 @@ public class Tuyen {
 
     public void setGaCuoi(String gaCuoi) {
         this.gaCuoi = gaCuoi;
+    }
+
+    public int getDonGiaKM() {
+        return donGiaKM;
+    }
+    public void setDonGiaKM(int donGiaKM) {
+        this.donGiaKM = donGiaKM;
     }
 
     // Override toString() để hiển thị trong JComboBox/JTable nếu cần
