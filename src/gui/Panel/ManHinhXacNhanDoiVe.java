@@ -238,7 +238,7 @@ public class ManHinhXacNhanDoiVe extends JPanel {
         box.setOpaque(false);
 
         lblTongTienCu = new JLabel("Tổng giá vé cũ (Hoàn lại): " + VN_MONEY.format(tongTienCu) + " VNĐ");
-        lblTongTienMoi = new JLabel("Tổng giá vé mới (Thu mới): " + VN_MONEY.format(tongTienMoi) + " VNĐ");
+        lblTongTienMoi = new JLabel("Tổng giá vé mới đã bao gồm phí đổi (Thu mới): " + VN_MONEY.format(tongTienMoi) + " VNĐ");
 
         String txtCL; Color colorCL;
         if (chenhLech > 0) {
