@@ -150,13 +150,12 @@ public class ManHinhDoiVe extends JPanel {
         pnlResultArea.add(scrollPane, BorderLayout.CENTER);
 
         JPanel pnlFooter = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnQuayLai = createStyledButton("Quay lại", new Color(230, 124, 50), Color.WHITE);
+
         JButton btnXoaTrang = createStyledButton("Xóa trắng", new Color(234, 67, 53), Color.WHITE);
 
         btnDoiToanBo = createStyledButton("Đổi toàn bộ", new Color(40, 70, 220), Color.WHITE);
         btnDoiToanBo.setEnabled(false);
 
-        pnlFooter.add(btnQuayLai);
         pnlFooter.add(btnXoaTrang);
         pnlFooter.add(btnDoiToanBo);
         pnlResultArea.add(pnlFooter, BorderLayout.SOUTH);

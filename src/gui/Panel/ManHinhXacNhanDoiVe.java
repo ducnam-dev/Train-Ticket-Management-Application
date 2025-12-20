@@ -245,10 +245,10 @@ public class ManHinhXacNhanDoiVe extends JPanel {
             txtCL = "KHÁCH CẦN TRẢ THÊM: " + VN_MONEY.format(chenhLech) + " VNĐ";
             colorCL = Color.RED;
         } else if (chenhLech < 0) {
-            txtCL = "HOÀN TIỀN CHO KHÁCH: " + VN_MONEY.format(Math.abs(chenhLech)) + " VNĐ";
+            txtCL = "HOÀN TIỀN : " + VN_MONEY.format(Math.abs(chenhLech)) + " VNĐ";
             colorCL = new Color(0, 100, 0);
         } else {
-            txtCL = "ĐỔI NGANG (KHÔNG CẦN THANH TOÁN)";
+            txtCL = "KHÔNG CẦN THANH TOÁN";
             colorCL = Color.BLUE;
         }
 
