@@ -11,6 +11,7 @@ import gui.MainFrame.AdminFullDashboard;
 import gui.MainFrame.BanVeDashboard;
 import control.VeSoDoTau;
 import org.apache.poi.ss.usermodel.*;
+import service.NghiepVuTinhGiaVe;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -109,6 +110,9 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private final KhachHangDAO khachHangDAO = new KhachHangDAO();
     private JPanel pnlDanhSachKhachHang;
 
+    private final NghiepVuTinhGiaVe nghiepVuTinhGiaVe = new NghiepVuTinhGiaVe();
+
+
 
     // ====================================================================================
     // MODULE: 2. RECORD CHI TIẾT KHÁCH (DỮ LIỆU TẠM THỜI)
@@ -142,6 +146,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         public ChiTietKhach withNgaySinh(String newNgaySinh) {
             return new ChiTietKhach(this.choDat, this.maLoaiVe, this.hoTen, this.cccd, this.sdt, newNgaySinh);
         }
+
     }
 
 
@@ -1391,8 +1396,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         if (age == -1 || age == 0) return MA_VE_DEFAULT; // Ngày sinh không hợp lệ/tuổi 0
 
-        // Ta sẽ sắp xếp các mã vé theo thứ tự ưu tiên (Tùy thuộc vào quy định kinh doanh)
-        //ưu tiên người lớn hơn là sinh viên VT01 > VT04 nếu cùng độ tuổi
 
         List<String> priorityOrder = List.of("VT02", "VT03", "VT01", "VT04");
 
@@ -1436,79 +1439,23 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         // Logic này giả định: tuoi >= tuoiMin VÀ tuoi <= tuoiMax
     }
 
-    private long roundUpToNextTen(long value) {
-        return ((value + 9) / 10) * 10;
-    }
 
     private long tinhGiaVeTau(ChoDat cho, String maLoaiVe) throws Exception {
-        // 1. Lấy thông tin Ga đi, Ga đến và Chuyến tàu hiện tại
         Ga gaDi = (Ga) cbGaDi.getSelectedItem();
         Ga gaDen = (Ga) cbGaDen.getSelectedItem();
-        if (gaDi == null || gaDen == null) throw new Exception("Ga đi hoặc ga đến chưa được chọn.");
 
-        GaTrongTuyenDao gaTrongTuyenDao = new GaTrongTuyenDao();
-
-        ChuyenTau ctHienTai = null;
-        if (maChuyenTauHienTai != null) {
-            for (ChuyenTau ct : ketQua) {
-                if (maChuyenTauHienTai.equals(ct.getMaChuyenTau())) {
-                    ctHienTai = ct;
-                    break;
-                }
-            }
+        if (gaDi == null || gaDen == null || maChuyenTauHienTai == null) {
+            throw new Exception("Thông tin chuyến tàu hoặc ga chưa đầy đủ.");
         }
 
-        if (ctHienTai == null) throw new Exception("Không xác định được thông tin chuyến tàu.");
-
-        String maTuyen = maChuyenTauHienTai.split("_")[0] ;
-        System.out.println(maChuyenTauHienTai);
-        System.out.println(maTuyen);
-        // 2. Tính khoảng cách giữa hai ga dựa trên tuyến của chuyến tàu
-        int khoangCachKm = 0;
-        try {
-            khoangCachKm = gaTrongTuyenDao.tinhKhoangCachGiuaHaiGa(
-                    maTuyen,
-                    gaDi.getMaGa(),
-                    gaDen.getMaGa()
-            );
-        } catch (SQLException e) {
-            throw new Exception("Lỗi khi tính khoảng cách: " + e.getMessage());
-        }
-
-        System.out.println(khoangCachKm);
-
-        // 3. Tính Giá cơ bản dựa trên km (Giả sử đơn giá là 1.000 VNĐ/km)
-        // Bạn có thể lấy đơn giá này từ một cấu hình hệ thống hoặc DAO khác
-        long donGiaMoiKm = 1000;
-        long base = khoangCachKm * donGiaMoiKm;
-
-        // 4. Lấy hệ số toa
-        ToaDAO tdao = new ToaDAO();
-        String maTau = ctHienTai.getMaTau();
-        List<Toa> toas = tdao.layToaTheoMaTau(maTau);
-        String loaiToa = null;
-
-        if (toas != null) {
-            for (Toa t : toas) {
-                if (t.getMaToa().equals(cho.getMaToa())) {
-                    loaiToa = t.getLoaiToa();
-                    break;
-                }
-            }
-        }
-        if (loaiToa == null) throw new Exception("Không tìm thấy thông tin loại toa cho ghế.");
-
-        double heSoToa = loaiChoDatDAO.getHeSoByLoaiToa(loaiToa);
-
-        // 5. Lấy hệ số loại vé (Người lớn, trẻ em, sinh viên...)
-        double heSoLoaiVe = loaiVeDAO.getHeSoByMaLoaiVe(maLoaiVe);
-
-        // 6. Tổng hợp công thức
-        double price = base * heSoToa * heSoLoaiVe;
-
-        // Làm tròn đến hàng chục nghìn hoặc hàng đơn vị theo quy tắc của bạn
-        long rounded = roundUpToNextTen(Math.round(price));
-        return rounded;
+        // Gọi Service xử lý logic
+        return NghiepVuTinhGiaVe.tinhGiaVe(
+                gaDi.getMaGa(),
+                gaDen.getMaGa(),
+                maChuyenTauHienTai,
+                cho,
+                maLoaiVe
+        );
     }
 
     // ====================================================================================

@@ -10,13 +10,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/control/QuanLyTrangThaiGhe.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/service/NghiepVuTinhGiaVe.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dao/ChuyenTauDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChuyenTauDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/ConnectDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/ConnectDB.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/LoaiChoDatDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/LoaiChoDatDAO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyChuyenTau.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyChuyenTau.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -314,7 +312,8 @@
     <MESSAGE value="xóa các class không cần thiết, pull code từ master của nam" />
     <MESSAGE value="sửa tuổi =&gt; ngày sinh, tìm khách hàng nhanh theo cccd. Ngày 13/12 thêm chức năng hiện thị chuyến tàu đẹp mắt hơn" />
     <MESSAGE value="sửa lý thành công khuyến mãi và 100% khuyến mãi" />
-    <option name="LAST_COMMIT_MESSAGE" value="sửa lý thành công khuyến mãi và 100% khuyến mãi" />
+    <MESSAGE value="hoàn thiện 100% chức năng hiện thị vé tàu siêu tối ưu &quot;Ghế X bị coi là ĐÃ ĐẶT nếu có một vé bất kỳ thuộc CÙNG TUYẾN, CÙNG NGÀY mà chặng đường của nó giao với chặng đường tôi đang tìm.&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="hoàn thiện 100% chức năng hiện thị vé tàu siêu tối ưu &quot;Ghế X bị coi là ĐÃ ĐẶT nếu có một vé bất kỳ thuộc CÙNG TUYẾN, CÙNG NGÀY mà chặng đường của nó giao với chặng đường tôi đang tìm.&quot;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -325,7 +324,7 @@
         </breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/dao/ChuyenTauDao.java</url>
-          <line>665</line>
+          <line>590</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>

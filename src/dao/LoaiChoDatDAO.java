@@ -55,6 +55,4 @@ public class LoaiChoDatDAO {
         return mock.getOrDefault(loaiToa, 1.0);
     }
 
-
-
 }

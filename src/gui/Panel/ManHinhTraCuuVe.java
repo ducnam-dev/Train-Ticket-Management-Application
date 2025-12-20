@@ -2,7 +2,7 @@ package gui.Panel;
 
 import dao.VeDAO;
 import entity.*;
-import gui.Popup.TicketPanel;
+import gui.Popup.PopUpVeTau;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -131,7 +131,7 @@ public class ManHinhTraCuuVe extends JPanel implements ActionListener {
                 SwingUtilities.getWindowAncestor(this),
                 "Chi tiết vé: " + ve.getMaVe(),
                 Dialog.ModalityType.APPLICATION_MODAL // Sử dụng Constructor JDialog(Window, String, ModalityType)
-        );        TicketPanel ticketPanel = new TicketPanel(ve);
+        );        PopUpVeTau ticketPanel = new PopUpVeTau(ve);
 
         dialog.getContentPane().add(ticketPanel, BorderLayout.CENTER);
 

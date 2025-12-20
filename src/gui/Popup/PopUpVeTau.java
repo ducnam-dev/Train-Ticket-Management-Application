@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public class TicketPanel extends JPanel {
+public class PopUpVeTau extends JPanel {
 
     private Ve ve;
     private static final Font FONT_MONOSPACE = new Font(Font.MONOSPACED, Font.PLAIN, 12);
@@ -22,7 +22,7 @@ public class TicketPanel extends JPanel {
     private static final int QR_SIZE = 180;
 
     // Constructor nhận đối tượng Ve
-    public TicketPanel(Ve ve) {
+    public PopUpVeTau(Ve ve) {
         this.ve = ve;
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
