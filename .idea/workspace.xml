@@ -11,7 +11,6 @@
   <component name="ChangeListManager">
     <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="fix bán vé">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe_DoiVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe_DoiVe.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -104,7 +103,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "fix-chuc-nang-ban-ve-2.0",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/06_Study/Stuby IUH/Hoc ki 5/Phat trien ung dung/DU AN/Train-Ticket-Management-Application/sql",
@@ -180,8 +179,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhQuanLyGiaVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhQuanLyGiaVe" />
+    <configuration name="ManHinhQuanLyChuyenTau" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhQuanLyChuyenTau" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -209,10 +208,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.BanVeDashboard" />
-        <item itemvalue="Application.ManHinhBanVe" />
+        <item itemvalue="Application.ManHinhQuanLyChuyenTau" />
         <item itemvalue="Application.ManHinhTongQuanGiaVe" />
         <item itemvalue="Application.AdminFullDashboard" />
-        <item itemvalue="Application.ManHinhQuanLyGiaVe" />
+        <item itemvalue="Application.ManHinhBanVe" />
       </list>
     </recent_temporary>
   </component>

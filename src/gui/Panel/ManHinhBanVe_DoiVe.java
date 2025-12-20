@@ -454,9 +454,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         this.maVeDangActive = maVeMoi;
         if (maToaHienTai != null && maChuyenTauHienTai != null) {
             String loaiToa = layLoaiToa(maToaHienTai);
-            String gaDi = ((Ga) cbGaDi.getSelectedItem()).getTenGa();
-            String gaDen = ((Ga) cbGaDen.getSelectedItem()).getTenGa();
-            List<ChoDat> listGhe = choDatDao.getDanhSachChoDatTheoPhanChanh(maToaHienTai, maChuyenTauHienTai, gaDi, gaDen);
+            List<ChoDat> listGhe = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(maToaHienTai, maChuyenTauHienTai);
             if (!listGhe.isEmpty()) {
                 if (loaiToa.toLowerCase().contains("giường")) veSoDoGiuongNam(listGhe);
                 else veSoDoGheNgoi(listGhe);
@@ -654,9 +652,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
 
         if(maToaHienTai != null) {
             String loai = layLoaiToa(maToaHienTai);
-            String gaDi = ((Ga) cbGaDi.getSelectedItem()).getTenGa();
-            String gaDen = ((Ga) cbGaDen.getSelectedItem()).getTenGa();
-            List<ChoDat> listReload = choDatDao.getDanhSachChoDatTheoPhanChanh(maToaHienTai, maChuyenTauHienTai, gaDi, gaDen);
+            List<ChoDat> listReload = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(maToaHienTai, maChuyenTauHienTai);
             if(!listReload.isEmpty()){
                 if(loai.toLowerCase().contains("giường")) veSoDoGiuongNam(listReload);
                 else veSoDoGheNgoi(listReload);
@@ -693,9 +689,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         // 4. Vẽ lại sơ đồ ghế để xóa màu
         if(maToaHienTai != null && maChuyenTauHienTai != null) {
             String loai = layLoaiToa(maToaHienTai);
-            String gaDi = ((Ga) cbGaDi.getSelectedItem()).getTenGa();
-            String gaDen = ((Ga) cbGaDen.getSelectedItem()).getTenGa();
-            List<ChoDat> listReload = choDatDao.getDanhSachChoDatTheoPhanChanh(maToaHienTai, maChuyenTauHienTai, gaDi, gaDen);
+            List<ChoDat> listReload = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(maToaHienTai, maChuyenTauHienTai);
             if(!listReload.isEmpty()){
                 if(loai.toLowerCase().contains("giường")) veSoDoGiuongNam(listReload);
                 else veSoDoGheNgoi(listReload);
@@ -902,9 +896,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         maToaHienTai=t.getMaToa();
         if(lastSelectedToaButton!=null) { lastSelectedToaButton.setBackground(Color.LIGHT_GRAY); lastSelectedToaButton.setForeground(Color.BLACK); }
         b.setBackground(COLOR_BLUE_LIGHT); b.setForeground(Color.WHITE); lastSelectedToaButton=b;
-        String ga = ((Ga)cbGaDi.getSelectedItem()).getTenGa();
-        String den = ((Ga)cbGaDen.getSelectedItem()).getTenGa();
-        List<ChoDat> l = choDatDao.getDanhSachChoDatTheoPhanChanh(maToaHienTai, maChuyenTauHienTai, ga, den);
+        List<ChoDat> l = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(maToaHienTai, maChuyenTauHienTai);
         if(t.getLoaiToa().toLowerCase().contains("giường")) veSoDoGiuongNam(l); else veSoDoGheNgoi(l);
     }
 
