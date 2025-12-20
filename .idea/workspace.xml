@@ -9,24 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="Đã hoàn thiện màn hình đổi vé , đang thiết lập đổi vé...">
-      <change afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTongQuanGiaVe.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/view/ManHinhQuanLyDonGiaTuyen.java" afterDir="false" />
+    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="fix bán vé">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/Popup/TicketPanel.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/script tự động tạo tàu SPT2 sài gòn phan thiết.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/1016 chỗ đặt cho tàu se1 se2 spt2.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChoDatDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/TuyenDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/TuyenDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/AdminFullDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/AdminFullDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe2.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyKhuyenMai.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyKhuyenMai.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyKhuyenMai2.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Popup/PopupTaoKhuyenMai.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Popup/PopupTaoKhuyenMai.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/view/ManHinhQuanLyChuyenTau2.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/view/ManHinhThemChuyenTauDonGian.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe_DoiVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe_DoiVe.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -320,7 +306,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766055201399</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="fix bán vé">
+      <option name="closed" value="true" />
+      <created>1766226889872</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1766226889872</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -335,7 +329,8 @@
     <MESSAGE value="sửa tuổi =&gt; ngày sinh, tìm khách hàng nhanh theo cccd. Ngày 13/12 thêm chức năng hiện thị chuyến tàu đẹp mắt hơn" />
     <MESSAGE value="sửa lý thành công khuyến mãi và 100% khuyến mãi" />
     <MESSAGE value="Đã hoàn thiện màn hình đổi vé , đang thiết lập đổi vé..." />
-    <option name="LAST_COMMIT_MESSAGE" value="Đã hoàn thiện màn hình đổi vé , đang thiết lập đổi vé..." />
+    <MESSAGE value="fix bán vé" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix bán vé" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

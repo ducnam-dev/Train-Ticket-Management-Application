@@ -20,9 +20,11 @@ public class ChoDatDAO {
         List<ChoDat> danhSachChoDat = new ArrayList<>();
 
         String sql = "SELECT cd.MaCho, cd.MaToa, cd.SoCho, cd.Khoang, cd.Tang, "
-                + "CASE WHEN v.MaVe IS NOT NULL AND v.TrangThai <> N'DA-HUY' THEN 1 ELSE 0 END AS DaDatTrenChuyenTau "
+                + "CASE WHEN v.MaVe IS NOT NULL THEN 1 ELSE 0 END AS DaDat "
                 + "FROM ChoDat cd "
-                + "LEFT JOIN Ve v ON cd.MaCho = v.MaChoDat AND v.MaChuyenTau = ? "
+                + "LEFT JOIN Ve v ON cd.MaCho = v.MaChoDat "
+                + "    AND v.MaChuyenTau = ? "
+                + "    AND v.TrangThai = N'DA_BAN' "
                 + "WHERE cd.MaToa = ? "
                 + "ORDER BY cd.SoCho";
 
