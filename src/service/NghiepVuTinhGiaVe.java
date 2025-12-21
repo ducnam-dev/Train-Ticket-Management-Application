@@ -11,7 +11,7 @@ public class NghiepVuTinhGiaVe {
 
     private static final GaTrongTuyenDao gaTrongTuyenDao = new GaTrongTuyenDao();
     private static final ToaDAO toaDao = new ToaDAO();
-    private static final LoaiChoDatDAO loaiChoDatDao = new LoaiChoDatDAO();
+    private static final LoaiToaDAO loaiChoDatDao = new LoaiToaDAO();
     private static final LoaiVeDAO loaiVeDao = new LoaiVeDAO();
     private static final TuyenDao tuyenDao = new TuyenDao();
 
@@ -62,7 +62,7 @@ public class NghiepVuTinhGiaVe {
         }
 
         if (loaiToa == null) throw new Exception("Không xác định được loại toa.");
-        return loaiChoDatDao.getLoaiChoDatByMa(loaiToa).getHeSo();
+        return loaiChoDatDao.getLoaiToaByMa(loaiToa).getHeSo();
     }
 
     private static long roundUpToNextTen(long value) {

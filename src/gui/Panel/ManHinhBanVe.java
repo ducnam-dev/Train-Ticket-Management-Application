@@ -24,7 +24,6 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -105,7 +104,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
     // --- 1.3. DAO (Data Access Objects) ---
     private final ChoDatDAO choDatDao = new ChoDatDAO();
-    private final LoaiChoDatDAO loaiChoDatDAO = new LoaiChoDatDAO();
+    private final LoaiToaDAO loaiChoDatDAO = new LoaiToaDAO();
     private final LoaiVeDAO loaiVeDAO = new LoaiVeDAO();
     private final KhachHangDAO khachHangDAO = new KhachHangDAO();
     private JPanel pnlDanhSachKhachHang;

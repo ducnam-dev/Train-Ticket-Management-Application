@@ -1,7 +1,8 @@
 package view;
 
-import dao.LoaiChoDatDAO;
-import entity.LoaiChoDat;
+import dao.LoaiToaDAO;
+import entity.LoaiToa;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -11,26 +12,25 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
-public class ManHinhQuanLyLoaiChoDat extends JPanel {
+public class ManHinhQuanLyLoaiToa extends JPanel {
 
-    private final LoaiChoDatDAO loaiChoDAO;
-    private JTable tableLoaiCho;
+    private final LoaiToaDAO loaiToaDAO;
+    private JTable tableLoaiToa;
     private DefaultTableModel tableModel;
 
-    private JTextField txtMaLoaiCho, txtTenLoaiCho, txtHeSo;
+    private JTextField txtMaLoaiToa, txtTenLoaiToa, txtHeSo;
     private JButton btnCapNhat, btnLamMoi;
 
     private final Color PRIMARY_COLOR = new Color(0, 102, 204);
     private final Font FONT_HEADER = new Font("Segoe UI", Font.BOLD, 18);
-    private final Font FONT_LABEL = new Font("Segoe UI", Font.PLAIN, 13);
 
-    public ManHinhQuanLyLoaiChoDat() {
-        loaiChoDAO = new LoaiChoDatDAO();
+    public ManHinhQuanLyLoaiToa() {
+        loaiToaDAO = new LoaiToaDAO();
         setLayout(new BorderLayout(10, 10));
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // --- Tiêu đề ---
-        JLabel lblTitle = new JLabel("QUẢN LÝ HỆ SỐ LOẠI CHỖ ĐẶT");
+        JLabel lblTitle = new JLabel("QUẢN LÝ LOẠI TOA TÀU");
         lblTitle.setFont(FONT_HEADER);
         lblTitle.setForeground(PRIMARY_COLOR);
         lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
@@ -38,9 +38,9 @@ public class ManHinhQuanLyLoaiChoDat extends JPanel {
 
         // --- Center: Bảng dữ liệu ---
         khoiTaoBang();
-        JScrollPane scrollPane = new JScrollPane(tableLoaiCho);
+        JScrollPane scrollPane = new JScrollPane(tableLoaiToa);
         scrollPane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(Color.GRAY), "Danh sách loại chỗ (Ghế/Giường)",
+                BorderFactory.createLineBorder(Color.GRAY), "Danh sách các loại toa hiện có",
                 TitledBorder.LEFT, TitledBorder.TOP, new Font("Segoe UI", Font.ITALIC, 12)));
         add(scrollPane, BorderLayout.CENTER);
 
@@ -51,19 +51,20 @@ public class ManHinhQuanLyLoaiChoDat extends JPanel {
     }
 
     private void khoiTaoBang() {
-        String[] columns = {"Mã Loại Chỗ", "Tên Loại Chỗ", "Hệ Số Giá"};
+        String[] columns = {"Mã Loại Toa", "Tên Loại Toa", "Hệ Số Giá"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
-        tableLoaiCho = new JTable(tableModel);
-        tableLoaiCho.setRowHeight(30);
-        tableLoaiCho.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        tableLoaiToa = new JTable(tableModel);
+        tableLoaiToa.setRowHeight(30);
+        tableLoaiToa.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tableLoaiToa.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
 
-        tableLoaiCho.addMouseListener(new MouseAdapter() {
+        tableLoaiToa.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int row = tableLoaiCho.getSelectedRow();
+                int row = tableLoaiToa.getSelectedRow();
                 if (row >= 0) hienThiChiTiet(row);
             }
         });
@@ -73,22 +74,22 @@ public class ManHinhQuanLyLoaiChoDat extends JPanel {
         JPanel mainSidePanel = new JPanel(new BorderLayout());
         mainSidePanel.setPreferredSize(new Dimension(350, 0));
         mainSidePanel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(PRIMARY_COLOR), "Cấu hình hệ số"));
+                BorderFactory.createLineBorder(PRIMARY_COLOR), "Thông tin loại toa"));
 
         JPanel form = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 15, 10, 15);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        txtMaLoaiCho = new JTextField();
-        txtMaLoaiCho.setEditable(false);
-        txtMaLoaiCho.setBackground(new Color(235, 235, 235));
+        txtMaLoaiToa = new JTextField();
+        txtMaLoaiToa.setEditable(false); // Mã thường không cho sửa trực tiếp
+        txtMaLoaiToa.setBackground(new Color(240, 240, 240));
 
-        txtTenLoaiCho = new JTextField();
+        txtTenLoaiToa = new JTextField();
         txtHeSo = new JTextField();
 
-        addFormField(form, "Mã Loại Chỗ:", txtMaLoaiCho, gbc, 0);
-        addFormField(form, "Tên Loại Chỗ:", txtTenLoaiCho, gbc, 1);
+        addFormField(form, "Mã Loại Toa:", txtMaLoaiToa, gbc, 0);
+        addFormField(form, "Tên Loại Toa:", txtTenLoaiToa, gbc, 1);
         addFormField(form, "Hệ Số Nhân:", txtHeSo, gbc, 2);
 
         // Panel chứa nút
@@ -96,7 +97,6 @@ public class ManHinhQuanLyLoaiChoDat extends JPanel {
         btnCapNhat = new JButton("Cập Nhật");
         btnCapNhat.setPreferredSize(new Dimension(100, 35));
         btnCapNhat.setBackground(PRIMARY_COLOR);
-        btnCapNhat.setForeground(Color.WHITE);
         btnCapNhat.setEnabled(false);
 
         btnLamMoi = new JButton("Làm mới");
@@ -105,7 +105,7 @@ public class ManHinhQuanLyLoaiChoDat extends JPanel {
         pnlButtons.add(btnLamMoi);
         pnlButtons.add(btnCapNhat);
 
-        btnCapNhat.addActionListener(e -> capNhatHeSo());
+        btnCapNhat.addActionListener(e -> capNhatLoaiToa());
         btnLamMoi.addActionListener(e -> lamMoiForm());
 
         mainSidePanel.add(form, BorderLayout.NORTH);
@@ -128,51 +128,59 @@ public class ManHinhQuanLyLoaiChoDat extends JPanel {
 
     private void taiDuLieuVaoBang() {
         tableModel.setRowCount(0);
-        List<LoaiChoDat> ds = loaiChoDAO.getAllLoaiChoDat();
-        for (LoaiChoDat l : ds) {
+        // Lưu ý: Đảm bảo LoaiToaDAO có phương thức getAllLoaiToa()
+        List<LoaiToa> ds = loaiToaDAO.getAllLoaiToa();
+        for (LoaiToa l : ds) {
             tableModel.addRow(new Object[]{ l.getMaLoaiCho(), l.getTenLoaiCho(), l.getHeSo() });
         }
     }
 
     private void hienThiChiTiet(int row) {
-        txtMaLoaiCho.setText(tableModel.getValueAt(row, 0).toString());
-        txtTenLoaiCho.setText(tableModel.getValueAt(row, 1).toString());
+        txtMaLoaiToa.setText(tableModel.getValueAt(row, 0).toString());
+        txtTenLoaiToa.setText(tableModel.getValueAt(row, 1).toString());
         txtHeSo.setText(tableModel.getValueAt(row, 2).toString());
         btnCapNhat.setEnabled(true);
     }
 
     private void lamMoiForm() {
-        txtMaLoaiCho.setText("");
-        txtTenLoaiCho.setText("");
+        txtMaLoaiToa.setText("");
+        txtTenLoaiToa.setText("");
         txtHeSo.setText("");
-        tableLoaiCho.clearSelection();
+        tableLoaiToa.clearSelection();
         btnCapNhat.setEnabled(false);
     }
 
-    private void capNhatHeSo() {
+    private void capNhatLoaiToa() {
         try {
-            String ma = txtMaLoaiCho.getText();
-            String ten = txtTenLoaiCho.getText();
-            double heSo = Double.parseDouble(txtHeSo.getText().replace(",", "."));
+            String ma = txtMaLoaiToa.getText();
+            String ten = txtTenLoaiToa.getText();
+            double heSo = Double.parseDouble(txtHeSo.getText().trim());
 
-            LoaiChoDat loai = new LoaiChoDat(ma, ten, heSo);
-            if (loaiChoDAO.updateLoaiChoDat(loai)) {
-                JOptionPane.showMessageDialog(this, "Cập nhật hệ số thành công!");
+            LoaiToa loai = new LoaiToa(ma, ten, heSo);
+            // Lưu ý: Đảm bảo LoaiToaDAO có phương thức updateLoaiToa()
+            if (loaiToaDAO.updateLoaiToa(loai)) {
+                JOptionPane.showMessageDialog(this, "Cập nhật loại toa thành công!");
                 taiDuLieuVaoBang();
                 lamMoiForm();
             }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Hệ số giá phải là số thực hợp lệ!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Hệ số phải là số thực (Ví dụ: 1.25)");
+            JOptionPane.showMessageDialog(this, "Có lỗi xảy ra: " + e.getMessage());
         }
     }
 
-    //main
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Quản Lý Loại Chỗ Đặt");
+        try {
+            // Thiết lập giao diện giống hệ điều hành
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) { e.printStackTrace(); }
+
+        JFrame frame = new JFrame("Hệ Thống Quản Lý Toa Tàu");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        frame.setSize(900, 600);
         frame.setLocationRelativeTo(null);
-        frame.add(new ManHinhQuanLyLoaiChoDat());
+        frame.add(new ManHinhQuanLyLoaiToa());
         frame.setVisible(true);
     }
 }

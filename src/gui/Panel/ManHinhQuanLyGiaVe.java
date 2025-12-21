@@ -1,7 +1,8 @@
 package gui.Panel;
 
 import view.ManHinhQuanLyDonGiaTuyen;
-import view.ManHinhQuanLyLoaiChoDat;
+import view.ManHinhQuanLyLoaiToa;
+import view.ManHinhQuanLyLoaiToa;
 import view.ManHinhQuanLyLoaiVe;
 
 import javax.swing.*;
@@ -22,7 +23,7 @@ public class ManHinhQuanLyGiaVe extends JPanel {
         tabbedPane.addTab("Đơn giá KM theo Tuyến", new ManHinhQuanLyDonGiaTuyen());
 
         // 3. Tab Hệ số Loại chỗ (Bạn có thể phát triển thêm tương tự)
-        tabbedPane.addTab("Hệ số Loại chỗ (Ghế/Giường)", new ManHinhQuanLyLoaiChoDat());
+        tabbedPane.addTab("Hệ số Loại chỗ (Ghế/Giường)", new ManHinhQuanLyLoaiToa());
 
         add(tabbedPane, BorderLayout.CENTER);
 

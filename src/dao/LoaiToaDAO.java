@@ -1,7 +1,7 @@
 package dao;
 
 import database.ConnectDB;
-import entity.LoaiChoDat;
+import entity.LoaiToa;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -9,29 +9,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import database.ConnectDB;
-
 /**
  * DAO tạm thời cho hệ số theo loại chỗ đặt.
  * mucGiaGiam trong DB được hiểu là hệ số nhân (ví dụ giường nằm = 1.5)
  */
-public class LoaiChoDatDAO {
+public class LoaiToaDAO {
     private final Map<String, Double> mock = new HashMap<>();
 
-    public List<LoaiChoDat> getAllLoaiChoDat() {
-        List<LoaiChoDat> ds = new ArrayList<>();
-        String sql = "SELECT * FROM LoaiChoDat";
+    public List<LoaiToa> getAllLoaiToa() {
+        List<LoaiToa> ds = new ArrayList<>();
+        String sql = "SELECT * FROM LoaiToa";
 
         try { Connection con = ConnectDB.getConnection();
             Statement statement = con.createStatement();
             ResultSet rs = statement.executeQuery(sql);
 
             while (rs.next()) {
-                String ma = rs.getString("MaLoaiCho");
-                String ten = rs.getString("TenLoaiCho");
+                String ma = rs.getString("MaLoaiToa");
+                String ten = rs.getString("TenLoaiToa");
                 double heSo = rs.getDouble("HeSo");
 
-                LoaiChoDat loai = new LoaiChoDat(ma, ten, heSo);
+                LoaiToa loai = new LoaiToa(ma, ten, heSo);
                 ds.add(loai);
             }
         } catch (SQLException e) {
@@ -43,10 +41,35 @@ public class LoaiChoDatDAO {
     /**
      * Tìm một loại chỗ theo Mã
      */
-    public LoaiChoDat getLoaiChoDatByMa(String maLoai) {
-        LoaiChoDat loai = null;
+    public static LoaiToa getLoaiToaByMa(String ten) {
+        LoaiToa loai = null;
 
-        String sql = "SELECT * FROM LoaiChoDat WHERE MaLoaiCho = ?";
+        String sql = "SELECT * FROM LoaiToa WHERE TenLoaiToa = ?";
+
+        try {Connection con = ConnectDB.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, ten);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                loai = new LoaiToa(
+                        rs.getString("MaLoaiToa"),
+                        rs.getString("TenLoaiToa"),
+                        rs.getDouble("HeSo")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return loai;
+    }
+    /**
+     * Tìm một loại chỗ theo Mã
+     */
+    public static LoaiToa getLoaiToaByMaLoaiToa(String maLoai) {
+        LoaiToa loai = null;
+
+        String sql = "SELECT * FROM LoaiToa WHERE MaLoaiToa = ?";
 
         try {Connection con = ConnectDB.getConnection();
             PreparedStatement ps = con.prepareStatement(sql);
@@ -54,9 +77,9 @@ public class LoaiChoDatDAO {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                loai = new LoaiChoDat(
-                        rs.getString("MaLoaiCho"),
-                        rs.getString("TenLoaiCho"),
+                loai = new LoaiToa(
+                        rs.getString("MaLoaiToa"),
+                        rs.getString("TenLoaiToa"),
                         rs.getDouble("HeSo")
                 );
             }
@@ -66,16 +89,18 @@ public class LoaiChoDatDAO {
         return loai;
     }
 
+
+
     /**
      * Thêm mới một loại chỗ
      */
-    public boolean addLoaiChoDat(LoaiChoDat loai) {
+    public boolean addLoaiChoDat(LoaiToa loai) {
 
         PreparedStatement ps = null;
         int n = 0;
         try {
             Connection con = ConnectDB.getConnection();
-            ps = con.prepareStatement("INSERT INTO LoaiChoDat VALUES(?, ?, ?)");
+            ps = con.prepareStatement("INSERT INTO LoaiToa VALUES(?, ?, ?)");
             ps.setString(1, loai.getMaLoaiCho());
             ps.setString(2, loai.getTenLoaiCho());
             ps.setDouble(3, loai.getHeSo());
@@ -89,12 +114,12 @@ public class LoaiChoDatDAO {
     /**
      * Cập nhật thông tin loại chỗ
      */
-    public boolean updateLoaiChoDat(LoaiChoDat loai) {
+    public boolean updateLoaiToa(LoaiToa loai) {
         int n = 0;
         try {
             Connection con = ConnectDB.getConnection();
             PreparedStatement ps = con.prepareStatement(
-                    "UPDATE LoaiChoDat SET TenLoaiCho = ?, HeSo = ? WHERE MaLoaiCho = ?");
+                    "UPDATE LoaiToa SET TenLoaiToa = ?, HeSo = ? WHERE MaLoaiToa = ?");
             ps.setString(1, loai.getTenLoaiCho());
             ps.setDouble(2, loai.getHeSo());
             ps.setString(3, loai.getMaLoaiCho());

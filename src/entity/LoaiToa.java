@@ -1,13 +1,14 @@
 package entity;
 
-public class LoaiChoDat {
+
+public class LoaiToa {
     private String maLoaiCho;
     private String tenLoaiCho;
     private double heSo;
 
-    public LoaiChoDat() {}
+    public LoaiToa() {}
 
-    public LoaiChoDat(String maLoaiCho, String tenLoaiCho, double heSo) {
+    public LoaiToa(String maLoaiCho, String tenLoaiCho, double heSo) {
         this.maLoaiCho = maLoaiCho;
         this.tenLoaiCho = tenLoaiCho;
         this.heSo = heSo;

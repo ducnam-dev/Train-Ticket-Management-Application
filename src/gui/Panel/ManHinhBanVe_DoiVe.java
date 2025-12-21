@@ -70,7 +70,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
     private Map<String, ChoDat> tatCaChoDatToaHienTai = new HashMap<>();
 
     private final ChoDatDAO choDatDao = new ChoDatDAO();
-    private final LoaiChoDatDAO loaiChoDatDAO = new LoaiChoDatDAO();
+    private final LoaiToaDAO loaiChoDatDAO = new LoaiToaDAO();
     private final LoaiVeDAO loaiVeDAO = new LoaiVeDAO();
     private final ToaDAO toaDao = new ToaDAO();
     private final GaTrongTuyenDao gaTrongTuyenDao = new GaTrongTuyenDao();
@@ -786,7 +786,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         String maTuyen = maChuyenTauHienTai.split("_")[0];
         int kc = gaTrongTuyenDao.tinhKhoangCachGiuaHaiGa(maTuyen, gaDi.getMaGa(), gaDen.getMaGa());
         String loaiToa = layLoaiToa(cho.getMaToa());
-        double hsToa = loaiChoDatDAO.getLoaiChoDatByMa(loaiToa).getHeSo();
+        double hsToa = loaiChoDatDAO.getLoaiToaByMa(loaiToa).getHeSo();
         double hsVe = loaiVeDAO.getHeSoByMaLoaiVe(maLoaiVe);
         long gia = Math.round(kc * 1000 * hsToa * hsVe);
         return ((gia + 9) / 10) * 10;
