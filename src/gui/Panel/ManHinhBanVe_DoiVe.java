@@ -5,6 +5,7 @@ import dao.*;
 import control.VeSoDoTau;
 import entity.*;
 import entity.DTO.ThongTinVeDTO;
+import service.NghiepVuTinhGiaVe;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -73,7 +74,6 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
     private Map<String, ChoDat> tatCaChoDatToaHienTai = new HashMap<>();
 
     private final ChoDatDAO choDatDao = new ChoDatDAO();
-    private final LoaiChoDatDAO loaiChoDatDAO = new LoaiChoDatDAO();
     private final LoaiVeDAO loaiVeDAO = new LoaiVeDAO();
     private final ToaDAO toaDao = new ToaDAO();
     private final GaTrongTuyenDao gaTrongTuyenDao = new GaTrongTuyenDao();
@@ -813,12 +813,34 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         Ga gaDi = (Ga) cbGaDi.getSelectedItem(); Ga gaDen = (Ga) cbGaDen.getSelectedItem();
         String maTuyen = maChuyenTauHienTai.split("_")[0];
         int kc = gaTrongTuyenDao.tinhKhoangCachGiuaHaiGa(maTuyen, gaDi.getMaGa(), gaDen.getMaGa());
+        // => có mã toa => lấy được mã loại toa => lấy được hệ số toa
+
         String loaiToa = layLoaiToa(cho.getMaToa());
-        double hsToa = loaiChoDatDAO.getHeSoByLoaiToa(loaiToa);
+
+//        double hsToa = loaiToaDao.getHeSoByLoaiToa(loaiToa);
+        double hsToa = 1.0;
         double hsVe = loaiVeDAO.getHeSoByMaLoaiVe(maLoaiVe);
         long gia = Math.round(kc * 1000 * hsToa * hsVe);
         return (((gia + 999) / 1000) * 1000) + PHI_DOI_VE;
     }
+//    private long tinhGiaVeTau(ChoDat cho, String maLoaiVe) throws Exception {
+//        Ga gaDi = (Ga) cbGaDi.getSelectedItem();
+//        Ga gaDen = (Ga) cbGaDen.getSelectedItem();
+//
+//        if (gaDi == null || gaDen == null || maChuyenTauHienTai == null) {
+//            throw new Exception("Thông tin chuyến tàu hoặc ga chưa đầy đủ.");
+//        }
+//
+//        // Gọi Service xử lý logic
+//        return NghiepVuTinhGiaVe.tinhGiaVe(
+//                gaDi.getMaGa(),
+//                gaDen.getMaGa(),
+//                maChuyenTauHienTai,
+//                cho,
+//                maLoaiVe
+//        );
+//    }
+
 
     private String formatLoaiVeHienThi(LoaiVe lv) { return lv.getTenLoai(); }
 
