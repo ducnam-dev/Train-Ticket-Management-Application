@@ -1,0 +1,14 @@
+Index: .idea/data_source_mapping.xml
+===================================================================
+diff --git a/.idea/data_source_mapping.xml b/.idea/data_source_mapping.xml
+deleted file mode 100644
+--- a/.idea/data_source_mapping.xml	(revision 3f561ccf353c7e4823c50306767c8a8d31b227a9)
++++ /dev/null	(revision 3f561ccf353c7e4823c50306767c8a8d31b227a9)
+@@ -1,6 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="DataSourcePerFileMappings">
+-    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/aa33fde8-dd38-4c55-960d-eeced9eb409b/console.sql" value="aa33fde8-dd38-4c55-960d-eeced9eb409b" />
+-  </component>
+-</project>
+\ No newline at end of file
