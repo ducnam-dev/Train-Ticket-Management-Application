@@ -30,6 +30,9 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
     private static final Color COLOR_DANG_CHON = Color.BLUE;            // Mới (Khách hiện tại)
     private static final Color COLOR_KHACH_KHAC_GIU = new Color(255, 193, 7); // Vàng (Khách khác giữ)
 
+    // --- PHÍ ĐỔI VÉ ---
+    private static final long PHI_DOI_VE = 20000;
+
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final SimpleDateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -54,7 +57,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
     private JComboBox<Ga> cbGaDi, cbGaDen;
     private JDateChooser dateChooserNgayDi;
     private JPanel pnlChuyenTau, pnlToa, pnlSoDoGhe, pnlDanhSachKhachHang;
-    private JButton btnTimChuyen, btnHuy, btnReset, btnXacNhanDoi; // Thêm btnReset
+    private JButton btnTimChuyen, btnHuy, btnReset, btnXacNhanDoi;
 
     // --- STATE ---
     private List<ChuyenTau> ketQuaTimKiem = new ArrayList<>();
@@ -70,7 +73,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
     private Map<String, ChoDat> tatCaChoDatToaHienTai = new HashMap<>();
 
     private final ChoDatDAO choDatDao = new ChoDatDAO();
-    private final LoaiToaDAO loaiChoDatDAO = new LoaiToaDAO();
+    private final LoaiChoDatDAO loaiChoDatDAO = new LoaiChoDatDAO();
     private final LoaiVeDAO loaiVeDAO = new LoaiVeDAO();
     private final ToaDAO toaDao = new ToaDAO();
     private final GaTrongTuyenDao gaTrongTuyenDao = new GaTrongTuyenDao();
@@ -151,9 +154,11 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         Vector<Ga> listGa = new GaDao().layDanhSachGa();
         cbGaDi = new JComboBox<>(listGa);
         cbGaDen = new JComboBox<>(listGa);
+
         dateChooserNgayDi = new JDateChooser();
         dateChooserNgayDi.setDateFormatString("dd/MM/yyyy");
         dateChooserNgayDi.setPreferredSize(new Dimension(120, 25));
+        dateChooserNgayDi.setMinSelectableDate(new java.util.Date());
 
         btnTimChuyen = new JButton("Tìm chuyến");
         styleNutChinh(btnTimChuyen);
@@ -265,7 +270,6 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         footer.setBackground(Color.WHITE);
 
-        // Nút Hủy
         btnHuy = new JButton("Hủy bỏ");
         btnHuy.setPreferredSize(new Dimension(100, 40));
         btnHuy.setBackground(new Color(231, 76, 60));
@@ -277,15 +281,13 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
             else if (w instanceof Window) w.dispose();
         });
 
-        // --- NÚT RESET (LÀM MỚI) ---
         btnReset = new JButton("Làm mới");
         btnReset.setPreferredSize(new Dimension(100, 40));
-        btnReset.setBackground(Color.GRAY); // Màu xám
-        btnReset.setForeground(Color.WHITE); // Chữ trắng
+        btnReset.setBackground(Color.GRAY);
+        btnReset.setForeground(Color.WHITE);
         btnReset.setFont(new Font("Arial", Font.BOLD, 14));
-        btnReset.addActionListener(e -> xuLyReset()); // Gọi hàm reset
+        btnReset.addActionListener(e -> xuLyReset());
 
-        // Nút Xác nhận
         btnXacNhanDoi = new JButton("Xác nhận đổi");
         btnXacNhanDoi.setPreferredSize(new Dimension(150, 40));
         btnXacNhanDoi.setBackground(new Color(46, 204, 113));
@@ -294,7 +296,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         btnXacNhanDoi.addActionListener(this);
 
         footer.add(btnHuy);
-        footer.add(btnReset); // Thêm vào giữa
+        footer.add(btnReset);
         footer.add(btnXacNhanDoi);
         p.add(footer, BorderLayout.SOUTH);
         return p;
@@ -311,7 +313,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 280));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // 1. HEADER
+        // HEADER
         JPanel pnlHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         pnlHeader.setBackground(COLOR_BG_HEADER);
         JRadioButton rdo = new JRadioButton(ve.getHoTen());
@@ -325,7 +327,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         pnlHeader.add(new JLabel(" (Mã vé: " + ve.getMaVe() + ")"));
         panel.add(pnlHeader, BorderLayout.NORTH);
 
-        // 2. BODY
+        // BODY
         JPanel pnlContent = new JPanel(new GridBagLayout());
         pnlContent.setOpaque(false);
         pnlContent.setBorder(new EmptyBorder(5, 10, 5, 10));
@@ -454,7 +456,11 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         this.maVeDangActive = maVeMoi;
         if (maToaHienTai != null && maChuyenTauHienTai != null) {
             String loaiToa = layLoaiToa(maToaHienTai);
-            List<ChoDat> listGhe = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(maToaHienTai, maChuyenTauHienTai);
+            // [FIX] Dùng getMaGa() thay vì getTenGa()
+            String gaDi = ((Ga) cbGaDi.getSelectedItem()).getMaGa();
+            String gaDen = ((Ga) cbGaDen.getSelectedItem()).getMaGa();
+
+            List<ChoDat> listGhe = choDatDao.getDanhSachChoDatTheoPhanChanh(maToaHienTai, maChuyenTauHienTai, gaDi, gaDen);
             if (!listGhe.isEmpty()) {
                 if (loaiToa.toLowerCase().contains("giường")) veSoDoGiuongNam(listGhe);
                 else veSoDoGheNgoi(listGhe);
@@ -463,12 +469,20 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
     }
 
     // =========================================================================
-    // VẼ SƠ ĐỒ GHẾ
+    // VẼ SƠ ĐỒ GHẾ (ĐÃ CHỈNH SỬA)
     // =========================================================================
     private void veSoDoGheNgoi(List<ChoDat> listGhe) {
         pnlSoDoGhe.removeAll();
         tatCaChoDatToaHienTai.clear();
         seatButtonsMap.clear();
+
+        if (listGhe == null || listGhe.isEmpty()) {
+            JLabel lblTrong = new JLabel("Toa này chưa có dữ liệu ghế.");
+            lblTrong.setBorder(new EmptyBorder(20, 20, 20, 20));
+            pnlSoDoGhe.add(lblTrong);
+            pnlSoDoGhe.revalidate(); pnlSoDoGhe.repaint();
+            return;
+        }
 
         pnlSoDoGhe.setLayout(new BoxLayout(pnlSoDoGhe, BoxLayout.Y_AXIS));
         pnlSoDoGhe.setOpaque(true);
@@ -479,9 +493,13 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         List<ChoDat> day1 = new ArrayList<>(), day2 = new ArrayList<>(), day3 = new ArrayList<>(), day4 = new ArrayList<>();
         for(ChoDat c : listGhe) {
             tatCaChoDatToaHienTai.put(c.getMaCho(), c);
-            int stt = Integer.parseInt(c.getSoCho());
-            int hang = (stt - 1) % soHang + 1;
-            if(hang==1) day1.add(c); else if(hang==2) day2.add(c); else if(hang==3) day3.add(c); else day4.add(c);
+            try {
+                int stt = Integer.parseInt(c.getSoCho());
+                int hang = (stt - 1) % soHang + 1;
+                if(hang==1) day1.add(c); else if(hang==2) day2.add(c); else if(hang==3) day3.add(c); else day4.add(c);
+            } catch (Exception e) {
+                System.out.println("Lỗi parse số ghế: " + c.getSoCho());
+            }
         }
         int soCot = (int) Math.ceil((double)listGhe.size()/4);
 
@@ -491,8 +509,13 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setOpaque(false);
 
+        // Hàng 1-2
         content.add(taoContainerHaiHang(day1, day2, soCot, KICH_THUOC_GHE_VUONG));
-        content.add(Box.createHorizontalStrut(40));
+
+        // [CHỈNH Ở ĐÂY] Đổi thành 40 như ý bạn
+        content.add(Box.createVerticalStrut(40));
+
+        // Hàng 3-4
         content.add(taoContainerHaiHang(day3, day4, soCot, KICH_THUOC_GHE_VUONG));
 
         container.add(content);
@@ -522,6 +545,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         pnlSoDoGhe.removeAll();
         tatCaChoDatToaHienTai.clear();
         seatButtonsMap.clear();
+        if (listGhe == null || listGhe.isEmpty()) return;
 
         pnlSoDoGhe.setLayout(new FlowLayout(FlowLayout.LEFT));
         pnlSoDoGhe.setBorder(new EmptyBorder(10,5,10,5));
@@ -652,7 +676,11 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
 
         if(maToaHienTai != null) {
             String loai = layLoaiToa(maToaHienTai);
-            List<ChoDat> listReload = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(maToaHienTai, maChuyenTauHienTai);
+            // [FIX] Dùng getMaGa()
+            String gaDi = ((Ga) cbGaDi.getSelectedItem()).getMaGa();
+            String gaDen = ((Ga) cbGaDen.getSelectedItem()).getMaGa();
+
+            List<ChoDat> listReload = choDatDao.getDanhSachChoDatTheoPhanChanh(maToaHienTai, maChuyenTauHienTai, gaDi, gaDen);
             if(!listReload.isEmpty()){
                 if(loai.toLowerCase().contains("giường")) veSoDoGiuongNam(listReload);
                 else veSoDoGheNgoi(listReload);
@@ -660,25 +688,22 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         }
     }
 
-    // --- HÀM RESET MỚI ---
+    // --- RESET ---
     private void xuLyReset() {
-        if(mapGheMoi.isEmpty()) return; // Không có gì để reset
+        if(mapGheMoi.isEmpty()) return;
 
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Bạn có chắc muốn xóa tất cả các ghế đã chọn không?",
                 "Xác nhận làm mới", JOptionPane.YES_NO_OPTION);
         if(confirm != JOptionPane.YES_OPTION) return;
 
-        // 1. Xóa sạch dữ liệu chọn
         mapGheMoi.clear();
         mapVeToMaChuyen.clear();
 
-        // 2. Reset thông tin trên giao diện từng khách
         for (ThongTinVeDTO ve : listVeCanDoi) {
             capNhatThongTinMoiChoKhach(ve.getMaVe(), 0, null);
         }
 
-        // 3. Active lại khách đầu tiên
         if (!listVeCanDoi.isEmpty()) {
             maVeDangActive = listVeCanDoi.get(0).getMaVe();
             if (mapRadioButtons.containsKey(maVeDangActive)) {
@@ -686,10 +711,13 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
             }
         }
 
-        // 4. Vẽ lại sơ đồ ghế để xóa màu
         if(maToaHienTai != null && maChuyenTauHienTai != null) {
             String loai = layLoaiToa(maToaHienTai);
-            List<ChoDat> listReload = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(maToaHienTai, maChuyenTauHienTai);
+            // [FIX] Dùng getMaGa()
+            String gaDi = ((Ga) cbGaDi.getSelectedItem()).getMaGa();
+            String gaDen = ((Ga) cbGaDen.getSelectedItem()).getMaGa();
+
+            List<ChoDat> listReload = choDatDao.getDanhSachChoDatTheoPhanChanh(maToaHienTai, maChuyenTauHienTai, gaDi, gaDen);
             if(!listReload.isEmpty()){
                 if(loai.toLowerCase().contains("giường")) veSoDoGiuongNam(listReload);
                 else veSoDoGheNgoi(listReload);
@@ -786,10 +814,10 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         String maTuyen = maChuyenTauHienTai.split("_")[0];
         int kc = gaTrongTuyenDao.tinhKhoangCachGiuaHaiGa(maTuyen, gaDi.getMaGa(), gaDen.getMaGa());
         String loaiToa = layLoaiToa(cho.getMaToa());
-        double hsToa = loaiChoDatDAO.getLoaiToaByMa(loaiToa).getHeSo();
+        double hsToa = loaiChoDatDAO.getHeSoByLoaiToa(loaiToa);
         double hsVe = loaiVeDAO.getHeSoByMaLoaiVe(maLoaiVe);
         long gia = Math.round(kc * 1000 * hsToa * hsVe);
-        return ((gia + 9) / 10) * 10;
+        return (((gia + 999) / 1000) * 1000) + PHI_DOI_VE;
     }
 
     private String formatLoaiVeHienThi(LoaiVe lv) { return lv.getTenLoai(); }
@@ -806,74 +834,37 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
     }
     private int parseTextFieldToInt(JTextField f) { try{ return Integer.parseInt(f.getText().trim()); }catch(Exception e){return 0;} }
 
-    // --- SỬA LẠI LOGIC TÌM/CHỌN ---
+    // --- TÌM KIẾM ---
     private void timKiemChuyenTau() {
-        // 1. Lấy thông tin tìm kiếm
         Ga gDi = (Ga) cbGaDi.getSelectedItem();
         Ga gDen = (Ga) cbGaDen.getSelectedItem();
         java.util.Date d = dateChooserNgayDi.getDate();
 
-        if (gDi.getMaGa().equals(gDen.getMaGa())) {
-            JOptionPane.showMessageDialog(this, "Ga đi và Ga đến không được trùng nhau!");
-            return;
-        }
-        if (d == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày đi!");
-            return;
-        }
+        if (gDi.getMaGa().equals(gDen.getMaGa())) { JOptionPane.showMessageDialog(this, "Ga trùng!"); return; }
+        if (d == null) { JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày đi!"); return; }
 
-        // --- [FIX] DỌN DẸP GIAO DIỆN CŨ TRƯỚC KHI TÌM ---
-        // Xóa danh sách toa
-        pnlToa.removeAll();
-        pnlToa.revalidate();
-        pnlToa.repaint();
+        pnlToa.removeAll(); pnlToa.revalidate(); pnlToa.repaint();
+        pnlSoDoGhe.removeAll(); pnlSoDoGhe.revalidate(); pnlSoDoGhe.repaint();
+        maChuyenTauHienTai = null; maToaHienTai = null;
+        lastSelectedChuyenTauPanel = null; lastSelectedToaButton = null;
 
-        // Xóa sơ đồ ghế
-        pnlSoDoGhe.removeAll();
-        pnlSoDoGhe.revalidate();
-        pnlSoDoGhe.repaint();
-
-        // Reset các biến trạng thái đang chọn
-        maChuyenTauHienTai = null;
-        maToaHienTai = null;
-        lastSelectedChuyenTauPanel = null;
-        lastSelectedToaButton = null;
-        // ------------------------------------------------
-
-        // 2. Thực hiện tìm kiếm
         ChuyenTauDao dao = new ChuyenTauDao();
         ketQuaTimKiem = dao.timChuyenTauTheoGaVaNgayDi(gDi.getMaGa(), gDen.getMaGa(), SQL_DATE_FORMAT.format(d));
 
-        // 3. Hiển thị kết quả chuyến tàu
         pnlChuyenTau.removeAll();
         if (ketQuaTimKiem.isEmpty()) {
-            JLabel lblTrong = new JLabel("Không tìm thấy chuyến tàu nào phù hợp.");
-            lblTrong.setFont(new Font("Arial", Font.ITALIC, 14));
-            lblTrong.setBorder(new EmptyBorder(10, 10, 10, 10));
-            pnlChuyenTau.add(lblTrong);
+            pnlChuyenTau.add(new JLabel("Không tìm thấy tàu."));
         } else {
             for(ChuyenTau ct : ketQuaTimKiem) {
                 String t1 = ct.getNgayKhoiHanh().format(DateTimeFormatter.ofPattern("dd/MM")) + " " + ct.getGioKhoiHanh().format(TIME_FORMATTER);
                 String t2 = ct.getNgayDenDuKien().format(DateTimeFormatter.ofPattern("dd/MM")) + " " + ct.getGioDenDuKien().format(TIME_FORMATTER);
-
                 VeSoDoTau v = new VeSoDoTau(ct.getMaChuyenTau().split("_")[0], t1, t2);
-                JPanel p = new JPanel(new BorderLayout());
-                p.add(v);
-                p.setBackground(Color.WHITE);
-
-                // Sự kiện khi chọn chuyến tàu
-                p.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        chonChuyenTau(ct, p);
-                    }
-                });
-
+                JPanel p = new JPanel(new BorderLayout()); p.add(v); p.setBackground(Color.WHITE);
+                p.addMouseListener(new MouseAdapter() { @Override public void mouseClicked(MouseEvent e) { chonChuyenTau(ct, p); }});
                 pnlChuyenTau.add(p);
             }
         }
-        pnlChuyenTau.revalidate();
-        pnlChuyenTau.repaint();
+        pnlChuyenTau.revalidate(); pnlChuyenTau.repaint();
     }
 
     private void chonChuyenTau(ChuyenTau ct, JPanel p) {
@@ -896,7 +887,12 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         maToaHienTai=t.getMaToa();
         if(lastSelectedToaButton!=null) { lastSelectedToaButton.setBackground(Color.LIGHT_GRAY); lastSelectedToaButton.setForeground(Color.BLACK); }
         b.setBackground(COLOR_BLUE_LIGHT); b.setForeground(Color.WHITE); lastSelectedToaButton=b;
-        List<ChoDat> l = choDatDao.getDanhSachChoDatByMaToaVaTrangThai(maToaHienTai, maChuyenTauHienTai);
+
+        // [FIX] Dùng getMaGa() để khớp với Database
+        String ga = ((Ga)cbGaDi.getSelectedItem()).getMaGa();
+        String den = ((Ga)cbGaDen.getSelectedItem()).getMaGa();
+
+        List<ChoDat> l = choDatDao.getDanhSachChoDatTheoPhanChanh(maToaHienTai, maChuyenTauHienTai, ga, den);
         if(t.getLoaiToa().toLowerCase().contains("giường")) veSoDoGiuongNam(l); else veSoDoGheNgoi(l);
     }
 

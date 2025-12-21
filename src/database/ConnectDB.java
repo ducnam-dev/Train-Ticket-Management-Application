@@ -28,7 +28,7 @@ public class ConnectDB {
             // Logic tạo kết nối chỉ chạy khi kết nối là NULL hoặc không hợp lệ/đã đóng
             String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyVeTau;trustServerCertificate=true";
             String user = "sa";
-            String password = "sapassword";
+            String password = "Sapassword123@";
             try {
                 con = DriverManager.getConnection(url, user, password);
             } catch (SQLException e) {
