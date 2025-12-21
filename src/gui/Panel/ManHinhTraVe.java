@@ -299,9 +299,10 @@ public class ManHinhTraVe extends JPanel {
 
         if (dsVeVuaTim != null && !dsVeVuaTim.isEmpty()) {
             for (Ve v : dsVeVuaTim) {
+                v.toString();
                 String tuyen = "---";
                 if(v.getChuyenTauChiTiet() != null) {
-                    tuyen = v.getChuyenTauChiTiet().getGaDi().getTenGa() + " - " + v.getChuyenTauChiTiet().getGaDen().getTenGa();
+                    tuyen = v.getChuyenTauChiTiet().gaDi.tenGa + " - " + v.getChuyenTauChiTiet().gaDen.tenGa;
                 }
                 modelKetQua.addRow(new Object[]{
                         v.getMaVe(),

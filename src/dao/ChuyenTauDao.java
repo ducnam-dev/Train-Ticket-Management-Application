@@ -38,8 +38,8 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
             String maChuyenTau = rs.getString("MaChuyenTau");
             String maTau = rs.getString("MaTau"); // Đây là SoHieu, ví dụ "SE1"
             String maNV = rs.getString("MaNV"); // Có thể NULL
-            String tenGaDi = rs.getString("GaDi"); // CSDL lưu Tên Ga
-            String tenGaDen = rs.getString("GaDen"); // CSDL lưu Tên Ga
+            String maGaDi = rs.getString("GaDi"); // CSDL lưu Tên Ga
+            String maGaDen = rs.getString("GaDen"); // CSDL lưu Tên Ga
 
             // Lấy ngày/giờ và chuyển đổi sang java.time
             java.sql.Date dbNgayKH = rs.getDate("NgayKhoiHanh");
@@ -57,8 +57,8 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
             // Lấy các đối tượng liên quan từ DAO khác
             // Giả sử các DAO đã được khởi tạo trong constructor của ChuyenTauDao
             Tau tau = TauDAO.getTauById(maTau); // Dùng TauDAO
-            Ga gaDi = GaDao.layGaBangTen(tenGaDi); // Dùng GaDao (tìm theo Tên Ga)
-            Ga gaDen = GaDao.layGaBangTen(tenGaDen); // Dùng GaDao (tìm theo Tên Ga)
+            Ga gaDi = GaDao.layGaBangMa(maGaDi); // Dùng GaDao (tìm theo Tên Ga)
+            Ga gaDen = GaDao.layGaBangMa(maGaDen); // Dùng GaDao (tìm theo Tên Ga)
 
             NhanVien nhanVien = null;
             if (maNV != null && !maNV.isEmpty()) {
@@ -416,8 +416,8 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
 
                     System.out.println(maGaDiDb + " - " + maGaDenDb);
 
-                    Ga gaDi = GaDao.layGaBangTen(maGaDiDb);
-                    Ga gaDen = GaDao.layGaBangTen(maGaDenDb);
+                    Ga gaDi = GaDao.layGaBangMa(maGaDiDb);
+                    Ga gaDen = GaDao.layGaBangMa(maGaDenDb);
                     Tau tau = TauDAO.getTauById(maTau);
                     NhanVien nv = NhanVienDao.getNhanVienById(maNV);
 

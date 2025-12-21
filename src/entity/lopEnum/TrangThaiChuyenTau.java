@@ -2,7 +2,7 @@ package entity.lopEnum;
 
 public enum TrangThaiChuyenTau {
 
-    DANG_MO_BAN_VE("Đang mở bán vé"),
+    DANG_MO_BAN_VE("Chờ khởi hành"),
     DA_HUY("Đã hủy"),
     CHUA_MO_BAN_VE("Chưa mở bán vé"),
     DA_DEN("Đã đến");
