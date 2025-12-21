@@ -2,6 +2,8 @@
   <library name="core-3.5.0">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/core-3.5.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javax.activation-1.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javax.mail-1.6.2.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
