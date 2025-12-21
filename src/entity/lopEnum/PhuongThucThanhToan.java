@@ -1,20 +1,15 @@
 package entity.lopEnum;
 
-public enum TrangThaiChuyenTau {
-
-    DANG_MO_BAN_VE("Đang mở bán vé"),
-    DA_HUY("Đã hủy"),
-    CHUA_MO_BAN_VE("Chưa mở bán vé"),
-    DA_DEN("Đã đến");
+public enum PhuongThucThanhToan {
+    TIEN_MAT("Tiền mặt"),
+    CHUYEN_KHOANG("Chuyển khoản");
 
     private final String tenHienThi;
 
-    TrangThaiChuyenTau(String tenHienThi) {
+    PhuongThucThanhToan(String tenHienThi) {
         this.tenHienThi = tenHienThi;
     }
     //Không dùng tên hiển thị nữa dùng trực tiếp enum như thế nào
-
-
 
 
     public String getTenHienThi() {
@@ -22,12 +17,13 @@ public enum TrangThaiChuyenTau {
     }
 
     // Phương thức chuyển đổi tùy chỉnh
-    public static TrangThaiChuyenTau fromString(String text) {
-        for (TrangThaiChuyenTau b : TrangThaiChuyenTau.values()) {
+    public static PhuongThucThanhToan fromString(String text) {
+        for (PhuongThucThanhToan b : PhuongThucThanhToan.values()) {
             if (b.tenHienThi.equalsIgnoreCase(text)) {
                 return b;
             }
         }
         throw new IllegalArgumentException("Không tìm thấy trạng thái: " + text);
     }
+
 }

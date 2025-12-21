@@ -62,7 +62,7 @@ public class NghiepVuTinhGiaVe {
         }
 
         if (loaiToa == null) throw new Exception("Không xác định được loại toa.");
-        return loaiChoDatDao.getHeSoByLoaiToa(loaiToa);
+        return loaiChoDatDao.getLoaiChoDatByMa(loaiToa).getHeSo();
     }
 
     private static long roundUpToNextTen(long value) {

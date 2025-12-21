@@ -786,7 +786,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         String maTuyen = maChuyenTauHienTai.split("_")[0];
         int kc = gaTrongTuyenDao.tinhKhoangCachGiuaHaiGa(maTuyen, gaDi.getMaGa(), gaDen.getMaGa());
         String loaiToa = layLoaiToa(cho.getMaToa());
-        double hsToa = loaiChoDatDAO.getHeSoByLoaiToa(loaiToa);
+        double hsToa = loaiChoDatDAO.getLoaiChoDatByMa(loaiToa).getHeSo();
         double hsVe = loaiVeDAO.getHeSoByMaLoaiVe(maLoaiVe);
         long gia = Math.round(kc * 1000 * hsToa * hsVe);
         return ((gia + 9) / 10) * 10;

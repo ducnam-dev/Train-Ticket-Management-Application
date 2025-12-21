@@ -596,7 +596,7 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
                         thoiDiemDen.toLocalDate(),
                         thoiDiemDen.toLocalTime(),
                         nv,                 // Nhân viên tạo
-                        TrangThaiChuyenTau.DANG_CHO // Dùng Enum đúng
+                        TrangThaiChuyenTau.DANG_MO_BAN_VE // Dùng Enum đúng
                 );
 
                 try {

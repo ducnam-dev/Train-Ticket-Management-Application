@@ -301,8 +301,8 @@ public class ManHinhQuanLyKhuyenMai extends JPanel implements ActionListener {
                     giamPhanTram > 0 ? giamPhanTram + "%" : "",
                     giamCoDinh > 0 ? VND_FORMAT.format(giamCoDinh) : "",
                     dkApDungHienThi,
-                    km.getNgayBD().toLocalDate().toString(),
-                    km.getNgayKT().toLocalDate().toString(),
+                    km.getNgayBatDau().toLocalDate().toString(),
+                    km.getNgayKetThuc().toLocalDate().toString(),
                     trangThaiHienThi
             };
             tableModel.addRow(row);
@@ -369,7 +369,25 @@ public class ManHinhQuanLyKhuyenMai extends JPanel implements ActionListener {
             loadDataToTable(); // Tải lại bảng
         }
         else if (src == btnTimKiem || src == cbLocTrangThai) {
-            // Tự động load lại bảng khi nhấn Tìm kiếm hoặc thay đổi ComboBox
+            String keyword = txtTimKiem.getText().trim();
+            // 1. Kiểm tra rỗng
+            if (keyword.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập mã khuyến mãi để tìm kiếm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                txtTimKiem.requestFocus();
+                return;
+            }
+            // 2. Kiểm tra định dạng bằng Regex: KM + 2 số tháng + 2 số năm + 3 số thứ tự
+            String regex = "^KM(0[1-9]|1[0-2])\\d{2}\\d{3}$";
+
+            if (!keyword.matches(regex)) {
+                JOptionPane.showMessageDialog(this,
+                        "Mã tìm kiếm không đúng định dạng!\nQuy tắc: KM + Tháng(2 số) + Năm(2 số) + STT(3 số)\nVí dụ: KM1225001",
+                        "Lỗi định dạng", JOptionPane.ERROR_MESSAGE);
+                txtTimKiem.selectAll();
+                txtTimKiem.requestFocus();
+                return;
+            }
+
             loadDataToTable();
         }
         else if (src == btnThem) {
@@ -451,7 +469,7 @@ public class ManHinhQuanLyKhuyenMai extends JPanel implements ActionListener {
         JDateChooser newDateChooser = new JDateChooser();
         newDateChooser.setDateFormatString("dd/MM/yyyy");
         // Đặt ngày mặc định là Ngày Kết Thúc cũ
-        newDateChooser.setDate(Date.from(km.getNgayKT().atZone(ZoneId.systemDefault()).toInstant()));
+        newDateChooser.setDate(Date.from(km.getNgayKetThuc().atZone(ZoneId.systemDefault()).toInstant()));
 
         JPanel datePanel = new JPanel(new FlowLayout());
         datePanel.add(new JLabel("Chọn Ngày Kết Thúc mới:"));
@@ -467,7 +485,7 @@ public class ManHinhQuanLyKhuyenMai extends JPanel implements ActionListener {
             ngayKetThucMoi = ngayKetThucMoi.withHour(23).withMinute(59).withSecond(59);
 
             // Xác định trạng thái mới (Nếu Ngày Bắt Đầu đã qua thì là HOAT_DONG, nếu chưa qua thì là KHONG_HOAT_DONG)
-            String trangThaiMoi = km.getNgayBD().isBefore(LocalDateTime.now()) ? "HOAT_DONG" : "KHONG_HOAT_DONG";
+            String trangThaiMoi = km.getNgayBatDau().isBefore(LocalDateTime.now()) ? "HOAT_DONG" : "KHONG_HOAT_DONG";
 
             // Gọi DAO.capNhatTrangThai để cập nhật ngày và trạng thái
             boolean success = khuyenMaiDAO.capNhatTrangThai(maKM, trangThaiMoi, ngayKetThucMoi);

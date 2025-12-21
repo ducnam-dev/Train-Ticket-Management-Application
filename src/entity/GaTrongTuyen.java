@@ -11,8 +11,6 @@ public class GaTrongTuyen {
     // Khóa chính
     private Tuyen tuyen; // Tham chiếu đến đối tượng Tuyen
     private String maGa; // Chỉ cần Mã Ga (String), vì Ga đã là một Entity độc lập
-
-    // Thuộc tính
     private int thuTuGa;
     private int khoangCachTichLuy;
     private int thoiGianDiDenGaTiepTheo; // Thời gian chạy từ Ga này đến Ga kế tiếp
