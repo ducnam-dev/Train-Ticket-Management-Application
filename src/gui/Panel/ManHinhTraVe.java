@@ -15,6 +15,7 @@ import entity.Ve;
 import entity.KhachHang;
 import entity.ChuyenTau;
 import entity.ChoDat;
+import gui.Popup.PopUpBillTraVe;
 // Import lớp triển khai DAO (Giả định VeDAO là lớp triển khai)
 // import dao.VeDAO; // Vì VeDAO là class triển khai, không cần import VeDAOImpl
 
@@ -71,7 +72,7 @@ public class ManHinhTraVe extends JPanel {
 
         // 4. THÊM SỰ KIỆN
         initEventHandlers();
-
+        hienThiDuLieuMau();
         // Đặt trạng thái ban đầu
         xoaTrangThongTin();
     }
@@ -414,10 +415,19 @@ public class ManHinhTraVe extends JPanel {
             if (veDAO.huyVe(veHienTai.getMaVe())) {
                 JOptionPane.showMessageDialog(this, "Trả vé thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
 
-                // --- BẮT ĐẦU HIỂN THỊ POPUP KIỂU OVERLAY ---
-                String maHD = layMaHDTuMaVe(veHienTai.getMaVe());
-                if (maHD != null && !maHD.isEmpty()) {
-                    hienThiPopupGiongTraCuuHoaDon(maHD);
+                // 1. Tính toán tiền hoàn trả
+                double tienHoanTra = tinhTienHoanTraMoi(veHienTai);
+
+                // 2. SỬ DỤNG LẠI BIẾN lyDo (KHÔNG khai báo String ở đầu dòng này nữa)
+                // Vì biến lyDo đã được khai báo ở dòng 286 của file ManHinhTraVe.java
+                hienThiPopupBill(veHienTai, tienHoanTra, lyDo);
+
+                // 3. Cập nhật lại bảng danh sách vé
+                String searchText = txtMaVeHoacSDT.getText().trim();
+                if (!searchText.isEmpty()) {
+                    xuLyTimKiemVe();
+                } else {
+                    hienThiDuLieuMau();
                 }
 
                 xoaTrangThongTin();
@@ -430,40 +440,36 @@ public class ManHinhTraVe extends JPanel {
     /**
      * Hàm hiển thị Popup có nền mờ (Overlay) giống hệt màn hình Tra Cứu Hóa Đơn
      */
-    private void hienThiPopupGiongTraCuuHoaDon(String maHoaDon) {
-        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        if (topFrame == null) return;
-
-        // 1. Tạo panel chi tiết hóa đơn
-        gui.Popup.PopUpChiTietHoaDon chiTietPanel = new gui.Popup.PopUpChiTietHoaDon(maHoaDon);
-
-        // 2. Tạo lớp nền mờ (Overlay)
-        JPanel overlayPanel = new JPanel(new java.awt.GridBagLayout()) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.setColor(new Color(0, 0, 0, 150)); // Màu đen mờ 50%
-                g.fillRect(0, 0, getWidth(), getHeight());
-            }
-        };
-        overlayPanel.setOpaque(false);
-        overlayPanel.add(chiTietPanel); // Đưa popup vào giữa nền mờ
-
-        // 3. Sự kiện đóng popup khi nhấn nút "Đóng" bên trong PopUpChiTietHoaDon
-        // (Giả sử trong PopUpChiTietHoaDon bạn có nút btnDongChiTietHoaDon)
-        // Bạn cần chắc chắn class PopUpChiTietHoaDon có hàm để xử lý việc này hoặc tắt GlassPane
-
-        // Đặt overlay vào GlassPane của JFrame
-        topFrame.setGlassPane(overlayPanel);
-        overlayPanel.setVisible(true);
-
-        // Thêm MouseListener để tránh click xuyên qua lớp mờ
-        overlayPanel.addMouseListener(new java.awt.event.MouseAdapter() {});
-    }
 
     /**
      * Hàm bổ trợ lấy mã HD (giữ nguyên để không phải sửa file Ve)
      */
+    private void hienThiDuLieuMau() {
+        // 1. Gọi hàm lấy 5 vé từ DAO
+        dsVeVuaTim = veDAO.getTop5VeMoiNhat();
+
+        // 2. Làm sạch bảng trước khi đổ dữ liệu
+        modelKetQua.setRowCount(0);
+
+        // 3. Duyệt danh sách và thêm vào bảng
+        if (dsVeVuaTim != null && !dsVeVuaTim.isEmpty()) {
+            for (Ve v : dsVeVuaTim) {
+                String tuyen = "---";
+                // Kiểm tra null cho Chuyến tàu và Ga để tránh lỗi hiển thị
+                if(v.getChuyenTauChiTiet() != null && v.getChuyenTauChiTiet().getGaDi() != null) {
+                    tuyen = v.getChuyenTauChiTiet().getGaDi().getTenGa() + " - " + v.getChuyenTauChiTiet().getGaDen().getTenGa();
+                }
+
+                modelKetQua.addRow(new Object[]{
+                        v.getMaVe(),
+                        v.getTenKhachHang() != null ? v.getTenKhachHang() : "Khách lẻ",
+                        tuyen,
+                        v.getChoDatChiTiet() != null ? v.getChoDatChiTiet().getSoCho() : "---",
+                        String.format("%,.0f", v.getGiaVe())
+                });
+            }
+        }
+    }
     private String layMaHDTuMaVe(String maVe) {
         String maHD = "";
         String sql = "SELECT MaHD FROM ChiTietHoaDon WHERE MaVe = ?";
@@ -475,6 +481,29 @@ public class ManHinhTraVe extends JPanel {
             }
         } catch (Exception e) { e.printStackTrace(); }
         return maHD;
+    }
+    private void hienThiPopupBill(Ve ve, double tienHoanTra, String lyDo) {
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (topFrame == null) return;
+
+        // 1. Khởi tạo Panel hóa đơn trả vé
+        PopUpBillTraVe billPanel = new PopUpBillTraVe(ve, tienHoanTra, lyDo);
+
+        // 2. Tạo JDialog để hiển thị như một cửa sổ thực sự
+        JDialog dialog = new JDialog(topFrame, "Hóa đơn hoàn trả", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.add(billPanel, BorderLayout.CENTER);
+
+        // Nút đóng/in
+        JButton btnDong = new JButton("Đóng & Hoàn tất");
+        btnDong.addActionListener(e -> dialog.dispose());
+        JPanel pBtn = new JPanel();
+        pBtn.add(btnDong);
+        dialog.add(pBtn, BorderLayout.SOUTH);
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(topFrame);
+        dialog.setVisible(true);
     }
     private void xoaTrangThongTin() {
         lblTenKHValue.setText("---");

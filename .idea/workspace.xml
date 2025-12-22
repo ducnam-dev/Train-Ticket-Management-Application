@@ -9,26 +9,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="done">
+    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="New">
+      <change afterPath="$PROJECT_DIR$/src/gui/Popup/PopUpBillTraVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_15_12_2025_9_28_CH_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_15_12_2025_9_28_CH__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/AdminFullDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/AdminFullDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyGiaVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyGiaVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhTrangChuNVBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTrangChuNVBanVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/view/ManHinhQuanLyChuyenTau.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/view/ManHinhQuanLyDonGiaTuyen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/Gia/ManHinhQuanLyDonGiaTuyen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/view/ManHinhQuanLyLoaiToa.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/Gia/ManHinhQuanLyLoaiToa.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/view/ManHinhQuanLyLoaiVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/Gia/ManHinhQuanLyLoaiVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/VeDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/VeDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhTraVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTraVe.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="ExportToHTMLSettings">
-    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/../NguyenBaoDuyLoiDiRieng\exportToHTML" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -54,7 +48,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/ducnam-dev/Train-Ticket-Management-Application.git&quot;,
-    &quot;accountId&quot;: &quot;8c77214f-7c6d-450c-b97f-cfbb4d1119bb&quot;
+    &quot;accountId&quot;: &quot;c5274a8e-0278-4048-b551-86956f6e9c76&quot;
   },
   &quot;recentNewPullRequestHead&quot;: {
     &quot;server&quot;: {
@@ -94,32 +88,23 @@
     "Application.ManHinhBanVe2.executor": "Run",
     "Application.ManHinhBanVeUpdatePanelChuyenTau.executor": "Run",
     "Application.ManHinhDangNhap.executor": "Run",
-    "Application.ManHinhDoiVe.executor": "Run",
-    "Application.ManHinhQuanLyChuyenTau.executor": "Run",
-    "Application.ManHinhQuanLyChuyenTau2.executor": "Run",
-    "Application.ManHinhQuanLyDonGiaTuyen.executor": "Run",
-    "Application.ManHinhQuanLyGiaVe.executor": "Run",
     "Application.ManHinhQuanLyKhuyenMai.executor": "Run",
     "Application.ManHinhQuanLyKhuyenMai2.executor": "Run",
     "Application.ManHinhTimKiemChuyenTau.executor": "Run",
-    "Application.ManHinhTongQuanGiaVe.executor": "Run",
     "Application.ManHinhTraCuuHoaDon.executor": "Run",
-    "Application.ManHinhTrangChuNVBanVe.executor": "Run",
+    "Application.ManHinhTraVe.executor": "Run",
     "Application.ManHinhXacNhanBanVe.executor": "Run",
     "Application.ManhinhQuanLyChuyenTau.executor": "Run",
     "Application.PopUpChiTietHoaDon.executor": "Run",
     "Application.QuanLyDashboard.executor": "Run",
-    "Application.ThongTinVeDTODAO.executor": "Run",
-    "Application.TicketBookingUI.executor": "Run",
     "Application.VeSoDoTau.executor": "Run",
-    "Application.view.ManHinhQuanLyChuyenTau.executor": "Run",
-    "Application.view.ManHinhTrangChuNVBanVe.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "fix-chuc-nang-ban-ve-2.0",
+    "git-widget-placeholder": "master",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/06_Study/Stuby IUH/Hoc ki 5/Phat trien ung dung/DU AN/Train-Ticket-Management-Application/sql",
@@ -141,17 +126,15 @@
       <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\Train-Ticket-Management-Application\lib" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\NguyenBaoDuyLoiDiRieng\src\images\iconMenu" />
-      <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\NguyenBaoDuyLoiDiRieng\sql" />
       <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\Train-Ticket-Management-Application\sql" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="gui.Panel" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.ManHinhTrangChuNVBanVe">
-    <configuration name="BanVeDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.BanVeDashboard" />
+  <component name="RunManager" selected="Application.ManHinhTraVe">
+    <configuration name="AdminFullDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.AdminFullDashboard" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -170,8 +153,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhQuanLyDonGiaTuyen" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.Gia.ManHinhQuanLyDonGiaTuyen" />
+    <configuration name="ManHinhBanVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhBanVe" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -183,8 +166,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhQuanLyGiaVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhQuanLyGiaVe" />
+    <configuration name="ManHinhQuanLyKhuyenMai" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhQuanLyKhuyenMai" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -196,8 +179,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhTrangChuNVBanVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhTrangChuNVBanVe" />
+    <configuration name="ManHinhTraVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhTraVe" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -224,11 +207,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.ManHinhTrangChuNVBanVe" />
-        <item itemvalue="Application.BanVeDashboard" />
+        <item itemvalue="Application.ManHinhTraVe" />
+        <item itemvalue="Application.AdminFullDashboard" />
         <item itemvalue="Application.QuanLyDashboard" />
-        <item itemvalue="Application.ManHinhQuanLyGiaVe" />
-        <item itemvalue="Application.ManHinhQuanLyDonGiaTuyen" />
+        <item itemvalue="Application.ManHinhBanVe" />
+        <item itemvalue="Application.ManHinhQuanLyKhuyenMai" />
       </list>
     </recent_temporary>
   </component>
@@ -236,7 +219,6 @@
     <attachedChunks>
       <set>
         <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.26830.84" />
       </set>
     </attachedChunks>
   </component>
@@ -266,8 +248,6 @@
       <workItem from="1765790749182" duration="2883000" />
       <workItem from="1765795510159" duration="10382000" />
       <workItem from="1765807783944" duration="249000" />
-      <workItem from="1766386789203" duration="3651000" />
-      <workItem from="1766408226352" duration="6040000" />
     </task>
     <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
       <option name="closed" value="true" />
@@ -317,94 +297,11 @@
       <option name="project" value="LOCAL" />
       <updated>1765804790250</updated>
     </task>
-    <task id="LOCAL-00007" summary="Đã hoàn thiện màn hình đổi vé , đang thiết lập đổi vé...">
-      <option name="closed" value="true" />
-      <created>1766055201399</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1766055201399</updated>
-    </task>
-    <task id="LOCAL-00008" summary="fix bán vé">
-      <option name="closed" value="true" />
-      <created>1766226889872</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1766226889872</updated>
-    </task>
-    <task id="LOCAL-00009" summary="lỗi">
-      <option name="closed" value="true" />
-      <created>1766376025910</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1766376025910</updated>
-    </task>
-    <task id="LOCAL-00010" summary="km test">
-      <option name="closed" value="true" />
-      <created>1766381814731</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1766381814731</updated>
-    </task>
-    <task id="LOCAL-00011" summary="pre final">
-      <option name="closed" value="true" />
-      <created>1766388454659</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1766388454659</updated>
-    </task>
-    <task id="LOCAL-00012" summary="pre final">
-      <option name="closed" value="true" />
-      <created>1766388943281</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1766388943281</updated>
-    </task>
-    <task id="LOCAL-00013" summary="done quản lý chuyến tàu + tạo csdl duy nhất">
-      <option name="closed" value="true" />
-      <created>1766410306232</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1766410306232</updated>
-    </task>
-    <task id="LOCAL-00014" summary="done quản lý chuyến tàu + tạo csdl duy nhất">
-      <option name="closed" value="true" />
-      <created>1766411304172</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1766411304172</updated>
-    </task>
-    <task id="LOCAL-00015" summary="done">
-      <option name="closed" value="true" />
-      <created>1766411587703</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1766411587703</updated>
-    </task>
-    <option name="localTasksCounter" value="16" />
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Hoàn thiện tra cứu hóa đơn" />
@@ -414,24 +311,7 @@
     <MESSAGE value="xóa các class không cần thiết, pull code từ master của nam" />
     <MESSAGE value="sửa tuổi =&gt; ngày sinh, tìm khách hàng nhanh theo cccd. Ngày 13/12 thêm chức năng hiện thị chuyến tàu đẹp mắt hơn" />
     <MESSAGE value="sửa lý thành công khuyến mãi và 100% khuyến mãi" />
-    <MESSAGE value="Đã hoàn thiện màn hình đổi vé , đang thiết lập đổi vé..." />
-    <MESSAGE value="fix bán vé" />
-    <MESSAGE value="lỗi" />
-    <MESSAGE value="km test" />
-    <MESSAGE value="pre final" />
-    <MESSAGE value="done quản lý chuyến tàu + tạo csdl duy nhất" />
-    <MESSAGE value="done" />
-    <option name="LAST_COMMIT_MESSAGE" value="done" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <breakpoint enabled="true" type="java-exception">
-          <properties class="java.lang.IllegalArgumentException" package="java.lang" />
-          <option name="timeStamp" value="12" />
-        </breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <option name="LAST_COMMIT_MESSAGE" value="sửa lý thành công khuyến mãi và 100% khuyến mãi" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/UngDung$PopUpChiTietHoaDon.ic" NAME="PopUpChiTietHoaDon Coverage Results" MODIFIED="1765327945354" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

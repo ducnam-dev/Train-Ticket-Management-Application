@@ -19,7 +19,55 @@ public class VeDAO {
      * @param sdt Số điện thoại khách hàng
      * @return Đối tượng Ve đã nạp đầy đủ thông tin chi tiết (ChiTiet)
      */
+    /**
+     * Lấy danh sách 5 vé mới nhất có trạng thái 'Đã bán' để làm dữ liệu mẫu.
+     */
+    public List<Ve> getTop5VeMoiNhat() {
+        List<Ve> danhSachVe = new ArrayList<>();
+        // Thêm điều kiện TrangThai để lọc vé đã hủy
+        String sql = "SELECT TOP 5 V.MaVe, V.GiaVe, V.TrangThai, V.MaKhachHang, V.MaChuyenTau, V.MaChoDat, V.MaLoaiVe, V.MaNV " +
+                "FROM Ve V " +
+                "WHERE V.TrangThai = N'DA_BAN' " + // Hãy chắc chắn giá trị này giống trong DB
+                "ORDER BY V.MaVe DESC";
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
 
+            while (rs.next()) {
+                Ve ve = new Ve();
+                ve.setMaVe(rs.getString("MaVe"));
+                ve.setGiaVe(rs.getDouble("GiaVe"));
+                ve.setTrangThai(rs.getString("TrangThai"));
+                ve.setMaKhachHang(rs.getString("MaKhachHang"));
+                ve.setMaChuyenTau(rs.getString("MaChuyenTau"));
+                ve.setMaChoDat(rs.getString("MaChoDat"));
+                ve.setMaLoaiVe(rs.getString("MaLoaiVe"));
+                ve.setMaNV(rs.getString("MaNV"));
+
+                danhSachVe.add(ve);
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi lấy dữ liệu mẫu: " + e.getMessage());
+        } finally {
+            ConnectDB.disconnect();
+        }
+
+        // Nạp chi tiết thực thể sau khi đóng kết nối chính để tránh lỗi "Connection is closed"
+        for (Ve ve : danhSachVe) {
+            if (ve.getMaKhachHang() != null) {
+                KhachHang kh = KhachHangDAO.getKhachHangById(ve.getMaKhachHang());
+                ve.setKhachHangChiTiet(kh);
+                if (kh != null) ve.setTenKhachHang(kh.getHoTen());
+            }
+            if (ve.getMaChuyenTau() != null) {
+                ve.setChuyenTauChiTiet(ChuyenTauDao.layChuyenTauBangMa(ve.getMaChuyenTau()));
+            }
+            if (ve.getMaChoDat() != null) {
+                ve.setChoDatChiTiet(ChoDatDAO.getChoDatById(ve.getMaChoDat()));
+            }
+        }
+        return danhSachVe;
+    }
     public Ve getChiTietVeChoTraVe(String maVe, String sdt) {
         Ve ve = null;
 
