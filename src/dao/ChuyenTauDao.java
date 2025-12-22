@@ -289,9 +289,9 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
 
     public List<ChuyenTau> timChuyenTauTheoGaVaNgayDi(String gaXP, String gaKT, String ngayDi) {
         List<ChuyenTau> danhSachChuyenTau = new ArrayList<>();
-        System.out.println(gaXP + " | " + gaKT + " | " + ngayDi);
+        System.out.println("Input: " + gaXP + " | " + gaKT + " | " + ngayDi);
 
-        // SQL Tối ưu (JOIN tất cả các bảng phụ)
+        // 1. Sửa lỗi thiếu dấu cách trước " AND ("
         String sql = "SELECT CT.*, " +
                 "GA_DI.TenGa AS TenGaDi, GA_DI.DiaChi AS DiaChiGaDi, " +
                 "GA_DEN.TenGa AS TenGaDen, GA_DEN.DiaChi AS DiaChiGaDen, " +
@@ -302,46 +302,45 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
                 "LEFT JOIN Ga GA_DEN ON CT.GaDen = GA_DEN.MaGa " +
                 "LEFT JOIN Tau T ON CT.MaTau = T.SoHieu " +
                 "LEFT JOIN NhanVien NV ON CT.MaNV = NV.MaNV " +
-                "WHERE CT.GaDi = ? AND CT.GaDen = ? AND CT.NgayKhoiHanh = ?" +
+                "WHERE CT.GaDi = ? AND CT.GaDen = ? AND CT.NgayKhoiHanh = ? " + // <-- Dấu cách quan trọng
                 "AND (" +
-                "      CT.NgayKhoiHanh > CAST(GETDATE() AS DATE) \n" +
-                "      OR (CT.NgayKhoiHanh = CAST(GETDATE() AS DATE) AND CT.GioKhoiHanh > CAST(GETDATE() AS TIME))\n" +
-                "  )";
+                "      CT.NgayKhoiHanh > CAST(GETDATE() AS DATE) " +
+                "      OR (CT.NgayKhoiHanh = CAST(GETDATE() AS DATE) AND CT.GioKhoiHanh > CAST(GETDATE() AS TIME))" +
+                ")";
 
         try (Connection con = ConnectDB.getConnection();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
-            // 1. Set tham số
             pstmt.setString(1, gaXP);
             pstmt.setString(2, gaKT);
-            pstmt.setString(3, ngayDi);
+            pstmt.setString(3, ngayDi); // Fallback về setString nếu lỗi
 
 
-            // 2. Thực thi truy vấn và ánh xạ
+            System.out.println("Bắt đầu query...");
+
             try (ResultSet rs = pstmt.executeQuery()) {
+                // Biến kiểm tra xem có dòng nào không
+                boolean coDuLieu = false;
+
                 while (rs.next()) {
-                    // Lấy thông tin cơ bản
+                    coDuLieu = true;
                     String maChuyenTau = rs.getString("MaChuyenTau");
+                    System.out.println("Tìm thấy chuyến: " + maChuyenTau); // Debug
+
                     String maTau = rs.getString("MaTau");
                     String maNV = rs.getString("MaNV");
-                    // ... (các trường khác từ CT.*)
+
                     LocalDate ngayKH = rs.getDate("NgayKhoiHanh").toLocalDate();
                     LocalTime gioKH = rs.getTime("GioKhoiHanh").toLocalTime();
                     LocalDate ngayDen = rs.getDate("NgayDenDuKien").toLocalDate();
                     LocalTime gioDen = rs.getTime("GioDenDuKien").toLocalTime();
+
                     String trangThai = rs.getString("TrangThai");
-                    //trangThai lúc lấy là DANG_CHO
-                    //không dùng fromString
                     TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
 
-                    // TẠO ĐỐI TƯỢNG GA DI
                     Ga gaDi = new Ga(rs.getString("GaDi"), rs.getString("TenGaDi"), rs.getString("DiaChiGaDi"));
-                    // TẠO ĐỐI TƯỢNG GA ĐẾN
                     Ga gaDen = new Ga(rs.getString("GaDen"), rs.getString("TenGaDen"), rs.getString("DiaChiGaDen"));
-                    // TẠO ĐỐI TƯỢNG TÀU
                     Tau tau = new Tau(rs.getString("MaTau"), rs.getString("TrangThaiTau"));
-
-                    // 4. Nhân Viên (Gọi phương thức tĩnh từ NhanVienDao)
 
                     NhanVien nv = null;
                     if (maNV != null && !maNV.isEmpty()) {
@@ -349,13 +348,17 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
                     }
 
                     ChuyenTau ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
-
                     danhSachChuyenTau.add(ct);
+                }
+
+                if (!coDuLieu) {
+                    System.out.println("Query chạy thành công nhưng KHÔNG tìm thấy bản ghi nào khớp điều kiện.");
+                    System.out.println("Lưu ý: Code đang lọc bỏ các chuyến tàu đã khởi hành trong quá khứ so với giờ Server.");
                 }
             }
 
         } catch (SQLException e) {
-            System.err.println("Lỗi khi tìm chuyến tàu: ");
+            System.err.println("Lỗi SQL Exception: ");
             e.printStackTrace();
         }
         return danhSachChuyenTau;

@@ -5,7 +5,7 @@ import dao.*;
 import control.VeSoDoTau;
 import entity.*;
 import entity.DTO.ThongTinVeDTO;
-import service.NghiepVuTinhGiaVe;
+import service.NghiepVuTinhGiaVe; // Import service tính giá
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -250,7 +250,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
     }
 
     // =========================================================================
-    // UI PHẢI: PANEL KHÁCH HÀNG (CÓ NÚT RESET)
+    // UI PHẢI: PANEL KHÁCH HÀNG
     // =========================================================================
     private JPanel taoPanelPhai() {
         JPanel p = new JPanel(new BorderLayout());
@@ -407,7 +407,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         JPanel pnlFooter = new JPanel(new GridLayout(1, 2, 5, 2));
         pnlFooter.setOpaque(false);
         pnlFooter.setBorder(new EmptyBorder(5, 15, 5, 15));
-        JLabel lblGiaCu = new JLabel("Giá cũ: " + String.format("%,.0f", ve.getGiaVe()));
+        JLabel lblGiaCu = new JLabel("Giá cũ: " + String.format("%,.0f", ve.getGiaVe()) + "VNĐ");
         lblGiaCu.setForeground(Color.RED);
         JLabel lblGiaMoi = new JLabel("Giá mới: 0");
         lblGiaMoi.setForeground(new Color(0, 123, 255));
@@ -809,38 +809,27 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
         return "Ghế mềm điều hòa";
     }
 
+    // === CẬP NHẬT LOGIC TÍNH GIÁ MỚI Ở ĐÂY ===
     private long tinhGiaVeTau(ChoDat cho, String maLoaiVe) throws Exception {
-        Ga gaDi = (Ga) cbGaDi.getSelectedItem(); Ga gaDen = (Ga) cbGaDen.getSelectedItem();
-        String maTuyen = maChuyenTauHienTai.split("_")[0];
-        int kc = gaTrongTuyenDao.tinhKhoangCachGiuaHaiGa(maTuyen, gaDi.getMaGa(), gaDen.getMaGa());
-        // => có mã toa => lấy được mã loại toa => lấy được hệ số toa
+        Ga gaDi = (Ga) cbGaDi.getSelectedItem();
+        Ga gaDen = (Ga) cbGaDen.getSelectedItem();
 
-        String loaiToa = layLoaiToa(cho.getMaToa());
+        if (gaDi == null || gaDen == null || maChuyenTauHienTai == null) {
+            throw new Exception("Thông tin chuyến tàu hoặc ga chưa đầy đủ.");
+        }
 
-//        double hsToa = loaiToaDao.getHeSoByLoaiToa(loaiToa);
-        double hsToa = 1.0;
-        double hsVe = loaiVeDAO.getHeSoByMaLoaiVe(maLoaiVe);
-        long gia = Math.round(kc * 1000 * hsToa * hsVe);
-        return (((gia + 999) / 1000) * 1000) + PHI_DOI_VE;
+        // Gọi Service NghiepVuTinhGiaVe để lấy giá vé cơ bản (đã tính theo km, loại toa, loại vé)
+        long giaGoc = NghiepVuTinhGiaVe.tinhGiaVe(
+                gaDi.getMaGa(),
+                gaDen.getMaGa(),
+                maChuyenTauHienTai,
+                cho,
+                maLoaiVe
+        );
+
+        // Cộng thêm phí đổi vé theo nghiệp vụ
+        return giaGoc + PHI_DOI_VE;
     }
-//    private long tinhGiaVeTau(ChoDat cho, String maLoaiVe) throws Exception {
-//        Ga gaDi = (Ga) cbGaDi.getSelectedItem();
-//        Ga gaDen = (Ga) cbGaDen.getSelectedItem();
-//
-//        if (gaDi == null || gaDen == null || maChuyenTauHienTai == null) {
-//            throw new Exception("Thông tin chuyến tàu hoặc ga chưa đầy đủ.");
-//        }
-//
-//        // Gọi Service xử lý logic
-//        return NghiepVuTinhGiaVe.tinhGiaVe(
-//                gaDi.getMaGa(),
-//                gaDen.getMaGa(),
-//                maChuyenTauHienTai,
-//                cho,
-//                maLoaiVe
-//        );
-//    }
-
 
     private String formatLoaiVeHienThi(LoaiVe lv) { return lv.getTenLoai(); }
 
