@@ -19,45 +19,36 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.List;
-import java.util.Vector;
-import java.util.Map;
-import java.util.HashMap;
 
 public class ManHinhQuanLyChuyenTau extends JPanel {
 
     private static final Color BG_COLOR = new Color(245, 245, 245);
     private static final Font FONT_BOLD_12 = new Font("Segoe UI", Font.BOLD, 12);
-    private static final Font FONT_PLAIN_12 = new Font("Segoe UI", Font.PLAIN, 12);
+
+    // --- Biến logic ---
+    private List<GaTrongTuyen> danhSachGaTam = new ArrayList<>();
 
     private JTabbedPane tabbedPane;
 
-    // --- Components Tab 1 (Tuyến & Ga) ---
-    private JTable tbTuyen;
-    private DefaultTableModel modelTuyen;
+    // --- Components Tab 1 ---
+    private JTable tbTuyen, tbGaTrongTuyen;
+    private DefaultTableModel modelTuyen, modelGa;
     private JTextField txtMaTuyen, txtTenTuyen;
-    private JComboBox<Ga> cbGaDau, cbGaCuoi;
-    private JButton btnThemTuyen, btnSuaTuyen, btnXoaTrangTuyen;
-
-    private JTable tbGaTrongTuyen;
-    private DefaultTableModel modelGa;
-    private JComboBox<Ga> cbMaGa;
+    private JComboBox<Ga> cbGaDau, cbGaCuoi, cbMaGa;
     private JTextField txtThuTuGa, txtKhoangCach, txtThoiGianDi, txtThoiGianDung;
-    private JButton btnThemGa, btnSuaGa, btnXoaGa, btnLamMoiGa;
+    private JButton btnThemTuyen, btnXoaTrangTuyen, btnThemGa, btnXoaGa;
+    private JButton btnTimKiemChuyen, btnTaoLichTrinh;
 
-    // --- Components Tab 2 (Chuyến Tàu & Lịch Trình) ---
-    private JDateChooser dateTimKiem;
-    private JComboBox<Tuyen> cbTimTuyen;
+    // --- Components Tab 2 ---
+    private JDateChooser dateTimKiem, dateChooserBatDau, dateChooserKetThuc;
+    private JComboBox<Tuyen> cbTimTuyen, cbChonTuyenLichTrinh;
+    private JComboBox<Tau> cbChonTau;
     private JTable tbChuyenTau;
     private DefaultTableModel modelChuyenTau;
-    private JButton btnTimKiemChuyen;
-
-    private JComboBox<Tuyen> cbChonTuyenLichTrinh; // ComboBox mới yêu cầu
-    private JComboBox<Tau> cbChonTau;
-    private JDateChooser dateChooserBatDau, dateChooserKetThuc;
     private JTextField txtGioKhoiHanhChinh;
-    private JButton btnTaoLichTrinh;
-
+    private JTextField txtDonGiaKM;
     // DAOs
     private final TuyenDao tuyenDao;
     private final GaTrongTuyenDao gaTrongTuyenDao;
@@ -91,7 +82,6 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
         setLayout(new BorderLayout());
         setBackground(BG_COLOR);
 
-        // Tiêu đề tổng
         JLabel tieuDe = new JLabel("HỆ THỐNG QUẢN LÝ LỊCH TRÌNH TÀU HỎA");
         tieuDe.setFont(new Font("Segoe UI", Font.BOLD, 20));
         tieuDe.setForeground(new Color(0, 51, 153));
@@ -99,17 +89,17 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
         tieuDe.setBorder(new EmptyBorder(10, 0, 10, 0));
         add(tieuDe, BorderLayout.NORTH);
 
-        tabbedPane = new JTabbedPane();
+        JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(FONT_BOLD_12);
 
-        // TAB 1: CẤU HÌNH TUYẾN VÀ GA
+        // TAB 1
         JPanel pnlTab1 = new JPanel(new GridLayout(1, 2, 10, 0));
         pnlTab1.setBorder(new EmptyBorder(10, 10, 10, 10));
         pnlTab1.add(taoPanelTuyen());
         pnlTab1.add(taoPanelGaTrongTuyen());
-        tabbedPane.addTab("1. Cấu hình Tuyến & Ga dừng", pnlTab1);
+        tabbedPane.addTab("1. Thiết lập Tuyến & Ga dừng", pnlTab1);
 
-        // TAB 2: QUẢN LÝ CHUYẾN TÀU
+        // TAB 2
         JPanel pnlTab2 = new JPanel(new BorderLayout(0, 10));
         pnlTab2.setBorder(new EmptyBorder(10, 10, 10, 10));
         pnlTab2.add(taoPanelTimKiemChuyenTau(), BorderLayout.CENTER);
@@ -118,70 +108,92 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
 
         add(tabbedPane, BorderLayout.CENTER);
     }
-
     // --- Các hàm tạo Panel (Giữ nguyên logic cũ của bạn và điều chỉnh Tab 2) ---
 
     private JPanel taoPanelTuyen() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.setBorder(new TitledBorder("Danh sách Tuyến"));
-        panel.add(taoFormTuyen(), BorderLayout.NORTH);
+        panel.setBorder(new TitledBorder("Thông tin Tuyến mới"));
 
-        modelTuyen = new DefaultTableModel(new String[]{"Mã Tuyến", "Tên Tuyến", "Ga Đầu", "Ga Cuối"}, 0);
+        // 1. Form nhập liệu: Tăng lên GridLayout(5, 2) để thêm dòng Đơn giá
+        JPanel pnlForm = new JPanel(new GridLayout(5, 2, 5, 5));
+
+        pnlForm.add(new JLabel("Mã Tuyến:"));
+        txtMaTuyen = new JTextField();
+        pnlForm.add(txtMaTuyen);
+
+        pnlForm.add(new JLabel("Tên Tuyến:"));
+        txtTenTuyen = new JTextField();
+        pnlForm.add(txtTenTuyen);
+
+        pnlForm.add(new JLabel("Ga Đầu:"));
+        cbGaDau = new JComboBox<>();
+        pnlForm.add(cbGaDau);
+
+        pnlForm.add(new JLabel("Ga Cuối:"));
+        cbGaCuoi = new JComboBox<>();
+        pnlForm.add(cbGaCuoi);
+
+        // THÊM MỚI: Ô nhập Đơn giá/KM
+        pnlForm.add(new JLabel("Đơn giá/KM (VNĐ):"));
+        txtDonGiaKM = new JTextField();
+        pnlForm.add(txtDonGiaKM);
+
+        // 2. Bảng danh sách tuyến: Thêm cột "Đơn giá/KM"
+        modelTuyen = new DefaultTableModel(
+                new String[]{"Mã Tuyến", "Tên Tuyến", "Ga Đầu", "Ga Cuối", "Đơn giá/KM"}, 0
+        );
         tbTuyen = new JTable(modelTuyen);
-        tbTuyen.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) { hienThiChiTietTuyen(); }
-        });
-        panel.add(new JScrollPane(tbTuyen), BorderLayout.CENTER);
-        return panel;
-    }
 
-    private JPanel taoFormTuyen() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL; gbc.insets = new Insets(4,4,4,4);
+        // Nút bấm
+        JPanel pnlNut = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        btnThemTuyen = new JButton("XÁC NHẬN LƯU TUYẾN");
+        btnThemTuyen.setBackground(new Color(0, 102, 204));
+        btnThemTuyen.setForeground(Color.WHITE);
+        btnXoaTrangTuyen = new JButton("Làm mới/Mới");
 
-        gbc.gridx = 0; gbc.gridy = 0; panel.add(new JLabel("Mã Tuyến:"), gbc);
-        gbc.gridx = 1; txtMaTuyen = new JTextField(10); panel.add(txtMaTuyen, gbc);
-        gbc.gridx = 2; panel.add(new JLabel("Tên Tuyến:"), gbc);
-        gbc.gridx = 3; txtTenTuyen = new JTextField(15); panel.add(txtTenTuyen, gbc);
+        pnlNut.add(btnXoaTrangTuyen);
+        pnlNut.add(btnThemTuyen);
 
-        gbc.gridx = 0; gbc.gridy = 1; panel.add(new JLabel("Ga Đầu:"), gbc);
-        gbc.gridx = 1; cbGaDau = new JComboBox<>(); panel.add(cbGaDau, gbc);
-        gbc.gridx = 2; panel.add(new JLabel("Ga Cuối:"), gbc);
-        gbc.gridx = 3; cbGaCuoi = new JComboBox<>(); panel.add(cbGaCuoi, gbc);
-
-        JPanel pnlNut = new JPanel();
-        btnThemTuyen = new JButton("Thêm");
         btnThemTuyen.addActionListener(e -> logicThemTuyen());
-
-        btnXoaTrangTuyen = new JButton("Mới");
-        pnlNut.add(btnThemTuyen); pnlNut.add(btnXoaTrangTuyen);
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 4; panel.add(pnlNut, gbc);
-
         btnXoaTrangTuyen.addActionListener(e -> xoaTrangFormTuyen());
+
+        panel.add(pnlForm, BorderLayout.NORTH);
+        panel.add(new JScrollPane(tbTuyen), BorderLayout.CENTER);
+        panel.add(pnlNut, BorderLayout.SOUTH);
         return panel;
     }
 
     private JPanel taoPanelGaTrongTuyen() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.setBorder(new TitledBorder("Cấu hình Ga dừng đỗ"));
-        panel.add(taoPanelNhapLieuGa(), BorderLayout.NORTH);
+        panel.setBorder(new TitledBorder("Cấu hình Ga dừng (Thêm vào danh sách chờ)"));
 
-        modelGa = new DefaultTableModel(new String[]{"Mã Ga", "Thứ tự", "KC (km)", "TG Đi (phút)", "TG Dừng (phút)"}, 0);
+        // Form nhập ga
+        JPanel pnlNhapGa = new JPanel(new GridLayout(3, 4, 5, 5));
+        pnlNhapGa.add(new JLabel("Mã Ga:")); cbMaGa = new JComboBox<>(); pnlNhapGa.add(cbMaGa);
+        pnlNhapGa.add(new JLabel("Thứ tự:")); txtThuTuGa = new JTextField(); pnlNhapGa.add(txtThuTuGa);
+        pnlNhapGa.add(new JLabel("KC (km):")); txtKhoangCach = new JTextField(); pnlNhapGa.add(txtKhoangCach);
+        pnlNhapGa.add(new JLabel("Dừng (p):")); txtThoiGianDung = new JTextField(); pnlNhapGa.add(txtThoiGianDung);
+        pnlNhapGa.add(new JLabel("TG Đi (p):")); txtThoiGianDi = new JTextField(); pnlNhapGa.add(txtThoiGianDi);
+
+        // Bảng danh sách ga tạm
+        modelGa = new DefaultTableModel(new String[]{"Mã Ga", "Thứ tự", "KC", "TG Đi", "Dừng"}, 0);
         tbGaTrongTuyen = new JTable(modelGa);
-        tbGaTrongTuyen.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) { dienThongTinGaVaoForm(); }
-        });
-        panel.add(new JScrollPane(tbGaTrongTuyen), BorderLayout.CENTER);
 
-        JPanel pnlNutGa = new JPanel();
-        btnThemGa = new JButton("Thêm Ga");
+        // Nút bấm
+        JPanel pnlNutGa = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        btnThemGa = new JButton("Thêm vào danh sách chờ");
+        btnXoaGa = new JButton("Xóa khỏi danh sách chờ");
+        btnXoaGa.setForeground(Color.RED);
+
+        pnlNutGa.add(btnThemGa);
+        pnlNutGa.add(btnXoaGa);
+
         btnThemGa.addActionListener(e -> logicThemGa());
-        btnLamMoiGa = new JButton("Làm mới");
-        pnlNutGa.add(btnThemGa); pnlNutGa.add(btnLamMoiGa);
-        panel.add(pnlNutGa, BorderLayout.SOUTH);
+        btnXoaGa.addActionListener(e -> logicXoaGa());
 
-        btnLamMoiGa.addActionListener(e -> xoaTrangFormGa());
+        panel.add(pnlNhapGa, BorderLayout.NORTH);
+        panel.add(new JScrollPane(tbGaTrongTuyen), BorderLayout.CENTER);
+        panel.add(pnlNutGa, BorderLayout.SOUTH);
         return panel;
     }
 
@@ -226,10 +238,9 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
         panel.setBackground(new Color(230, 240, 250));
         panel.setBorder(new TitledBorder("4. Tạo Lịch Trình Chuyến Tàu Hàng Loạt"));
+        panel.setPreferredSize(new Dimension(0, 120));
 
         // ComboBox chọn Tuyến (Mới thêm vào theo yêu cầu)
-        panel.setPreferredSize(new Dimension(0, 100));
-
         panel.add(new JLabel("Chọn Tuyến:"));
         cbChonTuyenLichTrinh = new JComboBox<>();
         cbChonTuyenLichTrinh.setPreferredSize(new Dimension(200, 25));
@@ -386,61 +397,74 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
         String ten = txtTenTuyen.getText().trim();
         Ga gaDau = (Ga) cbGaDau.getSelectedItem();
         Ga gaCuoi = (Ga) cbGaCuoi.getSelectedItem();
-
-        if (ma.isEmpty() || ten.isEmpty() || gaDau == null || gaCuoi == null) {
-            hienThiThongBaoLoi("Vui lòng nhập đầy đủ thông tin tuyến!");
+        int donGiaKM;
+        try {
+            donGiaKM = Integer.parseInt(txtDonGiaKM.getText().trim());
+        } catch (NumberFormatException e) {
+            hienThiThongBaoLoi("Đơn giá/KM không hợp lệ!");
             return;
         }
 
-        if (gaDau.getMaGa().equals(gaCuoi.getMaGa())) {
-            hienThiThongBaoLoi("Ga đầu và ga cuối không được trùng nhau!");
+        if (ma.isEmpty() || ten.isEmpty()) {
+            hienThiThongBaoLoi("Vui lòng nhập Mã và Tên tuyến!");
+            return;
+        }
+
+        if (danhSachGaTam.size() < 2) {
+            hienThiThongBaoLoi("Bắt buộc phải có ít nhất 2 ga (Ga Đầu & Ga Cuối) trong danh sách chờ!");
             return;
         }
 
         try {
-            Tuyen t = new Tuyen(ma, ten, gaDau.getMaGa(), gaCuoi.getMaGa());
+            Tuyen t = new Tuyen(ma, ten, gaDau.getMaGa(), gaCuoi.getMaGa(), donGiaKM );
             if (tuyenDao.themTuyen(t)) {
-                JOptionPane.showMessageDialog(this, "Thêm tuyến thành công!");
-                taiDuLieuTuyen(); // Load lại bảng và các ComboBox
+                for (GaTrongTuyen gtt : danhSachGaTam) {
+                    gtt.setTuyen(t);
+                    gaTrongTuyenDao.themGaTrongTuyen(gtt);
+                }
+                JOptionPane.showMessageDialog(this, "Tạo Tuyến và cấu hình Ga thành công!");
+                taiDuLieuTuyen();
                 xoaTrangFormTuyen();
             }
         } catch (SQLException e) {
-            hienThiThongBaoLoi("Lỗi khi thêm tuyến: " + e.getMessage());
+            hienThiThongBaoLoi("Lỗi lưu tuyến: " + e.getMessage());
         }
     }
     private void logicThemGa() {
-        String maTuyen = txtMaTuyen.getText().trim();
-        if (maTuyen.isEmpty()) {
-            hienThiThongBaoLoi("Vui lòng chọn một Tuyến từ bảng bên trái trước!");
-            return;
-        }
-
         try {
             Ga gaChon = (Ga) cbMaGa.getSelectedItem();
-            int thuTu = Integer.parseInt(txtThuTuGa.getText().trim());
-            int kc = Integer.parseInt(txtKhoangCach.getText().trim());
-            int tgDi = Integer.parseInt(txtThoiGianDi.getText().trim());
-            int tgDung = Integer.parseInt(txtThoiGianDung.getText().trim());
+            for (GaTrongTuyen g : danhSachGaTam) {
+                if (g.getMaGa().equals(gaChon.getMaGa())) {
+                    hienThiThongBaoLoi("Ga này đã có trong danh sách chờ!");
+                    return;
+                }
+            }
 
             GaTrongTuyen gtt = new GaTrongTuyen();
-            gtt.setTuyen(new Tuyen(maTuyen));
             gtt.setMaGa(gaChon.getMaGa());
-            gtt.setThuTuGa(thuTu);
-            gtt.setKhoangCachTichLuy(kc);
-            gtt.setThoiGianDiDenGaTiepTheo(tgDi);
-            gtt.setThoiGianDung(tgDung);
+            gtt.setThuTuGa(Integer.parseInt(txtThuTuGa.getText().trim()));
+            gtt.setKhoangCachTichLuy(Integer.parseInt(txtKhoangCach.getText().trim()));
+            gtt.setThoiGianDiDenGaTiepTheo(Integer.parseInt(txtThoiGianDi.getText().trim()));
+            gtt.setThoiGianDung(Integer.parseInt(txtThoiGianDung.getText().trim()));
 
-            if (gaTrongTuyenDao.themGaTrongTuyen(gtt)) {
-                JOptionPane.showMessageDialog(this, "Thêm ga vào tuyến thành công!");
-                taiDuLieuGaTrongTuyen(maTuyen); // Refresh bảng ga
-                xoaTrangFormGa();
-            }
-        } catch (NumberFormatException e) {
-            hienThiThongBaoLoi("Thứ tự, khoảng cách và thời gian phải là số nguyên!");
-        } catch (SQLException e) {
-            hienThiThongBaoLoi("Lỗi: Ga này có thể đã tồn tại trong tuyến hoặc lỗi CSDL!");
+            danhSachGaTam.add(gtt);
+            modelGa.addRow(new Object[]{gtt.getMaGa(), gtt.getThuTuGa(), gtt.getKhoangCachTichLuy(), gtt.getThoiGianDiDenGaTiepTheo(), gtt.getThoiGianDung()});
+            xoaTrangFormGa();
+        } catch (Exception e) {
+            hienThiThongBaoLoi("Dữ liệu thông Ga không hợp lệ! Vui lòng kiểm tra lại");
         }
     }
+    private void logicXoaGa() {
+        int selectedRow = tbGaTrongTuyen.getSelectedRow();
+        if (selectedRow != -1) {
+            danhSachGaTam.remove(selectedRow);
+            modelGa.removeRow(selectedRow);
+            xoaTrangFormGa();
+        } else {
+            hienThiThongBaoLoi("Vui lòng chọn Ga trong danh sách chờ để xóa!");
+        }
+    }
+
     private void xoaTrangFormTuyen() {
         txtMaTuyen.setText("");
         txtTenTuyen.setText("");
@@ -458,41 +482,33 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
         txtThoiGianDung.setText("");
     }
 
-    private void taiDuLieuTuyen() {
+    private void taiDuLieuTuyen() throws SQLException {
+        // 1. Xóa dữ liệu cũ
         modelTuyen.setRowCount(0);
         cbTimTuyen.removeAllItems();
-        cbChonTuyenLichTrinh.removeAllItems(); // Cập nhật cả combo ở Tab 2
-        try {
-            List<Tuyen> ds = tuyenDao.layTatCaTuyen();
-            for (Tuyen t : ds) {
-                modelTuyen.addRow(new Object[]{t.getMaTuyen(), t.getTenTuyen(), t.getGaDau(), t.getGaCuoi()});
-                cbTimTuyen.addItem(t);
-                cbChonTuyenLichTrinh.addItem(t);
-            }
-        } catch (SQLException e) { e.printStackTrace(); }
+        cbChonTuyenLichTrinh.removeAllItems();
+
+        // 2. Lấy danh sách từ DAO
+        List<Tuyen> ds = tuyenDao.layTatCaTuyen();
+
+        for (Tuyen t : ds) {
+            // Đổ vào Bảng (JTable) - thêm đơn giá vào cột thứ 5
+            modelTuyen.addRow(new Object[]{
+                    t.getMaTuyen(),
+                    t.getTenTuyen(),
+                    t.getGaDau(),
+                    t.getGaCuoi(),
+                    t.getDonGiaKM()
+            });
+
+            // Đổ vào ComboBox (Quan trọng)
+            cbTimTuyen.addItem(t);
+            cbChonTuyenLichTrinh.addItem(t);
+        }
     }
 
     // --- Các hàm hỗ trợ khác (xóa trắng, load ga, load tàu...) giữ nguyên như code cũ của bạn ---
 
-    private void hienThiChiTietTuyen() {
-        int selectedRow = tbTuyen.getSelectedRow();
-        if (selectedRow != -1) {
-            String maTuyen = (String) modelTuyen.getValueAt(selectedRow, 0);
-            String tenTuyen = (String) modelTuyen.getValueAt(selectedRow, 1);
-            String gaDauMa = (String) modelTuyen.getValueAt(selectedRow, 2);
-            String gaCuoiMa = (String) modelTuyen.getValueAt(selectedRow, 3);
-
-            txtMaTuyen.setText(maTuyen);
-            txtTenTuyen.setText(tenTuyen);
-            txtMaTuyen.setEditable(false);
-
-            chonGaTrongComboBox(cbGaDau, gaDauMa);
-            chonGaTrongComboBox(cbGaCuoi, gaCuoiMa);
-
-            taiDuLieuGaTrongTuyen(maTuyen);
-            xoaTrangFormGa();
-        }
-    }
     private void chonGaTrongComboBox(JComboBox<Ga> cb, String maGa) {
         if (maGa == null || cb == null) return;
 
@@ -519,19 +535,11 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
     }
 
     private void loadDuLieuGaDocLap() throws SQLException {
-        Vector<Ga> danhSachGa = gaDao.layDanhSachGa();
-        cbGaDau.removeAllItems();
-        cbGaCuoi.removeAllItems();
-        cbMaGa.removeAllItems();
-        for (Ga ga : danhSachGa) {
-            cbGaDau.addItem(ga);
-            cbGaCuoi.addItem(ga);
-            cbMaGa.addItem(ga);
+        Vector<Ga> dsGa = gaDao.layDanhSachGa();
+        cbGaDau.removeAllItems(); cbGaCuoi.removeAllItems(); cbMaGa.removeAllItems();
+        for (Ga g : dsGa) {
+            cbGaDau.addItem(g); cbGaCuoi.addItem(g); cbMaGa.addItem(g);
         }
-        ManHinhQuanLyChuyenTau.GaRenderer renderer = new ManHinhQuanLyChuyenTau.GaRenderer();
-        cbGaDau.setRenderer(renderer);
-        cbGaCuoi.setRenderer(renderer);
-        cbMaGa.setRenderer(renderer);
     }
     private class GaRenderer extends DefaultListCellRenderer {
         @Override

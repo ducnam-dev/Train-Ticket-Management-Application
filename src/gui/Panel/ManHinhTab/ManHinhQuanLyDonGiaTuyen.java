@@ -1,4 +1,4 @@
-package gui.Panel.Gia;
+package gui.Panel.ManHinhTab;
 
 import dao.TuyenDao;
 import entity.Tuyen;

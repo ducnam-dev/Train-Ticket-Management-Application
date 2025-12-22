@@ -54,8 +54,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
     // UI Khuyen mai
     private JComboBox<KhuyenMai> cbKhuyenMai;
-    private JButton btnApDungKhuyenMai;
-    private JButton btnXoaKhuyenMai;
     private JLabel lblThongTinKhuyenMai;
 
     //UI Hoa don
@@ -377,15 +375,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         cbKhuyenMai.setEnabled(false);
         dongKm.add(cbKhuyenMai);
 
-        btnApDungKhuyenMai = new JButton("Áp dụng");
-        btnApDungKhuyenMai.setEnabled(false);
-        btnApDungKhuyenMai.addActionListener(e -> apDungKhuyenMaiChon());
-        dongKm.add(btnApDungKhuyenMai);
-
-        btnXoaKhuyenMai = new JButton("Xóa KM");
-        btnXoaKhuyenMai.setEnabled(false);
-        btnXoaKhuyenMai.addActionListener(e -> xoaKhuyenMai());
-        dongKm.add(btnXoaKhuyenMai);
 
         lblThongTinKhuyenMai = new JLabel(" ");
         dongKm.add(lblThongTinKhuyenMai);
@@ -744,15 +733,12 @@ public class ManHinhXacNhanBanVe extends JPanel {
         double maxDiscount = 0.0;
 
         for (KhuyenMai km : activePromos) {
-            // BƯỚC 1: KIỂM TRA ĐIỀU KIỆN ÁP DỤNG
             if (!kiemTraDieuKienHopLe(km, subtotal, soLuongVe)) {
                 continue; // Bỏ qua KM không thỏa mãn
             }
 
-            // BƯỚC 2: TÍNH TOÁN GIÁ TRỊ GIẢM
             double currentDiscount = tinhToanGiamGiaTuyetDoi(km, subtotal);
 
-            // BƯỚC 3: SO SÁNH VÀ CHỌN TỐI ƯU
             if (currentDiscount > maxDiscount) {
                 maxDiscount = currentDiscount;
                 bestKm = km;
@@ -799,7 +785,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 khuyenMaiApDung = bestKm;
                 cbKhuyenMai.setSelectedItem(bestKm); // Chọn KM tốt nhất trên ComboBox
                 lblThongTinKhuyenMai.setText("Tự động áp dụng: " + bestKm.getMaKM());
-                btnXoaKhuyenMai.setEnabled(true);
 
                 // --- LOGIC MỚI: THÔNG BÁO SỐ TIỀN GIẢM ---
                 Tong tong = tinhTongHoaDon(subtotal, bestKm);
@@ -817,7 +802,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
                 khuyenMaiApDung = null;
                 cbKhuyenMai.setSelectedIndex(0);
                 lblThongTinKhuyenMai.setText("Không có KM phù hợp để áp dụng.");
-                btnXoaKhuyenMai.setEnabled(false);
             }
 
             // 5. Cập nhật tổng tiền ngay sau khi áp dụng KM tự động
@@ -825,37 +809,8 @@ public class ManHinhXacNhanBanVe extends JPanel {
         });
     }
 
-    // Ap dung khuyen mai dang chon (Thủ công)
-    private void apDungKhuyenMaiChon() {
-        KhuyenMai sel = (KhuyenMai) cbKhuyenMai.getSelectedItem();
 
-        if (sel == null || sel.getMaKM() == null || sel.getMaKM().isEmpty()) {
-            xoaKhuyenMai(); // Nếu chọn "Không áp dụng"
-            return;
-        }
 
-        double subtotal = tinhGiaVe();
-        int soLuongVe = (danhSachGhe == null) ? 0 : danhSachGhe.size();
-
-        // **SỬ DỤNG HÀM KIỂM TRA ĐIỀU KIỆN MỚI**
-        if (!kiemTraDieuKienHopLe(sel, subtotal, soLuongVe)) {
-            JOptionPane.showMessageDialog(this, "Khuyến mãi không thỏa điều kiện áp dụng.", "Không hợp lệ", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        khuyenMaiApDung = sel;
-        btnXoaKhuyenMai.setEnabled(true);
-        lblThongTinKhuyenMai.setText("Đã áp dụng: " + sel.getMaKM());
-        capNhatTongVaGiaoDien();
-        JOptionPane.showMessageDialog(this, "Áp dụng khuyến mãi thành công.", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void xoaKhuyenMai() {
-        khuyenMaiApDung = null;
-        btnXoaKhuyenMai.setEnabled(false);
-        lblThongTinKhuyenMai.setText(" ");
-        capNhatTongVaGiaoDien();
-    }
 
     // Tinh tong (subtotal, discount, total)
     private Tong tinhTongHoaDon(double subtotal, KhuyenMai km) {
@@ -1068,8 +1023,6 @@ public class ManHinhXacNhanBanVe extends JPanel {
         if (btnHuy != null) btnHuy.setEnabled(false);
         if (btnXacNhan != null) btnXacNhan.setEnabled(false);
         if (btnQuayLai != null) btnQuayLai.setEnabled(false);
-        if (btnApDungKhuyenMai != null) btnApDungKhuyenMai.setEnabled(false);
-        if (btnXoaKhuyenMai != null) btnXoaKhuyenMai.setEnabled(false);
         if (cbHinhThuc != null) cbHinhThuc.setEnabled(false);
         if (btnKetThuc != null) btnKetThuc.setEnabled(true);
         if (lblTongCongLon != null) {

@@ -17,12 +17,12 @@ public class Tuyen {
         this.maTuyen = maTuyen;
     }
 
-    public Tuyen(String maTuyen, String tenTuyen, String gaDau, String gaCuoi) {
-        this.maTuyen = maTuyen;
-        this.tenTuyen = tenTuyen;
-        this.gaDau = gaDau;
-        this.gaCuoi = gaCuoi;
-    }
+//    public Tuyen(String maTuyen, String tenTuyen, String gaDau, String gaCuoi) {
+//        this.maTuyen = maTuyen;
+//        this.tenTuyen = tenTuyen;
+//        this.gaDau = gaDau;
+//        this.gaCuoi = gaCuoi;
+//    }
     public Tuyen(String maTuyen, String tenTuyen, String gaDau, String gaCuoi, int donGiaKM) {
         this.maTuyen = maTuyen;
         this.tenTuyen = tenTuyen;

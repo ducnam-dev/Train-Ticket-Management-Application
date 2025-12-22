@@ -11,8 +11,17 @@
   <component name="ChangeListManager">
     <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="done">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/ChuyenTauDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/ChuyenTauDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/TuyenDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/TuyenDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entity/Tuyen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/Tuyen.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/Gia/ManHinhQuanLyDonGiaTuyen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTab/ManHinhQuanLyDonGiaTuyen.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/Gia/ManHinhQuanLyLoaiToa.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTab/ManHinhQuanLyLoaiToa.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/Gia/ManHinhQuanLyLoaiVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTab/ManHinhQuanLyLoaiVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyChuyenTau.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyChuyenTau.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyGiaVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyGiaVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhTrangChuNVBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTrangChuNVBanVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhXacNhanBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhXacNhanBanVe.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,7 +150,7 @@
       <recent name="gui.Panel" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.ManHinhBanVe">
+  <component name="RunManager" selected="Application.ManHinhTrangChuNVBanVe">
     <configuration name="BanVeDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="gui.MainFrame.BanVeDashboard" />
       <module name="Train-Ticket-Management-Application2" />
@@ -175,8 +184,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhQuanLyGiaVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhQuanLyGiaVe" />
+    <configuration name="ManHinhQuanLyChuyenTau" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhQuanLyChuyenTau" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -216,11 +225,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.ManHinhBanVe" />
         <item itemvalue="Application.ManHinhTrangChuNVBanVe" />
-        <item itemvalue="Application.BanVeDashboard" />
         <item itemvalue="Application.QuanLyDashboard" />
-        <item itemvalue="Application.ManHinhQuanLyGiaVe" />
+        <item itemvalue="Application.BanVeDashboard" />
+        <item itemvalue="Application.ManHinhQuanLyChuyenTau" />
+        <item itemvalue="Application.ManHinhBanVe" />
       </list>
     </recent_temporary>
   </component>
@@ -259,7 +268,7 @@
       <workItem from="1765795510159" duration="10382000" />
       <workItem from="1765807783944" duration="249000" />
       <workItem from="1766386789203" duration="3651000" />
-      <workItem from="1766408226352" duration="8085000" />
+      <workItem from="1766408226352" duration="13596000" />
     </task>
     <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
       <option name="closed" value="true" />
@@ -389,7 +398,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766415923870</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="done">
+      <option name="closed" value="true" />
+      <created>1766418444512</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1766418444512</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

@@ -26,7 +26,7 @@ public class ManHinhTrangChuNVBanVe extends JPanel {
             DateTimeFormatter.ofPattern("HH:mm:ss EEEE, dd/MM/yyyy", new Locale("vi", "VN"));
 
     // --- CÁC THÀNH PHẦN CẬP NHẬT DỮ LIỆU ---
-    private JLabel lblDoanhThu, lblSoVe, lblSoHD, lblCaTruc;
+    private JLabel lblSoVe, lblSoHD;
     private JLabel lblTenNV, lblMaNV, lblDongHo;
     private JPanel pnlTauSapChay, pnlHoatDongGanDay, pnlKhuyenMaiContainer, pnlThongBaoNoiBo;
 
@@ -118,15 +118,11 @@ public class ManHinhTrangChuNVBanVe extends JPanel {
         pnl.setOpaque(false);
         pnl.setPreferredSize(new Dimension(0, 100));
 
-        lblDoanhThu = new JLabel("0 VND", SwingConstants.CENTER);
         lblSoVe = new JLabel("0", SwingConstants.CENTER);
         lblSoHD = new JLabel("0", SwingConstants.CENTER);
-        lblCaTruc = new JLabel("N/A", SwingConstants.CENTER);
 
-        pnl.add(taoCardStat("DOANH THU", lblDoanhThu, MAU_NHAN));
         pnl.add(taoCardStat("VÉ ĐÃ BÁN", lblSoVe, MAU_CHINH));
         pnl.add(taoCardStat("HÓA ĐƠN", lblSoHD, Color.decode("#4CAF50")));
-        pnl.add(taoCardStat("CA TRỰC", lblCaTruc, Color.decode("#9C27B0")));
 
         return pnl;
     }
@@ -274,10 +270,10 @@ public class ManHinhTrangChuNVBanVe extends JPanel {
 
         // Cập nhật Stats
         Map<String, Object> stats = dao.getThongKeTrongNgay(nv.getMaNV());
-        lblDoanhThu.setText(String.format("%,.0f VND", (double) stats.get("doanhThu")));
+
+
         lblSoVe.setText(stats.get("soVe").toString());
-        lblSoHD.setText("5");
-        lblCaTruc.setText("Hành Chính");
+        lblSoHD.setText("N/A");
 
         // Cập nhật Tàu sắp chạy
         List<String[]> dsTau = dao.getChuyenTauSapChay();
