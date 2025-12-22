@@ -9,11 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="pull trả ve + lấy chuyến tàu">
+    <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="code mọi người đầy đủ, chưa test chương trình, lỗi không tìm thấy loaiVe vì =&gt;maLoaiVe">
+      <change afterPath="$PROJECT_DIR$/src/view/ManHinhQuanLyChuyenTau.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/ConnectDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/ConnectDB.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/1016 chỗ đặt cho tàu se1 se2 spt2.sql" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/QuanLyDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe_DoiVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhBanVe_DoiVe.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,6 +88,7 @@
     "Application.ManHinhDangNhap (3).executor": "Run",
     "Application.ManHinhDangNhap.executor": "Run",
     "Application.ManHinhDoiVe.executor": "Run",
+    "Application.ManHinhQuanLyChuyenTau.executor": "Run",
     "Application.ManHinhQuanLyGiaVe.executor": "Run",
     "Application.ManHinhQuanLyKhuyenMai.executor": "Run",
     "Application.ManHinhQuanLyKhuyenMai2.executor": "Run",
@@ -134,20 +135,7 @@
       <recent name="gui.Panel" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.BanVeDashboard">
-    <configuration name="AdminFullDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.AdminFullDashboard" />
-      <module name="Train-Ticket-Management-Application2" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="gui.MainFrame.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="Application.QuanLyDashboard">
     <configuration name="BanVeDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="gui.MainFrame.BanVeDashboard" />
       <module name="Train-Ticket-Management-Application2" />
@@ -181,21 +169,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ManHinhQuanLyGiaVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhQuanLyGiaVe" />
-      <module name="Train-Ticket-Management-Application2" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="gui.Panel.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="ManHinhQuanLyLoaiToa" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="view.ManHinhQuanLyLoaiToa" />
+    <configuration name="ManHinhQuanLyChuyenTau" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="view.ManHinhQuanLyChuyenTau" />
       <module name="Train-Ticket-Management-Application2" />
       <extension name="coverage">
         <pattern>
@@ -207,13 +182,39 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="ManHinhTraCuuVe" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.Panel.ManHinhTraCuuVe" />
+      <module name="Train-Ticket-Management-Application2" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="gui.Panel.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="QuanLyDashboard" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="gui.MainFrame.QuanLyDashboard" />
+      <module name="Train-Ticket-Management-Application2" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="gui.MainFrame.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.QuanLyDashboard" />
         <item itemvalue="Application.BanVeDashboard" />
+        <item itemvalue="Application.ManHinhTraCuuVe" />
+        <item itemvalue="Application.ManHinhQuanLyChuyenTau" />
         <item itemvalue="Application.ManHinhDoiVe" />
-        <item itemvalue="Application.ManHinhQuanLyGiaVe" />
-        <item itemvalue="Application.AdminFullDashboard" />
-        <item itemvalue="Application.ManHinhQuanLyLoaiToa" />
       </list>
     </recent_temporary>
   </component>
@@ -252,6 +253,7 @@
       <workItem from="1765795510159" duration="10382000" />
       <workItem from="1765807783944" duration="249000" />
       <workItem from="1766297859129" duration="355000" />
+      <workItem from="1766313577869" duration="4976000" />
     </task>
     <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
       <option name="closed" value="true" />
@@ -325,7 +327,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766293151706</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="code mọi người đầy đủ, chưa test chương trình, lỗi không tìm thấy loaiVe vì =&gt;maLoaiVe">
+      <option name="closed" value="true" />
+      <created>1766300585847</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1766300585848</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -353,7 +363,8 @@
     <MESSAGE value="QuenMatKhau" />
     <MESSAGE value="gần xong, sắp xong, chức năng chỉnh gia vé theo giá cơ bản chưa làm được" />
     <MESSAGE value="pull trả ve + lấy chuyến tàu" />
-    <option name="LAST_COMMIT_MESSAGE" value="pull trả ve + lấy chuyến tàu" />
+    <MESSAGE value="code mọi người đầy đủ, chưa test chương trình, lỗi không tìm thấy loaiVe vì =&gt;maLoaiVe" />
+    <option name="LAST_COMMIT_MESSAGE" value="code mọi người đầy đủ, chưa test chương trình, lỗi không tìm thấy loaiVe vì =&gt;maLoaiVe" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -362,6 +373,15 @@
           <properties class="java.lang.IllegalArgumentException" package="java.lang" />
           <option name="timeStamp" value="12" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>file://$PROJECT_DIR$/src/view/ManHinhQuanLyChuyenTau.java</url>
+          <line>389</line>
+          <properties class="view.ManHinhQuanLyChuyenTau" method="hienThiChiTietTuyen">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

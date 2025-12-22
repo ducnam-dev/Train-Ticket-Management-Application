@@ -23,7 +23,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
     private final Color MAU_DUOC_CHON = new Color(74, 184, 237);
     private final Color MAU_HOVER = new Color(45, 150, 215);
     private final Map<String, JButton> menuButtons = new HashMap<>();
-    private static final int CHIEU_RONG_MENU = 220;
+    private static final int CHIEU_RONG_MENU = 180;
     private static final int ICON_SIZE = 20;
 
     private JButton btnTrangChu, btnQLChuyenTau, btnQLNV, btnQLKhuyenMai, btnDangXuat;
@@ -67,12 +67,10 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
     }
 
     private JPanel createNavPanel() {
-        // ... (Giữ nguyên code tạo menu như phiên bản trước) ...
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(MAU_CHINH);
         panel.setPreferredSize(new Dimension(CHIEU_RONG_MENU, 0));
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // Header
         JPanel headerPanel = new JPanel();
@@ -247,7 +245,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        try{ UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel"); } catch (Exception e){}
+//        try{ UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel"); } catch (Exception e){}
         SwingUtilities.invokeLater(() -> new QuanLyDashboard());
     }
 }
