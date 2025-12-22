@@ -255,9 +255,7 @@ public class ManHinhTrangChuNVBanVe extends JPanel {
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.addActionListener(e -> {
-//            if (mainFrame != null) mainFrame.instance.chuyenManHinh(cardName);
-            BanVeDashboard.instance.chuyenManHinh("banVeMoi");
-            //Chạy được là được
+            BanVeDashboard.instance.chuyenManHinh(cardName);
         });
 
         return btn;
