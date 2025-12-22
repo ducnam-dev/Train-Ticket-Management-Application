@@ -1,398 +1,345 @@
 package gui.Panel;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
+import javax.swing.border.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import javax.swing.Timer;
+import javax.swing.table.DefaultTableModel;
 
 import control.CaLamViec;
 import dao.DashboardDAO;
 import entity.NhanVien;
 import gui.MainFrame.BanVeDashboard;
 
-/**
- * Lớp ManHinhTrangChuNVBanVe: Dashboard hiển thị thông tin chính cho Nhân viên bán vé
- * Đã xóa bỏ các dữ liệu mẫu, dữ liệu được đổ động từ DashboardDAO.
- */
 public class ManHinhTrangChuNVBanVe extends JPanel {
 
     // --- HẰNG SỐ GIAO DIỆN ---
-    private static final Color MAU_NEN = Color.decode("#F5F5F5");
+    private static final Color MAU_NEN = Color.decode("#F0F2F5");
     private static final Color MAU_NEN_CARD = Color.WHITE;
     private static final Color MAU_CHINH = Color.decode("#3F51B5");
     private static final Color MAU_NHAN = Color.decode("#FF9800");
-
     private static final DateTimeFormatter DINH_DANG_NGAY_GIO =
-            DateTimeFormatter.ofPattern("HH:mm:ss EEEE, 'ngày' dd 'tháng' MM 'năm' yyyy", new Locale("vi", "VN"));
+            DateTimeFormatter.ofPattern("HH:mm:ss EEEE, dd/MM/yyyy", new Locale("vi", "VN"));
 
-    // --- THÀNH PHẦN GUI CẦN CẬP NHẬT DỮ LIỆU ---
-    private JLabel nhanGiaTriDoanhThu;
-    private JTextPane oVanBanThongBao;
-    private JPanel panelPlaceholderDoThi;
-    private JLabel nhanTen;
-    private JLabel nhanGiaTriNgayNghi;
-    private JLabel nhanGiaTriLuong;
+    // --- CÁC THÀNH PHẦN CẬP NHẬT DỮ LIỆU ---
+    private JLabel lblSoVe, lblSoHD;
+    private JLabel lblTenNV, lblMaNV, lblDongHo;
+    private JPanel pnlTauSapChay, pnlHoatDongGanDay, pnlKhuyenMaiContainer, pnlThongBaoNoiBo;
 
-    // --- BIẾN DỮ LIỆU ---
-    private String tenNhanVienHienThi = "";
-    private String luongCoBanHienThi = "0";
-    private int ngayNghiConLaiHienThi = 0;
     private BanVeDashboard mainFrame;
+    private DashboardDAO dao = new DashboardDAO();
 
     public ManHinhTrangChuNVBanVe(BanVeDashboard mainFrame) {
         this.mainFrame = mainFrame;
-
-        // 1. Lấy thông tin cơ bản của nhân viên đăng nhập
-        layDuLieuNhanVien();
-
-        // 2. Thiết lập Layout chính
         setLayout(new BorderLayout(20, 20));
         setBorder(new EmptyBorder(20, 20, 20, 20));
         setBackground(MAU_NEN);
 
-        // Header
-        add(taoPanelTieuDe(), BorderLayout.NORTH);
+        // 1. GÓC TRÁI TRÊN & ĐỒNG HỒ (NORTH)
+        add(taoHeader(), BorderLayout.NORTH);
 
-        // Nội dung chính
-        JPanel panelNoiDungChinh = new JPanel(new BorderLayout(20, 20));
-        panelNoiDungChinh.setOpaque(false);
-        panelNoiDungChinh.add(taoPanelLienKetNhanh(), BorderLayout.NORTH);
+        // 2. PHẦN TRUNG TÂM (CENTER) - Chứa Stats và Cột nội dung
+        JPanel pnlTrungTam = new JPanel(new BorderLayout(0, 20));
+        pnlTrungTam.setOpaque(false);
 
-        JPanel panelNoiDungDuoi = new JPanel(new GridLayout(1, 3, 20, 0));
-        panelNoiDungDuoi.setOpaque(false);
+        // 2a. Hàng 4 thẻ Stats
+        pnlTrungTam.add(taoHangStats(), BorderLayout.NORTH);
 
-        // Card 1: Thống kê & Chuyến tàu
-        JPanel panelThongKeVaAnh = new JPanel(new BorderLayout(0, 20));
-        panelThongKeVaAnh.setOpaque(false);
-        panelThongKeVaAnh.add(taoPanelThongKe(), BorderLayout.NORTH);
-        panelThongKeVaAnh.add(taoCardAnhNho(), BorderLayout.CENTER);
+        // 2b. Chia 2 cột: Trái (Chính) - Phải (Phụ)
+        JPanel pnlNoiDungChinh = new JPanel(new GridBagLayout());
+        pnlNoiDungChinh.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
 
-        // Card 2: Thông báo (Khuyến mãi)
-        panelNoiDungDuoi.add(panelThongKeVaAnh);
-        panelNoiDungDuoi.add(taoPanelThongBao());
-        panelNoiDungDuoi.add(taoPanelThongTinNhanVien());
+        // Cột Trái (70%)
+        gbc.gridx = 0; gbc.weightx = 0.7; gbc.insets = new Insets(0, 0, 0, 10);
+        pnlNoiDungChinh.add(taoCotTraiChinh(), gbc);
 
-        panelNoiDungChinh.add(panelNoiDungDuoi, BorderLayout.CENTER);
-        add(panelNoiDungChinh, BorderLayout.CENTER);
+        // Cột Phải (30%)
+        gbc.gridx = 1; gbc.weightx = 0.3; gbc.insets = new Insets(0, 10, 0, 0);
+        pnlNoiDungChinh.add(taoCotPhaiPhu(), gbc);
 
-        // 3. Đổ dữ liệu từ Database vào các thành phần đã tạo
+        pnlTrungTam.add(pnlNoiDungChinh, BorderLayout.CENTER);
+        add(pnlTrungTam, BorderLayout.CENTER);
+
+        // 3. DƯỚI CÙNG / MENU NHANH (SOUTH)
+        add(taoPanelLienKetNhanh(), BorderLayout.SOUTH);
+
+        // Load dữ liệu
         capNhatDuLieuDashboard();
     }
 
-    private void layDuLieuNhanVien() {
-        NhanVien nv = CaLamViec.getInstance().getNhanVienDangNhap();
-        if (nv != null) {
-            this.tenNhanVienHienThi = nv.getHoTen();
-            this.luongCoBanHienThi = "Chưa cập nhật";
-            this.ngayNghiConLaiHienThi = 0;
-        } else {
-            this.tenNhanVienHienThi = "Người dùng";
-        }
+    // =========================================================================
+    // PHẦN 1: HEADER (Chào hỏi & Đồng hồ)
+    // =========================================================================
+    private JPanel taoHeader() {
+        JPanel pnl = new JPanel(new BorderLayout());
+        pnl.setOpaque(false);
+
+        // Trái: Lời chào & ID
+        JPanel pnlTrai = new JPanel(new GridLayout(2, 1));
+        pnlTrai.setOpaque(false);
+
+        lblTenNV = new JLabel("Xin chào, Đang tải...");
+        lblTenNV.setFont(new Font("Segoe UI", Font.BOLD, 24));
+
+        lblMaNV = new JLabel("Mã nhân viên: N/A");
+        lblMaNV.setForeground(Color.GRAY);
+
+        pnlTrai.add(lblTenNV);
+        pnlTrai.add(lblMaNV);
+
+        // Phải: Đồng hồ & Avatar
+        JPanel pnlPhai = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+        pnlPhai.setOpaque(false);
+
+        lblDongHo = new JLabel();
+        lblDongHo.setFont(new Font("Segoe UI", Font.ITALIC, 16));
+        khoiDongDongHo();
+
+        pnlPhai.add(lblDongHo);
+        pnlPhai.add(taoAvatar("U"));
+
+        pnl.add(pnlTrai, BorderLayout.WEST);
+        pnl.add(pnlPhai, BorderLayout.EAST);
+        return pnl;
     }
 
-    /**
-     * Hàm quan trọng nhất: Lấy dữ liệu thực từ DAO và hiển thị lên giao diện
-     */
-    private void capNhatDuLieuDashboard() {
-        DashboardDAO dao = new DashboardDAO();
-        NhanVien nv = CaLamViec.getInstance().getNhanVienDangNhap();
+    // =========================================================================
+    // PHẦN 2: HÀNG 4 THẺ THỐNG KÊ (STATS)
+    // =========================================================================
+    private JPanel taoHangStats() {
+        JPanel pnl = new JPanel(new GridLayout(1, 4, 20, 0));
+        pnl.setOpaque(false);
+        pnl.setPreferredSize(new Dimension(0, 100));
 
-        if (nv == null) return;
+        lblSoVe = new JLabel("0", SwingConstants.CENTER);
+        lblSoHD = new JLabel("0", SwingConstants.CENTER);
 
-        // 1. Cập nhật Doanh thu
-        Map<String, Object> thongKe = dao.getThongKeTrongNgay(nv.getMaNV());
-        double doanhThu = (double) thongKe.get("doanhThu");
-        nhanGiaTriDoanhThu.setText(String.format("%,.0f VND", doanhThu));
+        pnl.add(taoCardStat("VÉ ĐÃ BÁN", lblSoVe, MAU_CHINH));
+        pnl.add(taoCardStat("HÓA ĐƠN", lblSoHD, Color.decode("#4CAF50")));
 
-        // 2. Cập nhật Thông báo (Khuyến mãi từ DB)
-        List<Map<String, String>> dsKM = dao.getKhuyenMaiHienNay(); // Danh sách bây giờ là List<Map>
-
-
-        pnlKhuyenMaiContainer.removeAll();
-        pnlKhuyenMaiContainer.setLayout(new BoxLayout(pnlKhuyenMaiContainer, BoxLayout.Y_AXIS));
-
-        if (dsKM.isEmpty()) {
-            pnlKhuyenMaiContainer.add(new JLabel("  Hiện không có khuyến mãi nào."));
-        } else {
-            // SỬA LỖI TẠI ĐÂY: Đổi String km thành Map<String, String> km
-            for (Map<String, String> km : dsKM) {
-                // Lấy dữ liệu từ Map thông qua Key
-                String ten = km.get("ten");
-                String dk = km.get("dieukien");
-                String giam = km.get("giamgia");
-
-                // Thêm thẻ khuyến mãi vào giao diện
-                pnlKhuyenMaiContainer.add(taoCardKhuyenMaiChiTiet(ten, dk, giam));
-
-                // Tạo khoảng cách 10 pixel giữa các thẻ
-                pnlKhuyenMaiContainer.add(Box.createVerticalStrut(10));
-            }
-        }
-
-        // 3. Cập nhật Chuyến tàu sắp chạy
-        List<String[]> dsTau = dao.getChuyenTauSapChay();
-        panelPlaceholderDoThi.removeAll();
-        panelPlaceholderDoThi.setLayout(new GridLayout(6, 1, 0, 2));
-
-        JLabel tieuDeTau = new JLabel("🚀 CHUYẾN TÀU SẮP KHỞI HÀNH:");
-        tieuDeTau.setFont(new Font("Arial", Font.BOLD, 12));
-        tieuDeTau.setForeground(MAU_CHINH);
-        panelPlaceholderDoThi.add(tieuDeTau);
-
-        if (dsTau.isEmpty()) {
-            panelPlaceholderDoThi.add(new JLabel("  Không có chuyến tàu nào sắp khởi hành."));
-        } else {
-            for (String[] tau : dsTau) {
-                panelPlaceholderDoThi.add(new JLabel(String.format("  [%s] %s → %s (%s)", tau[0], tau[1], tau[2], tau[3])));
-            }
-        }
-        panelPlaceholderDoThi.revalidate();
-        panelPlaceholderDoThi.repaint();
+        return pnl;
     }
-    private JPanel taoCardKhuyenMaiChiTiet(String ten, String dieuKien, String giamGia) {
-        JPanel card = new JPanel(new BorderLayout(10, 5));
-        card.setBackground(Color.decode("#E3F2FD")); // Màu xanh nhạt cực sang
-        card.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(Color.decode("#BBDEFB"), 1, true),
-                new EmptyBorder(10, 10, 10, 10)
-        ));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
+    private JPanel taoCardStat(String tieuDe, JLabel lblGiaTri, Color color) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(MAU_NEN_CARD);
+        card.setBorder(new LineBorder(Color.LIGHT_GRAY, 1));
 
+        JLabel lblTieuDe = new JLabel(tieuDe, SwingConstants.CENTER);
+        lblTieuDe.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblTieuDe.setForeground(Color.GRAY);
 
-        // Thông tin text ở giữa
-        JPanel info = new JPanel(new GridLayout(2, 1));
-        info.setOpaque(false);
+        lblGiaTri.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblGiaTri.setForeground(color);
 
-        JLabel lblTen = new JLabel(ten.toUpperCase());
-        lblTen.setFont(new Font("Arial", Font.BOLD, 13));
-        lblTen.setForeground(Color.decode("#1976D2"));
-
-        JLabel lblDK = new JLabel("<html>ĐK: " + dieuKien + "</html>");
-        lblDK.setFont(new Font("Arial", Font.ITALIC, 11));
-        lblDK.setForeground(Color.DARK_GRAY);
-
-
-        info.add(lblTen);
-        info.add(lblDK);
-        card.add(info, BorderLayout.CENTER);
-
+        card.add(lblTieuDe, BorderLayout.NORTH);
+        card.add(lblGiaTri, BorderLayout.CENTER);
         return card;
     }
+    private DefaultTableModel modelHoatDong;
+    private JTable tblHoatDong;
+    private static final java.text.DecimalFormat VND_FORMAT = new java.text.DecimalFormat("#,###");
 
-    // --- CÁC PHƯƠNG THỨC TẠO PANEL (Đã dọn dẹp dữ liệu tĩnh) ---
+    // =========================================================================
+    // PHẦN 3: CỘT TRÁI CHÍNH (Tàu chạy & Hoạt động)
+    // =========================================================================
+    private JPanel taoCotTraiChinh() {
+        JPanel pnl = new JPanel(new GridLayout(2, 1, 0, 20));
+        pnl.setOpaque(false);
 
-    private JPanel taoPanelTieuDe() {
-        JPanel panelTieuDe = new JPanel(new BorderLayout(10, 0));
-        panelTieuDe.setOpaque(false);
+        // 1. Panel Tàu sắp khởi hành
+        pnlTauSapChay = new JPanel();
+        pnlTauSapChay.setBackground(MAU_NEN_CARD);
+        pnlTauSapChay.setBorder(taoTieuDeBorder("CHUYẾN TÀU SẮP KHỞI HÀNH"));
 
-        JPanel panelChaoMung = new JPanel();
-        panelChaoMung.setLayout(new BoxLayout(panelChaoMung, BoxLayout.Y_AXIS));
-        panelChaoMung.setOpaque(false);
+        // 2. Panel Hoạt động gần đây (Placeholder cho Table)
+        pnlHoatDongGanDay = new JPanel(new BorderLayout());
+        pnlHoatDongGanDay.setBackground(MAU_NEN_CARD);
+        pnlHoatDongGanDay.setBorder(taoTieuDeBorder("HOẠT ĐỘNG GẦN ĐÂY"));
 
-        JLabel nhanChaoMung = new JLabel("Dashboard | Xin chào,");
-        nhanChaoMung.setFont(new Font("Arial", Font.PLAIN, 18));
-        nhanChaoMung.setForeground(Color.GRAY);
+        String[] cols = {"Mã HD", "Khách hàng", "Tổng tiền", "Thời gian"};
+        modelHoatDong = new DefaultTableModel(cols, 0); // Khởi tạo model
+        tblHoatDong = new JTable(modelHoatDong);
 
-        nhanTen = new JLabel(tenNhanVienHienThi + "!");
-        nhanTen.setFont(new Font("Arial", Font.BOLD, 28));
+        // Tùy chỉnh bảng cho đẹp
+        tblHoatDong.setRowHeight(30);
+        tblHoatDong.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
 
-        panelChaoMung.add(nhanChaoMung);
-        panelChaoMung.add(nhanTen);
+        JScrollPane sp = new JScrollPane(tblHoatDong);
+        pnlHoatDongGanDay.add(sp, BorderLayout.CENTER);
 
-        JLabel nhanNgayGio = new JLabel("", SwingConstants.RIGHT);
-        khoiDongDongHo(nhanNgayGio);
+        pnl.add(pnlTauSapChay);
+        pnl.add(pnlHoatDongGanDay);
+        return pnl;
+    }
+    private void capNhatHoatDongGanDay() {
+        NhanVien nv = CaLamViec.getInstance().getNhanVienDangNhap();
+        if (nv == null) return;
 
-        String chuCaiDau = tenNhanVienHienThi.isEmpty() ? "U" : tenNhanVienHienThi.substring(0, 1).toUpperCase();
+        List<Map<String, Object>> ds = dao.getHoaDonGanDay(nv.getMaNV());
+        modelHoatDong.setRowCount(0); // Xóa dữ liệu cũ
 
-        panelTieuDe.add(panelChaoMung, BorderLayout.WEST);
-        panelTieuDe.add(nhanNgayGio, BorderLayout.CENTER);
-        panelTieuDe.add(taoPanelAvatar(chuCaiDau), BorderLayout.EAST);
+        DateTimeFormatter fmtGio = DateTimeFormatter.ofPattern("HH:mm dd/MM");
 
-        return panelTieuDe;
+        for (Map<String, Object> hd : ds) {
+            // Chuyển Timestamp sang LocalDateTime để format
+            java.sql.Timestamp ts = (java.sql.Timestamp) hd.get("ngayLap");
+            String thoiGian = ts.toLocalDateTime().format(fmtGio);
+
+            modelHoatDong.addRow(new Object[]{
+                    hd.get("maHD"),
+                    hd.get("tenKH"),
+                    VND_FORMAT.format(hd.get("tongTien")) + " VND",
+                    thoiGian
+            });
+        }
     }
 
-    private void khoiDongDongHo(JLabel nhanNgayGio) {
-        new javax.swing.Timer(1000, e -> {
-            nhanNgayGio.setText(LocalDateTime.now().format(DINH_DANG_NGAY_GIO));
-        }).start();
-    }
 
-    private JPanel taoPanelThongKe() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBackground(MAU_NEN_CARD);
-        panel.setBorder(taoBorderCard());
+    // =========================================================================
+    // PHẦN 4: CỘT PHẢI PHỤ (Khuyến mãi & Thông báo)
+    // =========================================================================
+    private JPanel taoCotPhaiPhu() {
+        JPanel pnl = new JPanel(new GridLayout(2, 1, 0, 20));
+        pnl.setOpaque(false);
 
-        JLabel nhanTieuDe = new JLabel("Doanh thu hôm nay");
-        nhanTieuDe.setFont(new Font("Arial", Font.BOLD, 16));
-        nhanTieuDe.setForeground(MAU_CHINH);
-
-        nhanGiaTriDoanhThu = new JLabel("0 VND"); // Mặc định là 0
-        nhanGiaTriDoanhThu.setFont(new Font("Arial", Font.BOLD, 24));
-        nhanGiaTriDoanhThu.setForeground(MAU_NHAN);
-
-        panel.add(nhanTieuDe, BorderLayout.NORTH);
-        panel.add(nhanGiaTriDoanhThu, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    private JPanel taoCardAnhNho() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(MAU_NEN_CARD);
-        panel.setBorder(taoBorderCard());
-
-        JLabel nhanTieuDe = new JLabel("Lịch trình vận hành");
-        nhanTieuDe.setFont(new Font("Arial", Font.BOLD, 16));
-        panel.add(nhanTieuDe, BorderLayout.NORTH);
-
-        panelPlaceholderDoThi = new JPanel();
-        panelPlaceholderDoThi.setBackground(Color.decode("#F0F8FF"));
-        panelPlaceholderDoThi.setPreferredSize(new Dimension(10, 120));
-
-        panel.add(panelPlaceholderDoThi, BorderLayout.CENTER);
-        return panel;
-    }
-    //biến toàn cực
-    private JPanel pnlKhuyenMaiContainer;
-
-    private JPanel taoPanelThongBao() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBackground(MAU_NEN_CARD);
-        panel.setBorder(taoBorderCard());
-
-        JLabel nhanTieuDe = new JLabel("Chương trình Khuyến mãi");
-        nhanTieuDe.setFont(new Font("Arial", Font.BOLD, 20));
-        nhanTieuDe.setForeground(MAU_CHINH);
-        panel.add(nhanTieuDe, BorderLayout.NORTH);
-
+        // 1. Panel Khuyến mãi
         pnlKhuyenMaiContainer = new JPanel();
         pnlKhuyenMaiContainer.setBackground(MAU_NEN_CARD);
+        JScrollPane scrollKM = new JScrollPane(pnlKhuyenMaiContainer);
+        scrollKM.setBorder(taoTieuDeBorder("KHUYẾN MÃI HOT"));
 
-        JScrollPane thanhCuon = new JScrollPane(pnlKhuyenMaiContainer);
-        thanhCuon.setBorder(null);
-        thanhCuon.getVerticalScrollBar().setUnitIncrement(16); // Cuộn mượt hơn
+        // 2. Panel Thông báo nội bộ
+        pnlThongBaoNoiBo = new JPanel();
+        pnlThongBaoNoiBo.setBackground(MAU_NEN_CARD);
+        pnlThongBaoNoiBo.setBorder(taoTieuDeBorder("THÔNG BÁO NỘI BỘ"));
+        pnlThongBaoNoiBo.add(new JLabel("<html>- Cập nhật phần mềm v2.0 vào tối nay.<br>- Nhắc nhở kiểm tra két tiền trước khi kết ca.</html>"));
 
-        panel.add(thanhCuon, BorderLayout.CENTER);
-        return panel;
+        pnl.add(scrollKM);
+        pnl.add(pnlThongBaoNoiBo);
+        return pnl;
     }
 
-    private JPanel taoPanelThongTinNhanVien() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBackground(MAU_NEN_CARD);
-        panel.setBorder(taoBorderCard());
+    // =========================================================================
+    // PHẦN 5: MENU NHANH DƯỚI CÙNG (SOUTH)
+    // =========================================================================
+    private JPanel taoPanelLienKetNhanh() {
+        JPanel pnl = new JPanel(new GridLayout(1, 4, 20, 0));
+        pnl.setOpaque(false);
+        pnl.setPreferredSize(new Dimension(0, 80));
 
-        JLabel nhanTieuDe = new JLabel("Thông tin cá nhân");
-        nhanTieuDe.setFont(new Font("Arial", Font.BOLD, 20));
-        nhanTieuDe.setForeground(MAU_CHINH);
-        panel.add(nhanTieuDe, BorderLayout.NORTH);
+        pnl.add(taoNutNhanh("BÁN VÉ MỚI", "banVeMoi", MAU_CHINH));
+        pnl.add(taoNutNhanh("TRẢ VÉ", "traVe", Color.decode("#E91E63")));
+        pnl.add(taoNutNhanh("ĐỔI VÉ", "doiVe", Color.decode("#FF9800")));
+        pnl.add(taoNutNhanh("TRA CỨU VÉ", "traCuuVe", Color.decode("#009688")));
 
-        JPanel panelNoiDung = new JPanel(new GridBagLayout());
-        panelNoiDung.setOpaque(false);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 5, 10, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
-
-        nhanGiaTriNgayNghi = new JLabel(ngayNghiConLaiHienThi + " ngày");
-        nhanGiaTriLuong = new JLabel(luongCoBanHienThi + " VND");
-
-        gbc.gridy = 0; panelNoiDung.add(new JLabel("Ngày nghỉ còn lại:"), gbc);
-        gbc.gridx = 1; panelNoiDung.add(nhanGiaTriNgayNghi, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1; panelNoiDung.add(new JLabel("Lương cơ bản:"), gbc);
-        gbc.gridx = 1; panelNoiDung.add(nhanGiaTriLuong, gbc);
-
-        panel.add(panelNoiDung, BorderLayout.CENTER);
-        return panel;
+        return pnl;
     }
 
-    // --- CÁC PHƯƠNG THỨC HỖ TRỢ KHÁC (GIỮ NGUYÊN) ---
+    private JButton taoNutNhanh(String text, String cardName, Color bg) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(bg);
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.addActionListener(e -> {
+            BanVeDashboard.instance.chuyenManHinh(cardName);
+        });
 
-    private JPanel taoPanelAvatar(String chuCaiDau) {
-        JPanel panelAvatar = new JPanel() {
-            @Override
+        return btn;
+    }
+
+    // =========================================================================
+    // LOGIC CẬP NHẬT DỮ LIỆU
+    // =========================================================================
+    private void capNhatDuLieuDashboard() {
+        NhanVien nv = CaLamViec.getInstance().getNhanVienDangNhap();
+        if (nv == null) return;
+
+        // Cập nhật Header
+        lblTenNV.setText("Xin chào, " + nv.getHoTen() + "!");
+        lblMaNV.setText("Mã nhân viên: " + nv.getMaNV());
+
+        // Cập nhật Stats
+        Map<String, Object> stats = dao.getThongKeTrongNgay(nv.getMaNV());
+
+
+        lblSoVe.setText(stats.get("soVe").toString());
+        lblSoHD.setText("N/A");
+
+        // Cập nhật Tàu sắp chạy
+        List<String[]> dsTau = dao.getChuyenTauSapChay();
+        pnlTauSapChay.removeAll();
+        pnlTauSapChay.setLayout(new BoxLayout(pnlTauSapChay, BoxLayout.Y_AXIS));
+        for (String[] t : dsTau) {
+            JLabel lb = new JLabel("🚂 " + t[0] + ": " + t[1] + " -> " + t[2] + " (" + t[3] + ")");
+            lb.setBorder(new EmptyBorder(5,10,5,10));
+            pnlTauSapChay.add(lb);
+        }
+
+        // Cập nhật Khuyến mãi
+        List<Map<String, String>> dsKM = dao.getKhuyenMaiHienNay();
+        pnlKhuyenMaiContainer.removeAll();
+        pnlKhuyenMaiContainer.setLayout(new BoxLayout(pnlKhuyenMaiContainer, BoxLayout.Y_AXIS));
+        for (Map<String, String> km : dsKM) {
+            pnlKhuyenMaiContainer.add(taoCardKhuyenMaiChiTiet(km.get("ten"), km.get("dieukien"), ""));
+            pnlKhuyenMaiContainer.add(Box.createVerticalStrut(5));
+        }
+        capNhatHoatDongGanDay();
+        revalidate(); repaint();
+    }
+
+    // --- HELPER METHODS ---
+    private TitledBorder taoTieuDeBorder(String title) {
+        TitledBorder b = BorderFactory.createTitledBorder(new LineBorder(Color.LIGHT_GRAY), title);
+        b.setTitleFont(new Font("Segoe UI", Font.BOLD, 14));
+        b.setTitleColor(MAU_CHINH);
+        return b;
+    }
+
+    private void khoiDongDongHo() {
+        new Timer(1000, e -> lblDongHo.setText(LocalDateTime.now().format(DINH_DANG_NGAY_GIO))).start();
+    }
+
+    private JPanel taoAvatar(String text) {
+        JPanel p = new JPanel() {
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
                 g.setColor(MAU_CHINH);
-                g.fillOval(0, 0, 50, 50);
+                g.fillOval(0, 0, 40, 40);
                 g.setColor(Color.WHITE);
-                g.setFont(new Font("Arial", Font.BOLD, 24));
-                g.drawString(chuCaiDau, 16, 34);
+                g.drawString(text, 15, 25);
             }
         };
-        panelAvatar.setPreferredSize(new Dimension(50, 50));
-        panelAvatar.setOpaque(false);
-        return panelAvatar;
+        p.setPreferredSize(new Dimension(40, 40));
+        p.setOpaque(false);
+        return p;
     }
 
-    private JPanel taoPanelLienKetNhanh() {
-        JPanel panel = new JPanel(new GridLayout(1, 4, 20, 0));
-        panel.setOpaque(false);
-        // 1. Nút Bán vé (Giữ nguyên)
-        panel.add(taoNutLienKetNhanh("Bán vé",
-                "<html>Màn hình tạo vé<br>mới cho khách hàng</html>",
-                "banVeMoi"));
-
-        // 2. Nút Trả vé (Thay thế 'Tra cứu' cũ)
-        panel.add(taoNutLienKetNhanh("Trả vé",
-                "<html>Xử lý hoàn tiền<br>và hủy vé hệ thống</html>",
-                "traVe"));
-
-        // 3. Nút Đổi vé (Thay thế 'Khuyến mãi' cũ)
-        panel.add(taoNutLienKetNhanh("Đổi vé",
-                "<html>Thay đổi lịch trình<br>hoặc thông tin vé</html>",
-                "doiVe"));
-
-        // 4. Nút Tra cứu vé (Thay thế 'Cài đặt' cũ)
-        panel.add(taoNutLienKetNhanh("Tra cứu vé",
-                "<html>Tìm kiếm thông tin<br>vé qua mã hoặc SĐT</html>",
-                "traCuuVe"));return panel;
-    }
-
-    private JButton taoNutLienKetNhanh(String tieuDe, String moTa, String maCard) {
-        JButton nut = new JButton();
-        nut.setLayout(new BorderLayout(5, 5));
-        nut.setBackground(MAU_NEN_CARD);
-        nut.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.LIGHT_GRAY, 1), new EmptyBorder(15, 15, 15, 15)));
-        nut.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        JLabel t = new JLabel(tieuDe); t.setFont(new Font("Arial", Font.BOLD, 16));
-        JLabel m = new JLabel(moTa); m.setFont(new Font("Arial", Font.PLAIN, 12)); m.setForeground(Color.GRAY);
-
-        nut.add(t, BorderLayout.NORTH);
-        nut.add(m, BorderLayout.CENTER);
-        nut.addActionListener(e -> {
-            if (mainFrame != null) mainFrame.chuyenManHinh(maCard);
-        });
-        return nut;
-    }
-
-    private Border taoBorderCard() {
-        return BorderFactory.createCompoundBorder(new LineBorder(Color.LIGHT_GRAY, 1), new EmptyBorder(15, 15, 15, 15));
+    private JPanel taoCardKhuyenMaiChiTiet(String ten, String dk, String giam) {
+        JPanel p = new JPanel(new GridLayout(2, 1));
+        p.setBackground(Color.decode("#E3F2FD"));
+        p.setBorder(new EmptyBorder(5, 5, 5, 5));
+        JLabel l1 = new JLabel(ten); l1.setFont(new Font("Arial", Font.BOLD, 12));
+        JLabel l2 = new JLabel("ĐK: " + dk); l2.setFont(new Font("Arial", Font.PLAIN, 10));
+        p.add(l1); p.add(l2);
+        return p;
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Dashboard");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.add(new ManHinhTrangChuNVBanVe(null));
-            frame.setSize(1200, 750);
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
+            JFrame f = new JFrame();
+            f.setDefaultCloseOperation(3);
+            f.add(new ManHinhTrangChuNVBanVe(null));
+            f.setSize(1200, 800);
+            f.setVisible(true);
         });
     }
 }

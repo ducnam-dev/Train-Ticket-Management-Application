@@ -2,11 +2,10 @@ package entity;
 
 import java.util.Objects;
 
-// Lớp này ánh xạ bảng ChiTietHoaDon (MaHD, MaVe là khóa chính tổ hợp)
 public class ChiTietHoaDon {
-    private String maHD; // Mã hóa đơn (Khóa chính tổ hợp)
+    private String maHD;
     private String maVe;
-    private double donGia;// Mã vé (Khóa chính tổ hợp)
+    private double donGia;
     private int soLuong;
 
     public ChiTietHoaDon(String maHD, String maVe, int soLuong) {
@@ -55,7 +54,6 @@ public class ChiTietHoaDon {
 
     public void setDonGia(double donGia) {this.donGia = donGia;}
 
-    // Quan trọng khi sử dụng khóa tổ hợp
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

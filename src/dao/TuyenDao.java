@@ -57,7 +57,7 @@ public class TuyenDao {
             return null;
         }
 
-        String sql = "SELECT MaTuyen, TenTuyen, GaDau, GaCuoi FROM Tuyen WHERE MaTuyen = ?";
+        String sql = "SELECT MaTuyen, TenTuyen, GaDau, GaCuoi, DonGiaKM FROM Tuyen WHERE MaTuyen = ?";
 
         try (Connection con = ConnectDB.getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -71,8 +71,9 @@ public class TuyenDao {
                     String ten = rs.getString("TenTuyen");
                     String gaD = rs.getString("GaDau");
                     String gaC = rs.getString("GaCuoi");
+                    int don = rs.getInt("DonGiaKM");
 
-                    return new Tuyen(ma, ten, gaD, gaC);
+                    return new Tuyen(ma, ten, gaD, gaC, don);
                 }
             }
         }
@@ -83,13 +84,15 @@ public class TuyenDao {
      * Thêm một Tuyến mới vào CSDL.
      */
     public boolean themTuyen(Tuyen tuyen) throws SQLException {
-        String sql = "INSERT INTO Tuyen (MaTuyen, TenTuyen, GaDau, GaCuoi) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Tuyen (MaTuyen, TenTuyen, GaDau, GaCuoi, DonGiaKM) VALUES (?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = ConnectDB.getConnection();
+                PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, tuyen.getMaTuyen());
             pst.setString(2, tuyen.getTenTuyen());
             pst.setString(3, tuyen.getGaDau());
             pst.setString(4, tuyen.getGaCuoi());
+            pst.setInt(5, tuyen.getDonGiaKM());
             return pst.executeUpdate() > 0;
         }
     }

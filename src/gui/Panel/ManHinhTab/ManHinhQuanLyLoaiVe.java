@@ -1,4 +1,4 @@
-package view;
+package gui.Panel.ManHinhTab;
 
 import dao.LoaiVeDAO;
 import entity.LoaiVe;

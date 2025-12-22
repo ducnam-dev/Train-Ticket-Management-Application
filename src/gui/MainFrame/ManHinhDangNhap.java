@@ -25,7 +25,7 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
 
     // --- Thuộc tính (Properties) đã Việt hóa ---
     private static final String DUONG_DAN_LOGO = "src/images/logo-train.png";
-    private static final String DUONG_DAN_ANH_TAU = "src/images/anh tau.jpg";
+    private static final String DUONG_DAN_ANH_TAU = "src/images/anh-tau.jpg";
     private static final int KICH_THUOC_LOGO = 80;
     private static final int CHIEU_RONG_ANH_TAU = 600;
 
@@ -261,9 +261,8 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
             if (tenDangNhap.equals("admin") && matKhau.equals("admin")) {
                 // Đăng nhập Admin thành công mà không cần kiểm tra CSDL
 
-                // Giả định một đối tượng NhanVien cho Admin để lưu vào CaLamViec
-                // Mã NVQL000 có thể là một mã đặc biệt/tạm thời cho Admin
-                NhanVien nhanVienAdmin = new NhanVien("Admi0001", "ADMIN", "0000000000");
+
+                NhanVien nhanVienAdmin = new NhanVien("ADMIN001", "ADMIN", "0000000000");
 
                 // BẮT ĐẦU CA LÀM VIỆC VÀ LƯU SESSION
                 CaLamViec.getInstance().batDauCa(nhanVienAdmin);

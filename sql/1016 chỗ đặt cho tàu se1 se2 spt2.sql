@@ -1,6 +1,4 @@
-﻿USE [QuanLyVeTau]
-GO
---Xóa bản chỗ đặt
+﻿
 use QuanLyVeTau
 DELETE FROM ChoDat;
 
@@ -17,13 +15,12 @@ GhếMềm AS (
         CEILING(CAST(STT AS DECIMAL) / 4) AS Khoang
     FROM Numbers
 )
-INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [LoaiCho], [Khoang], [Tang])
+INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [Khoang], [Tang])
 SELECT
     -- MaCho: [STT]-[MaToa]-C, ví dụ: SPT2-1-C01
     t.MaToa + '-' + 'C' + FORMAT(gm.STT, '00') AS MaCho,
     t.MaToa,
     FORMAT(gm.STT, '00') AS SoCho, -- SoCho là số thứ tự 01, 02, ... 64
-    N'Ghế mềm' AS LoaiCho,
     NULL AS Khoang,
     NULL AS Tang
 FROM GhếMềm gm
@@ -54,7 +51,7 @@ GiườngNằm AS (
     FROM Numbers
     CROSS JOIN Params
 )
-INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [LoaiCho], [Khoang], [Tang])
+INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [Khoang], [Tang])
 SELECT
     -- MaCho: [MaToa]-C[STT], ví dụ: SPT2-5-C01
     t.MaToa + N'-C' + FORMAT(gn.N, '00') AS MaCho,
@@ -64,8 +61,6 @@ SELECT
     -- *** LOGIC TẠO SOCHO ĐÃ SỬA THÀNH SỐ THỨ TỰ (STT) ***
     FORMAT(gn.N, '00') AS SoCho, 
     -- ****************************************************
-    
-    N'Giường nằm' AS LoaiCho,
     gn.Khoang,
     gn.Tang
 FROM GiườngNằm gn
@@ -87,12 +82,11 @@ GO
 WITH Numbers AS (
     SELECT TOP 64 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS STT FROM sys.columns c1, sys.columns c2
 )
-INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [LoaiCho], [Khoang], [Tang])
+INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [Khoang], [Tang])
 SELECT 
     t.MaToa + '-C' + FORMAT(n.STT, '00') AS MaCho,
     t.MaToa,
     FORMAT(n.STT, '00') AS SoCho,
-    N'Ghế mềm' AS LoaiCho,
     NULL AS Khoang,
     NULL AS Tang
 FROM Numbers n
@@ -105,12 +99,11 @@ CROSS JOIN (VALUES (N'SE1-1'), (N'SE1-2')) AS t(MaToa);
 WITH Numbers AS (
     SELECT TOP 64 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS STT FROM sys.columns c1, sys.columns c2
 )
-INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [LoaiCho], [Khoang], [Tang])
+INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [Khoang], [Tang])
 SELECT 
     t.MaToa + '-C' + FORMAT(n.STT, '00') AS MaCho,
     t.MaToa,
     FORMAT(n.STT, '00') AS SoCho,
-    N'Ghế cứng' AS LoaiCho,
     NULL AS Khoang,
     NULL AS Tang
 FROM Numbers n
@@ -130,12 +123,11 @@ GiườngLogic AS (
         ((N - 1) % 6) / 2 + 1 AS Tang
     FROM Numbers
 )
-INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [LoaiCho], [Khoang], [Tang])
+INSERT INTO [dbo].[ChoDat] ([MaCho], [MaToa], [SoCho], [Khoang], [Tang])
 SELECT 
     t.MaToa + '-C' + FORMAT(gl.N, '00') AS MaCho,
     t.MaToa,
     FORMAT(gl.N, '00') AS SoCho,
-    N'Giường nằm' AS LoaiCho,
     gl.Khoang,
     gl.Tang
 FROM GiườngLogic gl

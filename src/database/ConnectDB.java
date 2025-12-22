@@ -13,19 +13,22 @@ public class ConnectDB {
     }
 
     public void connect() {
+        // CẦN SỬA ĐỔI: Kiểm tra xem có nên tạo lại kết nối hay không.
         boolean isConnectionValid = false;
         try {
             if (con != null && !con.isClosed()) {
                 isConnectionValid = true;
             }
         } catch (SQLException e) {
+            // Nếu kiểm tra isClosed() ném lỗi, kết nối đã chết và cần tạo lại.
             isConnectionValid = false;
         }
 
         if(!isConnectionValid) {
+            // Logic tạo kết nối chỉ chạy khi kết nối là NULL hoặc không hợp lệ/đã đóng
             String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyVeTau;trustServerCertificate=true";
             String user = "sa";
-            String password = "Sapassword123@";
+            String password = "sapassword";
             try {
                 con = DriverManager.getConnection(url, user, password);
             } catch (SQLException e) {

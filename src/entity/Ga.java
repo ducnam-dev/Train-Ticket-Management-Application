@@ -11,7 +11,6 @@ public class Ga {
 		this.tenGa = tenGa;
 		this.diaChi = diaChi;
 	}
-    //1 tham số
     public Ga(String maGa) {
         super();
         this.maGa = maGa;

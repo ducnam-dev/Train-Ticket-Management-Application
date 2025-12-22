@@ -201,6 +201,7 @@ public class KhuyenMaiDAO {
         km.setNgayKetThuc(rs.getTimestamp("NgayKT").toLocalDateTime());
 
         km.setTrangThai(rs.getString("TrangThai"));
+
         return km;
     }
 //    khoiTaoMaKMMoi
