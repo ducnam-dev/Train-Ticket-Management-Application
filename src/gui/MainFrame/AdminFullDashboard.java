@@ -349,11 +349,8 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         panelNoiDung.add(new JPanel(), "thongKe");
 
         // --- Chức năng Bán Vé (từ BanVeDashboard) ---
-        // SỬ DỤNG LẠI ManHinhDashboardQuanLy làm trang chủ tổng
-        panelNoiDung.add(new ManHinhMoCa(), "moCa");
-        panelNoiDung.add(new ManHinhKetCa(), "ketCa");
 
-        manHinhBanVeInstance = new ManHinhBanVe(); // Giữ instance để có thể tương tác nếu cần
+        manHinhBanVeInstance = new ManHinhBanVe();
         panelNoiDung.add(manHinhBanVeInstance, "banVeMoi");
 
         panelNoiDung.add(new ManHinhDoiVe(), "doiVe");

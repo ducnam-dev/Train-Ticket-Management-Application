@@ -61,7 +61,7 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         contentPanel.add(new ManHinhQuanLyKhuyenMai(), "qlKhuyenMai");
         contentPanel.add(new ManHinhTraCuuHoaDon(), "traCuuHD");
         contentPanel.add(new ManHinhQuanLyGiaVe(), "qlGiaVe");
-        contentPanel.add(new ManHinhDashboardQuanLy(), "thongKe"); // Tạm thời dùng chung Dashboard
+        contentPanel.add(new ManHinhDashboardQuanLy(), "thongKe");
 
         add(contentPanel, BorderLayout.CENTER);
     }
@@ -122,13 +122,11 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
     // PHƯƠNG THỨC BỊ THIẾU ĐÃ ĐƯỢC BỔ SUNG Ở ĐÂY
     // ================================================================
     private void highlightActiveButton(JButton active) {
-        // Đặt lại màu cho tất cả các nút về màu gốc
         for (JButton button : menuButtons.values()) {
             if (button != null) {
                 button.setBackground(MAU_CHINH);
             }
         }
-        // Đổi màu nền cho nút đang được chọn
         if (active != null) {
             active.setBackground(MAU_DUOC_CHON);
         }
@@ -247,7 +245,6 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        try{ UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel"); } catch (Exception e){}
         SwingUtilities.invokeLater(() -> new QuanLyDashboard());
     }
 }

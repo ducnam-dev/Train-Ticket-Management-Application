@@ -41,7 +41,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private static final SimpleDateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
-    // Mã loại vé (hằng)
     private static final String MA_VE_NL = "VT01";
 
 
@@ -57,7 +56,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private JComboBox<Ga> cbGaDi;
     private JComboBox<Ga> cbGaDen;
     private JDateChooser dateChooserNgayDi;
-    private JTable tableChuyenTau;
     private DefaultTableModel tableModel;
     private JTextField txtTongSoKhach;
     private JButton btnTimChuyen;
@@ -109,7 +107,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private final KhachHangDAO khachHangDAO = new KhachHangDAO();
     private JPanel pnlDanhSachKhachHang;
 
-    private final NghiepVuTinhGiaVe nghiepVuTinhGiaVe = new NghiepVuTinhGiaVe();
 
 
 
@@ -1214,12 +1211,10 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                 if (!kiemTraHopLeLoaiVeTheoNgaySinh(ngaySinhValue, maMoi)) {
                     isAgeMatchValid = false;
 
-                    // Ghi đè lỗi tuổi nếu validation format pass
                     txtNgaySinhToValidate.setBorder(BorderFactory.createLineBorder(Color.RED));
                     String tenLoaiMoi = getTenLoaiVeHienThi(maMoi);
                     errNgaySinhToValidate.setText("Tuổi không đúng loại vé");
                 } else {
-                    // Nếu validation format pass và tuổi hợp lệ, reset lỗi
                     txtNgaySinhToValidate.setBorder(UIManager.getBorder("TextField.border"));
                     errNgaySinhToValidate.setText("");
                 }
@@ -1236,7 +1231,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                     System.err.println("Lỗi tính giá khi đổi loại vé: " + ex.getMessage());
                 }
             } else {
-                // Nếu tuổi không khớp, không tính lại giá (hoặc giữ giá cũ/đặt 0)
                 danhSachGiaVe.put(maCho, 0L);
                 lblGia.setText("0 VNĐ (Lỗi Tuổi)");
             }
@@ -1395,7 +1389,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     }
 
     private String goiYLoaiVeByAge(int age) {
-        // Mã mặc định (đã được định nghĩa là MA_VE_NL="VT01")
         final String MA_VE_DEFAULT = "VT01";
 
         if (age == -1 || age == 0) return MA_VE_DEFAULT; // Ngày sinh không hợp lệ/tuổi 0
@@ -1408,7 +1401,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
             if (loaiVe != null) {
                 if (loaiVe.isTuoiHopLe(age)) {
-                    // Nếu tuổi hợp lệ với phạm vi của loại vé này, chọn nó
                     return maLoaiVe;
                 }
             }
@@ -1426,21 +1418,16 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         int tuoi = tinhTuoi(ngaySinhStr);
 
         if (tuoi < 0) {
-            // Ngày sinh không hợp lệ về mặt định dạng hoặc là ngày tương lai
             return false;
         }
 
-        // Lấy đối tượng LoaiVe để truy cập TuoiMin/TuoiMax
         LoaiVe loaiVe = mapAllLoaiVe.get(maLoaiVeDaChon);
 
         if (loaiVe == null) {
-            // Trường hợp không tìm thấy mã loại vé trong CSDL
-            return true; // Coi như hợp lệ để không chặn giao dịch, nhưng cần kiểm tra trong validation cuối
+            return true;
         }
 
-        // Kiểm tra xem tuổi có nằm trong phạm vi cho phép của loại vé này không
         return loaiVe.isTuoiHopLe(tuoi);
-        // Logic này giả định: tuoi >= tuoiMin VÀ tuoi <= tuoiMax
     }
 
 
@@ -1504,7 +1491,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             // Xác định tên card Trang chủ tương ứng với Dashboard
             String tenCardTrangChu = (w instanceof AdminFullDashboard) ? "trangChuQL" : "trangChuNV";
 
-            ManHinhTrangChuNVBanVe trangChuPanel = new ManHinhTrangChuNVBanVe();
+            ManHinhTrangChuNVBanVe trangChuPanel = new ManHinhTrangChuNVBanVe(null);
 
             if (w instanceof BanVeDashboard) {
                 BanVeDashboard dashboard = (BanVeDashboard) w;
