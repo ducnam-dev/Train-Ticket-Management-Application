@@ -9,9 +9,10 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI; // Import cần thiết để mở web
 import java.util.HashMap;
 import java.util.Map;
-import java.net.URL; // Cần thiết cho việc tải tài nguyên
+import java.net.URL;
 
 /**
  * Lớp này tạo ManFrame cho quyền Nhân viên Bán Vé, chứa Menu cố định và CardLayout.
@@ -29,6 +30,9 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     // Các nút menu cần quản lý
     private JButton nutTrangChu, nutMoCa, nutKetCa, nutBanVe, nutDoiVe, nutTraCuuVe, nutTraCuuHD, nutDangXuat, nutTraVe;
 
+    // [THÊM MỚI] Nút Trợ giúp
+    private JButton nutTroGiup;
+
     // Dữ liệu Nhân viên
     private String maNVHienThi = "N/A";
     private String tenNVHienThi = "Đang tải...";
@@ -37,6 +41,9 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     private static final int CHIEU_RONG_MENU = 180;
     // Hằng số cho kích thước icon
     private static final int ICON_SIZE = 20;
+
+    // Đường dẫn đến trang hướng dẫn (GitHub Pages)
+    private static final String LINK_HUONG_DAN = "https://transon-code.github.io/TrainTicketManagement_Guide/html/NhanVienBanVe/DangNhap.html";
 
     public ManHinhBanVe manHinhBanVeInstance;
 
@@ -125,10 +132,6 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         panel.add(nutTrangChu);
         panel.add(taoDuongKe());
 
-
-
-
-
         // [4. Bán vé mới]
         nutBanVe = taoMucMenu("Bán vé", "/images/iconMenu/banve.png", "banVeMoi");
         panel.add(nutBanVe);
@@ -152,6 +155,14 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         // [7. Tra cứu hóa đơn]
         nutTraCuuHD = taoMucMenu("Tra cứu hóa đơn", "/images/iconMenu/tracuuhoadon.png", "traCuuHD");
         panel.add(nutTraCuuHD);
+        panel.add(taoDuongKe());
+
+        // ====================================================================
+        // [8. THÊM MỚI] NÚT TRỢ GIÚP
+        // Lưu ý: Hãy đảm bảo bạn có file icon "help.png" trong thư mục images/iconMenu
+        // ====================================================================
+        nutTroGiup = taoMucMenu("Hướng dẫn sử dụng", "/images/iconMenu/help.png", "troGiup");
+        panel.add(nutTroGiup);
         panel.add(taoDuongKe());
 
 
@@ -326,6 +337,14 @@ public class BanVeDashboard extends JFrame implements ActionListener {
                 .findFirst()
                 .orElse(null);
 
+        // --- [XỬ LÝ NÚT TRỢ GIÚP] ---
+        if ("troGiup".equals(tenCard)) {
+            // Mở trình duyệt web và dừng lại (không chuyển Card)
+            moTrinhDuyet(LINK_HUONG_DAN);
+            return;
+        }
+        // -----------------------------
+
         if ("dangXuat".equals(tenCard)) {
             int xacNhan = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn đăng xuất?", "Xác nhận đăng xuất", JOptionPane.YES_NO_OPTION);
             if (xacNhan == JOptionPane.YES_OPTION) {
@@ -340,26 +359,23 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         }
     }
 
-    // MAIN
-    /*public static void main(String[] args) {
+    // --- [HÀM MỚI] MỞ TRÌNH DUYỆT ---
+    private void moTrinhDuyet(String urlString) {
         try {
-            NhanVien nvMock = new NhanVien("NVBV0001", "Trần Đức Nam", "0123456789");
-            CaLamViec.getInstance().batDauCa(nvMock);
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new URI(urlString));
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Máy tính không hỗ trợ tự động mở trình duyệt.\nVui lòng truy cập: " + urlString,
+                        "Thông báo", JOptionPane.WARNING_MESSAGE);
+            }
         } catch (Exception e) {
-            System.err.println("Lỗi MOCKUP NhanVien/CaLamViec: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Không thể mở đường dẫn: " + e.getMessage());
         }
+    }
 
-//        try{
-//            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-//        } catch (Exception e){
-//            // Dùng giao diện mặc định
-//        }
-
-        SwingUtilities.invokeLater(() -> {
-            new BanVeDashboard();
-        });
-    }*/
-
+    // MAIN
     // HÀM MAIN ÉP SANG GIAO DIỆN METAL CHO MACOS (để dùng cho cả win và mac)
     public static void main(String[] args) {
         // 1. Phần Mockup dữ liệu (Giữ nguyên)
@@ -374,10 +390,6 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         try {
             // Đây là dòng lệnh gọi giao diện Metal chuẩn
             javax.swing.UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-
-            // Tùy chọn thêm: Nếu muốn bật theme Ocean (xanh nhẹ) của Metal cho đẹp hơn chút thì bỏ comment dòng dưới:
-            // javax.swing.plaf.metal.MetalLookAndFeel.setCurrentTheme(new javax.swing.plaf.metal.OceanTheme());
-
         } catch (Exception ex) {
             System.err.println("Lỗi cài đặt giao diện.");
         }
@@ -387,7 +399,6 @@ public class BanVeDashboard extends JFrame implements ActionListener {
             new BanVeDashboard();
         });
     }
-
 
     public Component layCardTheoTen(String tenCard) {
         for (Component comp : panelNoiDung.getComponents()) {
