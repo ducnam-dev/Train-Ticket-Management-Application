@@ -25,7 +25,7 @@ public class ManHinhDangNhap extends JFrame implements ActionListener {
 
     // --- Thuộc tính (Properties) đã Việt hóa ---
     private static final String DUONG_DAN_LOGO = "src/images/logo-train.png";
-    private static final String DUONG_DAN_ANH_TAU = "src/images/anh tau.jpg";
+    private static final String DUONG_DAN_ANH_TAU = "src/images/anh-tau.jpg";
     private static final int KICH_THUOC_LOGO = 80;
     private static final int CHIEU_RONG_ANH_TAU = 600;
 

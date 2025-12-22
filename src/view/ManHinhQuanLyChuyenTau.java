@@ -552,7 +552,7 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
 
     public static void main(String[] args) {
         // Mock data nhân viên để test
-        NhanVien nv = new NhanVien(); nv.setMaNV("NV001");
+        NhanVien nv = new NhanVien(); nv.setMaNV("NVQL0001");
         CaLamViec.getInstance().batDauCa(nv);
 
         SwingUtilities.invokeLater(() -> {

@@ -40,8 +40,9 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 
     public ManHinhBanVe manHinhBanVeInstance;
 
-
+    public static BanVeDashboard instance;
     public BanVeDashboard() {
+        instance = this;
         setTitle("Hệ thống Bán Vé Tàu - Nhân viên Bán Vé");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -340,27 +341,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         }
     }
 
-    // MAIN
-    /*public static void main(String[] args) {
-        try {
-            NhanVien nvMock = new NhanVien("NVBV0001", "Trần Đức Nam", "0123456789");
-            CaLamViec.getInstance().batDauCa(nvMock);
-        } catch (Exception e) {
-            System.err.println("Lỗi MOCKUP NhanVien/CaLamViec: " + e.getMessage());
-        }
 
-//        try{
-//            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-//        } catch (Exception e){
-//            // Dùng giao diện mặc định
-//        }
-
-        SwingUtilities.invokeLater(() -> {
-            new BanVeDashboard();
-        });
-    }*/
-
-    // HÀM MAIN ÉP SANG GIAO DIỆN METAL CHO MACOS (để dùng cho cả win và mac)
     public static void main(String[] args) {
         // 1. Phần Mockup dữ liệu (Giữ nguyên)
         try {
@@ -388,13 +369,4 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         });
     }
 
-
-    public Component layCardTheoTen(String tenCard) {
-        for (Component comp : panelNoiDung.getComponents()) {
-            if (comp.getName() != null && comp.getName().equals(tenCard)) {
-                return comp;
-            }
-        }
-        return null;
-    }
 }
