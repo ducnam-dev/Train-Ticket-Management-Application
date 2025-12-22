@@ -308,38 +308,60 @@ public class ManHinhDoiVe extends JPanel {
         btnDoiToanBo.addActionListener(e -> {
             List<ThongTinVeDTO> danhSachVeCanDoi = new ArrayList<>();
 
-            // 1. Duyệt qua các TicketPanel để lấy vé hợp lệ
+            // [MỚI] Biến dùng để ghi nhớ mã chuyến của vé đầu tiên tìm thấy
+            String maChuyenTauChung = null;
+
+            // [CŨ - GIỮ NGUYÊN] Duyệt qua UI để lấy vé
             Component[] components = pnlListTickets.getComponents();
             for (Component comp : components) {
                 if (comp instanceof TicketPanel) {
                     TicketPanel panel = (TicketPanel) comp;
-
-                    // --- MẤU CHỐT: Lấy DTO từ Panel ---
-                    // DTO này đã chứa đủ MaKhachHang, MaLoaiVe, NgaySinh nhờ DAO đã được cập nhật
                     ThongTinVeDTO ve = panel.getTicket();
 
+                    // [CŨ - GIỮ NGUYÊN] Chỉ lấy vé đủ điều kiện (thời gian, trạng thái)
                     if (checkDieuKienDoiVe(ve)) {
+
+                        // --- [MỚI - BẮT ĐẦU] LOGIC KIỂM TRA CÙNG CHUYẾN TÀU ---
+                        if (maChuyenTauChung == null) {
+                            // Nếu đây là vé hợp lệ đầu tiên, lấy mã chuyến của nó làm chuẩn
+                            maChuyenTauChung = ve.getMaChuyenTau();
+                        } else {
+                            // Những vé sau phải so sánh với mã chuẩn này
+                            if (!maChuyenTauChung.equals(ve.getMaChuyenTau())) {
+                                JOptionPane.showMessageDialog(this,
+                                        "Không thể đổi đồng thời các vé thuộc nhiều chuyến tàu khác nhau!\n" +
+                                                "Vui lòng xóa bớt vé khác chuyến hoặc lọc lại danh sách.",
+                                        "Lỗi chọn vé", JOptionPane.ERROR_MESSAGE);
+                                return; // Dừng ngay lập tức, không cho đi tiếp
+                            }
+                        }
+                        // --- [MỚI - KẾT THÚC] ---
+
+                        // [CŨ - GIỮ NGUYÊN] Thêm vé vào danh sách
                         danhSachVeCanDoi.add(ve);
                     }
                 }
             }
 
+            // [CŨ - GIỮ NGUYÊN] Kiểm tra danh sách rỗng
             if (danhSachVeCanDoi.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
                         "Không tìm thấy vé nào đủ điều kiện đổi trên màn hình!",
                         "Thông báo", JOptionPane.WARNING_MESSAGE);
             } else {
-                String msg = "Tìm thấy " + danhSachVeCanDoi.size() + " vé hợp lệ.\n"
+                // [CŨ - GIỮ NGUYÊN] Hiển thị xác nhận
+                String msg = "Tìm thấy " + danhSachVeCanDoi.size() + " vé hợp lệ thuộc chuyến " + maChuyenTauChung + ".\n"
                         + "Bạn có chắc chắn muốn đổi TOÀN BỘ danh sách này không?";
 
                 int choice = JOptionPane.showConfirmDialog(this, msg,
                         "Xác nhận đổi toàn bộ", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
                 if (choice == JOptionPane.YES_OPTION) {
-                    // --- GỌI HÀM IN KIỂM TRA RA CONSOLE ---
+                    // [CŨ - GIỮ NGUYÊN] In log kiểm tra
                     inDanhSachVeRaConsole(danhSachVeCanDoi, "DANH SÁCH ĐỔI TOÀN BỘ");
 
-                    ManHinhXuLyDoiVe panelDoiVeMoi = new ManHinhXuLyDoiVe(danhSachVeCanDoi);
+                    // [CŨ - GIỮ NGUYÊN] Khởi tạo màn hình xử lý & Điều hướng
+                    ManHinhXuLyDoiVe panelDoiVeMoi = new ManHinhXuLyDoiVe(danhSachVeCanDoi); // Lớp này là ManHinhBanVe_DoiVe mà bạn đổi tên
                     Window win = SwingUtilities.getWindowAncestor(this);
 
                     if (win instanceof BanVeDashboard) {
