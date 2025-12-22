@@ -1733,7 +1733,7 @@ public class ManHinhXacNhanBanVe extends JPanel {
 
                 // Chỉ thêm/cập nhật nếu là Trang chủ (vì Trang chủ thường cần refresh)
                 if ("trangChuNV".equals(finalCardName)) {
-                    dashboard.themHoacCapNhatCard(new ManHinhTrangChuNVBanVe(), finalCardName);
+                    dashboard.themHoacCapNhatCard(new ManHinhTrangChuNVBanVe(null), finalCardName);
                 }
 
                 dashboard.chuyenManHinh(finalCardName);

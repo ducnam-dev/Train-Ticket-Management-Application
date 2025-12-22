@@ -694,12 +694,9 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
     private void loadDuLieuTau() {
         cbChonTau.removeAllItems();
         try {
-            // Giả sử TauDao có hàm layTatCaTau() trả về List<Tau>
-            // Hoặc bạn có thể dùng select * from Tau trong TauDao
             List<Tau> danhSachTau = tauDao.layTatCa();
 
             for (Tau t : danhSachTau) {
-                // Chỉ thêm tàu đang hoạt động (tuỳ logic của bạn)
                 if (!"Bảo trì".equals(t.getTrangThai())) {
                     cbChonTau.addItem(t);
                 }
@@ -785,14 +782,6 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
     }
 
     private void themTuyen() { /* Logic thêm tuyến vào DB */ }
-
-    private void xoaTrangFormTuyen() {
-        txtMaTuyen.setText("");
-        txtTenTuyen.setText("");
-        txtMaTuyen.setEditable(true);
-        modelGa.setRowCount(0);
-    }
-
     private void themGaTrongTuyen() {
     }
 
@@ -801,6 +790,15 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
 
     private void xoaGaTrongTuyen() {
     }
+
+    private void xoaTrangFormTuyen() {
+        txtMaTuyen.setText("");
+        txtTenTuyen.setText("");
+        txtMaTuyen.setEditable(true);
+        modelGa.setRowCount(0);
+    }
+
+
 
     private void chonGaTrongComboBox(JComboBox<Ga> cb, String maGa) {
         for (int i = 0; i < cb.getItemCount(); i++) {

@@ -260,9 +260,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
         boCucCard = new CardLayout();
         panelNoiDung = new JPanel(boCucCard);
 
-        panelNoiDung.add(new ManHinhTrangChuNVBanVe(), "trangChuNV");
-        panelNoiDung.add(new ManHinhMoCa(), "moCa");
-        panelNoiDung.add(new ManHinhKetCa(), "ketCa");
+        panelNoiDung.add(new ManHinhTrangChuNVBanVe(this), "trangChuNV");
 
         manHinhBanVeInstance = new ManHinhBanVe();
         panelNoiDung.add(manHinhBanVeInstance, "banVeMoi");
