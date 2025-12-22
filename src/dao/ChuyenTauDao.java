@@ -435,11 +435,14 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
 
     public static ChuyenTau timKiemChuyenTauTheoMaHoaDon(String maHoaDon) {
         String sql = """
-                SELECT DISTINCT J.GaDi, J.GaDen, J.NgayKhoiHanh, J.GioKhoiHanh
+                SELECT DISTINCT J.NgayKhoiHanh, J.GioKhoiHanh,
+                GA_DI.TenGa as TenGaDi, GA_DEN.TenGa as TenGaDen
                 FROM HoaDon HD 
                 JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
                 JOIN Ve V ON V.MaVe = CT.MaVe
                 JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
+                JOIN Ga GA_DI ON J.GaDi = GA_DI.MaGa 
+                JOIN Ga GA_DEN ON J.GaDen = GA_DEN.MaGa 
                 WHERE HD.MaHD = ?
                 """;
 
@@ -451,8 +454,8 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
 
             if (rs.next()) {
                 ChuyenTau ct = new ChuyenTau();
-                ct.gaDi = new Ga(null, rs.getString("GaDi"), null);
-                ct.gaDen = new Ga(null, rs.getString("GaDen"), null);
+                ct.gaDi = new Ga(null, rs.getString("TenGaDi"), null);
+                ct.gaDen = new Ga(null, rs.getString("TenGaDen"), null);
                 ct.ngayKhoiHanh = rs.getObject("NgayKhoiHanh", LocalDate.class);
                 ct.gioKhoiHanh = rs.getObject("GioKhoiHanh", LocalTime.class);
                 return ct;
@@ -469,11 +472,14 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
         String sql = """
                 
                                         
-                                        SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen, J.GaDi, J.GaDen , J.NgayKhoiHanh, J.GioKhoiHanh
+                                        SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen, J.NgayKhoiHanh, J.GioKhoiHanh, 
+                                        GA_DI.TenGa as TenGaDi, GA_DEN.TenGa as TenGaDen
                                         FROM HoaDon HD JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
                                         JOIN Ve V ON V.MaVe = CT.MaVe
                                         JOIN KhachHang KH ON KH.MaKhachHang = HD.MaKhachHang
-                                        JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
+                                        JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau 
+                                        JOIN Ga GA_DI ON J.GaDi = GA_DI.MaGa
+                                        JOIN Ga GA_DEN ON J.GaDen = GA_DEN.MaGa
                                         WHERE SoDienThoai = ?
                 """;
 
@@ -485,8 +491,8 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
 
             while (rs.next()) {
                 ChuyenTau ct = new ChuyenTau();
-                ct.gaDi = new Ga(null, rs.getString("GaDi"), null);
-                ct.gaDen = new Ga(null, rs.getString("GaDen"), null);
+                ct.gaDi = new Ga(null, rs.getString("TenGaDi"), null);
+                ct.gaDen = new Ga(null, rs.getString("TenGaDen"), null);
                 ct.ngayKhoiHanh = rs.getObject("NgayKhoiHanh", LocalDate.class);
                 ct.gioKhoiHanh = rs.getObject("GioKhoiHanh", LocalTime.class);
                 danhSach.add(ct);
@@ -501,11 +507,14 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
     public static ArrayList<ChuyenTau> timChuyenTauTheoCCCD(String giaTriTimKiem) {
         ArrayList<ChuyenTau> danhSach = new ArrayList<>();
         String sql = """
-                                SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen,KH.CCCD, J.GaDi, J.GaDen , J.NgayKhoiHanh, J.GioKhoiHanh
+                                SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen,KH.CCCD, J.NgayKhoiHanh, J.GioKhoiHanh,
+                                GA_DI.TenGa as TenGaDi, GA_DEN.TenGa as TenGaDen 
                                  FROM HoaDon HD JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
                                  JOIN Ve V ON V.MaVe = CT.MaVe
                                  JOIN KhachHang KH ON KH.MaKhachHang = HD.MaKhachHang
                                  JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
+                                 JOIN Ga GA_DI ON J.GaDi = GA_DI.MaGa
+                                 JOIN Ga GA_DEN ON J.GaDen = GA_DEN.MaGa
                                  WHERE KH.CCCD = ?
         """;
 
@@ -517,8 +526,8 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
 
             while (rs.next()) {
                 ChuyenTau ct = new ChuyenTau();
-                ct.gaDi = new Ga(null, rs.getString("GaDi"), null);
-                ct.gaDen = new Ga(null, rs.getString("GaDen"), null);
+                ct.gaDi = new Ga(null, rs.getString("TenGaDi"), null);
+                ct.gaDen = new Ga(null, rs.getString("TenGaDen"), null);
                 ct.ngayKhoiHanh = rs.getObject("NgayKhoiHanh", LocalDate.class);
                 ct.gioKhoiHanh = rs.getObject("GioKhoiHanh", LocalTime.class);
                 danhSach.add(ct);
@@ -533,11 +542,14 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
     public static ArrayList<ChuyenTau> timChuyenTauTheoSDTLocThangNam(String sdt, int thang, int nam) {
         ArrayList<ChuyenTau> danhSach = new ArrayList<>();
         String sql = """
-            SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen, J.GaDi, J.GaDen , J.NgayKhoiHanh, J.GioKhoiHanh
+            SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen, J.NgayKhoiHanh, J.GioKhoiHanh, 
+            GA_DI.TenGa as TenGaDi, GA_DEN.TenGa as TenGaDen
                                         FROM HoaDon HD JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
                                         JOIN Ve V ON V.MaVe = CT.MaVe
                                         JOIN KhachHang KH ON KH.MaKhachHang = HD.MaKhachHang
-                                        JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
+                                        JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau 
+                                        JOIN Ga GA_DI ON J.GaDi = GA_DI.MaGa
+                                        JOIN Ga GA_DEN ON J.GaDen = GA_DEN.MaGa
                                         WHERE KH.SoDienThoai = ? AND MONTH(HD.NgayLap) = ? AND YEAR(HD.NgayLap) = ?
             """;
         try (Connection conn = ConnectDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -547,8 +559,8 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 ChuyenTau ct = new ChuyenTau(); // Giả sử có setters hoặc constructor phù hợp
-                ct.gaDi = new Ga(null, rs.getString("GaDi"), null);
-                ct.gaDen = new Ga(null, rs.getString("GaDen"), null);
+                ct.gaDi = new Ga(null, rs.getString("TenGaDi"), null);
+                ct.gaDen = new Ga(null, rs.getString("TenGaDen"), null);
                 ct.ngayKhoiHanh = rs.getObject("NgayKhoiHanh", LocalDate.class);
                 ct.gioKhoiHanh = rs.getObject("GioKhoiHanh", LocalTime.class);
                 // Set các thuộc tính khác nếu cần
@@ -562,11 +574,14 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
     public static ArrayList<ChuyenTau> timChuyenTauTheoCCCDLocThangNam(String cccd, int thang, int nam) {
         ArrayList<ChuyenTau> danhSach = new ArrayList<>();
         String sql = """
-             SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen, J.GaDi, J.GaDen , J.NgayKhoiHanh, J.GioKhoiHanh
+             SELECT DISTINCT HD.MaHD, KH.SoDienThoai, KH.HoTen, J.NgayKhoiHanh, J.GioKhoiHanh,
+             GA_DI.TenGa as TenGaDi, GA_DEN.TenGa as TenGaDen
                                         FROM HoaDon HD JOIN ChiTietHoaDon CT ON HD.MaHD = CT.MaHD
                                         JOIN Ve V ON V.MaVe = CT.MaVe
                                         JOIN KhachHang KH ON KH.MaKhachHang = HD.MaKhachHang
                                         JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau
+                                        JOIN Ga GA_DI ON J.GaDi = GA_DI.MaGa
+                                        JOIN Ga GA_DEN ON J.GaDen = GA_DEN.MaGa
                                         WHERE KH.CCCD = ? AND MONTH(HD.NgayLap) = ? AND YEAR(HD.NgayLap) = ?
              """;
         try (Connection conn = ConnectDB.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -576,8 +591,8 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 ChuyenTau ct = new ChuyenTau();
-                ct.gaDi = new Ga(null, rs.getString("GaDi"), null);
-                ct.gaDen = new Ga(null, rs.getString("GaDen"), null);
+                ct.gaDi = new Ga(null, rs.getString("TenGaDi"), null);
+                ct.gaDen = new Ga(null, rs.getString("TenGaDen"), null);
                 ct.ngayKhoiHanh = rs.getObject("NgayKhoiHanh", LocalDate.class);
                 ct.gioKhoiHanh = rs.getObject("GioKhoiHanh", LocalTime.class);
                 danhSach.add(ct);

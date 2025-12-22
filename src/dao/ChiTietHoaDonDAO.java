@@ -84,11 +84,24 @@ public class ChiTietHoaDonDAO {
     // Phương thức lấy thông tin chuyến tàu theo mã hóa đơn
     public static ChuyenTau chuyenTauTheoCTHD(String maHD) {
         ChuyenTau chuyenTau = null;
-        String sql = "SELECT DISTINCT HD.MaHD, J.MaChuyenTau, J.MaTau, J.GaDi, J.GaDen, " +
-                "J.NgayKhoiHanh, J.GioKhoiHanh, J.NgayDenDuKien, J.GioDenDuKien " +
-                "FROM HoaDon HD JOIN Ve V ON HD.MaKhachHang = V.MaKhachHang " +
-                "JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau " +
-                "WHERE HD.MaHD = ?";
+        String sql = """
+        SELECT DISTINCT 
+        HD.MaHD, 
+        J.MaChuyenTau, 
+        J.MaTau, 
+        GA_DI.TenGa AS TenGaDi, 
+        GA_DEN.TenGa AS TenGaDen, 
+        J.NgayKhoiHanh, 
+        J.GioKhoiHanh, 
+        J.NgayDenDuKien, 
+        J.GioDenDuKien 
+    FROM HoaDon HD 
+    JOIN Ve V ON HD.MaKhachHang = V.MaKhachHang 
+    JOIN ChuyenTau J ON J.MaChuyenTau = V.MaChuyenTau 
+    JOIN Ga GA_DI ON J.GaDi = GA_DI.MaGa 
+    JOIN Ga GA_DEN ON J.GaDen = GA_DEN.MaGa 
+    WHERE HD.MaHD = ?;
+                      """;
 
         try (Connection conn = ConnectDB.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -112,20 +125,18 @@ public class ChiTietHoaDonDAO {
                 chuyenTau.setGioKhoiHanh(rs.getObject("GioKhoiHanh", LocalTime.class));
 
                 Ga gaDi = new Ga();
-                gaDi.setTenGa(rs.getString("GaDi"));
+                gaDi.setTenGa(rs.getString("TenGaDi"));
                 chuyenTau.setGaDi(gaDi);
 
+                System.out.println("Kiểm tra chuyến tàu trong phương thức lấy chuyến tàu theo chi tiết hóa đơn" + chuyenTau.getGaDi());
+
                 Ga gaDen = new Ga();
-                gaDen.setTenGa(rs.getString("GaDen"));
+                gaDen.setTenGa(rs.getString("TenGaDen"));
                 chuyenTau.setGaDen(gaDen);
 
                 chuyenTau.setNgayDenDuKien(rs.getObject("NgayDenDuKien", LocalDate.class));
                 chuyenTau.setGioDenDuKien(rs.getObject("GioDenDuKien", LocalTime.class));
 
-                // Các thuộc tính không có trong truy vấn
-                chuyenTau.setTau(null);
-                chuyenTau.setNhanVien(null);
-                chuyenTau.setThct(null);
             }
 
         } catch (SQLException e) {

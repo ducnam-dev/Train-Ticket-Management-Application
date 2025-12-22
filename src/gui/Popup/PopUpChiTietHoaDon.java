@@ -89,11 +89,6 @@ public class PopUpChiTietHoaDon extends JPanel {
         lblSoTienPhaiThanhToan.setIcon(resizedTransactionIcon); // Đã sửa từ lblTongTien
         jLabel27.setIcon(resizedPaymentMethodIcon);
         lblNgayLapHD.setIcon(resizedCalendarIcon); // Đã sửa từ lblNgayThanhToan
-        lblEmail.setIcon(resizedGenderIcon);
-
-        if (lblEmail.getText().equals("Nam"))
-            lblEmail.setIcon(resizedMaleIcon);
-        else lblEmail.setIcon(resizedFemaleIcon);
 
         // Custom nút
         btnInHoaDon.setOpaque(true);
@@ -114,19 +109,18 @@ public class PopUpChiTietHoaDon extends JPanel {
         TableColumnModel columnModel = BangChiTietHanhKhach.getColumnModel();
 
         columnModel.getColumn(0).setCellRenderer(centerDataRenderer); // STT
-        columnModel.getColumn(2).setCellRenderer(centerDataRenderer); // Giới tính
-        columnModel.getColumn(3).setCellRenderer(centerDataRenderer); // Định danh/CCCD (Index 2)
-        columnModel.getColumn(4).setCellRenderer(centerDataRenderer); // Giá vé (Index 4)
-        columnModel.getColumn(5).setCellRenderer(centerDataRenderer); // Số lượng
-        columnModel.getColumn(6).setCellRenderer(centerDataRenderer); // Số lượng
+        columnModel.getColumn(2).setCellRenderer(centerDataRenderer); // Định danh/CCCD (Index 2)
+        columnModel.getColumn(3).setCellRenderer(centerDataRenderer); // Loại vé
+        columnModel.getColumn(4).setCellRenderer(centerDataRenderer); // Số lượng
+        columnModel.getColumn(5).setCellRenderer(centerDataRenderer); // Đơn giá
 
         columnModel.getColumn(1).setPreferredWidth(155); // Họ và tên
-        columnModel.getColumn(3).setPreferredWidth(140); // Mã định danh/CCCD
+        columnModel.getColumn(2).setPreferredWidth(140); // Mã định danh/CCCD
         columnModel.getColumn(0).setPreferredWidth(40);  // STT
         columnModel.getColumn(0).setMaxWidth(50);
-        columnModel.getColumn(4).setPreferredWidth(110); // Loại vé
-        columnModel.getColumn(5).setPreferredWidth(60); // Số lượng
-        columnModel.getColumn(6).setPreferredWidth(110); // Đơn giá
+        columnModel.getColumn(3).setPreferredWidth(110); // Loại vé
+        columnModel.getColumn(4).setPreferredWidth(60); // Số lượng
+        columnModel.getColumn(5).setPreferredWidth(110); // Đơn giá
         // columnModel.getColumn(6).setPreferredWidth(70); // Thành tiền (đã có ở trên, dòng này dư)
 
         BangChiTietHanhKhach.setShowGrid(false);
@@ -192,7 +186,7 @@ public class PopUpChiTietHoaDon extends JPanel {
         jLabel20 = new JLabel();
         jLabel21 = new JLabel();
         lblTenHanhKhach = new JLabel();
-        lblEmail = new JLabel();
+
         lblSoDienThoai = new JLabel();
         jLabel25 = new JLabel() {
             { setOpaque(false); }
@@ -224,6 +218,7 @@ public class PopUpChiTietHoaDon extends JPanel {
         lblKMchoHoaDon = new JLabel();
         jLabel34 = new JLabel();
         lblTongTien = new JLabel();
+        lblTongTien.setVisible(false);
         jLabel22 = new JLabel();
         lblNguoiThanhToan = new JLabel();
         jLabel35 = new JLabel();
@@ -231,6 +226,7 @@ public class PopUpChiTietHoaDon extends JPanel {
         jLabel26 = new JLabel();
         btnDongChiTietHoaDon = new JButton();
         btnInHoaDon = new JButton();
+        lblEmail = new JLabel("");
 
         setBackground(new Color(218, 218, 218)); // Đã sửa
         setForeground(new Color(218, 218, 218)); // Đã sửa
@@ -384,7 +380,7 @@ public class PopUpChiTietHoaDon extends JPanel {
 
         jLabel20.setFont(new Font("Kailasa", Font.PLAIN, 16)); // Đã sửa
         jLabel20.setForeground(new Color(158, 158, 158)); // Đã sửa
-        jLabel20.setText("Giới tính :");
+
 
         jLabel21.setFont(new Font("Kailasa", Font.PLAIN, 16)); // Đã sửa
         jLabel21.setForeground(new Color(158, 158, 158)); // Đã sửa
@@ -392,10 +388,6 @@ public class PopUpChiTietHoaDon extends JPanel {
 
         lblTenHanhKhach.setFont(new Font("Kailasa", Font.PLAIN, 17)); // Đã sửa
         lblTenHanhKhach.setText("Nguyễn Văn Nam");
-
-        lblEmail.setFont(new Font("Kailasa", Font.PLAIN, 17)); // Đã sửa
-        lblEmail.setIcon(new ImageIcon("/images/gender.png")); // Đã sửa
-        lblEmail.setText("Nam");
 
         lblSoDienThoai.setFont(new Font("Kailasa", Font.PLAIN, 17)); // Đã sửa
         lblSoDienThoai.setIcon(new ImageIcon("/images/telephone.png")); // Đã sửa
@@ -412,13 +404,13 @@ public class PopUpChiTietHoaDon extends JPanel {
         BangChiTietHanhKhach.setFont(new Font("Helvetica Neue", Font.PLAIN, 15)); // Đã sửa
         BangChiTietHanhKhach.setModel(new DefaultTableModel( // Đã sửa javax.swing.table.DefaultTableModel -> DefaultTableModel
                 new Object [][] {
-                        { 1, "Nguyễn Văn Nam", "Nam" ,"044180000960", "Người lớn", "1", "900.000đ"}, // Integer tự động boxing/unboxing
-                        { 2, "Nguyễn Trúc Thùy Tiên", "Nữ" , "077202000870", "Sinh Viên", "1", "810.000đ"},
-                        { 3, "Trần Đức Nam", "Nam" , "044210000102", "Trẻ em", "1", "740.000đ"},
+                        { 1, "Nguyễn Văn Nam", "044180000960", "Người lớn", "1", "900.000đ"}, // Integer tự động boxing/unboxing
+                        { 2, "Nguyễn Trúc Thùy Tiên", "077202000870", "Sinh Viên", "1", "810.000đ"},
+                        { 3, "Trần Đức Nam", "044210000102", "Trẻ em", "1", "740.000đ"},
                         {null, null, null, null, null, null, null}
                 },
                 new String [] {
-                        "STT", "Họ và tên", "Giới Tính", "Định danh/CCCD", "Loại vé", "Số lượng", "Đơn giá"
+                        "STT", "Họ và tên", "Định danh/CCCD", "Loại vé", "Số lượng", "Đơn giá"
                 }
         ) {
             // Đã sửa java.lang.* -> *
@@ -545,6 +537,7 @@ public class PopUpChiTietHoaDon extends JPanel {
         jLabel32.setFont(new Font("Helvetica Neue", Font.PLAIN, 16)); // Đã sửa
         jLabel32.setForeground(new Color(158, 158, 158)); // Đã sửa
         jLabel32.setText("Tổng cộng :");
+        jLabel32.setVisible(false);
 
         lblKMchoHoaDon.setFont(new Font("Helvetica Neue", Font.PLAIN, 16)); // Đã sửa
         lblKMchoHoaDon.setText("5%");
@@ -803,7 +796,7 @@ public class PopUpChiTietHoaDon extends JPanel {
         System.out.println("KHÁCH HÀNG ĐẶT HÓA ĐƠN:");
         System.out.printf("  Họ tên: %s%n", khachHangDat.getHoTen());
         System.out.printf("  SĐT: %s%n", khachHangDat.getSdt());
-        System.out.printf("  Giới tính: %s%n", khachHangDat.getGioiTinh());
+
         System.out.println();
 
         // 3. Danh sách vé (Chi tiết hóa đơn)
@@ -865,8 +858,8 @@ public class PopUpChiTietHoaDon extends JPanel {
         System.out.println("  Họ tên                  | CCCD           | Giới tính");
         System.out.println("  -----------------------------------------------------");
         for (KhachHang kh : khachHangDiVe) {
-            System.out.printf("  %-23s | %-14s | %s%n",
-                    kh.getHoTen(), kh.getSoCCCD(), kh.getGioiTinh());
+            System.out.printf("  %-23s | %-14s ",
+                    kh.getHoTen(), kh.getSoCCCD());
         }
 
         System.out.println("\n════════════════════════════════════════════════════════════");
@@ -888,24 +881,8 @@ public class PopUpChiTietHoaDon extends JPanel {
         // 2. Thông tin khách hàng đặt hóa đơn
         lblTenHanhKhach.setText(khachHangDat.getHoTen());
         lblSoDienThoai.setText(khachHangDat.getSdt());
-        lblEmail.setText(khachHangDat.getGioiTinh());
 
 
-        // Kiểm tra null trước khi gọi bất kỳ phương thức nào
-        if (khachHangDat.getGioiTinh() != null) {
-            if (khachHangDat.getGioiTinh().equals("Nam")){
-                lblEmail.setIcon(resizedMaleIcon);
-            }
-            else {
-                lblEmail.setIcon(resizedFemaleIcon);
-            }
-        } else {
-            // Xử lý khi Giới Tính là NULL (ví dụ: gán icon mặc định)
-            // lblEmail.setIcon(resizedGenderIcon);
-            lblEmail.setIcon(null); // Không gán icon
-            lblEmail.setText("N/A");
-        }
-        lblEmail.repaint();
 
         //4 Thông tin giao dịch
         lblNgayLapHD.setText(hoaDon.getNgayLap().format(DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm")));
@@ -962,8 +939,7 @@ public class PopUpChiTietHoaDon extends JPanel {
         for (int i = 0; i < chiTietList.size(); i++) {
             model.addRow(new Object[]{
                     (i + 1),                                    // STT
-                    khachHangDiVe.get(i).getHoTen(),            // Họ và tên
-                    khachHangDiVe.get(i).getGioiTinh(),         // Giới tính
+                    khachHangDiVe.get(i).getHoTen(),            // Họ và tên// Giới tính
                     khachHangDiVe.get(i).getSoCCCD(),           // CCCD
                     loaiVe.get(i).getTenLoai(),                 // Loại vé
                     chiTietList.get(i).getSoLuong(),            // Số lượng

@@ -347,7 +347,7 @@ public class ManHinhTraCuuHoaDon extends JPanel {
                         {null, null, null, null, "", null, null, null}
                 },
                 new String [] {
-                        "Mã hóa đơn", "Khách hàng", "Tuyến", "Số lượng vé", "Ngày khởi hành", "Tổng tiền", "Loại hóa đơn", "Tùy chọn"
+                        "Mã hóa đơn", "Khách hàng", "Chuyến", "Số lượng vé", "Ngày khởi hành", "Tổng tiền", "Loại hóa đơn", "Tùy chọn"
                 }
         ) {
             Class[] types = new Class [] {
