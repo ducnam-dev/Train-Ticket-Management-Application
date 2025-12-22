@@ -10,28 +10,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="done quản lý chuyến tàu + tạo csdl duy nhất">
-      <change afterPath="$PROJECT_DIR$/sql/1016 chỗ đặt cho tàu se1 se2 spt2.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sql/pre final QuanLyVeTau.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/CSDL quan ly ve tau backup.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/QuanLyVeTau.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/GaTrongTuyenDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/GaTrongTuyenDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/TuyenDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/TuyenDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/ConnectDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/ConnectDB.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/ChiTietHoaDon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/ChiTietHoaDon.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/ChoDat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/ChoDat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/ChuyenTau.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/ChuyenTau.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/Ga.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/Ga.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/GaTrongTuyen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/GaTrongTuyen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/GiaVeCoBanTheoGa.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/HoaDon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/HoaDon.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/Tuyen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/Tuyen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/images/iconMenu/help.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/BanVeDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/MainFrame/ManHinhDangNhap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/MainFrame/ManHinhDangNhap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhDoiVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhDoiVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyChuyenTau.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyChuyenTau.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/view/ManHinhQuanLyChuyenTau.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/view/ManHinhQuanLyChuyenTau.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -151,6 +131,7 @@
       <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\Train-Ticket-Management-Application\lib" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\NguyenBaoDuyLoiDiRieng\src\images\iconMenu" />
       <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\NguyenBaoDuyLoiDiRieng\sql" />
       <recent name="D:\06_Study\Stuby IUH\Hoc ki 5\Phat trien ung dung\DU AN\Train-Ticket-Management-Application\sql" />
     </key>
@@ -276,7 +257,7 @@
       <workItem from="1765795510159" duration="10382000" />
       <workItem from="1765807783944" duration="249000" />
       <workItem from="1766386789203" duration="3651000" />
-      <workItem from="1766408226352" duration="2970000" />
+      <workItem from="1766408226352" duration="3279000" />
     </task>
     <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
       <option name="closed" value="true" />
@@ -382,7 +363,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766410306232</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="done quản lý chuyến tàu + tạo csdl duy nhất">
+      <option name="closed" value="true" />
+      <created>1766411304172</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1766411304172</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

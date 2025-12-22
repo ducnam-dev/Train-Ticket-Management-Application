@@ -38,7 +38,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     private String tenNVHienThi = "Đang tải...";
 
     // Hằng số cho chiều rộng menu
-    private static final int CHIEU_RONG_MENU = 180;
+    private static final int CHIEU_RONG_MENU = 220;
     // Hằng số cho kích thước icon
     private static final int ICON_SIZE = 20;
 
