@@ -45,7 +45,7 @@ public class KhuyenMai{
         return maKM;
     }
 
-    public void setMaKM(String ma) {
+    public void setMaKM(String maKM) {
         this.maKM = maKM;
     }
 

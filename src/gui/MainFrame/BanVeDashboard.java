@@ -38,7 +38,7 @@ public class BanVeDashboard extends JFrame implements ActionListener {
     private String tenNVHienThi = "Đang tải...";
 
     // Hằng số cho chiều rộng menu
-    private static final int CHIEU_RONG_MENU = 180;
+    private static final int CHIEU_RONG_MENU = 220;
     // Hằng số cho kích thước icon
     private static final int ICON_SIZE = 20;
 
@@ -47,8 +47,10 @@ public class BanVeDashboard extends JFrame implements ActionListener {
 
     public ManHinhBanVe manHinhBanVeInstance;
 
+    public static BanVeDashboard instance;
 
     public BanVeDashboard() {
+        instance= this;
         setTitle("Hệ thống Bán Vé Tàu - Nhân viên Bán Vé");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -19,10 +19,7 @@ public class XuLyTaiKhoan {
      */
     public static TaiKhoan authenticate(String tenDangNhap, String matKhau) {
 
-        // **LƯU Ý VỀ BẢO MẬT:**
-        // Trong ứng dụng thực tế, nên áp dụng mã hóa mật khẩu
-        // Tuy nhiên, để khớp với TaiKhoanDAO cơ bản đã viết, ta dùng mật khẩu thô.
-        // Gọi phương thức DAO để thực hiện xác thực CSDL
+
         TaiKhoan taiKhoan = taiKhoanDAO.dangNhap(tenDangNhap, matKhau);
 
         if (taiKhoan == null) {
@@ -30,7 +27,7 @@ public class XuLyTaiKhoan {
             return null;
         }
 
-        if (taiKhoan.getTrangThai() != null && taiKhoan.getTrangThai().equalsIgnoreCase("Hoạt động")) {
+        if (taiKhoan.getTrangThai() != null && taiKhoan.getTrangThai().equalsIgnoreCase("Đang hoạt động")) {
             System.out.println("Đăng nhập thành công cho nhân viên: " + taiKhoan.getMaNV());
             return taiKhoan;
         } else {

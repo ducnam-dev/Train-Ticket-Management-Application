@@ -97,4 +97,32 @@ public class DashboardDAO {
         }
         return ds;
     }
+
+    public List<Map<String, Object>> getHoaDonGanDay(String maNV) {
+        List<Map<String, Object>> ds = new ArrayList<>();
+        // Join với bảng Khách hàng để lấy tên khách cho đẹp
+        String sql = "SELECT TOP 5 h.MaHD, k.HoTen, h.TongTien, h.NgayLap " +
+                "FROM HoaDon h " +
+                "JOIN KhachHang k ON h.MaKhachHang = k.MaKhachHang " +
+                "WHERE h.MaNVLap = ? " +
+                "ORDER BY h.NgayLap DESC"; // Mới nhất lên đầu
+
+        try (Connection con = ConnectDB.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, maNV);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> hd = new HashMap<>();
+                hd.put("maHD", rs.getString("MaHD"));
+                hd.put("tenKH", rs.getString("HoTen"));
+                hd.put("tongTien", rs.getDouble("TongTien"));
+                hd.put("ngayLap", rs.getTimestamp("NgayLap"));
+                ds.add(hd);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ds;
+    }
 }

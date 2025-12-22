@@ -8,15 +8,13 @@ import java.util.Objects;
  * (Tương ứng với khóa chính kép: MaTuyen + MaGa)
  */
 public class GaTrongTuyen {
-    // Khóa chính
-    private Tuyen tuyen; // Tham chiếu đến đối tượng Tuyen
-    private String maGa; // Chỉ cần Mã Ga (String), vì Ga đã là một Entity độc lập
+    private Tuyen tuyen;
+    private String maGa;
     private int thuTuGa;
     private int khoangCachTichLuy;
-    private int thoiGianDiDenGaTiepTheo; // Thời gian chạy từ Ga này đến Ga kế tiếp
-    private int thoiGianDung; // Thời gian dừng tại Ga này
+    private int thoiGianDiDenGaTiepTheo;
+    private int thoiGianDung;
 
-    // Constructors
     public GaTrongTuyen() {}
 
     public GaTrongTuyen(Tuyen tuyen, String maGa, int thuTuGa, int khoangCachTichLuy, int thoiGianDiDenGaTiepTheo, int thoiGianDung) {
@@ -77,7 +75,6 @@ public class GaTrongTuyen {
         this.thoiGianDung = thoiGianDung;
     }
 
-    // Override equals() và hashCode() dựa trên khóa chính kép
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

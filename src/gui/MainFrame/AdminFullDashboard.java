@@ -4,6 +4,7 @@ package gui.MainFrame;
 import control.CaLamViec;
 import entity.NhanVien;
 import gui.Panel.*;
+import gui.Panel.ManHinhQuanLyGiaVe;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

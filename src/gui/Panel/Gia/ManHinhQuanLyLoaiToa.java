@@ -1,4 +1,4 @@
-package view;
+package gui.Panel.Gia;
 
 import dao.LoaiToaDAO;
 import entity.LoaiToa;

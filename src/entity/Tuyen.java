@@ -13,7 +13,9 @@ public class Tuyen {
     private int donGiaKM;
 
     // Constructors
-    public Tuyen() {}
+    public Tuyen(String maTuyen) {
+        this.maTuyen = maTuyen;
+    }
 
     public Tuyen(String maTuyen, String tenTuyen, String gaDau, String gaCuoi) {
         this.maTuyen = maTuyen;

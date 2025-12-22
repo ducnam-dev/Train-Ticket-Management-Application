@@ -1,4 +1,4 @@
-package view;
+package gui.Panel.Gia;
 
 import dao.TuyenDao;
 import entity.Tuyen;
@@ -190,5 +190,16 @@ public class ManHinhQuanLyDonGiaTuyen extends JPanel {
             JOptionPane.showMessageDialog(this, "Lỗi kết nối cơ sở dữ liệu: " + ex.getMessage(), "Lỗi SQL", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         }
+    }
+    //main
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Quản Lý Đơn Giá Theo Tuyến");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.add(new ManHinhQuanLyDonGiaTuyen());
+            frame.setSize(900, 500);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
     }
 }

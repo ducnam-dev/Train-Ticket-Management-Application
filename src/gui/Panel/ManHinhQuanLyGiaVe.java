@@ -1,9 +1,8 @@
 package gui.Panel;
 
-import view.ManHinhQuanLyDonGiaTuyen;
-import view.ManHinhQuanLyLoaiToa;
-import view.ManHinhQuanLyLoaiToa;
-import view.ManHinhQuanLyLoaiVe;
+import gui.Panel.Gia.ManHinhQuanLyDonGiaTuyen;
+import gui.Panel.Gia.ManHinhQuanLyLoaiToa;
+import gui.Panel.Gia.ManHinhQuanLyLoaiVe;
 
 import javax.swing.*;
 import java.awt.*;

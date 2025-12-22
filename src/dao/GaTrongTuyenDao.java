@@ -30,7 +30,6 @@ public class GaTrongTuyenDao {
         List<GaTrongTuyen> danhSach = new ArrayList<>();
 
         // Lấy thông tin Tuyen TRƯỚC khi mở kết nối cho GaTrongTuyen
-        // Việc này đảm bảo nếu layTuyenTheoMa có đóng kết nối, nó cũng không ảnh hưởng đến truy vấn sau
         Tuyen tuyen = tuyenDao.layTuyenTheoMa(maTuyen);
         if (tuyen == null) return danhSach;
 
@@ -73,7 +72,6 @@ public class GaTrongTuyenDao {
 
 
     public static int tinhKhoangCachGiuaHaiGa(String maTuyen, String maGaDi, String maGaDen) throws SQLException {
-        // 1. Sửa tên bảng cho đúng với script SQL của bạn (GA_TRONG_TUYEN)
         String sql = "SELECT MaGa, KhoangCachTichLuy FROM GA_TRONG_TUYEN " +
                 "WHERE MaTuyen = ? AND (MaGa = ? OR MaGa = ?)";
 
