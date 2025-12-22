@@ -251,7 +251,13 @@ public class ManHinhQuanLyKhuyenMai extends JPanel implements ActionListener {
 
         List<KhuyenMai> dsKM = khuyenMaiDAO.layTatCaKhuyenMai(); // Lấy tất cả KM
 
+        // DEBUG: Kiểm tra xem có dữ liệu từ DAO không
+        System.out.println("Số lượng KM lấy được từ DB: " + (dsKM != null ? dsKM.size() : "null"));
+
+        if (dsKM == null) return;
+
         for (KhuyenMai km : dsKM) {
+            System.out.println(km.getMaKM() + " - " + km.getTenKM()); // DEBUG: In mã và tên KM
 
             // --- BƯỚC 1: LỌC THEO TRẠNG THÁI & TÌM KIẾM ---
             String trangThaiHienThi = getStatusHienThi(km.getTrangThai());
@@ -324,23 +330,38 @@ public class ManHinhQuanLyKhuyenMai extends JPanel implements ActionListener {
     }
 
 
-    /**
-     * Cập nhật trạng thái nút khi click vào một hàng trên bảng.
-     */
+   /**
+            * Cập nhật trạng thái nút khi click vào một hàng trên bảng.
+            * Đã sửa lỗi NullPointerException bằng cách kiểm tra dữ liệu an toàn.
+            */
     private void fillFormFromTable(int row) {
-        // Lấy Mã KM thực tế (cột 0)
-        String maKM = tableModel.getValueAt(row, 0).toString();
-        // Lấy Trạng thái hiển thị (cột 8, là cột cuối cùng)
-        String trangThaiHienThi = tableModel.getValueAt(row, tableModel.getColumnCount() - 1).toString();
+        // 1. Kiểm tra hàng hợp lệ
+        if (row < 0 || row >= tableModel.getRowCount()) {
+            return;
+        }
 
+        // 2. Lấy dữ liệu an toàn (Dùng String.valueOf hoặc kiểm tra != null)
+        // Nếu getValueAt là null, String.valueOf sẽ trả về chuỗi "null"
+        // Hoặc dùng cách kiểm tra để trả về chuỗi rỗng ""
+        Object objMa = tableModel.getValueAt(row, 0);
+        String maKM = (objMa != null) ? objMa.toString() : "";
+
+        Object objTrangThai = tableModel.getValueAt(row, tableModel.getColumnCount() - 1);
+        String trangThaiHienThi = (objTrangThai != null) ? objTrangThai.toString() : "";
+
+        // 3. Điền dữ liệu vào form
         txtMaKM.setText(maKM);
 
-        // Kích hoạt các nút Sửa/Kết thúc/Gia hạn
-        btnSua.setEnabled(true);
-        btnGiaHan.setEnabled(true);
+        // 4. Cập nhật trạng thái các nút bấm
+        btnSua.setEnabled(!maKM.isEmpty()); // Chỉ bật nếu có mã
+        btnGiaHan.setEnabled(!maKM.isEmpty());
 
-        // Chỉ cho phép kết thúc nếu KM đang hoạt động
-        btnKetThuc.setEnabled("Đang Hoạt Động".equals(trangThaiHienThi));
+        // 5. Kiểm tra trạng thái (Dùng equalsIgnoreCase để an toàn hơn)
+        if (trangThaiHienThi != null && trangThaiHienThi.equalsIgnoreCase("Đang Hoạt Động")) {
+            btnKetThuc.setEnabled(true);
+        } else {
+            btnKetThuc.setEnabled(false);
+        }
     }
 
     /**
