@@ -4,6 +4,7 @@ import database.ConnectDB;
 import entity.KhuyenMai; // Đã đổi tên từ KhuyenMaiOptimized thành KhuyenMai
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.format.DateTimeFormatter; // Để format LocalDateTime sang String cho SQL
@@ -109,8 +110,8 @@ public class KhuyenMaiDAO {
                 ps.setNull(6, Types.DECIMAL);
             }
 
-            ps.setTimestamp(7, Timestamp.valueOf(km.getNgayBD()));
-            ps.setTimestamp(8, Timestamp.valueOf(km.getNgayKT()));
+            ps.setTimestamp(7, Timestamp.valueOf(km.getNgayBatDau()));
+            ps.setTimestamp(8, Timestamp.valueOf(km.getNgayKetThuc()));
             ps.setString(9, km.getTrangThai());
 
             return ps.executeUpdate() > 0;
@@ -141,8 +142,8 @@ public class KhuyenMaiDAO {
                 ps.setNull(5, Types.DECIMAL);
             }
 
-            ps.setTimestamp(6, Timestamp.valueOf(km.getNgayBD()));
-            ps.setTimestamp(7, Timestamp.valueOf(km.getNgayKT()));
+            ps.setTimestamp(6, Timestamp.valueOf(km.getNgayBatDau()));
+            ps.setTimestamp(7, Timestamp.valueOf(km.getNgayKetThuc()));
             ps.setString(8, km.getTrangThai());
             ps.setString(9, km.getMaKM());
 
@@ -196,55 +197,53 @@ public class KhuyenMaiDAO {
         km.setGiaTriDK(rs.getBigDecimal("GiaTriDK"));
 
         // Chuyển đổi từ SQL DATETIME sang Java LocalDateTime
-        km.setNgayBD(rs.getTimestamp("NgayBD").toLocalDateTime());
-        km.setNgayKT(rs.getTimestamp("NgayKT").toLocalDateTime());
+        km.setNgayBatDau(rs.getTimestamp("NgayBD").toLocalDateTime());
+        km.setNgayKetThuc(rs.getTimestamp("NgayKT").toLocalDateTime());
 
         km.setTrangThai(rs.getString("TrangThai"));
         return km;
     }
+//    khoiTaoMaKMMoi
 
     /**
-     * Tự động khởi tạo mã khuyến mãi mới (KMxxxx) bằng cách tìm mã lớn nhất hiện có và tăng lên 1.
-     * @return Mã khuyến mãi mới dưới dạng chuỗi (ví dụ: KM0005).
+     * Khởi tạo mã KM theo định dạng: KM + MM + YY + NNN
+     * @param ngayBD Ngày bắt đầu khuyến mãi (lấy từ JDateChooser)
+     * @return Ví dụ: KM1225001
      */
-    public String khoiTaoMaKMMoi() {
-        String latestMaKM = null;
-        String newMaKM = "KM0001"; // Mã mặc định nếu chưa có KM nào
+    public String khoiTaoMaKMMoiTheoThang(java.util.Date ngayBD) {
+        if (ngayBD == null) ngayBD = new java.util.Date(); // Nếu chưa chọn ngày, lấy ngày hiện tại
 
-        // Truy vấn lấy Mã KM lớn nhất (sắp xếp giảm dần và lấy 1)
-        String sql = "SELECT TOP 1 MaKM FROM KhuyenMai ORDER BY MaKM DESC";
+        // 1. Lấy Tháng và Năm (2 số cuối)
+        SimpleDateFormat formatThang = new SimpleDateFormat("MM");
+        SimpleDateFormat formatNam = new SimpleDateFormat("yy");
+        String mm = formatThang.format(ngayBD);
+        String yy = formatNam.format(ngayBD);
+
+        String prefix = "KM" + mm + yy; // Ví dụ: KM1225
+        String newMaKM = prefix + "001"; // Mặc định nếu tháng đó chưa có mã nào
+
+        // 2. Truy vấn mã lớn nhất của tháng/năm đó
+        // SQL: Tìm các mã bắt đầu bằng KM1225...
+        String sql = "SELECT TOP 1 MaKM FROM KhuyenMai WHERE MaKM LIKE ? ORDER BY MaKM DESC";
 
         try (Connection con = ConnectDB.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, prefix + "%");
+            ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                latestMaKM = rs.getString("MaKM");
+                String latestMaKM = rs.getString("MaKM");
+                // Cắt 3 số cuối của STT (Ví dụ: KM1225004 -> "004")
+                String sttPart = latestMaKM.substring(6);
+                int nextSTT = Integer.parseInt(sttPart) + 1;
+
+                // Format lại thành 3 chữ số
+                newMaKM = prefix + String.format("%03d", nextSTT);
             }
 
         } catch (SQLException e) {
-            System.err.println("Lỗi truy vấn khởi tạo Mã Khuyến mãi: " + e.getMessage());
-            // Trả về mã mặc định nếu có lỗi
-            return newMaKM;
-        }
-
-        // Xử lý tạo mã mới từ mã lớn nhất tìm được
-        if (latestMaKM != null && latestMaKM.startsWith("KM")) {
-            try {
-                // Lấy phần số từ chuỗi (ví dụ: "KM0004" -> 4)
-                String numberPart = latestMaKM.substring(2);
-                int number = Integer.parseInt(numberPart);
-
-                // Tăng lên 1
-                int newNumber = number + 1;
-
-                // Format lại thành chuỗi 4 chữ số (ví dụ: 5 -> "0005")
-                newMaKM = String.format("KM%04d", newNumber);
-
-            } catch (NumberFormatException e) {
-                System.err.println("Lỗi định dạng Mã Khuyến mãi: " + latestMaKM);
-                // Nếu định dạng sai, vẫn trả về mã mặc định
-            }
+            e.printStackTrace();
         }
 
         return newMaKM;

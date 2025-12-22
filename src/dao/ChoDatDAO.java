@@ -44,7 +44,7 @@ public class ChoDatDAO {
                         int khoang = rs.getInt("Khoang");
 
                         int tang = rs.getInt("Tang");
-                        int daDatInt = rs.getInt("DaDatTrenChuyenTau");
+                        int daDatInt = rs.getInt("DaDat");
 
                         ChoDat choDat = new ChoDat(maCho, maToa, soCho, khoang, tang);
                         choDat.setDaDat(daDatInt == 1);

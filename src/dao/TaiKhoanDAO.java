@@ -51,4 +51,16 @@ public class TaiKhoanDAO {
         }
         return taiKhoan;
     }
+    public static boolean doiMatKhau(String maNV, String matKhauMoi) {
+        String sql = "UPDATE TaiKhoan SET MatKhau = ? WHERE MaNV = ?";
+        try (Connection con = database.ConnectDB.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, matKhauMoi);
+            pstmt.setString(2, maNV);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

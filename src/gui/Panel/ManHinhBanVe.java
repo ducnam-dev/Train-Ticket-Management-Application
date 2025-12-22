@@ -24,7 +24,6 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -105,7 +104,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
     // --- 1.3. DAO (Data Access Objects) ---
     private final ChoDatDAO choDatDao = new ChoDatDAO();
-    private final LoaiChoDatDAO loaiChoDatDAO = new LoaiChoDatDAO();
+    private final LoaiToaDAO loaiChoDatDAO = new LoaiToaDAO();
     private final LoaiVeDAO loaiVeDAO = new LoaiVeDAO();
     private final KhachHangDAO khachHangDAO = new KhachHangDAO();
     private JPanel pnlDanhSachKhachHang;
@@ -506,6 +505,9 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         Ga gaDiSelected = (Ga) cbGaDi.getSelectedItem();
         Ga gaDenSelected = (Ga) cbGaDen.getSelectedItem();
 
+        System.out.println(gaDiSelected.getMaGa());
+        System.out.println(gaDenSelected.getMaGa());
+
         String maGaDi =  gaDiSelected.getMaGa();
         String maGaDen = gaDenSelected.getMaGa();
 
@@ -534,6 +536,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         ChuyenTauDao dao = new ChuyenTauDao();
         System.out.println("Tìm chuyến tàu từ " + maGaDi + " đến " + maGaDen + " vào ngày " + ngayDiSQL);
         ketQua = dao.timChuyenTauTheoGaVaNgayDi(maGaDi, maGaDen, ngayDiSQL);
+        System.out.println(ketQua);
 
         if (ketQua == null || ketQua.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Không tìm thấy chuyến tàu nào phù hợp.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
@@ -958,10 +961,6 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             JTextField sdtField = inputFieldsMap.get(maCho + "_sdt");
             JLabel sdtErrorLabel = errorLabelsMap.get(maCho + "_sdt");
 
-            // --- Kiểm tra từng trường bằng hàm chung ---
-            // Sử dụng toán tử & (bitwise AND) thay vì && để đảm bảo TẤT CẢ các hàm validateField đều được chạy
-            // (để hiển thị lỗi cho tất cả các trường sai, không chỉ trường đầu tiên)
-
             boolean v1 = true, v2 = true, v3 = true, v4 = true;
 
             if (hoTenField != null) {
@@ -1261,6 +1260,11 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
                 if (value.isEmpty()) {
                     isValid = false;
                     errorMsg = "Họ tên không để trống.";
+                }
+                // Regex:
+                else if (!value.matches("^[\\p{L}\\s]+$")) {
+                    isValid = false;
+                    errorMsg = "Không chứa số hay ký tự đặc biệt.";
                 }
                 break;
             case "ngaySinh":
@@ -1913,10 +1917,19 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 
         targetField.setText(initialValue);
         targetField.setHorizontalAlignment(JTextField.CENTER);
-
         targetField.setPreferredSize(new Dimension(60, 30));
         targetField.setMaximumSize(new Dimension(60, 30));
-        targetField.setEditable(false);
+
+        // Cho phép sửa
+        targetField.setEditable(true);
+        // Thêm sự kiện khi mất focus để kiểm tra giá trị hợp lệ
+        targetField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                kiemTraHopLeSoKhach();
+            }
+        });
+        targetField.addActionListener(e -> kiemTraHopLeSoKhach());
 
         JButton btnPlus = new JButton("+");
         btnPlus.setPreferredSize(new Dimension(30, 30));
@@ -1938,9 +1951,33 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
     private void changeQuantity(JTextField field, int delta) {
         int currentValue = parseTextFieldToInt(field);
         int newValue = currentValue + delta;
-        if (newValue < 0) newValue = 0;
+        if (newValue <= 0) {
+            JOptionPane.showMessageDialog(this, "Số lượng khách phải lớn hơn 0", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return; // Không cho phép giảm xuống 0 hoặc âm
+        }
+
         field.setText(String.valueOf(newValue));
         capNhatSoLuongYeuCau();
+        capNhatDanhSachGheDaChonUI();
+
+    }
+
+    private void kiemTraHopLeSoKhach() {
+        String text = txtTongSoKhach.getText().trim();
+        try {
+            int value = Integer.parseInt(text);
+            if (value <= 0) {
+                JOptionPane.showMessageDialog(this, "Số lượng khách phải lớn hơn 0", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+                txtTongSoKhach.setText("1"); // Reset về giá trị mặc định an toàn
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số nguyên hợp lệ", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            txtTongSoKhach.setText("1");
+        }
+
+        // Sau khi kiểm tra xong, cập nhật lại trạng thái giao diện liên quan
+        capNhatSoLuongYeuCau();
+        capNhatDanhSachGheDaChonUI();
     }
 
     private int parseTextFieldToInt(JTextField field) {

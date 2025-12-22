@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+
 /**
  * Lớp này tạo giao diện Popup để Tạo/Sửa Khuyến Mãi.
  * Tích hợp DAO để xử lý nghiệp vụ.
@@ -40,15 +41,12 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
     private JDateChooser dateChooserBatDau;
     private JDateChooser dateChooserKetThuc;
 
-    // Loại Giảm Giá (PHAN_TRAM_GIA/CO_DINH) được xác định từ spinnerPhanTram/spinnerTienGiam
-    private JSpinner spinnerPhanTram; // Lưu giá trị 0.0 -> 1.0 (0% -> 100%)
-    private JSpinner spinnerTienGiam; // Lưu giá trị tiền cố định
+    private JSpinner spinnerPhanTram;
+    private JSpinner spinnerTienGiam;
 
-    // Khu vực điều kiện (DKApDung: MIN_GIA/MIN_SL/NONE)
     private JComboBox<String> cbDieuKien;
-    private JTextField txtGiaTriDK; // Dùng để nhập Giá trị cho MIN_GIA hoặc MIN_SL
+    private JTextField txtGiaTriDK;
 
-    private JTextArea txtAreaMoTa; // Giữ nguyên để người dùng nhập mô tả chi tiết, nhưng KHÔNG LƯU vào CSDL
     private JButton btnLuu, btnHuy;
 
     // Tham chiếu DAO và Panel
@@ -110,14 +108,14 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
 
     private void addListenerToSpinners() {
         spinnerPhanTram.addChangeListener(e -> {
-            if ((Double) spinnerPhanTram.getValue() > 0.0 && (Integer) spinnerTienGiam.getValue() > 0) {
+            if ((Integer) spinnerPhanTram.getValue() > 0.0 && (Integer) spinnerTienGiam.getValue() > 0) {
                 spinnerTienGiam.setValue(0);
             }
         });
 
         spinnerTienGiam.addChangeListener(e -> {
-            if ((Integer) spinnerTienGiam.getValue() > 0 && (Double) spinnerPhanTram.getValue() > 0.0) {
-                spinnerPhanTram.setValue(0.0);
+            if ((Integer) spinnerTienGiam.getValue() > 0 && (Integer) spinnerPhanTram.getValue() > 0.0) {
+                spinnerPhanTram.setValue(0);
             }
         });
     }
@@ -192,9 +190,7 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
         gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 4; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.BOTH; gbc.insets = new Insets(5, 5, 5, 5);
         fieldsPanel.add(new JLabel("Mô tả:"), gbc);
         gbc.gridx = 0; gbc.gridy = 7; gbc.gridwidth = 4; gbc.gridheight = 2;
-        txtAreaMoTa = new JTextArea(5, 20);
-        txtAreaMoTa.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        fieldsPanel.add(new JScrollPane(txtAreaMoTa), gbc);
+
 
 
         panel.add(fieldsPanel, BorderLayout.CENTER);
@@ -237,11 +233,11 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
         panel.setOpaque(false);
 
-        btnLuu = new JButton(currentMaKM == null ? "✅ Lưu Khuyến Mãi" : "💾 Cập Nhật");
+        btnLuu = new JButton(currentMaKM == null ? "Lưu Khuyến Mãi" : "Cập Nhật");
         btnLuu.setFont(FONT_BOLD_14);
         btnLuu.addActionListener(this);
 
-        btnHuy = new JButton("❌ Hủy");
+        btnHuy = new JButton("Hủy");
         btnHuy.setFont(FONT_BOLD_14);
         btnHuy.addActionListener(this);
 
@@ -266,8 +262,8 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
         txtTenKM.setText(km.getTenKM());
 
         // Ngày
-        dateChooserBatDau.setDate(Date.from(km.getNgayBD().atZone(ZoneId.systemDefault()).toInstant()));
-        dateChooserKetThuc.setDate(Date.from(km.getNgayKT().atZone(ZoneId.systemDefault()).toInstant()));
+        dateChooserBatDau.setDate(Date.from(km.getNgayBatDau().atZone(ZoneId.systemDefault()).toInstant()));
+        dateChooserKetThuc.setDate(Date.from(km.getNgayKetThuc().atZone(ZoneId.systemDefault()).toInstant()));
 
         // Loại giảm giá
         double giamGia = km.getGiaTriGiam().doubleValue();
@@ -294,11 +290,15 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
             txtGiaTriDK.setEnabled(false);
         }
 
-        txtAreaMoTa.setText(km.getTenKM()); // (Giả định: Dùng TenKM làm mô tả tạm thời nếu không có cột mô tả riêng)
     }
 
     private void lamMoiForm() {
-        txtMaKM.setText(khuyenMaiDAO.khoiTaoMaKMMoi()); // Cần tạo hàm generateNewMaKM() trong DAO
+
+        // Giả sử: KM + tháng(12) + năm(25) + 001 -> KM1225001
+        txtMaKM.setText("(Mã sẽ tự sinh khi lưu)");
+        txtMaKM.setForeground(Color.GRAY); // Để màu xám cho đẹp
+
+
         txtTenKM.setText("");
         dateChooserBatDau.setDate(null);
         dateChooserKetThuc.setDate(null);
@@ -307,7 +307,6 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
         cbDieuKien.setSelectedIndex(0);
         txtGiaTriDK.setText("");
         txtGiaTriDK.setEnabled(false);
-        txtAreaMoTa.setText("");
     }
 
     // Tạo KhuyenMai Entity từ dữ liệu Form (Sau khi đã Validate)
@@ -366,8 +365,8 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
         km.setGiaTriGiam(giaTriGiam);
         km.setDkApDung(dkApDung);
         km.setGiaTriDK(giaTriDK);
-        km.setNgayBD(ngayBD);
-        km.setNgayKT(ngayKT);
+        km.setNgayBatDau(ngayBD);
+        km.setNgayKetThuc(ngayKT);
         km.setTrangThai(trangThai);
         // Lưu ý: Trường mô tả (txtAreaMoTa) hiện không có cột tương ứng trong CSDL
 
@@ -388,6 +387,11 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
             JOptionPane.showMessageDialog(this, "Tên Khuyến Mãi không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             txtTenKM.requestFocus();
             return false;
+        }//=> 5 kí tự trở lên, không chứa ký tự đặc biệt
+        if (tenKM.length() < 5 || !tenKM.matches("^[a-zA-Z0-9\\s]+$")) {
+            JOptionPane.showMessageDialog(this, "Tên Khuyến Mãi phải có ít nhất 5 ký tự và không chứa ký tự đặc biệt.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            txtTenKM.requestFocus();
+            return false;
         }
         if (ngayBD == null || ngayKT == null) {
             JOptionPane.showMessageDialog(this, "Ngày Bắt Đầu và Ngày Kết Thúc không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -395,6 +399,12 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
         }
         if (ngayKT.before(ngayBD)) {
             JOptionPane.showMessageDialog(this, "Ngày Kết Thúc phải sau hoặc bằng Ngày Bắt Đầu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        //không được trước ngày hiện tại hoặc bằng ngày hiện tại
+        Date today = new Date();
+        if (ngayBD.before(today) || DATE_FORMAT_SQL.format(ngayBD).equals(DATE_FORMAT_SQL.format(today))) {
+            JOptionPane.showMessageDialog(this, "Ngày Bắt Đầu phải sau ngày hiện tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         if (phanTram > 0 && tienGiam > 0) {
@@ -463,14 +473,36 @@ public class PopupTaoKhuyenMai extends JDialog implements ActionListener {
     public void handleThemKhuyenMai() {
         if (!validateAndGetFormData()) return;
 
-        KhuyenMai newKm = createKhuyenMaiFromForm();
+        try {
+            // 2. Lấy dữ liệu từ Form vào đối tượng tạm
+            KhuyenMai newKm = createKhuyenMaiFromForm();
 
-        if (khuyenMaiDAO.themKhuyenMai(newKm)) {
-            JOptionPane.showMessageDialog(this, "Tạo Khuyến Mãi [" + newKm.getMaKM() + "] thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            parentPanel.loadDataToTable();
-            dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Tạo Khuyến Mãi thất bại. Vui lòng kiểm tra lại Mã KM hoặc kết nối CSDL.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            // 3. Lấy ngày từ JDateChooser (trả về java.util.Date)
+            java.util.Date ngayChon = dateChooserBatDau.getDate();
+
+            // SỬA LỖI TẠI ĐÂY: Chuyển đổi thông qua miliseconds
+            java.sql.Date sqlDate = new java.sql.Date(ngayChon.getTime());
+
+            // Gọi hàm sinh mã với sqlDate đã chuyển đổi
+            String maKMChinhThuc = khuyenMaiDAO.khoiTaoMaKMMoiTheoThang(sqlDate);
+
+            // 4. Gán mã vừa tạo vào đối tượng trước khi lưu
+            newKm.setMaKM(maKMChinhThuc);
+
+            // 5. Thực hiện lưu vào CSDL
+            if (khuyenMaiDAO.themKhuyenMai(newKm)) {
+                JOptionPane.showMessageDialog(this,
+                        "Tạo Khuyến Mãi thành công!\nMã chương trình là: " + maKMChinhThuc,
+                        "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+
+                parentPanel.loadDataToTable(); // Load lại bảng ở màn hình chính
+                dispose(); // Đóng popup
+            } else {
+                JOptionPane.showMessageDialog(this, "Lỗi: Không thể lưu vào hệ thống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Có lỗi xảy ra: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
