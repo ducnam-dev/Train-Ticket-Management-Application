@@ -10,18 +10,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9195ed27-83c9-451b-9d20-ed626046b0e3" name="Changes" comment="done">
+      <change beforePath="$PROJECT_DIR$/.idea/artifacts/Train_Ticket_Management_Application2_jar.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/artifacts/Train_Ticket_Management_Application2_jar.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" beforeDir="false" afterPath="$PROJECT_DIR$/classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/TuyenDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/TuyenDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/entity/Tuyen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity/Tuyen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/Gia/ManHinhQuanLyDonGiaTuyen.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTab/ManHinhQuanLyDonGiaTuyen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/Gia/ManHinhQuanLyLoaiToa.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTab/ManHinhQuanLyLoaiToa.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/Gia/ManHinhQuanLyLoaiVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTab/ManHinhQuanLyLoaiVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyChuyenTau.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyChuyenTau.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyGiaVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhQuanLyGiaVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhTrangChuNVBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhTrangChuNVBanVe.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Panel/ManHinhXacNhanBanVe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Panel/ManHinhXacNhanBanVe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/images/sơ đồ sơn.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/to do list. danh sach cac phan viec can hoan thien" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Ảnh test chương trình/QR vé tàu.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Ảnh test chương trình/ghi chú làm thống kế.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Ảnh test chương trình/ảnh nếu mua vé thành công.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Ảnh test chương trình/ảnh qr thanh toán khi mua vé tàu.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Ảnh test chương trình/ảnh vé tàu.jpg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -268,7 +266,7 @@
       <workItem from="1765795510159" duration="10382000" />
       <workItem from="1765807783944" duration="249000" />
       <workItem from="1766386789203" duration="3651000" />
-      <workItem from="1766408226352" duration="13596000" />
+      <workItem from="1766408226352" duration="14906000" />
     </task>
     <task id="LOCAL-00001" summary="Hoàn thiện tra cứu hóa đơn">
       <option name="closed" value="true" />
@@ -406,7 +404,23 @@
       <option name="project" value="LOCAL" />
       <updated>1766418444512</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="done">
+      <option name="closed" value="true" />
+      <created>1766425660022</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1766425660022</updated>
+    </task>
+    <task id="LOCAL-00019" summary="done">
+      <option name="closed" value="true" />
+      <created>1766425915648</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1766425915648</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
