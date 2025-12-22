@@ -505,6 +505,9 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         Ga gaDiSelected = (Ga) cbGaDi.getSelectedItem();
         Ga gaDenSelected = (Ga) cbGaDen.getSelectedItem();
 
+        System.out.println(gaDiSelected.getMaGa());
+        System.out.println(gaDenSelected.getMaGa());
+
         String maGaDi =  gaDiSelected.getMaGa();
         String maGaDen = gaDenSelected.getMaGa();
 
@@ -533,6 +536,7 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         ChuyenTauDao dao = new ChuyenTauDao();
         System.out.println("Tìm chuyến tàu từ " + maGaDi + " đến " + maGaDen + " vào ngày " + ngayDiSQL);
         ketQua = dao.timChuyenTauTheoGaVaNgayDi(maGaDi, maGaDen, ngayDiSQL);
+        System.out.println(ketQua);
 
         if (ketQua == null || ketQua.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Không tìm thấy chuyến tàu nào phù hợp.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
