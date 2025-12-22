@@ -30,7 +30,7 @@ public class XuLyTaiKhoan {
             return null;
         }
 
-        if (taiKhoan.getTrangThai() != null && taiKhoan.getTrangThai().equalsIgnoreCase("Hoạt động")) {
+        if (taiKhoan.getTrangThai() != null && taiKhoan.getTrangThai().equalsIgnoreCase("Đang hoạt động")) {
             System.out.println("Đăng nhập thành công cho nhân viên: " + taiKhoan.getMaNV());
             return taiKhoan;
         } else {

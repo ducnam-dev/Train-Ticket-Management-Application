@@ -185,10 +185,6 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         navContentPanel.add(btnQLKhuyenMai);
         navContentPanel.add(taoDuongKe());
 
-        btnThongKe = createNavItem("Thống kê Báo cáo", "/images/iconMenu/thongke.png", "thongKe");
-        navContentPanel.add(btnThongKe);
-        navContentPanel.add(taoDuongKe());
-
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));

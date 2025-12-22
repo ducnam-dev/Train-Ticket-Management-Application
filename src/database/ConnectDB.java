@@ -25,7 +25,7 @@ public class ConnectDB {
         if(!isConnectionValid) {
             String url = "jdbc:sqlserver://localhost:1433;databaseName=QuanLyVeTau;trustServerCertificate=true";
             String user = "sa";
-            String password = "Sapassword123@";
+            String password = "sapassword";
             try {
                 con = DriverManager.getConnection(url, user, password);
             } catch (SQLException e) {
