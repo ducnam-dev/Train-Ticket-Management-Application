@@ -91,6 +91,7 @@ public class GaDao {
 
                 while (rs.next()) {
                     Ga ga = new Ga(rs.getString("MaGa"), rs.getString("TenGa"), rs.getString("DiaChi"));
+                    System.out.println(rs.getString("MaGa"));
                     danhSachGa.add(ga);
                 }
             }
@@ -98,6 +99,7 @@ public class GaDao {
             System.err.println("Lỗi khi tải danh sách Ga: " + e.getMessage());
             e.printStackTrace();
         }
+        System.out.println(danhSachGa);
         return danhSachGa;
     }
     //---

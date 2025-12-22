@@ -16,7 +16,7 @@ public class ThongTinVeDTODAO {
                     "       G1.TenGa AS TenGaDi, CT.GaDi AS MaGaDi, " +
                     "       G2.TenGa AS TenGaDen, CT.GaDen AS MaGaDen, " +
                     "       NgayKhoiHanh, GioKhoiHanh, NgayDenDuKien, GioDenDuKien, " +
-                    "       SoHieuTau, T.MaToa, LoaiToa, SoCho, Khoang, Tang, GiaVe, V.TrangThai " +
+                    "       SoHieuTau, T.MaToa, LT.TenLoaiToa, SoCho, Khoang, Tang, GiaVe, V.TrangThai " +
                     "FROM KhachHang KH " +
                     "JOIN Ve V ON KH.MaKhachHang = V.MaKhachHang " +
                     "JOIN ChoDat CD ON V.MaChoDat = CD.MaCho " +
@@ -25,7 +25,8 @@ public class ThongTinVeDTODAO {
                     "JOIN Tau TR ON TR.SoHieu = T.SoHieuTau " +
                     "JOIN LoaiVe L ON V.MaLoaiVe = L.MaLoaiVe " +
                     "JOIN Ga G1 ON CT.GaDi = G1.MaGa " +
-                    "JOIN Ga G2 ON CT.GaDen = G2.MaGa ";
+                    "JOIN Ga G2 ON CT.GaDen = G2.MaGa " +
+                    "JOIN LoaiToa LT ON T.MaLoaiToa = LT.MaLoaiToa ";
 
     public ThongTinVeDTO getVeByMaVe(String maVe) {
         ThongTinVeDTO ve = null;
@@ -70,7 +71,7 @@ public class ThongTinVeDTODAO {
                         "    CT.NgayKhoiHanh, CT.GioKhoiHanh, " +
                         "    CT.NgayDenDuKien, CT.GioDenDuKien, " +
                         "    TR.SoHieu AS SoHieuTau, " +
-                        "    T.MaToa, T.LoaiToa, " +
+                        "    T.MaToa, LT.TenLoaiToa, " +
                         "    CD.SoCho, CD.Khoang, CD.Tang, " +
                         "    V.GiaVe, V.TrangThai " +
                         "FROM HoaDon HD " +
@@ -83,6 +84,7 @@ public class ThongTinVeDTODAO {
                         "JOIN ChoDat CD           ON CD.MaCho = V.MaChoDat " +
                         "JOIN Toa T               ON T.MaToa = CD.MaToa " +
                         "JOIN Tau TR              ON TR.SoHieu = T.SoHieuTau " +
+                        "JOIN LoaiToa LT ON T.MaLoaiToa = LT.MaLoaiToa " +
                         "JOIN Ga G1 ON CT.GaDi = G1.MaGa " +
                         "JOIN Ga G2 ON CT.GaDen = G2.MaGa " +
                         "WHERE HD.MaHD = ?";
@@ -148,7 +150,7 @@ public class ThongTinVeDTODAO {
                 rs.getTime("GioDenDuKien").toLocalTime(),
                 rs.getString("SoHieuTau"),
                 cleanMaToa,
-                rs.getString("LoaiToa"),
+                rs.getString("TenLoaiToa"),
                 rs.getString("SoCho"),
                 rs.getString("Khoang"),
                 rs.getString("Tang"),

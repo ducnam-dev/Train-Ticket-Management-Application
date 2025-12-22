@@ -30,7 +30,7 @@ public class TuyenDao {
 
     public List<Tuyen> layTatCaTuyen() throws SQLException {
         List<Tuyen> danhSach = new ArrayList<>();
-        String sql = "SELECT MaTuyen, TenTuyen, GaDau, GaCuoi FROM Tuyen";
+        String sql = "SELECT MaTuyen, TenTuyen, GaDau, GaCuoi, DonGiaKM FROM Tuyen";
 
         // Mở kết nối NGAY TRONG try-with-resources
         try (Connection con = ConnectDB.getInstance().getConnection();
@@ -42,7 +42,8 @@ public class TuyenDao {
                         rs.getString("MaTuyen"),
                         rs.getString("TenTuyen"),
                         rs.getString("GaDau"),
-                        rs.getString("GaCuoi")
+                        rs.getString("GaCuoi"),
+                        rs.getInt("DonGiaKM")
                 );
                 danhSach.add(t);
             }
@@ -97,19 +98,20 @@ public class TuyenDao {
 
 
     //todo: lấy giá và sửa giá theo mã tuyến
-    public double layGiaTheoMaTuyen(String maTuyen) throws SQLException {
+    public int layGiaDonGia(String maTuyen) throws SQLException {
         String sql = "SELECT DonGiaKM FROM Tuyen WHERE MaTuyen = ?";
         try (Connection con = ConnectDB.getConnection();
                 PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, maTuyen);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getDouble("Gia");
+                    return rs.getInt("DonGiaKM");
                 }
             }
         }
         return -1; // Trả về -1 nếu không tìm thấy
     }
+
     public boolean suaGiaTheoMaTuyen(String maTuyen, double giaMoi) throws SQLException {
         String sql = "UPDATE Tuyen SET DonGiaKM = ? WHERE MaTuyen = ?";
         try (

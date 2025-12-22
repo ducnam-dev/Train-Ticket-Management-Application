@@ -17,8 +17,8 @@ public class KhuyenMai{
     private String dkApDung; // MIN_GIA, MIN_SL, NONE
     private BigDecimal giaTriDK; // Giá trị điều kiện (e.g., 1000000.00 hoặc 5.00)
 
-    private LocalDateTime ngayBD; // Ngay Bat Dau
-    private LocalDateTime ngayKT; // Ngay Ket Thuc
+    private LocalDateTime ngayBatDau; // Ngay Bat Dau
+    private LocalDateTime ngayKetThuc; // Ngay Ket Thuc
     private String trangThai; // HOAT_DONG, HET_HAN, KHONG_HOAT_DONG
 
     // 2. Constructor Rỗng
@@ -34,8 +34,8 @@ public class KhuyenMai{
         this.giaTriGiam = giaTriGiam;
         this.dkApDung = dkApDung;
         this.giaTriDK = giaTriDK;
-        this.ngayBD = ngayBD;
-        this.ngayKT = ngayKT;
+        this.ngayBatDau = ngayBD;
+        this.ngayKetThuc = ngayKT;
         this.trangThai = trangThai;
     }
 
@@ -45,7 +45,7 @@ public class KhuyenMai{
         return maKM;
     }
 
-    public void setMaKM(String maKM) {
+    public void setMaKM(String ma) {
         this.maKM = maKM;
     }
 
@@ -89,20 +89,20 @@ public class KhuyenMai{
         this.giaTriDK = giaTriDK;
     }
 
-    public LocalDateTime getNgayBD() {
-        return ngayBD;
+    public LocalDateTime getNgayBatDau() {
+        return ngayBatDau;
     }
 
-    public void setNgayBD(LocalDateTime ngayBD) {
-        this.ngayBD = ngayBD;
+    public void setNgayBatDau(LocalDateTime ngayBatDau) {
+        this.ngayBatDau  = ngayBatDau;
     }
 
-    public LocalDateTime getNgayKT() {
-        return ngayKT;
+    public LocalDateTime getNgayKetThuc() {
+        return ngayKetThuc;
     }
 
-    public void setNgayKT(LocalDateTime ngayKT) {
-        this.ngayKT = ngayKT;
+    public void setNgayKetThuc(LocalDateTime ngayKetThuc) {
+        this.ngayKetThuc  = ngayKetThuc;
     }
 
     public String getTrangThai() {

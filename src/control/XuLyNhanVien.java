@@ -10,7 +10,11 @@ public class XuLyNhanVien {
         // Gọi DAO để truy vấn CSDL
         return NhanVienDao.getNhanVienByMaNV(maNV);
     }
+    public static String layEmailTheoMa(String maNV) {
+        return NhanVienDao.layEmailTheoMa(maNV);
+    }
 }
+
 
 // --- Ví dụ tại màn hình đăng nhập ---
 // TaiKhoan taiKhoan = XuLyTaiKhoan.authenticate(tenDangNhap, matKhau);

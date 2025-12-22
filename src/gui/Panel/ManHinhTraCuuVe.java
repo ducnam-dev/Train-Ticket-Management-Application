@@ -352,7 +352,7 @@ public class ManHinhTraCuuVe extends JPanel implements ActionListener {
             ChoDat cd = ve.getChoDatChiTiet();
 
             String tenKhach = (kh != null) ? kh.getHoTen() : "N/A";
-            String hanhTrinh = (ct != null && ct.getGaDi() != null && ct.getGaDen() != null)
+            String hanhTrinh = (ct != null && ct.gaDi.tenGa != null && ct.gaDi.tenGa  != null)
                     ? ct.getGaDi().getTenGa() + " - " + ct.getGaDen().getTenGa() : "N/A";
             String loaiToa = (cd != null) ? cd.getMaToa() : "N/A";
             String ghe = (cd != null) ? cd.getSoCho() : "N/A";

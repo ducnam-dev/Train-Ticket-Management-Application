@@ -155,11 +155,7 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
 
         // --- MỤC: CHỨC NĂNG BÁN VÉ/CA ---
 
-        btnMoCa = createNavItem("Mở ca", "/images/iconMenu/moca.png", "moCa");
-        navContentPanel.add(btnMoCa);
-        btnKetCa = createNavItem("Kết ca", "/images/iconMenu/ketca.png", "ketCa");
-        navContentPanel.add(btnKetCa);
-        navContentPanel.add(taoDuongKe());
+
 
         btnBanVe = createNavItem("Bán vé mới", "/images/iconMenu/banve.png", "banVeMoi");
         navContentPanel.add(btnBanVe);

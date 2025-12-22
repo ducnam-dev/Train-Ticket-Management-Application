@@ -428,76 +428,88 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
     // Trong ManHinhCauHinhTuyen.java
 
     private void taoLichTrinhHangLoat() {
-        // 1. Kiểm tra đầu vào
+        // 1. Kiểm tra đầu vào (Validation)
         String maTuyen = txtMaTuyen.getText();
         if (txtMaTuyen.isEditable() || maTuyen.isEmpty()) {
-            hienThiThongBaoLoi("Vui lòng chọn một Tuyến từ bảng bên trái.");
+            hienThiThongBaoLoi("Vui lòng chọn một Tuyến từ bảng bên trái trước khi tạo lịch trình.");
             return;
         }
 
-        java.util.Date startDate = dateChooserBatDau.getDate();
-        java.util.Date endDate = dateChooserKetThuc.getDate();
+        java.util.Date utilStartDate = dateChooserBatDau.getDate();
+        java.util.Date utilEndDate = dateChooserKetThuc.getDate();
         String gioBatDauStr = txtGioKhoiHanhChinh.getText().trim();
 
-        if (startDate == null || endDate == null) {
-            hienThiThongBaoLoi("Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc.");
-            return;
-        }
-        if (startDate.after(endDate)) {
-            hienThiThongBaoLoi("Ngày bắt đầu phải trước ngày kết thúc.");
+        if (utilStartDate == null || utilEndDate == null) {
+            hienThiThongBaoLoi("Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc.");
             return;
         }
 
+        // Chuyển đổi sang LocalDate để xử lý logic chính xác
+        LocalDate startDay = utilStartDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate endDay = utilEndDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        // SỬA ĐỔI: Chỉ báo lỗi nếu Ngày bắt đầu thực sự LỚN HƠN ngày kết thúc
+        if (startDay.isAfter(endDay)) {
+            hienThiThongBaoLoi("Ngày bắt đầu không được sau ngày kết thúc.");
+            return;
+        }
+
+        // Kiểm tra định dạng giờ
         LocalTime gioBatDauCoDinh;
         try {
             if (gioBatDauStr.length() == 5) gioBatDauStr += ":00";
             gioBatDauCoDinh = LocalTime.parse(gioBatDauStr);
         } catch (Exception e) {
-            hienThiThongBaoLoi("Giờ khởi hành không hợp lệ. Định dạng chuẩn: HH:mm (VD: 08:00)");
+            hienThiThongBaoLoi("Giờ khởi hành không hợp lệ (VD chuẩn: 08:00).");
             return;
         }
 
-        // 2. Thực hiện tạo lịch trình
+        // 2. Thực hiện logic tạo lịch trình
         try {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
             Tuyen tuyenObj = tuyenDao.layTuyenTheoMa(maTuyen);
             List<GaTrongTuyen> danhSachGa = gaTrongTuyenDao.layGaTrongTuyenTheoMa(maTuyen);
             Tau tauObj = (Tau) cbChonTau.getSelectedItem();
 
-            StringBuilder ngayBiTrung = new StringBuilder(); // Lưu danh sách ngày đã có lịch
-            int soLuongChuyenTaoMoi = 0; // Đếm số chuyến tàu đã tạo mới
+            if (tauObj == null) {
+                hienThiThongBaoLoi("Vui lòng chọn một tàu để gán vào lịch trình.");
+                return;
+            }
 
-            LocalDate currentDay = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalDate endDay = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            StringBuilder ngayBiTrung = new StringBuilder();
+            int soLuongChuyenTaoMoi = 0;
+            LocalDate currentDay = startDay;
 
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
+            // Vòng lặp chạy từ ngày bắt đầu đến hết ngày kết thúc (bao gồm cả ngày bằng nhau)
             while (!currentDay.isAfter(endDay)) {
-                // Bước 1: Tạo chuỗi ngày định dạng ddMMyy (Ví dụ: 201225)
-                String ngayDauTienStr = currentDay.format(DateTimeFormatter.ofPattern("ddMMyy"));
+                String ngayDinhDangMa = currentDay.format(DateTimeFormatter.ofPattern("ddMMyy"));
 
-                // BƯỚC KIỂM TRA MỚI (CHÍNH XÁC):
-                // Kiểm tra xem mã SE1_201225_... đã tồn tại trong CSDL chưa
-                if (chuyenTauDao.kiemTraDaCoLichTrinhNgay(tuyenObj.getMaTuyen(), ngayDauTienStr)) {
+                // Kiểm tra xem ngày này đã được tạo lịch trình "gốc" chưa
+                if (chuyenTauDao.kiemTraDaCoLichTrinhNgay(tuyenObj.getMaTuyen(), ngayDinhDangMa)) {
                     ngayBiTrung.append(currentDay.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append(", ");
                 } else {
-                    // Nếu chưa có "Gốc" tàu ngày này, tiến hành tạo toàn bộ các chặng
+                    // Gọi hàm con để tạo tất cả các chặng trong ngày này
                     int count = taoLichTrinhNgay(tuyenObj, tauObj, currentDay, gioBatDauCoDinh, danhSachGa);
                     soLuongChuyenTaoMoi += count;
                 }
+
                 currentDay = currentDay.plusDays(1);
-
-
-            // Thông báo kết quả tổng hợp
-            String thongBao = "Hoàn tất!\nĐã tạo mới " + soLuongChuyenTaoMoi + " bản ghi chuyến tàu.";
-            if (ngayBiTrung.length() > 0) {
-                thongBao += "\n\nLưu ý: Hệ thống đã bỏ qua các ngày sau vì đã có lịch trình trước đó: \n" + ngayBiTrung.toString();
             }
 
-            JOptionPane.showMessageDialog(this, thongBao, "Kết quả", JOptionPane.INFORMATION_MESSAGE);
+            this.setCursor(Cursor.getDefaultCursor());
 
-        }
-        }
-        catch (SQLException e) {
+            // 3. Thông báo kết quả
+            String thongBao = String.format("Hoàn tất! Đã tạo mới thành công %d bản ghi chuyến tàu.", soLuongChuyenTaoMoi);
+            if (ngayBiTrung.length() > 0) {
+                // Xóa dấu phẩy cuối cùng
+                String dsNgay = ngayBiTrung.substring(0, ngayBiTrung.length() - 2);
+                thongBao += "\n\nLưu ý: Hệ thống đã bỏ qua các ngày sau vì đã có dữ liệu: \n" + dsNgay;
+            }
+
+            JOptionPane.showMessageDialog(this, thongBao, "Kết quả thực hiện", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (SQLException e) {
             this.setCursor(Cursor.getDefaultCursor());
             hienThiThongBaoLoi("Lỗi CSDL: " + e.getMessage());
             e.printStackTrace();
@@ -584,7 +596,7 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
                         thoiDiemDen.toLocalDate(),
                         thoiDiemDen.toLocalTime(),
                         nv,                 // Nhân viên tạo
-                        TrangThaiChuyenTau.DANG_CHO // Dùng Enum đúng
+                        TrangThaiChuyenTau.DANG_MO_BAN_VE // Dùng Enum đúng
                 );
 
                 try {

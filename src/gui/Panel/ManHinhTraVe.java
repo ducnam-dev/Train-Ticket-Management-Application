@@ -1,9 +1,12 @@
 package gui.Panel;
 
 import javax.swing.*;
+
+
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import dao.VeDAO;
@@ -29,7 +32,10 @@ public class ManHinhTraVe extends JPanel {
     private static final Font FONT_BOLD_14 = new Font("Segoe UI", Font.BOLD, 14);
     private static final Font FONT_PLAIN_14 = new Font("Segoe UI", Font.PLAIN, 14);
     private static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 18);
-
+    private JTable tblKetQua;
+    private javax.swing.table.DefaultTableModel modelKetQua;
+    private JScrollPane scrollPaneKetQua;
+    private java.util.List<Ve> dsVeVuaTim; // Lưu danh sách tạm thời
     // --- Components ---
     private JButton btnTimKiem, btnHuyBo, btnXacNhan;
     private JComboBox<String> cbTimKiemTheo;
@@ -97,11 +103,32 @@ public class ManHinhTraVe extends JPanel {
         panel.add(createSearchPanel());
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
 
+        // THÊM BẢNG HIỂN THỊ DANH SÁCH VÉ Ở ĐÂY
+        panel.add(createTablePanel());
+        panel.add(Box.createRigidArea(new Dimension(0, 15)));
+
         panel.add(createTicketInfoPanel());
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
 
         panel.add(createReasonAndButtonPanel());
-        panel.add(Box.createVerticalGlue());
+        return panel;
+    }
+
+    // Hàm tạo bảng mới
+    private JPanel createTablePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(createStyledBorder("Danh sách vé tìm thấy", PRIMARY_COLOR));
+        panel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 200));
+
+        String[] columns = {"Mã vé", "Tên khách hàng", "Tuyến đường", "Số ghế", "Giá vé"};
+        modelKetQua = new javax.swing.table.DefaultTableModel(columns, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+
+        tblKetQua = new JTable(modelKetQua);
+        scrollPaneKetQua = new JScrollPane(tblKetQua);
+        panel.add(scrollPaneKetQua, BorderLayout.CENTER);
 
         return panel;
     }
@@ -239,36 +266,56 @@ public class ManHinhTraVe extends JPanel {
         btnXacNhan.addActionListener(e -> xuLyHuyVe());
         btnHuyBo.addActionListener(e -> xoaTrangThongTin());
         // Đã xóa btnLichSuTraVe.addActionListener(e -> xuLyChuyenManHinhLichSu());
+        tblKetQua.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = tblKetQua.getSelectedRow();
+                if (row != -1 && dsVeVuaTim != null) {
+                    // Lấy đúng đối tượng Ve từ danh sách dựa trên dòng được chọn
+                    veHienTai = dsVeVuaTim.get(row);
+                    hienThiThongTinVe(veHienTai);
+                }
+            }
+        });
     }
 
-    private void xuLyTimKiemVe() {
-        if (veDAO == null) {
-            JOptionPane.showMessageDialog(this, "Lỗi: VeDAO chưa được khởi tạo. Vui lòng kiểm tra kết nối CSDL.", "Lỗi CSDL", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
 
+    private void xuLyTimKiemVe() {
         String searchBy = (String) cbTimKiemTheo.getSelectedItem();
         String searchText = txtMaVeHoacSDT.getText().trim();
 
         if (searchText.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập Mã vé hoặc Số điện thoại để tìm kiếm.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập thông tin!");
             return;
         }
 
         String maVe = "Mã vé".equals(searchBy) ? searchText : null;
         String sdt = "Số điện thoại".equals(searchBy) ? searchText : null;
 
-        veHienTai = veDAO.getChiTietVeChoTraVe(maVe, sdt);
+        // Gọi hàm trả về danh sách từ DAO
+        dsVeVuaTim = veDAO.timVeTheoKhachHang(null, sdt, null, maVe);
 
-        if (veHienTai != null) {
-            hienThiThongTinVe(veHienTai);
+        modelKetQua.setRowCount(0); // Xóa bảng cũ
+        xoaTrangThongTin();
+
+        if (dsVeVuaTim != null && !dsVeVuaTim.isEmpty()) {
+            for (Ve v : dsVeVuaTim) {
+                v.toString();
+                String tuyen = "---";
+                if(v.getChuyenTauChiTiet() != null) {
+                    tuyen = v.getChuyenTauChiTiet().gaDi.tenGa + " - " + v.getChuyenTauChiTiet().gaDen.tenGa;
+                }
+                modelKetQua.addRow(new Object[]{
+                        v.getMaVe(),
+                        v.getTenKhachHang(),
+                        tuyen,
+                        v.getChoDatChiTiet() != null ? v.getChoDatChiTiet().getSoCho() : "---",
+                        String.format("%,.0f", v.getGiaVe())
+                });
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin vé phù hợp.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-            xoaTrangThongTin();
+            JOptionPane.showMessageDialog(this, "Không tìm thấy vé!");
         }
     }
-
-
 
     // Trong lớp Form/UI của bạn
 
@@ -303,15 +350,47 @@ public class ManHinhTraVe extends JPanel {
         }
 
         // 4. GIÁ CẢ (Giữ nguyên)
-        lblGiaGocValue.setText(String.format("%,.0f VNĐ", ve.getGiaVe()));
-        double tienHoanTra = ve.getGiaVe() * 0.9;
+        double giaGoc = ve.getGiaVe();
+        double tienHoanTra = tinhTienHoanTraMoi(ve);
+
+        lblGiaGocValue.setText(String.format("%,.0f VNĐ", giaGoc));
         lblTienHoanTraValue.setText(String.format("%,.0f VNĐ", tienHoanTra));
+
+        // Đổi màu xanh để dễ phân biệt
+        lblTienHoanTraValue.setForeground(new Color(39, 174, 96));
 
         btnXacNhan.setEnabled(true);
         cbLyDoTraVe.setEnabled(true);
     }
 
 
+
+    private double tinhTienHoanTraMoi(Ve ve) {
+        if (ve == null || ve.getChuyenTauChiTiet() == null) return 0;
+
+        ChuyenTau ct = ve.getChuyenTauChiTiet();
+        LocalDateTime thoiDiemKhoiHanh = LocalDateTime.of(ct.getNgayKhoiHanh(), ct.getGioKhoiHanh());
+        LocalDateTime bayGio = LocalDateTime.now();
+
+        // Tính số giờ còn lại
+        long soGioConLai = java.time.Duration.between(bayGio, thoiDiemKhoiHanh).toHours();
+        double giaVe = ve.getGiaVe();
+
+        // SỬA LẠI LOGIC TẠI ĐÂY:
+        if (soGioConLai >= 24) {
+            // TRÊN 24 GIỜ: Nhận 80%
+            return giaVe * 0.8;
+        } else if (soGioConLai<0)
+            return 0;
+
+         else if (soGioConLai >= 4) {
+            // TỪ 4 ĐẾN DƯỚI 24 GIỜ: Nhận 90%
+            return giaVe * 0.9;
+        } else {
+            // DƯỚI 4 GIỜ (Bao gồm cả số âm - tàu đã chạy): Nhận 100%
+            return giaVe;
+        }
+    }
     private void xuLyHuyVe() {
         if (veHienTai == null) {
             JOptionPane.showMessageDialog(this, "Vui lòng tìm kiếm vé trước khi xác nhận trả vé.", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -324,14 +403,23 @@ public class ManHinhTraVe extends JPanel {
             return;
         }
 
+        // Lấy tiền hoàn trả từ label hoặc tính toán lại
+        String tienHoanStr = lblTienHoanTraValue.getText();
+
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Xác nhận hủy vé " + veHienTai.getMaVe() + " và hoàn trả " + lblTienHoanTraValue.getText() + "?",
+                "Xác nhận hủy vé " + veHienTai.getMaVe() + " và hoàn trả " + tienHoanStr + "?",
                 "Xác nhận Trả vé", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            // Giả sử getId() trả về Mã vé (String)
-            if (veDAO.huyVe(veHienTai.getMaVe())) { // SỬ DỤNG veHienTai.getId() (String)
+            if (veDAO.huyVe(veHienTai.getMaVe())) {
                 JOptionPane.showMessageDialog(this, "Trả vé thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+
+                // --- BẮT ĐẦU HIỂN THỊ POPUP KIỂU OVERLAY ---
+                String maHD = layMaHDTuMaVe(veHienTai.getMaVe());
+                if (maHD != null && !maHD.isEmpty()) {
+                    hienThiPopupGiongTraCuuHoaDon(maHD);
+                }
+
                 xoaTrangThongTin();
             } else {
                 JOptionPane.showMessageDialog(this, "Lỗi khi cập nhật trạng thái vé.", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -339,6 +427,55 @@ public class ManHinhTraVe extends JPanel {
         }
     }
 
+    /**
+     * Hàm hiển thị Popup có nền mờ (Overlay) giống hệt màn hình Tra Cứu Hóa Đơn
+     */
+    private void hienThiPopupGiongTraCuuHoaDon(String maHoaDon) {
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (topFrame == null) return;
+
+        // 1. Tạo panel chi tiết hóa đơn
+        gui.Popup.PopUpChiTietHoaDon chiTietPanel = new gui.Popup.PopUpChiTietHoaDon(maHoaDon);
+
+        // 2. Tạo lớp nền mờ (Overlay)
+        JPanel overlayPanel = new JPanel(new java.awt.GridBagLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(new Color(0, 0, 0, 150)); // Màu đen mờ 50%
+                g.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        overlayPanel.setOpaque(false);
+        overlayPanel.add(chiTietPanel); // Đưa popup vào giữa nền mờ
+
+        // 3. Sự kiện đóng popup khi nhấn nút "Đóng" bên trong PopUpChiTietHoaDon
+        // (Giả sử trong PopUpChiTietHoaDon bạn có nút btnDongChiTietHoaDon)
+        // Bạn cần chắc chắn class PopUpChiTietHoaDon có hàm để xử lý việc này hoặc tắt GlassPane
+
+        // Đặt overlay vào GlassPane của JFrame
+        topFrame.setGlassPane(overlayPanel);
+        overlayPanel.setVisible(true);
+
+        // Thêm MouseListener để tránh click xuyên qua lớp mờ
+        overlayPanel.addMouseListener(new java.awt.event.MouseAdapter() {});
+    }
+
+    /**
+     * Hàm bổ trợ lấy mã HD (giữ nguyên để không phải sửa file Ve)
+     */
+    private String layMaHDTuMaVe(String maVe) {
+        String maHD = "";
+        String sql = "SELECT MaHD FROM ChiTietHoaDon WHERE MaVe = ?";
+        try (java.sql.Connection con = database.ConnectDB.getConnection();
+             java.sql.PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, maVe);
+            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) maHD = rs.getString("MaHD");
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return maHD;
+    }
     private void xoaTrangThongTin() {
         lblTenKHValue.setText("---");
         lblSDTValue.setText("---");

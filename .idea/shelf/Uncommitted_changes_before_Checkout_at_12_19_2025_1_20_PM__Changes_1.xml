@@ -1,0 +1,19 @@
+<changelist name="Uncommitted_changes_before_Checkout_at_12_19_2025_1_20_PM_[Changes]1" date="1766125256444" recycled="true" deleted="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_12_19_2025_1_20_PM_[Changes]1/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Checkout at 12/19/2025 1:20 PM [Changes]" />
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard$1.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_12_19_2025_1_20_PM_[Changes]1/AdminFullDashboard$1.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Popup/TicketPanel.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/Popup/TicketPanel.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_12_19_2025_1_20_PM_[Changes]1/TicketPanel.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" />
+    <option name="AFTER_PATH" value="classes/production/Train-Ticket-Management-Application2/gui/MainFrame/AdminFullDashboard.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_12_19_2025_1_20_PM_[Changes]1/AdminFullDashboard.class" />
+  </binary>
+</changelist>
