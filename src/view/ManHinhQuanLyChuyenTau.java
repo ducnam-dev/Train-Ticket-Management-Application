@@ -152,6 +152,8 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
 
         JPanel pnlNut = new JPanel();
         btnThemTuyen = new JButton("Thêm");
+        btnThemTuyen.addActionListener(e -> logicThemTuyen());
+
         btnXoaTrangTuyen = new JButton("Mới");
         pnlNut.add(btnThemTuyen); pnlNut.add(btnXoaTrangTuyen);
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 4; panel.add(pnlNut, gbc);
@@ -174,6 +176,7 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
 
         JPanel pnlNutGa = new JPanel();
         btnThemGa = new JButton("Thêm Ga");
+        btnThemGa.addActionListener(e -> logicThemGa());
         btnLamMoiGa = new JButton("Làm mới");
         pnlNutGa.add(btnThemGa); pnlNutGa.add(btnLamMoiGa);
         panel.add(pnlNutGa, BorderLayout.SOUTH);
@@ -220,14 +223,16 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
     }
 
     private JPanel taoPanelTaoLichTrinh() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
         panel.setBackground(new Color(230, 240, 250));
         panel.setBorder(new TitledBorder("4. Tạo Lịch Trình Chuyến Tàu Hàng Loạt"));
 
         // ComboBox chọn Tuyến (Mới thêm vào theo yêu cầu)
+        panel.setPreferredSize(new Dimension(0, 100));
+
         panel.add(new JLabel("Chọn Tuyến:"));
         cbChonTuyenLichTrinh = new JComboBox<>();
-        cbChonTuyenLichTrinh.setPreferredSize(new Dimension(180, 25));
+        cbChonTuyenLichTrinh.setPreferredSize(new Dimension(200, 25));
         panel.add(cbChonTuyenLichTrinh);
 
         panel.add(new JLabel("Tàu:"));
@@ -236,18 +241,25 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
         panel.add(cbChonTau);
 
         panel.add(new JLabel("Giờ:"));
+
         txtGioKhoiHanhChinh = new JTextField("06:00", 5);
+        txtGioKhoiHanhChinh.setPreferredSize(new Dimension(60, 30));
         panel.add(txtGioKhoiHanhChinh);
 
         panel.add(new JLabel("Từ:"));
+
         dateChooserBatDau = new JDateChooser(new java.util.Date());
+        dateChooserBatDau.setPreferredSize(new Dimension(180, 30));
         panel.add(dateChooserBatDau);
 
         panel.add(new JLabel("Đến:"));
+
         dateChooserKetThuc = new JDateChooser(new java.util.Date());
+        dateChooserKetThuc.setPreferredSize(new Dimension(180, 30));
         panel.add(dateChooserKetThuc);
 
         btnTaoLichTrinh = new JButton("Tạo Lịch Trình");
+        btnTaoLichTrinh.setPreferredSize(new Dimension(150, 35));
         btnTaoLichTrinh.setBackground(new Color(0, 153, 76));
         btnTaoLichTrinh.setForeground(Color.WHITE);
         btnTaoLichTrinh.addActionListener(e -> taoLichTrinhHangLoat());
@@ -369,6 +381,82 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
         }
         return soLuongTauDuocTao;
     }
+    private void logicThemTuyen() {
+        String ma = txtMaTuyen.getText().trim();
+        String ten = txtTenTuyen.getText().trim();
+        Ga gaDau = (Ga) cbGaDau.getSelectedItem();
+        Ga gaCuoi = (Ga) cbGaCuoi.getSelectedItem();
+
+        if (ma.isEmpty() || ten.isEmpty() || gaDau == null || gaCuoi == null) {
+            hienThiThongBaoLoi("Vui lòng nhập đầy đủ thông tin tuyến!");
+            return;
+        }
+
+        if (gaDau.getMaGa().equals(gaCuoi.getMaGa())) {
+            hienThiThongBaoLoi("Ga đầu và ga cuối không được trùng nhau!");
+            return;
+        }
+
+        try {
+            Tuyen t = new Tuyen(ma, ten, gaDau.getMaGa(), gaCuoi.getMaGa());
+            if (tuyenDao.themTuyen(t)) {
+                JOptionPane.showMessageDialog(this, "Thêm tuyến thành công!");
+                taiDuLieuTuyen(); // Load lại bảng và các ComboBox
+                xoaTrangFormTuyen();
+            }
+        } catch (SQLException e) {
+            hienThiThongBaoLoi("Lỗi khi thêm tuyến: " + e.getMessage());
+        }
+    }
+    private void logicThemGa() {
+        String maTuyen = txtMaTuyen.getText().trim();
+        if (maTuyen.isEmpty()) {
+            hienThiThongBaoLoi("Vui lòng chọn một Tuyến từ bảng bên trái trước!");
+            return;
+        }
+
+        try {
+            Ga gaChon = (Ga) cbMaGa.getSelectedItem();
+            int thuTu = Integer.parseInt(txtThuTuGa.getText().trim());
+            int kc = Integer.parseInt(txtKhoangCach.getText().trim());
+            int tgDi = Integer.parseInt(txtThoiGianDi.getText().trim());
+            int tgDung = Integer.parseInt(txtThoiGianDung.getText().trim());
+
+            GaTrongTuyen gtt = new GaTrongTuyen();
+            gtt.setTuyen(new Tuyen(maTuyen));
+            gtt.setMaGa(gaChon.getMaGa());
+            gtt.setThuTuGa(thuTu);
+            gtt.setKhoangCachTichLuy(kc);
+            gtt.setThoiGianDiDenGaTiepTheo(tgDi);
+            gtt.setThoiGianDung(tgDung);
+
+            if (gaTrongTuyenDao.themGaTrongTuyen(gtt)) {
+                JOptionPane.showMessageDialog(this, "Thêm ga vào tuyến thành công!");
+                taiDuLieuGaTrongTuyen(maTuyen); // Refresh bảng ga
+                xoaTrangFormGa();
+            }
+        } catch (NumberFormatException e) {
+            hienThiThongBaoLoi("Thứ tự, khoảng cách và thời gian phải là số nguyên!");
+        } catch (SQLException e) {
+            hienThiThongBaoLoi("Lỗi: Ga này có thể đã tồn tại trong tuyến hoặc lỗi CSDL!");
+        }
+    }
+    private void xoaTrangFormTuyen() {
+        txtMaTuyen.setText("");
+        txtTenTuyen.setText("");
+        txtMaTuyen.setEditable(true);
+        if (cbGaDau.getItemCount() > 0) cbGaDau.setSelectedIndex(0);
+        if (cbGaCuoi.getItemCount() > 0) cbGaCuoi.setSelectedIndex(0);
+        tbTuyen.clearSelection();
+    }
+
+    private void xoaTrangFormGa() {
+        cbMaGa.setEnabled(true);
+        txtThuTuGa.setText("");
+        txtKhoangCach.setText("");
+        txtThoiGianDi.setText("");
+        txtThoiGianDung.setText("");
+    }
 
     private void taiDuLieuTuyen() {
         modelTuyen.setRowCount(0);
@@ -385,8 +473,7 @@ public class ManHinhQuanLyChuyenTau extends JPanel {
     }
 
     // --- Các hàm hỗ trợ khác (xóa trắng, load ga, load tàu...) giữ nguyên như code cũ của bạn ---
-    private void xoaTrangFormTuyen() { /* ... */ }
-    private void xoaTrangFormGa() { /* ... */ }
+
     private void hienThiChiTietTuyen() {
         int selectedRow = tbTuyen.getSelectedRow();
         if (selectedRow != -1) {

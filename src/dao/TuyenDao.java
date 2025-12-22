@@ -85,7 +85,8 @@ public class TuyenDao {
     public boolean themTuyen(Tuyen tuyen) throws SQLException {
         String sql = "INSERT INTO Tuyen (MaTuyen, TenTuyen, GaDau, GaCuoi) VALUES (?, ?, ?, ?)";
 
-        try (PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = ConnectDB.getConnection();
+                PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, tuyen.getMaTuyen());
             pst.setString(2, tuyen.getTenTuyen());
             pst.setString(3, tuyen.getGaDau());

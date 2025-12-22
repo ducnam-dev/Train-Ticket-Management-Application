@@ -7,15 +7,14 @@ public class HoaDon {
     private String maHD;
     private String maKhachHang;
     private String maNVLap;
-    private String maKM; // Có thể NULL
-    private double tongTien; // decimal(18, 0) trong SQL
-    private LocalDateTime ngayLap; // datetime trong SQL
+    private String maKM;
+    private double tongTien;
+    private LocalDateTime ngayLap;
     private String phuongThuc;
     private String loaiHoaDon;
     private double tongCong;
     private String maHoaDon_Goc;
 
-    // Constructor đầy đủ
     public HoaDon(String maHD, String maKhachHang, String maNVLap, String maKM,
                   double tongTien, LocalDateTime ngayLap, String phuongThuc,
                   String loaiHoaDon) {
@@ -38,8 +37,8 @@ public class HoaDon {
         this.setTongCong(tongCong);
         this.setTongTien(tongTien);
         this.setPhuongThuc(phuongThucThanhToan);
-        this.setMaHoaDon_Goc(maHoaDon_Goc); // Đã thêm
-        this.setLoaiHoaDon(loaiHoaDon);     // Đã thêm
+        this.setMaHoaDon_Goc(maHoaDon_Goc);
+        this.setLoaiHoaDon(loaiHoaDon);
     }
 
     // Constructor mặc định

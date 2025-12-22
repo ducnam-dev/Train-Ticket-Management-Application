@@ -1,6 +1,5 @@
 package entity;
 
-//import entity.lopEnum.TrangThaiChoDat;
 
 public class ChoDat {
         private String maCho;
