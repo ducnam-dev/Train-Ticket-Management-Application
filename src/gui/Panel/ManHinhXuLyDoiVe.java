@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
+public class ManHinhXuLyDoiVe extends JPanel implements ActionListener {
 
     // --- CẤU HÌNH UI ---
     private static final Color COLOR_BLUE_LIGHT = new Color(52, 152, 219);
@@ -80,7 +80,7 @@ public class ManHinhBanVe_DoiVe extends JPanel implements ActionListener {
     private final ToaDAO toaDao = new ToaDAO();
     // private final GaTrongTuyenDao gaTrongTuyenDao = new GaTrongTuyenDao(); // Chưa dùng tới
 
-    public ManHinhBanVe_DoiVe(List<ThongTinVeDTO> listVeInput) {
+    public ManHinhXuLyDoiVe(List<ThongTinVeDTO> listVeInput) {
         this.listVeCanDoi = listVeInput;
 
         List<LoaiVe> allLoaiVe = loaiVeDAO.getAllLoaiVe();

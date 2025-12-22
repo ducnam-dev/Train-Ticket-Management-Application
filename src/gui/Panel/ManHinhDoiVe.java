@@ -1,7 +1,6 @@
 package gui.Panel;
 
 import gui.MainFrame.BanVeDashboard;
-import gui.Panel.ManHinhBanVe_DoiVe;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -340,7 +339,7 @@ public class ManHinhDoiVe extends JPanel {
                     // --- GỌI HÀM IN KIỂM TRA RA CONSOLE ---
                     inDanhSachVeRaConsole(danhSachVeCanDoi, "DANH SÁCH ĐỔI TOÀN BỘ");
 
-                    ManHinhBanVe_DoiVe panelDoiVeMoi = new ManHinhBanVe_DoiVe(danhSachVeCanDoi);
+                    ManHinhXuLyDoiVe panelDoiVeMoi = new ManHinhXuLyDoiVe(danhSachVeCanDoi);
                     Window win = SwingUtilities.getWindowAncestor(this);
 
                     if (win instanceof BanVeDashboard) {
@@ -507,7 +506,7 @@ public class ManHinhDoiVe extends JPanel {
                         inDanhSachVeRaConsole(singleList, "DANH SÁCH ĐỔI VÉ LẺ");
 
                         // 4. Khởi tạo màn hình Bán Vé (Chế độ Đổi)
-                        ManHinhBanVe_DoiVe panelDoiVeMoi = new ManHinhBanVe_DoiVe(singleList);
+                        ManHinhXuLyDoiVe panelDoiVeMoi = new ManHinhXuLyDoiVe(singleList);
 
                         // 5. Lấy cửa sổ cha (Dashboard)
                         Window win = SwingUtilities.getWindowAncestor(TicketPanel.this);
