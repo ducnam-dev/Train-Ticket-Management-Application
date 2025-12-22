@@ -1594,11 +1594,10 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         Window ownerWindow = SwingUtilities.getWindowAncestor(this);
         Frame ownerFrame = (ownerWindow instanceof Frame) ? (Frame) ownerWindow : null;
 
-        // Sử dụng ModalityType cho khả năng tương thích hiện đại
-        JDialog dialog = new JDialog(ownerFrame, "Đặt vé Đoàn/Từ File", Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog dialog = new JDialog(ownerFrame, "Đặt vé Đoàn / Từ File", Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setLayout(new BorderLayout(10, 10));
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        dialog.setSize(450, 400);
+        dialog.setSize(450, 280); // Giảm chiều cao vì form đã ngắn hơn
         dialog.setLocationRelativeTo(this);
         dialog.setResizable(false);
 
@@ -1607,83 +1606,78 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // --- Khu vực 1: Nhập tay ---
-        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        inputPanel.setBorder(BorderFactory.createTitledBorder("Nhập thủ công (Dùng cho số lượng nhỏ)"));
+        // --- Khu vực 1: Nhập số lượng người (Thủ công) ---
+        JPanel inputPanel = new JPanel(new GridLayout(1, 2, 10, 10)); // Chỉ còn 1 hàng
+        inputPanel.setBorder(BorderFactory.createTitledBorder("Nhập số lượng thủ công"));
 
-        JTextField txtSoNguoi = new JTextField("30");
-        JTextField txtHoTenTruongDoan = new JTextField();
-        JTextField txtSdtTruongDoan = new JTextField();
-
+        JTextField txtSoNguoi = new JTextField("10");
         inputPanel.add(new JLabel("Số lượng người (*):"));
         inputPanel.add(txtSoNguoi);
-        inputPanel.add(new JLabel("Tên Trưởng đoàn (*):"));
-        inputPanel.add(txtHoTenTruongDoan);
-        inputPanel.add(new JLabel("SĐT Trưởng đoàn (*):"));
-        inputPanel.add(txtSdtTruongDoan);
 
         mainPanel.add(inputPanel);
         mainPanel.add(Box.createVerticalStrut(20));
 
         // --- Khu vực 2: Tải File ---
-        JButton btnTaiFile = new JButton("Tải lên File Khách hàng (.xlsx, .xls, .csv)");
+        JButton btnTaiFile = new JButton("Tải lên Danh sách Khách hàng (.xlsx, .xls, .csv)");
         btnTaiFile.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnTaiFile.setFocusPainted(false);
 
-        JLabel lblTaiFileLuuY = new JLabel("Hoặc dùng chức năng nhập thủ công bên dưới.");
+        JLabel lblTaiFileLuuY = new JLabel("Hoặc chọn file danh sách để nhập nhanh hơn");
+        lblTaiFileLuuY.setFont(new Font("Arial", Font.ITALIC, 11));
         lblTaiFileLuuY.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         btnTaiFile.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-
-            // Thêm File Filter cho các định dạng được hỗ trợ
             FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                    "File Khách hàng (*.xlsx, *.xls, *.csv, *.txt)", "xlsx", "xls", "csv", "txt");
+                    "File Khách hàng (*.xlsx, *.xls, *.csv)", "xlsx", "xls", "csv");
             fileChooser.setFileFilter(filter);
 
             int result = fileChooser.showOpenDialog(dialog);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
-
                 List<String[]> duLieuKhachHang = docDuLieuKhachHangTuFile(selectedFile);
 
                 if (duLieuKhachHang != null && !duLieuKhachHang.isEmpty()) {
-                    // Gọi logic xử lý chính từ file
                     xuLyDatChoTuFile(duLieuKhachHang);
                     dialog.dispose();
-                } else if (duLieuKhachHang != null && duLieuKhachHang.isEmpty()) {
-                    JOptionPane.showMessageDialog(dialog, "File không chứa dữ liệu khách hàng hợp lệ.", "Lỗi File", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "File không chứa dữ liệu hợp lệ.", "Lỗi File", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
         mainPanel.add(btnTaiFile);
-        mainPanel.add(Box.createVerticalStrut(10));
+        mainPanel.add(Box.createVerticalStrut(5));
         mainPanel.add(lblTaiFileLuuY);
 
         dialog.add(mainPanel, BorderLayout.NORTH);
 
-        // Panel nút bấm (Chỉ dành cho nhập thủ công)
+        // Panel nút bấm phía dưới
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnDatVe = new JButton("Đặt vé Thủ công");
-        JButton btnHuy = new JButton("Hủy");
+        JButton btnDatVe = new JButton("Xác nhận");
+        JButton btnHuy = new JButton("Hủy bỏ");
 
         btnHuy.addActionListener(e -> dialog.dispose());
 
         btnDatVe.addActionListener(e -> {
             try {
-                int soNguoi = Integer.parseInt(txtSoNguoi.getText().trim());
-                String tenTruongDoan = txtHoTenTruongDoan.getText().trim();
-                String sdtTruongDoan = txtSdtTruongDoan.getText().trim();
-
-                if (soNguoi <= 0 || tenTruongDoan.isEmpty() || sdtTruongDoan.isEmpty()) {
-                    JOptionPane.showMessageDialog(dialog, "Vui lòng nhập đầy đủ thông tin bắt buộc và số lượng người > 0.", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+                String textSoNguoi = txtSoNguoi.getText().trim();
+                if (textSoNguoi.isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Vui lòng nhập số lượng người.", "Thiếu thông tin", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
+                int soNguoi = Integer.parseInt(textSoNguoi);
+                if (soNguoi <= 0) {
+                    JOptionPane.showMessageDialog(dialog, "Số lượng người phải lớn hơn 0.", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                ChonChoNhanh(dialog, soNguoi);
+
                 dialog.dispose();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog, "Số lượng người phải là số nguyên hợp lệ.", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Số lượng người phải là chữ số.", "Lỗi định dạng", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -1790,67 +1784,55 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
 // --- Đặt phương thức này trong lớp ManHinhBanVe ---
 
     private void xuLyDatChoTuFile(List<String[]> duLieuKhachHangTuFile) {
-
         int soNguoi = duLieuKhachHangTuFile.size();
         if (soNguoi == 0) {
             JOptionPane.showMessageDialog(this, "File không chứa khách hàng nào.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
-        this.danhSachGheDaChon.clear();
-        this.danhSachKhachHang.clear(); // <<< Dùng this.danhSachKhachHang
-        this.danhSachGiaVe.clear();
-
-        // 1. Kiểm tra số lượng ghế trống có sẵn
-        List<ChoDat> choTrong = tatCaChoDatToaHienTai.values().stream()
+        // 1. Lấy tất cả ghế đang trống và sắp xếp theo số thứ tự ghế
+        List<ChoDat> tatCaGheTrong = tatCaChoDatToaHienTai.values().stream()
                 .filter(cho -> !cho.isDaDat() && !danhSachGheDaChon.containsKey(cho.getMaCho()))
-                .limit(soNguoi)
-                .toList();
+                .sorted(Comparator.comparingInt(cho -> Integer.parseInt(cho.getSoCho()))) // Quan trọng: Sắp xếp theo số ghế 1, 2, 3...
+                .collect(Collectors.toList());
 
-        if (choTrong.size() < soNguoi) {
+        if (tatCaGheTrong.size() < soNguoi) {
             JOptionPane.showMessageDialog(this,
-                    "Chỉ tìm thấy " + choTrong.size() + " chỗ trống trong toa này, nhưng cần " + soNguoi + " chỗ. Vui lòng chọn toa khác hoặc giảm số lượng.",
+                    "Chỉ tìm thấy " + tatCaGheTrong.size() + " chỗ trống trong toa, không đủ cho " + soNguoi + " người.",
                     "Không đủ chỗ", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // 2. Reset các lựa chọn cũ
-        danhSachGheDaChon.clear();
-        danhSachKhachHang.clear();
-        danhSachGiaVe.clear();
+        // 2. Thuật toán tìm dãy ghế gần nhau nhất
+        List<ChoDat> choChonToiUu = timDayGheGanNhau(tatCaGheTrong, soNguoi);
 
-        // 3. Tự động chọn ghế và điền thông tin từ file
+        // 3. Reset và thực hiện đặt vé (giữ nguyên logic cũ của bạn nhưng dùng danh sách tối ưu)
+        this.danhSachGheDaChon.clear();
+        this.danhSachKhachHang.clear();
+        this.danhSachGiaVe.clear();
+
         int count = 0;
-        for (int i = 0; i < choTrong.size(); i++) {
-            ChoDat cho = choTrong.get(i);
-            String[] data = duLieuKhachHangTuFile.get(i); // [HoTen, CCCD, SĐT, NgaySinh, MaLoaiVe]
+        for (int i = 0; i < choChonToiUu.size(); i++) {
+            ChoDat cho = choChonToiUu.get(i);
+            String[] data = duLieuKhachHangTuFile.get(i);
             String maCho = cho.getMaCho();
 
-            // Kiểm tra loại vé hợp lệ
             String maLoaiVe = (data[4] != null && data[4].startsWith("VT")) ? data[4] : MA_VE_NL;
 
-            // Tạo thông tin khách
             ChiTietKhach chiTietKhach = new ChiTietKhach(
-                    cho,
-                    maLoaiVe,  // MaLoaiVe
-                    data[0],   // HoTen
-                    data[1],   // CCCD
-                    data[2],   // SĐT
-                    data[3]    // NgaySinh (dd/MM/yyyy)
+                    cho, maLoaiVe, data[0], data[1], data[2], data[3]
             );
 
             try {
                 long gia = tinhGiaVeTau(cho, chiTietKhach.maLoaiVe());
                 danhSachGiaVe.put(maCho, gia);
             } catch (Exception ex) {
-                System.err.println("Lỗi tính giá cho ghế " + cho.getSoCho() + ": " + ex.getMessage());
                 continue;
             }
 
             danhSachGheDaChon.put(maCho, cho);
             danhSachKhachHang.put(maCho, chiTietKhach);
 
-            // Cập nhật trạng thái nút ghế
             JButton btnCho = seatButtonsMap.get(maCho);
             if (btnCho != null) {
                 btnCho.setBackground(new Color(0, 123, 255));
@@ -1859,18 +1841,107 @@ public class ManHinhBanVe extends JPanel implements MouseListener, ActionListene
             count++;
         }
 
-        // 4. Cập nhật giao diện
-        txtTongSoKhach.setText(String.valueOf(soNguoi));
-
+        // Cập nhật UI
+        txtTongSoKhach.setText(String.valueOf(count));
         capNhatDanhSachGheDaChonUI();
         capNhatThongTinKhachUI();
         capNhatTongTienUI();
 
-        JOptionPane.showMessageDialog(this,
-                "Đã đặt thành công " + count + " chỗ từ file. Vui lòng kiểm tra lại thông tin khách hàng.",
-                "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Đã tự động chọn " + count + " chỗ gần nhau nhất cho đoàn.");
     }
 
+    private void ChonChoNhanh(Dialog dialog, int soNguoi){
+        List<ChoDat> tatCaGheTrong = tatCaChoDatToaHienTai.values().stream()
+                .filter(cho -> !cho.isDaDat() && !danhSachGheDaChon.containsKey(cho.getMaCho()))
+                .sorted(Comparator.comparingInt(cho -> Integer.parseInt(cho.getSoCho())))
+                .collect(Collectors.toList());
+
+        // 2. Kiểm tra số lượng
+        if (tatCaGheTrong.size() < soNguoi) {
+
+            JOptionPane.showMessageDialog(dialog,
+                    "Không đủ chỗ! Toa hiện tại chỉ còn " + tatCaGheTrong.size() + " chỗ trống.",
+                    "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 3. Tìm các chỗ gần nhau nhất bằng hàm bổ trợ bạn đã viết
+        List<ChoDat> choChonToiUu = timDayGheGanNhau(tatCaGheTrong, soNguoi);
+
+        // 4. Reset các lựa chọn cũ (nếu muốn đặt mới hoàn toàn)
+        // Hoặc bỏ qua nếu muốn đặt cộng dồn
+        this.danhSachGheDaChon.clear();
+        this.danhSachKhachHang.clear();
+        this.danhSachGiaVe.clear();
+
+        // 5. Đổ dữ liệu vào Map và cập nhật trạng thái Button
+        for (ChoDat cho : choChonToiUu) {
+            String maCho = cho.getMaCho();
+
+            // Tạo khách hàng trống để người dùng điền sau
+            ChiTietKhach chiTietKhach = new ChiTietKhach(
+                    cho,
+                    MA_VE_NL, // Mặc định loại vé người lớn
+                    "", "", "", "" // Các thông tin khác để trống
+            );
+
+            try {
+                long gia = tinhGiaVeTau(cho, MA_VE_NL);
+                danhSachGiaVe.put(maCho, gia);
+            } catch (Exception ex) {
+                continue;
+            }
+
+            danhSachGheDaChon.put(maCho, cho);
+            danhSachKhachHang.put(maCho, chiTietKhach);
+
+            // Đổi màu nút trên sơ đồ (Màu xanh dương - Đang chọn)
+            JButton btnCho = seatButtonsMap.get(maCho);
+            if (btnCho != null) {
+                btnCho.setBackground(new Color(0, 123, 255));
+                btnCho.setForeground(Color.WHITE);
+            }
+        }
+
+        // 6. Cập nhật toàn bộ UI màn hình chính
+        txtTongSoKhach.setText(String.valueOf(danhSachGheDaChon.size()));
+        capNhatDanhSachGheDaChonUI();
+        capNhatThongTinKhachUI();
+        capNhatTongTienUI();
+
+        JOptionPane.showMessageDialog(this, "Đã tự động chọn " + soNguoi + " ghế gần nhau nhất.");
+    }
+
+    /**
+     * Hàm bổ trợ: Tìm danh sách ghế có độ tập trung cao nhất (gần nhau nhất)
+     */
+    private List<ChoDat> timDayGheGanNhau(List<ChoDat> danhSachGheTrong, int soLuong) {
+        if (danhSachGheTrong.isEmpty()) return new ArrayList<>();
+
+        List<List<ChoDat>> cacCumGhe = new ArrayList<>();
+        List<ChoDat> cumHienTai = new ArrayList<>();
+        cumHienTai.add(danhSachGheTrong.get(0));
+
+        for (int i = 1; i < danhSachGheTrong.size(); i++) {
+            // Parse String sang Int để thực hiện phép cộng
+            int soTruoc = Integer.parseInt(danhSachGheTrong.get(i - 1).getSoCho());
+            int soSau = Integer.parseInt(danhSachGheTrong.get(i).getSoCho());
+
+            if (soSau == soTruoc + 1) {
+                cumHienTai.add(danhSachGheTrong.get(i));
+            } else {
+                cacCumGhe.add(new ArrayList<>(cumHienTai));
+                cumHienTai.clear();
+                cumHienTai.add(danhSachGheTrong.get(i));
+            }
+        }
+        cacCumGhe.add(cumHienTai);
+
+        for (List<ChoDat> cum : cacCumGhe) {
+            if (cum.size() >= soLuong) return cum.subList(0, soLuong);
+        }
+        return danhSachGheTrong.subList(0, soLuong);
+    }
 
 
 

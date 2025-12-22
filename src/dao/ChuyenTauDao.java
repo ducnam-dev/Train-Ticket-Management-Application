@@ -417,16 +417,13 @@ public List<ChuyenTau> getAllChuyenTau() throws SQLException {
 
                     TrangThaiChuyenTau tt = TrangThaiChuyenTau.fromString(trangThai);
 
-                    System.out.println(maGaDiDb + " - " + maGaDenDb);
-
                     Ga gaDi = GaDao.layGaBangMa(maGaDiDb);
                     Ga gaDen = GaDao.layGaBangMa(maGaDenDb);
                     Tau tau = TauDAO.getTauById(maTau);
                     NhanVien nv = NhanVienDao.getNhanVienById(maNV);
 
                     ct = new ChuyenTau(maChuyenTau, maTau, ngayKH, gioKH, gaDi, gaDen, tau, ngayDen, gioDen, nv, tt);
-                   System.out.println("Chuyến tàu tìm thấy:" + ct.toString());
-
+                    System.out.println("Đã tìm thấy Chuyến Tàu với mã: " + maChuyenTau);
                 }
             }
         } catch (SQLException e) {

@@ -186,15 +186,11 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         navContentPanel.add(btnQLKhuyenMai);
         navContentPanel.add(taoDuongKe());
 
-        btnThongKe = createNavItem("Thống kê Báo cáo", "/images/iconMenu/thongke.png", "thongKe");
-        navContentPanel.add(btnThongKe);
-        navContentPanel.add(taoDuongKe());
-
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
         bottomPanel.setBackground(MAU_CHINH);
-        bottomPanel.add(Box.createVerticalGlue()); // Đẩy phần trên xuống
+        bottomPanel.add(Box.createVerticalGlue());
         bottomPanel.add(taoPanelThongTinNV());
 
         // --- Nút Đăng xuất ---
@@ -202,23 +198,16 @@ public class AdminFullDashboard extends JFrame implements ActionListener {
         bottomPanel.add(btnDangXuat);
         bottomPanel.setBorder(new EmptyBorder(0, 10, 10, 10)); // Border cho phần dưới cùng
 
-        // Thêm một panel riêng để chứa menu content và đẩy phần dưới cùng xuống
-        // Sử dụng JPanel kết hợp BoxLayout và VerticalGlue để đẩy phần dưới cùng xuống
         JPanel wrapperPanel = new JPanel(new BorderLayout());
-        wrapperPanel.add(navContentPanel, BorderLayout.NORTH); // Đảm bảo nội dung menu nằm trên cùng
+        wrapperPanel.add(navContentPanel, BorderLayout.NORTH);
 
-        // Thêm một Box.createVerticalGlue() vào navContentPanel để đẩy các thành phần
-        // xuống dưới cùng sẽ không hoạt động tốt với JScrollPane, nên ta sử dụng
-        // một wrapper panel đơn giản với BorderLayout và Box.createVerticalGlue() ở giữa
-        // Hoặc đơn giản là dùng VerticalGlue trong navContentPanel và đặt nó là viewport
-        // (đã thử và là cách tốt nhất)
 
-        navContentPanel.add(Box.createVerticalGlue()); // Đẩy phần dưới cùng xuống
 
-        // --- THÔNG TIN NV & Đăng xuất (đã di chuyển vào navContentPanel) ---
+        navContentPanel.add(Box.createVerticalGlue());
+        // --- THÔNG TIN NV & Đăng xuất -
         navContentPanel.add(taoPanelThongTinNV());
         navContentPanel.add(btnDangXuat);
-        navContentPanel.add(Box.createVerticalStrut(10)); // Khoảng trống cuối cùng
+        navContentPanel.add(Box.createVerticalStrut(10));
 
         // Khởi tạo JScrollPane
         JScrollPane scrollPane = new JScrollPane(navContentPanel);

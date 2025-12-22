@@ -107,9 +107,6 @@ public class QuanLyDashboard extends JFrame implements ActionListener {
         btnTraCuuHD = createNavItem("Tra cứu hóa đơn", "/images/iconMenu/tracuuhoadon.png", "traCuuHD");
         panel.add(btnTraCuuHD);
         panel.add(taoDuongKe());
-        btnThongKe = createNavItem("Thống kê báo cáo", "/images/iconMenu/thongke.png", "thongKe");
-        panel.add(btnThongKe);
-        panel.add(taoDuongKe());
 
         panel.add(Box.createVerticalGlue());
         panel.add(taoPanelThongTinNV());
